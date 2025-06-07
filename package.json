@@ -1,0 +1,25 @@
+{
+  "name": "bulbro",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "latest",
+    "serve": "^14.2.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "bun build --target browser --outdir public src/main.ts",
+    "dev": "bun build --watch --sourcemap --target browser --outdir public src/main.ts",
+    "serve": "serve public",
+    "start": "bun run build && bun run serve"
+  },
+  "dependencies": {
+    "pino": "^9.7.0",
+    "pixi.js": "^8.10.1",
+    "uuid": "^11.1.0"
+  }
+}
