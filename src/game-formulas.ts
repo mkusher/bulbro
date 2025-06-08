@@ -72,3 +72,14 @@ export function shoot(
 		speed: shotSpeed,
 	};
 }
+
+export function isInRange(
+	player: PlayerState,
+	enemy: EnemyState,
+	weapon: WeaponState,
+) {
+	return (
+		distance(player.position, enemy.position) <=
+		player.stats.range + (weapon.statsBonus.range ?? 0)
+	);
+}

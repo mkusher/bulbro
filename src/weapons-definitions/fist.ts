@@ -7,5 +7,8 @@ export const fist: Weapon = {
 	id: "fist",
 	name: "Fist",
 	classes: ["unarmed"],
-	statsBonus: {},
+	statsBonus: {
+		damage: 5,
+		meleeDamage: 1,
+	},
 };

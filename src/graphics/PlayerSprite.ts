@@ -6,18 +6,35 @@ import { PLAYER_SIZE } from "../bulbro";
  * Manages a player sprite graphic.
  */
 export class PlayerSprite {
-	#gfx: PIXI.Graphics;
+	#gfx: PIXI.Container;
+	#sprite?: PIXI.Sprite;
 
 	constructor() {
-		this.#gfx = new PIXI.Graphics();
-		this.#gfx.beginFill(0x99ccff);
-		this.#gfx.drawRect(
-			-PLAYER_SIZE.width / 2,
-			-PLAYER_SIZE.height / 2,
-			PLAYER_SIZE.width,
-			PLAYER_SIZE.height,
-		);
-		this.#gfx.endFill();
+		this.#gfx = new PIXI.Container();
+		this.init();
+	}
+
+	async init() {
+		const fullTexture = await PIXI.Assets.load("/assets/Soldier.png");
+
+		const offset = 39;
+		const croppedTexture = new PIXI.Texture({
+			source: fullTexture,
+			frame: new PIXI.Rectangle(
+				offset,
+				offset,
+				PLAYER_SIZE.width,
+				PLAYER_SIZE.height,
+			),
+		});
+
+		const fullSprite = new PIXI.Sprite({
+			texture: croppedTexture,
+		});
+
+		this.#sprite = fullSprite;
+		this.#sprite.scale.set(1.5);
+		this.#gfx.addChild(this.#sprite);
 	}
 
 	/**

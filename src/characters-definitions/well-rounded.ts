@@ -9,9 +9,9 @@ export const wellRoundedBulbro: Bulbro = {
 	baseStats: {
 		maxHp: 100,
 		hpRegeneration: 0,
-		damage: 0,
+		damage: 10,
 		meleeDamage: 0,
-		rangedDamage: 0,
+		rangedDamage: 5,
 		elementalDamage: 0,
 		attackSpeed: 1,
 		critChance: 0,

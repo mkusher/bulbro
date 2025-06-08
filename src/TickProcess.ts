@@ -9,9 +9,11 @@ import {
 	isWeaponReadyToShoot,
 	findClosestEnemyInRange,
 	shoot,
+	isInRange,
 } from "./game-formulas";
 import { direction, distance } from "./geometry";
 import { keysToDirection, type ArrowKeys } from "./keyboard";
+import type { Logger } from "pino";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -24,6 +26,7 @@ export class TickProcess {
 	#logger = defaultLogger.child({ component: "TickProcess" });
 
 	constructor(
+		logger: Logger,
 		scene: Scene,
 		roundProcess: RoundProcess | undefined,
 		now?: TickProcess,
@@ -31,7 +34,7 @@ export class TickProcess {
 		this.#scene = scene;
 		this.#roundProcess = roundProcess;
 		this.#lastSpawnAt = now?.lastSpawnAt;
-		this.#logger = this.#logger.child({ spawnInterval: this.#spawnInterval });
+		this.#logger = logger.child({ spawnInterval: this.#spawnInterval });
 		this.#logger.debug("TickProcess initialized");
 	}
 
@@ -114,7 +117,7 @@ export class TickProcess {
 			};
 			const speed = 20;
 			const healthPoints = 50;
-			this.#logger.debug(
+			this.#logger.info(
 				{ event: "spawnEnemy", id, position, speed, healthPoints },
 				"spawning enemy",
 			);
@@ -146,11 +149,12 @@ export class TickProcess {
 						now,
 					)
 				) {
+					this.#logger.info({ weapon, player }, "Weapon is ready to shoot");
 					const target = findClosestEnemyInRange(player, newState.enemies);
-					if (target) {
-						this.#logger.debug(
+					if (target && isInRange(player, target, weapon)) {
+						this.#logger.info(
 							{ playerId: player.id, weaponId: weapon.id, targetId: target.id },
-							"shootPlayersWeapons",
+							"Player is attacking a target",
 						);
 
 						const shot = shoot(player, weapon, target.position);

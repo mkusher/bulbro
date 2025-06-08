@@ -13,7 +13,7 @@ export class ShotSprite {
 
 	constructor() {
 		this.#gfx = new PIXI.Graphics();
-		this.#gfx.beginFill(0x990000);
+		this.#gfx.beginFill(0xff2222);
 		this.#gfx.drawRect(
 			-SHOT_SIZE.width / 2,
 			-SHOT_SIZE.height / 2,

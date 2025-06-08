@@ -6,18 +6,35 @@ import { ENEMY_SIZE } from "../enemy";
  * Manages an enemy sprite graphic.
  */
 export class EnemySprite {
-	#gfx: PIXI.Graphics;
+	#gfx: PIXI.Container;
+	#sprite?: PIXI.Sprite;
 
 	constructor() {
-		this.#gfx = new PIXI.Graphics();
-		this.#gfx.beginFill(0x333333);
-		this.#gfx.drawRect(
-			-ENEMY_SIZE.width / 2,
-			-ENEMY_SIZE.height / 2,
-			ENEMY_SIZE.width,
-			ENEMY_SIZE.height,
-		);
-		this.#gfx.endFill();
+		this.#gfx = new PIXI.Container();
+		this.init();
+	}
+
+	async init() {
+		const fullTexture = await PIXI.Assets.load("/assets/Orc.png");
+
+		const offset = 39;
+		const croppedTexture = new PIXI.Texture({
+			source: fullTexture,
+			frame: new PIXI.Rectangle(
+				offset,
+				offset,
+				ENEMY_SIZE.width,
+				ENEMY_SIZE.height,
+			),
+		});
+
+		const fullSprite = new PIXI.Sprite({
+			texture: croppedTexture,
+		});
+
+		this.#sprite = fullSprite;
+		this.#sprite.scale.set(2);
+		this.#gfx.addChild(this.#sprite);
 	}
 
 	/**

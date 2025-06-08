@@ -131,3 +131,16 @@ export function rectIntersectsLine(
 	}
 	return false;
 }
+/**
+ * Creates an axis-aligned rectangle centered at the given point, with the specified size.
+ */
+export function rectFromCenter(center: Point, size: Size): Rectangle {
+	const halfW = size.width / 2;
+	const halfH = size.height / 2;
+	return {
+		x: center.x - halfW,
+		y: center.y - halfH,
+		width: size.width,
+		height: size.height,
+	};
+}

@@ -2,8 +2,12 @@ import {
 	type Position,
 	type Size,
 	type Direction,
+	type Rectangle,
 	rectContainsPoint,
+	rectsIntersect,
+	rectIntersectsLine,
 	distance,
+	rectFromCenter,
 } from "./geometry";
 import { movePosition } from "./physics";
 import { PLAYER_SIZE, type Player, type Stats } from "./bulbro";
@@ -170,78 +174,120 @@ export function updateState(state: CurrentState, action: Action): CurrentState {
 	switch (action.type) {
 		case "move": {
 			const { direction, deltaTime } = action;
-			const halfW = PLAYER_SIZE.width / 2;
-			const halfH = PLAYER_SIZE.height / 2;
+			// Precompute collision rectangles for other players and enemies
+			const otherPlayerRects = state.players
+				.filter((p2) => p2.id !== state.currentPlayerId)
+				.map((p2) => rectFromCenter(p2.position, PLAYER_SIZE));
+			const enemyRects = state.enemies.map((e) =>
+				rectFromCenter(e.position, ENEMY_SIZE),
+			);
 			return {
 				...state,
 				players: state.players.map((p) => {
 					if (p.id !== state.currentPlayerId) return p;
+					const halfW = PLAYER_SIZE.width / 2;
+					const halfH = PLAYER_SIZE.height / 2;
 					let pos = movePosition(p.position, p.speed, direction, deltaTime);
 					pos.x = Math.max(halfW, Math.min(state.mapSize.width - halfW, pos.x));
 					pos.y = Math.max(
 						halfH,
 						Math.min(state.mapSize.height - halfH, pos.y),
 					);
+					const movedRect = rectFromCenter(pos, PLAYER_SIZE);
+					const collisionWithPlayer = otherPlayerRects.some((rr) =>
+						rectsIntersect(movedRect, rr),
+					);
+					const collisionWithEnemy = enemyRects.some((rr) =>
+						rectsIntersect(movedRect, rr),
+					);
+					if (collisionWithPlayer || collisionWithEnemy) return p;
 					return { ...p, position: pos };
 				}),
 			};
 		}
 		case "moveEnemy": {
 			const { id, direction, deltaTime } = action;
-			const halfW = ENEMY_SIZE.width / 2;
-			const halfH = ENEMY_SIZE.height / 2;
+			// Precompute collision rectangles for other enemies and players
+			const otherEnemyRects = state.enemies
+				.filter((e2) => e2.id !== id)
+				.map((e2) => rectFromCenter(e2.position, ENEMY_SIZE));
+			const playerRects = state.players.map((p2) =>
+				rectFromCenter(p2.position, PLAYER_SIZE),
+			);
 			return {
 				...state,
 				enemies: state.enemies.map((e) => {
 					if (e.id !== id) return e;
+					const halfW = ENEMY_SIZE.width / 2;
+					const halfH = ENEMY_SIZE.height / 2;
 					let pos = movePosition(e.position, e.speed, direction, deltaTime);
 					pos.x = Math.max(halfW, Math.min(state.mapSize.width - halfW, pos.x));
 					pos.y = Math.max(
 						halfH,
 						Math.min(state.mapSize.height - halfH, pos.y),
 					);
+					const movedRect = rectFromCenter(pos, ENEMY_SIZE);
+					const collisionWithEnemy = otherEnemyRects.some((rr) =>
+						rectsIntersect(movedRect, rr),
+					);
+					const collisionWithPlayer = playerRects.some((rr) =>
+						rectsIntersect(movedRect, rr),
+					);
+					if (collisionWithEnemy || collisionWithPlayer) return e;
 					return { ...e, position: pos };
 				}),
 			};
 		}
 		case "moveShot": {
 			const { shotId, direction, deltaTime } = action;
-			const shots = [];
-			for (let shot of state.shots) {
+			const bounds: Rectangle = {
+				x: 0,
+				y: 0,
+				width: state.mapSize.width,
+				height: state.mapSize.height,
+			};
+			let newShots: ShotState[] = [];
+			let newEnemies = state.enemies;
+			for (const shot of state.shots) {
 				if (shot.id !== shotId) {
-					shots.push(shot);
+					newShots.push(shot);
 					continue;
 				}
-				const position = shot.position;
-				const nextPosition = movePosition(
-					position,
-					shot.speed,
-					direction,
-					deltaTime,
-				);
+				const prevPos = shot.position;
+				const nextPos = movePosition(prevPos, shot.speed, direction, deltaTime);
+				// drop if out of bounds or exceeded range
 				if (
-					!rectContainsPoint(
-						{
-							...state.mapSize,
-							x: 0,
-							y: 0,
-						},
-						nextPosition,
-					)
+					!rectContainsPoint(bounds, nextPos) ||
+					distance(shot.startPosition, nextPos) > shot.range
 				) {
 					continue;
 				}
-				if (distance(shot.startPosition, nextPosition) > shot.range) {
-					continue;
+				// handle player shots hitting enemies
+				if (shot.shooterType === "player") {
+					const segment = { start: prevPos, end: nextPos };
+					let isHit = false;
+					newEnemies = newEnemies.map((e) => {
+						const enemyRect = rectFromCenter(e.position, ENEMY_SIZE);
+						if (rectIntersectsLine(enemyRect, segment)) {
+							isHit = true;
+							return { ...e, healthPoints: e.healthPoints - shot.damage };
+						}
+						return e;
+					});
+					// shot disappears after hitting
+					if (isHit) {
+						continue;
+					}
 				}
-				shots.push({
-					...shot,
-					position: nextPosition,
-				});
+				// otherwise continue moving the shot
+				newShots.push({ ...shot, position: nextPos });
 			}
+			// Remove defeated enemies (health <= 0)
+			newEnemies = newEnemies.filter((e) => e.healthPoints > 0);
 			return {
 				...state,
-				shots,
+				enemies: newEnemies,
+				shots: newShots,
 			};
 		}
 		case "spawnEnemy": {

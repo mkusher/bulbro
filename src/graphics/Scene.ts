@@ -33,11 +33,12 @@ export class Scene {
 	/**
 	 * Initializes sprites and UI elements.
 	 */
-	init(state: CurrentState): void {
+	async init(state: CurrentState) {
 		this.#viewSize = {
 			width: this.#app.view.width,
 			height: this.#app.view.height,
 		};
+		await this.#initBackground();
 		// Create player sprites
 		state.players.forEach((p: PlayerState) => {
 			const sprite = new PlayerSprite();
@@ -53,6 +54,16 @@ export class Scene {
 		// Timer text
 		this.#timerSprite = new TimerSprite();
 		this.#timerSprite.appendTo(this.#app.stage);
+	}
+
+	async #initBackground() {
+		const texture = await PIXI.Assets.load("/assets/grass.png");
+		const tilingSprite = new PIXI.TilingSprite({
+			texture,
+			width: this.#app.view.width,
+			height: this.#app.view.height,
+		});
+		this.#app.stage.addChild(tilingSprite);
 	}
 
 	/**

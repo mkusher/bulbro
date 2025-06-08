@@ -66,14 +66,14 @@ export class GameProcess {
 		const round = {
 			id: "round1",
 			duration: 60_000,
-			players: [{ id: this.#bulbro.id, bulbro: this.#bulbro }],
+			players: this.#state.players,
 		};
 		this.#roundProcess = new RoundProcess(round);
 		this.#roundProcess.start();
 
 		// Setup scene
 		this.#scene = new Scene(this.#app, this.#bulbro, this.#roundProcess);
-		this.#scene.init(this.#state);
+		await this.#scene.init(this.#state);
 		let i = 0;
 		let lastTick: TickProcess;
 		this.#app.ticker.add(() => {
@@ -85,6 +85,7 @@ export class GameProcess {
 			}
 			// Delegate per-tick updates to TickProcess
 			const tickProc = new TickProcess(
+				this.#logger,
 				this.#scene,
 				this.#roundProcess,
 				lastTick,
