@@ -3,7 +3,6 @@ import type { Logger } from "pino";
 import { logger as defaultLogger } from "./logger";
 import type { Bulbro } from "./bulbro";
 import { createInitialState, type CurrentState } from "./currentState";
-import { RoundProcess } from "./RoundProcess";
 import { Scene } from "./graphics/Scene";
 import { TickProcess } from "./TickProcess";
 import { subscribeToKeyboard, type ArrowKeys } from "./keyboard";
@@ -18,7 +17,6 @@ export class GameProcess {
 	#app: PIXI.Application;
 	#keys: ArrowKeys = {};
 	#scene!: Scene;
-	#roundProcess?: RoundProcess;
 	#state: CurrentState;
 
 	constructor(bulbro: Bulbro) {
@@ -63,16 +61,8 @@ export class GameProcess {
 		// Start round
 		this.#logger.info({ state: this.#state }, "GameProcess is starting");
 
-		const round = {
-			id: "round1",
-			duration: 60_000,
-			players: this.#state.players,
-		};
-		this.#roundProcess = new RoundProcess(round);
-		this.#roundProcess.start();
-
 		// Setup scene
-		this.#scene = new Scene(this.#app, this.#bulbro, this.#roundProcess);
+		this.#scene = new Scene(this.#app, this.#bulbro);
 		await this.#scene.init(this.#state);
 		let i = 0;
 		let lastTick: TickProcess;
@@ -84,15 +74,9 @@ export class GameProcess {
 				this.#logger.info({ state: this.#state, i }, "Tick");
 			}
 			// Delegate per-tick updates to TickProcess
-			const tickProc = new TickProcess(
-				this.#logger,
-				this.#scene,
-				this.#roundProcess,
-				lastTick,
-			);
+			const tickProc = new TickProcess(this.#logger, this.#scene, lastTick);
 			this.#state = tickProc.tick(this.#state, delta, this.#keys, now);
 			lastTick = tickProc;
 		});
-		return this.#roundProcess.wait();
 	}
 }

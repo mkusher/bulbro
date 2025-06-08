@@ -1,7 +1,6 @@
-import type { CurrentState } from "./currentState";
-import { updateState } from "./currentState";
+import type { CurrentState, EnemyState } from "./currentState";
+import { getTimeLeft, updateState } from "./currentState";
 import type { Scene } from "./graphics/Scene";
-import type { RoundProcess } from "./RoundProcess";
 import { v4 as uuidv4 } from "uuid";
 import { logger as defaultLogger } from "./logger";
 import {
@@ -10,29 +9,24 @@ import {
 	findClosestEnemyInRange,
 	shoot,
 	isInRange,
+	findClosestPlayerInRange,
 } from "./game-formulas";
 import { direction, distance } from "./geometry";
 import { keysToDirection, type ArrowKeys } from "./keyboard";
 import type { Logger } from "pino";
+import { babyEnemy } from "./enemies-definitions";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
  */
 export class TickProcess {
 	#scene: Scene;
-	#roundProcess?: RoundProcess;
-	#spawnInterval: number = 1000;
+	#spawnInterval: number = 100;
 	#lastSpawnAt?: number;
 	#logger = defaultLogger.child({ component: "TickProcess" });
 
-	constructor(
-		logger: Logger,
-		scene: Scene,
-		roundProcess: RoundProcess | undefined,
-		now?: TickProcess,
-	) {
+	constructor(logger: Logger, scene: Scene, now?: TickProcess) {
 		this.#scene = scene;
-		this.#roundProcess = roundProcess;
 		this.#lastSpawnAt = now?.lastSpawnAt;
 		this.#logger = logger.child({ spawnInterval: this.#spawnInterval });
 		this.#logger.debug("TickProcess initialized");
@@ -51,19 +45,21 @@ export class TickProcess {
 		keys: ArrowKeys,
 		now: number,
 	): CurrentState {
-		if (!this.#roundProcess || !this.#roundProcess.isRunning()) {
-			this.#logger.debug("tick skipped; round not running");
-			this.#scene.update(deltaTime, state);
-			return state;
-		}
 		this.#logger.debug({ event: "tick", now, deltaTime }, "Tick start");
-		this.#roundProcess.tick();
 		let newState = state;
+		if (!state.round.isRunning || getTimeLeft(state.round) <= 0) {
+			this.#logger.debug("tick skipped; round not running");
+			newState = this.#tick(newState, now, deltaTime);
+			this.#scene.update(deltaTime, newState);
+			return newState;
+		}
 		newState = this.#movePlayer(newState, deltaTime, keys);
 		newState = this.#moveEnemies(newState, deltaTime);
 		newState = this.#spawnEnemies(newState, now);
 		newState = this.#shootPlayersWeapons(newState, now);
+		newState = this.#shootEnemyWeapons(newState, now);
 		newState = this.#moveShoots(newState, now, deltaTime);
+		newState = this.#tick(newState, now, deltaTime);
 		this.#scene.update(deltaTime, newState);
 		return newState;
 	}
@@ -75,7 +71,12 @@ export class TickProcess {
 		keys: ArrowKeys,
 	): CurrentState {
 		const direction = keysToDirection(keys);
-		return updateState(state, { type: "move", direction, deltaTime });
+		return updateState(state, {
+			type: "move",
+			direction,
+			deltaTime,
+			now: Date.now(),
+		});
 	}
 
 	/** Update enemies to move towards nearest player */
@@ -84,6 +85,9 @@ export class TickProcess {
 		const players = state.players;
 		if (players.length > 0) {
 			state.enemies.forEach((enemy) => {
+				if (enemy.killedAt) {
+					return;
+				}
 				// pick first as baseline
 				let closest = players[0]!;
 				let minDist = Infinity;
@@ -100,6 +104,7 @@ export class TickProcess {
 					id: enemy.id,
 					direction: d,
 					deltaTime,
+					now: Date.now(),
 				});
 			});
 		}
@@ -115,32 +120,38 @@ export class TickProcess {
 				x: Math.random() * newState.mapSize.width,
 				y: Math.random() * newState.mapSize.height,
 			};
-			const speed = 20;
-			const healthPoints = 50;
-			this.#logger.info(
-				{ event: "spawnEnemy", id, position, speed, healthPoints },
+			const enemy: EnemyState = {
+				id,
+				position,
+				healthPoints: babyEnemy.stats.maxHp,
+				...babyEnemy,
+				lastMovedAt: new Date(),
+				weapons: babyEnemy.weapons.map((w) => ({
+					id: w.id,
+					lastStrikedAt: new Date(0), // Initialize to epoch,
+					statsBonus: w.statsBonus,
+				})),
+			};
+			this.#logger.debug(
+				{ event: "spawnEnemy", id, position, enemy },
 				"spawning enemy",
 			);
 			const now = Date.now();
 			newState = updateState(newState, {
 				type: "spawnEnemy",
-				id,
-				position,
-				speed,
-				healthPoints,
+				enemy,
 				now,
 			});
 		}
 		return newState;
 	}
 
-	/** Players' weapons shooting action */
 	#shootPlayersWeapons(state: CurrentState, now: number): CurrentState {
 		let newState = state;
 		state.players.forEach((player) => {
 			player.weapons.forEach((weapon) => {
-				const reloadTime = 1000;
-				const attackSpeed = 1;
+				const reloadTime = weapon.statsBonus.attackSpeed ?? 0;
+				const attackSpeed = player.stats.attackSpeed;
 				if (
 					isWeaponReadyToShoot(
 						weapon.lastStrikedAt,
@@ -149,7 +160,10 @@ export class TickProcess {
 						now,
 					)
 				) {
-					this.#logger.info({ weapon, player }, "Weapon is ready to shoot");
+					this.#logger.debug(
+						{ weapon, player: player },
+						"Weapon is ready to shoot",
+					);
 					const target = findClosestEnemyInRange(player, newState.enemies);
 					if (target && isInRange(player, target, weapon)) {
 						this.#logger.info(
@@ -157,12 +171,51 @@ export class TickProcess {
 							"Player is attacking a target",
 						);
 
-						const shot = shoot(player, weapon, target.position);
+						const shot = shoot(player, "player", weapon, target.position);
 						newState = updateState(newState, {
 							type: "shot",
 							now,
 							shot,
-							playerId: player.id,
+							weaponId: weapon.id,
+						});
+					}
+				}
+			});
+		});
+		return newState;
+	}
+
+	/** Players' weapons shooting action */
+	#shootEnemyWeapons(state: CurrentState, now: number): CurrentState {
+		let newState = state;
+		state.enemies.forEach((enemy) => {
+			if (enemy.killedAt) {
+				return;
+			}
+			enemy.weapons.forEach((weapon) => {
+				const reloadTime = weapon.statsBonus?.attackSpeed ?? 1;
+				const attackSpeed = enemy.stats.attackSpeed ?? 0;
+				if (
+					isWeaponReadyToShoot(
+						weapon.lastStrikedAt,
+						reloadTime,
+						attackSpeed,
+						now,
+					)
+				) {
+					this.#logger.debug({ weapon, enemy }, "Weapon is ready to shoot");
+					const target = findClosestPlayerInRange(enemy, newState.players);
+					if (target && isInRange(enemy, target, weapon)) {
+						this.#logger.debug(
+							{ enemy, target, weapon },
+							"Enemy is attacking a target",
+						);
+
+						const shot = shoot(enemy, "enemy", weapon, target.position);
+						newState = updateState(newState, {
+							type: "shot",
+							now,
+							shot,
 							weaponId: weapon.id,
 						});
 					}
@@ -185,8 +238,13 @@ export class TickProcess {
 				shotId: shot.id,
 				direction: shot.direction,
 				deltaTime,
+				now,
 			});
 		});
 		return newState;
+	}
+
+	#tick(state: CurrentState, now: number, deltaTime: number): CurrentState {
+		return updateState(state, { now, deltaTime });
 	}
 }

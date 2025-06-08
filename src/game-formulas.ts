@@ -14,7 +14,9 @@ export const shouldSpawnEnemy = (
 	state: CurrentState,
 ) => {
 	return (
-		((now - (state.lastSpawnAt ?? 0)) / spawnInterval) * Math.random() >= 1
+		((now - (state.lastSpawnAt?.getTime() ?? 0)) / spawnInterval) *
+			Math.random() >=
+		1
 	);
 };
 /** Determines if a weapon is ready to shoot.
@@ -28,9 +30,25 @@ export function isWeaponReadyToShoot(
 	now: number,
 ): boolean {
 	const elapsed = now - lastStrikedAt.getTime();
-	return (elapsed / reloadTime) * attackSpeed >= 1;
+	const chanceForReloaded = elapsed / reloadTime / 1000;
+	return chanceForReloaded + (chanceForReloaded * attackSpeed) / 100 >= 1;
 }
 
+export function findClosestPlayerInRange(
+	enemy: EnemyState,
+	players: PlayerState[],
+): PlayerState | undefined {
+	let closest: PlayerState | undefined;
+	let minDist = Infinity;
+	for (const player of players) {
+		const dist = distance(enemy.position, player.position);
+		if (dist < minDist) {
+			minDist = dist;
+			closest = player;
+		}
+	}
+	return closest;
+}
 /** Finds the closest enemy to a player based on Euclidean distance. */
 export function findClosestEnemyInRange(
 	player: PlayerState,
@@ -50,19 +68,20 @@ export function findClosestEnemyInRange(
 
 const shotSpeed = 3000;
 export function shoot(
-	player: PlayerState,
+	player: PlayerState | EnemyState,
+	shooterType: "player" | "enemy",
 	weapon: WeaponState,
 	targetPosition: Position,
 ): ShotState {
 	const id = uuidv4();
 	const currentPosition = { ...player.position };
-	const playerDamage = player.stats.damage;
-	const playerRange = player.stats.range;
+	const playerDamage = player.stats.damage ?? 0;
+	const playerRange = player.stats.range ?? 0;
 	const weaponDamage = weapon.statsBonus.damage ?? 0;
 	const weaponRange = weapon.statsBonus.range ?? 0;
 	return {
 		id,
-		shooterType: "player",
+		shooterType,
 		shooterId: player.id,
 		damage: playerDamage + weaponDamage,
 		range: playerRange + weaponRange,
@@ -74,12 +93,12 @@ export function shoot(
 }
 
 export function isInRange(
-	player: PlayerState,
-	enemy: EnemyState,
+	player: PlayerState | EnemyState,
+	enemy: EnemyState | PlayerState,
 	weapon: WeaponState,
 ) {
 	return (
 		distance(player.position, enemy.position) <=
-		player.stats.range + (weapon.statsBonus.range ?? 0)
+		(player.stats.range ?? 0) + (weapon.statsBonus.range ?? 0)
 	);
 }

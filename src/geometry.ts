@@ -59,6 +59,11 @@ export function normalize(p: Point) {
 	};
 }
 
+const epsilon = 0.001;
+export function isEqual(p1: Point, p2: Point) {
+	return distance(p1, p2) < epsilon;
+}
+
 /**
  * Check if a point lies within (or on edge of) a rectangle.
  */

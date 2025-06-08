@@ -1,27 +1,17 @@
 import type { Bulbro } from "../bulbro";
+import { baseHarvesting, baseMaxHp, baseSpeed, baseStats } from "./base";
 
 /**
- * A well-rounded starter Bulbro character.
+ * A well-rounded Bulbro character.
  */
 export const wellRoundedBulbro: Bulbro = {
-	id: "player1",
-	name: "Player1",
+	id: "well-rounded",
+	name: "Well Rounded",
 	baseStats: {
-		maxHp: 100,
-		hpRegeneration: 0,
-		damage: 10,
-		meleeDamage: 0,
-		rangedDamage: 5,
-		elementalDamage: 0,
-		attackSpeed: 1,
-		critChance: 0,
-		engineering: 0,
-		range: 100,
-		armor: 0,
-		dodge: 0,
-		speed: 200,
-		luck: 0,
-		harvesting: 0,
+		...baseStats,
+		maxHp: baseMaxHp + 50,
+		speed: baseSpeed * 1.05,
+		harvesting: baseHarvesting + 8,
 	},
 	weapons: [],
 };

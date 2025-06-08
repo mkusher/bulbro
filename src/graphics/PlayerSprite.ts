@@ -1,40 +1,46 @@
 import * as PIXI from "pixi.js";
 import type { Position } from "../geometry";
 import { PLAYER_SIZE } from "../bulbro";
+import type { PlayerState } from "../currentState";
 
 /**
  * Manages a player sprite graphic.
  */
 export class PlayerSprite {
 	#gfx: PIXI.Container;
-	#sprite?: PIXI.Sprite;
+	#sprite: PIXI.Sprite;
+	#lastMovingFrame: number = 0;
+	#lastMovedAt = Date.now();
 
 	constructor() {
 		this.#gfx = new PIXI.Container();
+		this.#sprite = new PIXI.Sprite();
+		this.#gfx.addChild(this.#sprite);
 		this.init();
 	}
 
-	async init() {
+	async #getCroppedIcon(x: number, y: number) {
+		const offset = 39;
+		const level = 100;
 		const fullTexture = await PIXI.Assets.load("/assets/Soldier.png");
 
-		const offset = 39;
-		const croppedTexture = new PIXI.Texture({
+		const left = x * level + offset;
+		const top = y * level + offset;
+
+		return new PIXI.Texture({
 			source: fullTexture,
 			frame: new PIXI.Rectangle(
-				offset,
-				offset,
+				left,
+				top,
 				PLAYER_SIZE.width,
 				PLAYER_SIZE.height,
 			),
 		});
+	}
 
-		const fullSprite = new PIXI.Sprite({
-			texture: croppedTexture,
-		});
-
-		this.#sprite = fullSprite;
+	async init() {
+		this.#sprite.texture = await this.#getCroppedIcon(0, 0);
 		this.#sprite.scale.set(1.5);
-		this.#gfx.addChild(this.#sprite);
 	}
 
 	/**
@@ -44,12 +50,23 @@ export class PlayerSprite {
 		parent.addChild(this.#gfx);
 	}
 
-	/**
-	 * Updates sprite position.
-	 */
-	updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x;
-		this.#gfx.y = pos.y;
+	update(player: PlayerState, delta: number) {
+		this.#updatePosition(player.position);
+
+		const movingAnimationDelay = 100;
+		if (Date.now() - player.lastHitAt?.getTime() < movingAnimationDelay * 5) {
+			if (player.healthPoints / player.stats.maxHp < 0.3) {
+				this.#setDanger();
+			} else {
+				this.#setWarning();
+			}
+		} else {
+			if (Date.now() - player.lastMovedAt.getTime() < movingAnimationDelay) {
+				this.#nextMovingFrame();
+			} else {
+				this.#setHealthy();
+			}
+		}
 	}
 
 	/**
@@ -58,10 +75,38 @@ export class PlayerSprite {
 	remove(): void {
 		this.#gfx.parent?.removeChild(this.#gfx);
 	}
+
+	/**
+	 * Updates sprite position.
+	 */
+	#updatePosition(pos: Position): void {
+		this.#gfx.x = pos.x;
+		this.#gfx.y = pos.y;
+	}
 	/**
 	 * Sets sprite opacity.
 	 */
-	setAlpha(alpha: number): void {
-		this.#gfx.alpha = alpha;
+	async #setHealthy() {
+		this.#sprite.texture = await this.#getCroppedIcon(0, 0);
+	}
+
+	async #setDanger() {
+		this.#sprite.texture = await this.#getCroppedIcon(1, 5);
+	}
+
+	async #setWarning() {
+		this.#sprite.texture = await this.#getCroppedIcon(2, 5);
+	}
+
+	async #nextMovingFrame() {
+		const animationDelay = 100;
+		if (Date.now() - this.#lastMovedAt > animationDelay) {
+			this.#sprite.texture = await this.#getCroppedIcon(
+				this.#lastMovingFrame,
+				1,
+			);
+			this.#lastMovingFrame = (this.#lastMovingFrame + 1) % 5;
+			this.#lastMovedAt = Date.now();
+		}
 	}
 }

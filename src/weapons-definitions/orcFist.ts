@@ -3,14 +3,11 @@ import type { Weapon } from "../weapon";
 /**
  * The most basic unarmed attack.
  */
-export const fist: Weapon = {
+export const orcFist: Weapon = {
 	id: "fist",
 	name: "Fist",
 	classes: ["unarmed"],
 	statsBonus: {
-		damage: 8,
-		meleeDamage: 1,
-		attackSpeed: 0.78,
-		range: 150,
+		range: 30,
 	},
 };

@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js";
 import type { Position } from "../geometry";
+import type { ShotState } from "../currentState";
 
 const SHOT_SIZE = {
-	width: 4,
-	height: 4,
+	width: 2,
+	height: 2,
 };
 /**
  * Manages an enemy sprite graphic.
@@ -11,9 +12,9 @@ const SHOT_SIZE = {
 export class ShotSprite {
 	#gfx: PIXI.Graphics;
 
-	constructor() {
+	constructor(shot: ShotState) {
 		this.#gfx = new PIXI.Graphics();
-		this.#gfx.beginFill(0xff2222);
+		this.#gfx.beginFill(shot.shooterType === "player" ? 0x000000 : 0xffff00);
 		this.#gfx.drawRect(
 			-SHOT_SIZE.width / 2,
 			-SHOT_SIZE.height / 2,

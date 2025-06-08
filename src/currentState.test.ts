@@ -32,6 +32,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.x).toBe(centerX - baseSpeed * delta);
@@ -45,6 +46,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.x).toBe(centerX + baseSpeed * delta);
@@ -58,6 +60,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.y).toBe(centerY - baseSpeed * delta);
@@ -71,6 +74,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.y).toBe(centerY + baseSpeed * delta);
@@ -85,6 +89,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.x).toBeGreaterThanOrEqual(0);
@@ -97,6 +102,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.x).toBeLessThanOrEqual(mapSize.width);
@@ -109,6 +115,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.y).toBeGreaterThanOrEqual(0);
@@ -121,6 +128,7 @@ describe("updateState move actions", () => {
 			type: "move",
 			direction,
 			deltaTime: delta,
+			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
 		expect(player.position.y).toBeLessThanOrEqual(mapSize.height);

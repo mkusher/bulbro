@@ -1,40 +1,43 @@
 import * as PIXI from "pixi.js";
 import type { Position } from "../geometry";
 import { ENEMY_SIZE } from "../enemy";
+import type { EnemyState } from "../currentState";
+
+const animationDelay = 100;
 
 /**
  * Manages an enemy sprite graphic.
  */
 export class EnemySprite {
 	#gfx: PIXI.Container;
-	#sprite?: PIXI.Sprite;
+	#sprite: PIXI.Sprite;
+	#lastMovingFrame: number = 0;
+	#lastMovedAt = Date.now();
 
 	constructor() {
 		this.#gfx = new PIXI.Container();
+		this.#sprite = new PIXI.Sprite();
+		this.#gfx.addChild(this.#sprite);
 		this.init();
 	}
 
-	async init() {
+	async #getCroppedIcon(x: number, y: number) {
+		const offset = 39;
+		const level = 100;
 		const fullTexture = await PIXI.Assets.load("/assets/Orc.png");
 
-		const offset = 39;
-		const croppedTexture = new PIXI.Texture({
+		const left = x * level + offset;
+		const top = y * level + offset;
+
+		return new PIXI.Texture({
 			source: fullTexture,
-			frame: new PIXI.Rectangle(
-				offset,
-				offset,
-				ENEMY_SIZE.width,
-				ENEMY_SIZE.height,
-			),
+			frame: new PIXI.Rectangle(left, top, ENEMY_SIZE.width, ENEMY_SIZE.height),
 		});
+	}
 
-		const fullSprite = new PIXI.Sprite({
-			texture: croppedTexture,
-		});
-
-		this.#sprite = fullSprite;
+	async init() {
+		this.#sprite.texture = await this.#getCroppedIcon(0, 0);
 		this.#sprite.scale.set(2);
-		this.#gfx.addChild(this.#sprite);
 	}
 
 	/**
@@ -42,6 +45,20 @@ export class EnemySprite {
 	 */
 	appendTo(parent: PIXI.Container): void {
 		parent.addChild(this.#gfx);
+	}
+
+	update(enemy: EnemyState) {
+		this.updatePosition(enemy.position);
+		if (enemy.killedAt) {
+			this.#killedFrames(enemy);
+			return;
+		}
+
+		const isMovingDelay = 100;
+
+		if (Date.now() - enemy.lastMovedAt.getTime() < isMovingDelay) {
+			this.#nextMovingFrame();
+		}
 	}
 
 	/**
@@ -58,10 +75,28 @@ export class EnemySprite {
 	remove(): void {
 		this.#gfx.parent?.removeChild(this.#gfx);
 	}
-	/**
-	 * Sets sprite opacity.
-	 */
-	setAlpha(alpha: number): void {
-		this.#gfx.alpha = alpha;
+
+	async #nextMovingFrame() {
+		if (Date.now() - this.#lastMovedAt > animationDelay) {
+			this.#sprite.texture = await this.#getCroppedIcon(
+				this.#lastMovingFrame,
+				1,
+			);
+			this.#lastMovingFrame = (this.#lastMovingFrame + 1) % 5;
+			this.#lastMovedAt = Date.now();
+		}
+	}
+
+	async #killedFrames(enemy: EnemyState) {
+		if (enemy.killedAt) {
+			const maxFrame = 2;
+			const frame = Math.min(
+				maxFrame,
+				Math.floor(
+					(Date.now() - enemy.killedAt.getTime()) / (animationDelay * 0.75),
+				),
+			);
+			this.#sprite.texture = await this.#getCroppedIcon(1 + frame, 5);
+		}
 	}
 }

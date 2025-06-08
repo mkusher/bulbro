@@ -7,5 +7,9 @@ export const doubleBarrelShotgun: Weapon = {
 	id: "double-barrel-shotgun",
 	name: "Double Barrel Shotgun",
 	classes: ["gun", "heavy", "explosive"],
-	statsBonus: {},
+	statsBonus: {
+		damage: 12,
+		attackSpeed: 1.37,
+		range: 350,
+	},
 };

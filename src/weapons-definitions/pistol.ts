@@ -8,7 +8,8 @@ export const pistol: Weapon = {
 	name: "Pistol",
 	classes: ["gun", "precise"],
 	statsBonus: {
-		damage: 15,
-		range: 25,
+		damage: 12,
+		range: 400,
+		attackSpeed: 1.2,
 	},
 };
