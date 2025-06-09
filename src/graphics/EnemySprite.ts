@@ -36,7 +36,7 @@ export class EnemySprite {
 	}
 
 	async init() {
-		this.#sprite.texture = await this.#getCroppedIcon(0, 0);
+		await this.#setHealthy();
 		this.#sprite.scale.set(2);
 	}
 
@@ -48,23 +48,31 @@ export class EnemySprite {
 	}
 
 	update(enemy: EnemyState) {
-		this.updatePosition(enemy.position);
+		this.#updatePosition(enemy.position);
 		if (enemy.killedAt) {
 			this.#killedFrames(enemy);
 			return;
 		}
+		const hitAnimationDelay = 500;
+		if (Date.now() - enemy.lastHitAt?.getTime() < hitAnimationDelay * 5) {
+			if (enemy.healthPoints / enemy.stats.maxHp < 0.3) {
+				this.#setDanger();
+			} else {
+				this.#setWarning();
+			}
+		} else {
+			const isMovingDelay = 100;
 
-		const isMovingDelay = 100;
-
-		if (Date.now() - enemy.lastMovedAt.getTime() < isMovingDelay) {
-			this.#nextMovingFrame();
+			if (Date.now() - enemy.lastMovedAt.getTime() < isMovingDelay) {
+				this.#nextMovingFrame();
+			}
 		}
 	}
 
 	/**
 	 * Updates sprite position.
 	 */
-	updatePosition(pos: Position): void {
+	#updatePosition(pos: Position): void {
 		this.#gfx.x = pos.x;
 		this.#gfx.y = pos.y;
 	}
@@ -98,5 +106,17 @@ export class EnemySprite {
 			);
 			this.#sprite.texture = await this.#getCroppedIcon(1 + frame, 5);
 		}
+	}
+
+	async #setHealthy() {
+		this.#sprite.texture = await this.#getCroppedIcon(0, 0);
+	}
+
+	async #setDanger() {
+		this.#sprite.texture = await this.#getCroppedIcon(1, 4);
+	}
+
+	async #setWarning() {
+		this.#sprite.texture = await this.#getCroppedIcon(2, 4);
 	}
 }

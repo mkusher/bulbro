@@ -64,6 +64,7 @@ export interface EnemyState {
 	weapons: WeaponState[];
 	stats: EnemyStats;
 	lastMovedAt: Date;
+	lastHitAt: Date;
 	killedAt?: Date;
 }
 /**
@@ -303,6 +304,7 @@ export function moveShot(
 					return {
 						...e,
 						healthPoints,
+						lastHitAt: new Date(now),
 						killedAt:
 							healthPoints <= 0 ? (e.killedAt ?? new Date(now)) : e.killedAt,
 					};

@@ -14,7 +14,8 @@ import {
 import { direction, distance } from "./geometry";
 import { keysToDirection, type ArrowKeys } from "./keyboard";
 import type { Logger } from "pino";
-import { babyEnemy } from "./enemies-definitions";
+import { babyEnemy, chaserEnemy, spitterEnemy } from "./enemies-definitions";
+import { toEnemyState } from "./enemy";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -113,18 +114,11 @@ export class TickProcess {
 				x: Math.random() * newState.mapSize.width,
 				y: Math.random() * newState.mapSize.height,
 			};
-			const enemy: EnemyState = {
-				id,
-				position,
-				healthPoints: babyEnemy.stats.maxHp,
-				...babyEnemy,
-				lastMovedAt: new Date(),
-				weapons: babyEnemy.weapons.map((w) => ({
-					id: w.id,
-					lastStrikedAt: new Date(0), // Initialize to epoch,
-					statsBonus: w.statsBonus,
-				})),
-			};
+			const enemiesToSpawn = [babyEnemy, chaserEnemy, spitterEnemy];
+			const randomEnemy =
+				enemiesToSpawn[Math.floor(enemiesToSpawn.length * Math.random())] ??
+				babyEnemy;
+			const enemy: EnemyState = toEnemyState(id, position, randomEnemy);
 			this.#logger.debug(
 				{ event: "spawnEnemy", id, position, enemy },
 				"spawning enemy",

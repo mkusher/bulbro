@@ -1,5 +1,9 @@
 import type { Stats } from "./bulbro";
-import type { Size } from "./geometry";
+import type { EnemyState } from "./currentState";
+import type { Size, Position } from "./geometry";
+import type { Weapon } from "./weapon";
+
+export type EnemyStats = Omit<Stats, "harvesting" | "engineering" | "luck">;
 
 /**
  * Character model for an enemy.
@@ -7,7 +11,8 @@ import type { Size } from "./geometry";
 export interface EnemyCharacter {
 	id: string;
 	name: string;
-	baseStats: Stats;
+	stats: EnemyStats;
+	weapons: Weapon[];
 }
 
 /**
@@ -23,3 +28,23 @@ export interface Enemy {
 
 /** Render size for enemy sprites. */
 export const ENEMY_SIZE: Size = { width: 16, height: 16 };
+
+export function toEnemyState(
+	id: string,
+	position: Position,
+	enemy: EnemyCharacter,
+): EnemyState {
+	return {
+		...enemy,
+		id,
+		position,
+		healthPoints: enemy.stats.maxHp,
+		lastMovedAt: new Date(),
+		lastHitAt: new Date(0),
+		weapons: enemy.weapons.map((w) => ({
+			id: w.id,
+			lastStrikedAt: new Date(0), // Initialize to epoch,
+			statsBonus: w.statsBonus,
+		})),
+	};
+}

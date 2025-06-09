@@ -23,7 +23,7 @@ export const shouldSpawnEnemy = (now: number, state: CurrentState) => {
 	const timeModifier =
 		(1 - timeLeftInRound / state.round.duration / 1000) * timeSinceLastSpawn;
 	return (
-		(timeSinceLastSpawn + timeModifier) / spawnInterval * Math.random() >= 1
+		((timeSinceLastSpawn + timeModifier) / spawnInterval) * Math.random() >= 1
 	);
 };
 /** Determines if a weapon is ready to shoot.
