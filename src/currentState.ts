@@ -93,6 +93,7 @@ export interface RoundState {
 	isRunning: boolean;
 	duration: number;
 	wave: number;
+	difficulty: number;
 	startedAt?: Date;
 	endedAt?: Date;
 }
@@ -149,6 +150,7 @@ export const createInitialState = (
 		round: {
 			isRunning: true,
 			duration: 60,
+			difficulty: 0,
 			wave,
 			startedAt: new Date(),
 		},

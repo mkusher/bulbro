@@ -27,9 +27,9 @@ export interface Rectangle {
 }
 
 export interface Circle {
-  x: number;
-  y: number;
-  radius: number;
+	x: number;
+	y: number;
+	radius: number;
 }
 
 /**
@@ -83,11 +83,11 @@ export function rectContainsPoint(rect: Rectangle, point: Point): boolean {
 }
 
 export function circleContainsPoint(circle: Circle, point: Point): boolean {
-  return distance(circle, point) <= circle.radius
+	return distance(circle, point) <= circle.radius;
 }
 
 export function circlesIntersect(c1: Circle, c2: Circle): boolean {
-  return distance(c1, c2) <= c1.radius + c2.radius
+	return distance(c1, c2) <= c1.radius + c2.radius;
 }
 
 /**
@@ -151,9 +151,7 @@ export function rectIntersectsLine(
 	return false;
 }
 
-export function circleIntersectsLine(circle: Circle, line: LineSegment) {
-
-}
+export function circleIntersectsLine(circle: Circle, line: LineSegment) {}
 /**
  * Creates an axis-aligned rectangle centered at the given point, with the specified size.
  */

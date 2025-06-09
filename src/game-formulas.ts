@@ -1,22 +1,29 @@
-import type {
-	CurrentState,
-	PlayerState,
-	EnemyState,
-	WeaponState,
-	ShotState,
+import {
+	type CurrentState,
+	type PlayerState,
+	type EnemyState,
+	type WeaponState,
+	type ShotState,
+	type RoundState,
+	getTimeLeft,
 } from "./currentState";
 import { v4 as uuidv4 } from "uuid";
 import { direction, distance, type Position } from "./geometry";
 
-export const shouldSpawnEnemy = (
-	now: number,
-	spawnInterval: number,
-	state: CurrentState,
-) => {
+export const spawnIntervalForRound = (round: RoundState) => {
+	const wave = round.wave;
+	const difficulty = round.difficulty + 1;
+
+	return 2000 / wave / difficulty;
+};
+export const shouldSpawnEnemy = (now: number, state: CurrentState) => {
+	const spawnInterval = spawnIntervalForRound(state.round);
+	const timeSinceLastSpawn = now - (state.lastSpawnAt?.getTime() ?? 0);
+	const timeLeftInRound = getTimeLeft(state.round);
+	const timeModifier =
+		(1 - timeLeftInRound / state.round.duration / 1000) * timeSinceLastSpawn;
 	return (
-		((now - (state.lastSpawnAt?.getTime() ?? 0)) / spawnInterval) *
-			Math.random() >=
-		1
+		(timeSinceLastSpawn + timeModifier) / spawnInterval * Math.random() >= 1
 	);
 };
 /** Determines if a weapon is ready to shoot.

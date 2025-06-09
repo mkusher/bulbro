@@ -21,19 +21,12 @@ import { babyEnemy } from "./enemies-definitions";
  */
 export class TickProcess {
 	#scene: Scene;
-	#spawnInterval: number = 100;
-	#lastSpawnAt?: number;
 	#logger = defaultLogger.child({ component: "TickProcess" });
 
 	constructor(logger: Logger, scene: Scene, now?: TickProcess) {
 		this.#scene = scene;
-		this.#lastSpawnAt = now?.lastSpawnAt;
-		this.#logger = logger.child({ spawnInterval: this.#spawnInterval });
+		this.#logger = logger.child({});
 		this.#logger.debug("TickProcess initialized");
-	}
-
-	get lastSpawnAt() {
-		return this.#lastSpawnAt;
 	}
 
 	/**
@@ -114,7 +107,7 @@ export class TickProcess {
 	/** Spawn new enemies over time */
 	#spawnEnemies(state: CurrentState, now: number): CurrentState {
 		let newState = state;
-		if (shouldSpawnEnemy(now, this.#spawnInterval, state)) {
+		if (shouldSpawnEnemy(now, state)) {
 			const id = uuidv4();
 			const position = {
 				x: Math.random() * newState.mapSize.width,

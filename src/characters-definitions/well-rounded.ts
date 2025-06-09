@@ -9,7 +9,7 @@ export const wellRoundedBulbro: Bulbro = {
 	name: "Well Rounded",
 	baseStats: {
 		...baseStats,
-		maxHp: baseMaxHp + 50,
+		maxHp: baseMaxHp + 5,
 		speed: baseSpeed * 1.05,
 		harvesting: baseHarvesting + 8,
 	},
