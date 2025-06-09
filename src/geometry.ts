@@ -26,6 +26,12 @@ export interface Rectangle {
 	height: number;
 }
 
+export interface Circle {
+  x: number;
+  y: number;
+  radius: number;
+}
+
 /**
  * Line segment between two points.
  */
@@ -74,6 +80,14 @@ export function rectContainsPoint(rect: Rectangle, point: Point): boolean {
 		point.y >= rect.y &&
 		point.y <= rect.y + rect.height
 	);
+}
+
+export function circleContainsPoint(circle: Circle, point: Point): boolean {
+  return distance(circle, point) <= circle.radius
+}
+
+export function circlesIntersect(c1: Circle, c2: Circle): boolean {
+  return distance(c1, c2) <= c1.radius + c2.radius
 }
 
 /**
@@ -135,6 +149,10 @@ export function rectIntersectsLine(
 		return true;
 	}
 	return false;
+}
+
+export function circleIntersectsLine(circle: Circle, line: LineSegment) {
+
 }
 /**
  * Creates an axis-aligned rectangle centered at the given point, with the specified size.

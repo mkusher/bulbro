@@ -1,13 +1,15 @@
-# pixi-demo
+# Bulbro
 
-Scaffolded Pixi.js project using Bun.
+An opensource clone of brotato. A Pixi.js game using Bun.
 
 ## Scripts
 
-- `bun run build`: bundle code (`public/bundle.js`)
-- `bun run dev`: watch and bundle code on changes
-- `bun run serve`: serve `public` folder
-- `bun run start`: build and serve
+- `bun build`: bundle code (`public/main.js`)
+- `bun dev`: watch and bundle code on changes
+- `bun serve`: serve `public` folder
+- `bun start`: build and serve
+- `bun test`: run tests
+- `bun format`: run tests
 
 ## Getting Started
 
@@ -20,5 +22,5 @@ bun install
 Build and serve:
 
 ```bash
-bun run start
+bun start
 ```

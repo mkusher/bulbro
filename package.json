@@ -1,6 +1,6 @@
 {
   "name": "bulbro",
-  "module": "index.ts",
+  "module": "src/main.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
@@ -15,7 +15,8 @@
     "build": "bun build --target browser --outdir public src/main.ts",
     "dev": "bun build --watch --sourcemap --target browser --outdir public src/main.ts",
     "serve": "serve public",
-    "start": "bun run build && bun run serve"
+    "start": "bun run build && bun run serve",
+    "format": "biome format --fix src"
   },
   "dependencies": {
     "pino": "^9.7.0",
