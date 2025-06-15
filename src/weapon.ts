@@ -30,3 +30,10 @@ export interface Weapon {
 	statsBonus: StatsBonus;
 	shotSpeed: number;
 }
+
+export const toWeaponState = (w: Weapon) => ({
+	id: w.id,
+	lastStrikedAt: new Date(0),
+	statsBonus: w.statsBonus,
+	shotSpeed: w.shotSpeed,
+});

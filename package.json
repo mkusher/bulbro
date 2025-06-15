@@ -21,6 +21,7 @@
   "dependencies": {
     "pino": "^9.7.0",
     "pixi.js": "^8.10.1",
+    "preact": "^10.26.9",
     "uuid": "^11.1.0"
   }
 }

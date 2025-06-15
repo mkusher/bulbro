@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import type { EnemyState, EnemyType } from "./EnemyState";
 import { OrcSprite } from "./sprites/OrcSprite";
+import { SlimeSprite } from "./sprites/SlimeSprite";
 
 /**
  * Manages an enemy sprite graphic.
@@ -22,5 +23,8 @@ export interface EnemySprite {
 }
 
 export function createEnemySprite(type: EnemyType): EnemySprite {
+  if (type === "slime") {
+    return new SlimeSprite()
+  }
 	return new OrcSprite();
 }

@@ -18,6 +18,7 @@ import type { Player } from "./bulbro";
 import { ENEMY_SIZE } from "./enemy";
 import type { StatsBonus } from "./weapon";
 import { EnemyState } from "./enemy/EnemyState";
+import type { Difficulty } from "./game-formulas";
 
 /**
  * Runtime state of a single weapon in play.
@@ -80,27 +81,56 @@ export interface CurrentState {
 	round: RoundState;
 }
 
+export const nextWave = (
+	currentState: CurrentState,
+	weapons: WeaponState[],
+): CurrentState => ({
+	...currentState,
+	players: currentState.players
+		.map((player) =>
+			player.move(startPosition(currentState.mapSize), Date.now()),
+		)
+		.map((player) =>
+			player.id === currentState.currentPlayerId
+				? player.useWeapons(weapons)
+				: player,
+		),
+	round: {
+		...currentState.round,
+		isRunning: true,
+		endedAt: undefined,
+		startedAt: new Date(),
+		wave: currentState.round.wave + 1,
+	},
+});
+
+const startPosition = (mapSize: Size) => ({
+	x: mapSize.width / 2,
+	y: mapSize.height / 2,
+});
+
 export const createInitialState = (
 	currentPlayer: Player,
 	mapSize: Size,
+	difficulty: Difficulty,
 	wave = 1,
 ): CurrentState => {
-	const startPosition = {
-		x: mapSize.width / 2,
-		y: mapSize.height / 2,
-	};
 	return {
 		currentPlayerId: currentPlayer.id,
 		mapSize,
 		players: [
-			spawnBulbro(currentPlayer.id, startPosition, currentPlayer.bulbro),
+			spawnBulbro(
+				currentPlayer.id,
+				startPosition(mapSize),
+				currentPlayer.bulbro,
+			),
 		],
 		enemies: [],
 		shots: [],
 		round: {
 			isRunning: true,
-			duration: 60,
-			difficulty: 0,
+			duration: 10,
+			difficulty,
 			wave,
 			startedAt: new Date(),
 		},

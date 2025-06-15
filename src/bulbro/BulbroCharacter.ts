@@ -19,6 +19,7 @@ export interface Stats {
 	speed: number;
 	luck: number;
 	harvesting: number;
+	pickupRange: number;
 }
 
 /**

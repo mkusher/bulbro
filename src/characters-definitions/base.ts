@@ -1,7 +1,9 @@
+import type { Stats } from "../bulbro";
+
 export const baseMaxHp = 10;
 export const baseSpeed = 450;
 export const baseHarvesting = 0;
-export const baseStats = {
+export const baseStats: Stats = {
 	maxHp: baseMaxHp,
 	speed: baseSpeed,
 	harvesting: baseHarvesting,
@@ -17,4 +19,5 @@ export const baseStats = {
 	armor: 0,
 	dodge: 0,
 	luck: 0,
+	pickupRange: 50,
 };

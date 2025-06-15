@@ -9,6 +9,7 @@ import { TimerSprite } from "./TimerSprite";
 import { ShotSprite } from "./ShotSprite";
 import { HealthSprite } from "./HealthSprite";
 import { PlayingFieldTile } from "./PlayingFieldTile";
+import { WaveSprite } from "./WaveSprite";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -19,6 +20,7 @@ export class Scene {
 	#enemySprites: Map<string, EnemySprite> = new Map();
 	#shotSprites: Map<string, ShotSprite> = new Map();
 	#timerSprite!: TimerSprite;
+	#waveSprite!: WaveSprite;
 	#viewSize!: Size;
 	#healthSprite!: HealthSprite;
 	#playingFieldTile!: PlayingFieldTile;
@@ -45,13 +47,15 @@ export class Scene {
 		});
 		// Create enemy sprites
 		state.enemies.forEach((e: EnemyState) => {
-			const sprite = createEnemySprite("orc");
+			const sprite = createEnemySprite(e.type);
 			sprite.appendTo(this.#app.stage);
 			this.#enemySprites.set(e.id, sprite);
 		});
 		// Timer text
 		this.#timerSprite = new TimerSprite();
 		this.#timerSprite.appendTo(this.#app.stage);
+		this.#waveSprite = new WaveSprite();
+		this.#waveSprite.appendTo(this.#app.stage);
 		this.#healthSprite = new HealthSprite(state.mapSize);
 		this.#healthSprite.appendTo(this.#app.stage);
 	}
@@ -63,8 +67,8 @@ export class Scene {
 		this.#updatePlayers(deltaTime, state);
 		this.#updateEnemies(deltaTime, state);
 		this.#updateShots(deltaTime, state);
-		// Timer
 		this.#timerSprite.update(state.round, this.#viewSize.width);
+		this.#waveSprite.update(state.round, this.#viewSize.width);
 		const player = state.players.find((p) => p.id === state.currentPlayerId);
 		this.#healthSprite.update(state, player);
 	}
@@ -94,7 +98,7 @@ export class Scene {
 	#updateEnemies(deltaTime: number, state: CurrentState) {
 		state.enemies.forEach((e: EnemyState) => {
 			if (!this.#enemySprites.has(e.id)) {
-				const sprite = createEnemySprite("orc");
+				const sprite = createEnemySprite(e.type);
 				sprite.appendTo(this.#app.stage);
 				this.#enemySprites.set(e.id, sprite);
 			}

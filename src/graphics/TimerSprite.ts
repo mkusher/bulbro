@@ -6,7 +6,7 @@ export class TimerSprite {
 	constructor() {
 		const style = new PIXI.TextStyle({ fontSize: 24, fill: "#ffffff" });
 		this.#gfx = new PIXI.Text("", style);
-		this.#gfx.y = 10;
+		this.#gfx.y = 30;
 	}
 	appendTo(parent: PIXI.Container): void {
 		parent.addChild(this.#gfx);

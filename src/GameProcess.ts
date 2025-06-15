@@ -2,83 +2,93 @@ import * as PIXI from "pixi.js";
 import type { Logger } from "pino";
 import { logger as defaultLogger } from "./logger";
 import type { Bulbro } from "./bulbro";
-import { createInitialState, type CurrentState } from "./currentState";
-import { Scene } from "./graphics/Scene";
-import { TickProcess } from "./TickProcess";
 import {
-	keysToDirection,
-	subscribeToKeyboard,
-	type ArrowKeys,
-} from "./controls/keyboard";
+	createInitialState,
+	nextWave,
+	type CurrentState,
+} from "./currentState";
+import { Scene } from "./graphics/Scene";
 import { createPlayer } from "./player";
 import {
 	subscribeToTouch,
 	type DirectionContainer,
 } from "./controls/touchscreen";
+import type { Size } from "./geometry";
+import type { Difficulty } from "./game-formulas";
+import { WaveProcess } from "./WaveProcess";
+import { toWeaponState, type Weapon } from "./weapon";
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
  */
 export class GameProcess {
-	#bulbro: Bulbro;
 	#logger: Logger;
 	#app: PIXI.Application;
-	#keys: ArrowKeys = {};
-	#touch: DirectionContainer = {};
 	#scene!: Scene;
-	#state: CurrentState;
+	#mapSize: Size;
+	#state?: CurrentState;
+	#waveProcess?: WaveProcess;
 
-	constructor(bulbro: Bulbro) {
+	constructor() {
 		this.#app = new PIXI.Application();
-		this.#bulbro = bulbro;
 		this.#logger = defaultLogger.child({
 			component: "GameProcess",
-			playerId: bulbro.id,
 		});
-		this.#state = createInitialState(createPlayer(bulbro), {
-			width: 0,
-			height: 0,
-		});
+		this.#mapSize = { width: 800, height: 600 };
+	}
+
+	async initMap(mapSize = this.#mapSize) {
+		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
+	}
+
+	showMap(rootEl: HTMLElement) {
+		rootEl.appendChild(this.#app.view);
 	}
 
 	/**
 	 * Initializes Pixi, creates player, starts input & ticker, and begins the round.
 	 * Resolves when the round ends.
 	 */
-	async start(): Promise<void> {
-		const mapSize = { width: 800, height: 600 };
-		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
-		document.body.appendChild(this.#app.view);
-
-		subscribeToKeyboard(this.#keys);
-		subscribeToTouch(this.#touch);
+	async start(bulbro: Bulbro, weapons: Weapon[], difficulty: Difficulty) {
+		this.#logger.info({ difficulty, bulbro, weapons }, "starting the game");
 
 		// Initial game state
-		this.#state = createInitialState(createPlayer(this.#bulbro), mapSize);
-		// Start round
-		this.#logger.info({ state: this.#state }, "GameProcess is starting");
-
-		// Setup scene
+		this.#state = createInitialState(
+			createPlayer(bulbro, weapons),
+			this.#mapSize,
+			difficulty,
+		);
 		this.#scene = new Scene(this.#app);
-		await this.#scene.init(this.#state);
-		let i = 0;
-		this.#app.ticker.add(() => {
-			++i;
-			const now = Date.now();
-			const delta = this.#app.ticker.deltaMS / 1000;
-			if (i % 200 === 0) {
-				this.#logger.info({ state: this.#state, i }, "Current state");
-			}
-			// Delegate per-tick updates to TickProcess
-			const tickProc = new TickProcess(this.#logger, this.#scene);
-			const keyboardDirection = keysToDirection(this.#keys);
-			const touchDirection = this.#touch.direction;
-			this.#state = tickProc.tick(
-				this.#state,
-				delta,
-				touchDirection ?? keyboardDirection,
-				now,
-			);
-		});
+		this.#waveProcess = new WaveProcess(
+			this.#logger,
+			this.#state,
+			this.#scene,
+			this.#app.ticker,
+		);
+		return {
+			wavePromise: this.#waveProcess.start(),
+		};
+	}
+
+	async startNextWave(weapons: Weapon[]) {
+		if (!this.#state) {
+			this.#logger.error("no state set to start next wave");
+			throw new Error("No state set for the game");
+		}
+		this.#state = nextWave(this.#state, weapons.map(toWeaponState));
+		this.#logger.info(
+			{ weapons, state: this.#state },
+			"starting the next wave",
+		);
+		this.#app.ticker.start();
+		this.#waveProcess = new WaveProcess(
+			this.#logger,
+			this.#state,
+			this.#scene,
+			this.#app.ticker,
+		);
+		return {
+			wavePromise: this.#waveProcess.start(),
+		};
 	}
 }

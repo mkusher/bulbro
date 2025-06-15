@@ -1,9 +1,11 @@
+import type { EnemyCharacter } from "../enemy";
 import { orcFist } from "../weapons-definitions/orcFist";
 import { baseStats } from "./base";
 
-export const babyEnemy = {
+export const babyEnemy: EnemyCharacter = {
 	id: "baby",
 	name: "Baby enemy",
+  sprite: "orc",
 	stats: {
 		...baseStats,
 		maxHp: 2,

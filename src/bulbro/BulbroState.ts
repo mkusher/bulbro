@@ -3,6 +3,7 @@ import type { WeaponState } from "../currentState";
 import type { Bulbro, Stats } from "./BulbroCharacter";
 import type { MovableObject, Shape } from "../movement/Movement";
 import { BULBRO_SIZE } from "./index";
+import { toWeaponState } from "../weapon";
 
 /**
  * Immutable runtime state of a single Bulbro (player).
@@ -35,6 +36,19 @@ export class BulbroState {
 		this.weapons = weapons;
 		this.lastMovedAt = lastMovedAt;
 		this.lastHitAt = lastHitAt;
+	}
+
+	useWeapons(weapons: WeaponState[]) {
+		return new BulbroState(
+			this.id,
+			this.position,
+			this.speed,
+			this.healthPoints,
+			this.stats,
+			weapons,
+			this.lastMovedAt,
+			this.lastHitAt,
+		);
 	}
 
 	/** Returns a new state with the Bulbro moved to a new position. */
@@ -102,12 +116,7 @@ export function spawnBulbro(
 	position: Position,
 	character: Bulbro,
 ): BulbroState {
-	const weapons: WeaponState[] = character.weapons.map((w) => ({
-		id: w.id,
-		lastStrikedAt: new Date(0),
-		statsBonus: w.statsBonus,
-		shotSpeed: w.shotSpeed,
-	}));
+	const weapons: WeaponState[] = character.weapons.map(toWeaponState);
 	return new BulbroState(
 		id,
 		position,

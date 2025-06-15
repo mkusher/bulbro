@@ -10,6 +10,12 @@ import type { EnemyState } from "./enemy/EnemyState";
 import { v4 as uuidv4 } from "uuid";
 import { direction, distance, type Position } from "./geometry";
 
+export type Difficulty = 0 | 1 | 2 | 3 | 4 | 5;
+export const isDifficulty = (
+	maybeDifficulty: number,
+): maybeDifficulty is Difficulty =>
+	maybeDifficulty >= 0 && maybeDifficulty <= 5;
+
 export const spawnIntervalForRound = (round: RoundState) => {
 	const wave = round.wave;
 	const difficulty = round.difficulty + 1;

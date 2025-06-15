@@ -26,6 +26,7 @@ describe("updateState move actions", () => {
 			bulbro: wellRoundedBulbro,
 		},
 		mapSize,
+		0,
 	);
 
 	it("moves left correctly", () => {

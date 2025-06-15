@@ -5,15 +5,19 @@ import type { WeaponState } from "../currentState";
 import type { MovableObject, Shape } from "../movement/Movement";
 import { ENEMY_SIZE } from "./index";
 
-export type EnemyType = "orc";
+export type EnemyType = "orc" | "slime";
 
 /**
  * Immutable runtime state of a single enemy.
  */
-export type EnemyStats = Omit<Stats, "harvesting" | "engineering" | "luck">;
+export type EnemyStats = Omit<
+	Stats,
+	"harvesting" | "engineering" | "luck" | "pickupRange"
+>;
 
 export class EnemyState {
 	readonly id: string;
+  readonly type: EnemyType;
 	readonly position: Position;
 	readonly healthPoints: number;
 	readonly weapons: WeaponState[];
@@ -24,6 +28,7 @@ export class EnemyState {
 
 	constructor(
 		id: string,
+    type: EnemyType,
 		position: Position,
 		healthPoints: number,
 		weapons: WeaponState[],
@@ -33,6 +38,7 @@ export class EnemyState {
 		killedAt?: Date,
 	) {
 		this.id = id;
+    this.type = type;
 		this.position = position;
 		this.healthPoints = healthPoints;
 		this.weapons = weapons;
@@ -58,6 +64,7 @@ export class EnemyState {
 	move(position: Position, now: number): EnemyState {
 		return new EnemyState(
 			this.id,
+      this.type,
 			position,
 			this.healthPoints,
 			this.weapons,
@@ -75,6 +82,7 @@ export class EnemyState {
 		);
 		return new EnemyState(
 			this.id,
+      this.type,
 			this.position,
 			this.healthPoints,
 			weapons,
@@ -92,6 +100,7 @@ export class EnemyState {
 			healthPoints <= 0 && !this.killedAt ? new Date(now) : this.killedAt;
 		return new EnemyState(
 			this.id,
+      this.type,
 			this.position,
 			healthPoints,
 			this.weapons,
@@ -119,6 +128,7 @@ export function spawnEnemy(
 	}));
 	return new EnemyState(
 		id,
+    character.sprite,
 		position,
 		character.stats.maxHp,
 		weapons,
