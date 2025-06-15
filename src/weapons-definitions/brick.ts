@@ -7,5 +7,6 @@ export const brick: Weapon = {
 	id: "brick",
 	name: "Brick",
 	classes: ["blunt", "heavy"],
+	shotSpeed: 1000,
 	statsBonus: {},
 };

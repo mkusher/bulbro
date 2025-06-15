@@ -1,12 +1,12 @@
 import {
 	type CurrentState,
-	type PlayerState,
-	type EnemyState,
 	type WeaponState,
 	type ShotState,
 	type RoundState,
 	getTimeLeft,
 } from "./currentState";
+import type { BulbroState } from "./bulbro";
+import type { EnemyState } from "./enemy/EnemyState";
 import { v4 as uuidv4 } from "uuid";
 import { direction, distance, type Position } from "./geometry";
 
@@ -43,9 +43,9 @@ export function isWeaponReadyToShoot(
 
 export function findClosestPlayerInRange(
 	enemy: EnemyState,
-	players: PlayerState[],
-): PlayerState | undefined {
-	let closest: PlayerState | undefined;
+	players: BulbroState[],
+): BulbroState | undefined {
+	let closest: BulbroState | undefined;
 	let minDist = Infinity;
 	for (const player of players) {
 		const dist = distance(enemy.position, player.position);
@@ -58,7 +58,7 @@ export function findClosestPlayerInRange(
 }
 /** Finds the closest enemy to a player based on Euclidean distance. */
 export function findClosestEnemyInRange(
-	player: PlayerState,
+	player: BulbroState,
 	enemies: EnemyState[],
 ): EnemyState | undefined {
 	let closest: EnemyState | undefined;
@@ -73,9 +73,8 @@ export function findClosestEnemyInRange(
 	return closest;
 }
 
-const shotSpeed = 3000;
 export function shoot(
-	player: PlayerState | EnemyState,
+	player: BulbroState | EnemyState,
 	shooterType: "player" | "enemy",
 	weapon: WeaponState,
 	targetPosition: Position,
@@ -95,13 +94,13 @@ export function shoot(
 		position: currentPosition,
 		startPosition: currentPosition,
 		direction: direction(currentPosition, targetPosition),
-		speed: shotSpeed,
+		speed: weapon.shotSpeed,
 	};
 }
 
 export function isInRange(
-	player: PlayerState | EnemyState,
-	enemy: EnemyState | PlayerState,
+	player: BulbroState | EnemyState,
+	enemy: EnemyState | BulbroState,
 	weapon: WeaponState,
 ) {
 	return (

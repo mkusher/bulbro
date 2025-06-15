@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
-import type { CurrentState, PlayerState } from "../currentState";
+import type { CurrentState } from "../currentState";
+import type { BulbroState } from "../bulbro";
 import type { Size } from "../geometry";
 
 const blackBorderRectangleHeight = 35;
@@ -39,7 +40,7 @@ export class HealthSprite {
 	appendTo(parent: PIXI.Container): void {
 		parent.addChild(this.#gfx);
 	}
-	update(state: CurrentState, player?: PlayerState) {
+	update(state: CurrentState, player?: BulbroState) {
 		const healthPercent = player?.stats.maxHp
 			? (player?.healthPoints ?? 0) / player.stats.maxHp
 			: 0;

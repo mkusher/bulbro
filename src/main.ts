@@ -1,10 +1,10 @@
 import { wellRoundedBulbro } from "./characters-definitions";
 import { GameProcess } from "./GameProcess";
-import { fist, pistol, smg } from "./weapons-definitions";
+import { fist, pistol } from "./weapons-definitions";
 
 // Bootstrap the game
 const game = new GameProcess({
 	...wellRoundedBulbro,
-	weapons: [fist, pistol, smg],
+	weapons: [fist, pistol],
 });
 await game.start();

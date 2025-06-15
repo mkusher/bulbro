@@ -11,11 +11,13 @@ import {
 	isEqual,
 } from "./geometry";
 import { movePosition } from "./physics";
-import { PLAYER_SIZE, type Player, type Stats } from "./bulbro";
+import { Movement } from "./movement/Movement";
+import type { MovableObject, Shape } from "./movement/Movement";
+import { BULBRO_SIZE, BulbroState, spawnBulbro } from "./bulbro";
+import type { Player } from "./bulbro";
 import { ENEMY_SIZE } from "./enemy";
 import type { StatsBonus } from "./weapon";
-import { fist } from "./weapons-definitions";
-import type { EnemyStats } from "./enemies-definitions/base";
+import { EnemyState } from "./enemy/EnemyState";
 
 /**
  * Runtime state of a single weapon in play.
@@ -26,47 +28,9 @@ export interface WeaponState {
 	/** Timestamp of the last time this weapon struck */
 	lastStrikedAt: Date;
 	statsBonus: StatsBonus;
-}
-/**
- * Runtime state of a single player.
- */
-export interface PlayerState {
-	/** Player identifier */
-	id: string;
-	/** Current position */
-	position: Position;
-	/** Movement speed */
-	speed: number;
-	/** Current health points */
-	healthPoints: number;
-	/** State of each weapon equipped by the player */
-	weapons: WeaponState[];
-	stats: Stats;
-	lastMovedAt: Date;
-	lastHitAt: Date;
+	shotSpeed: number;
 }
 
-/**
- * Runtime state of a single enemy.
- */
-/**
- * Runtime state of a single enemy.
- */
-export interface EnemyState {
-	/** Enemy identifier */
-	id: string;
-	/** Current position */
-	position: Position;
-	/** Current health points */
-	healthPoints: number;
-	/** Movement speed */
-	/** State of each weapon equipped by the enemy */
-	weapons: WeaponState[];
-	stats: EnemyStats;
-	lastMovedAt: Date;
-	lastHitAt: Date;
-	killedAt?: Date;
-}
 /**
  * Runtime state of an individual projectile (shot) in play.
  */
@@ -107,7 +71,7 @@ export interface CurrentState {
 	currentPlayerId: string;
 	/** The game map size for clamping positions */
 	mapSize: Size;
-	players: PlayerState[];
+	players: BulbroState[];
 	enemies: EnemyState[];
 	/** Active shots in play */
 	shots: ShotState[];
@@ -129,22 +93,7 @@ export const createInitialState = (
 		currentPlayerId: currentPlayer.id,
 		mapSize,
 		players: [
-			{
-				id: currentPlayer.id,
-				position: startPosition,
-				speed: currentPlayer.bulbro.baseStats.speed,
-				healthPoints: currentPlayer.bulbro.baseStats.maxHp,
-				stats: currentPlayer.bulbro.baseStats,
-				lastMovedAt: new Date(),
-				lastHitAt: new Date(0),
-				weapons: [
-					{
-						id: fist.id,
-						statsBonus: fist.statsBonus,
-						lastStrikedAt: new Date(),
-					},
-				],
-			},
+			spawnBulbro(currentPlayer.id, startPosition, currentPlayer.bulbro),
 		],
 		enemies: [],
 		shots: [],
@@ -202,31 +151,32 @@ export function movePlayer(
 	action: Extract<Action, { type: "move" }>,
 ): CurrentState {
 	const { direction, deltaTime, now } = action;
-	const otherPlayerRects = state.players
-		.filter((p2) => p2.id !== state.currentPlayerId)
-		.map((p2) => rectFromCenter(p2.position, PLAYER_SIZE));
-	const enemyRects = state.enemies
-		.filter((e) => !e.killedAt)
-		.map((e) => rectFromCenter(e.position, ENEMY_SIZE));
+	// Movement handler: build obstacles from other players and alive enemies
+	const obstacles: MovableObject[] = [
+		...state.players
+			.filter((p2) => p2.id !== state.currentPlayerId)
+			.map((p2) => p2.toMovableObject()),
+		...state.enemies.filter((e) => !e.killedAt).map((e) => e.toMovableObject()),
+	];
 	return {
 		...state,
 		players: state.players.map((p) => {
 			if (p.id !== state.currentPlayerId) return p;
-			const halfW = PLAYER_SIZE.width / 2;
-			const halfH = PLAYER_SIZE.height / 2;
-			let pos = movePosition(p.position, p.speed, direction, deltaTime);
-			pos.x = Math.max(halfW, Math.min(state.mapSize.width - halfW, pos.x));
-			pos.y = Math.max(halfH, Math.min(state.mapSize.height - halfH, pos.y));
-			const movedRect = rectFromCenter(pos, PLAYER_SIZE);
-			const collisionWithPlayer = otherPlayerRects.some((rr) =>
-				rectsIntersect(movedRect, rr),
+			const mover = new Movement(
+				{
+					position: p.position,
+					shape: {
+						type: "rectangle",
+						width: BULBRO_SIZE.width,
+						height: BULBRO_SIZE.height,
+					},
+				},
+				state.mapSize,
+				obstacles,
 			);
-			const collisionWithEnemy = enemyRects.some((rr) =>
-				rectsIntersect(movedRect, rr),
-			);
-			if (collisionWithPlayer || collisionWithEnemy) return p;
-			if (isEqual(p.position, pos)) return p;
-			return { ...p, position: pos, lastMovedAt: new Date(now) };
+			const newPos = mover.getPositionAfterMove(direction, p.speed, deltaTime);
+			if (isEqual(p.position, newPos)) return p;
+			return p.move(newPos, now);
 		}),
 	};
 }
@@ -236,31 +186,50 @@ export function moveEnemy(
 	action: Extract<Action, { type: "moveEnemy" }>,
 ): CurrentState {
 	const { id, direction, deltaTime, now } = action;
-	const otherEnemyRects = state.enemies
-		.filter((e2) => e2.id !== id && !e2.killedAt)
-		.map((e2) => rectFromCenter(e2.position, ENEMY_SIZE));
-	const playerRects = state.players.map((p2) =>
-		rectFromCenter(p2.position, PLAYER_SIZE),
-	);
+	// Movement handler: build obstacles from other enemies and players
+	const obstacles: MovableObject[] = [
+		...state.enemies
+			.filter((e2) => e2.id !== id && !e2.killedAt)
+			.map((e2) => ({
+				position: e2.position,
+				shape: {
+					type: "rectangle",
+					width: ENEMY_SIZE.width,
+					height: ENEMY_SIZE.height,
+				} as Shape,
+			})),
+		...state.players.map((p2) => ({
+			position: p2.position,
+			shape: {
+				type: "rectangle",
+				width: BULBRO_SIZE.width,
+				height: BULBRO_SIZE.height,
+			} as Shape,
+		})),
+	];
 	return {
 		...state,
 		enemies: state.enemies.map((e) => {
 			if (e.id !== id) return e;
-			const halfW = ENEMY_SIZE.width / 2;
-			const halfH = ENEMY_SIZE.height / 2;
-			let pos = movePosition(e.position, e.stats.speed, direction, deltaTime);
-			pos.x = Math.max(halfW, Math.min(state.mapSize.width - halfW, pos.x));
-			pos.y = Math.max(halfH, Math.min(state.mapSize.height - halfH, pos.y));
-			const movedRect = rectFromCenter(pos, ENEMY_SIZE);
-			const collisionWithEnemy = otherEnemyRects.some((rr) =>
-				rectsIntersect(movedRect, rr),
+			const mover = new Movement(
+				{
+					position: e.position,
+					shape: {
+						type: "rectangle",
+						width: ENEMY_SIZE.width,
+						height: ENEMY_SIZE.height,
+					},
+				},
+				state.mapSize,
+				obstacles,
 			);
-			const collisionWithPlayer = playerRects.some((rr) =>
-				rectsIntersect(movedRect, rr),
+			const newPos = mover.getPositionAfterMove(
+				direction,
+				e.stats.speed,
+				deltaTime,
 			);
-			if (collisionWithEnemy || collisionWithPlayer) return e;
-			if (isEqual(e.position, pos)) return e;
-			return { ...e, position: pos, lastMovedAt: new Date(now) };
+			if (isEqual(e.position, newPos)) return e;
+			return e.move(newPos, now);
 		}),
 	};
 }
@@ -300,14 +269,7 @@ export function moveShot(
 				const enemyRect = rectFromCenter(e.position, ENEMY_SIZE);
 				if (rectIntersectsLine(enemyRect, segment)) {
 					isHit = true;
-					const healthPoints = e.healthPoints - shot.damage;
-					return {
-						...e,
-						healthPoints,
-						lastHitAt: new Date(now),
-						killedAt:
-							healthPoints <= 0 ? (e.killedAt ?? new Date(now)) : e.killedAt,
-					};
+					return e.beHit(shot.damage, now);
 				}
 				return e;
 			});
@@ -317,14 +279,10 @@ export function moveShot(
 			const segment = { start: prevPos, end: nextPos };
 			let isHit = false;
 			newPlayers = newPlayers.map((p) => {
-				const playerRect = rectFromCenter(p.position, PLAYER_SIZE);
+				const playerRect = rectFromCenter(p.position, BULBRO_SIZE);
 				if (rectIntersectsLine(playerRect, segment)) {
 					isHit = true;
-					return {
-						...p,
-						healthPoints: p.healthPoints - shot.damage,
-						lastHitAt: new Date(now),
-					};
+					return p.beHit(shot.damage, now);
 				}
 				return p;
 			});
@@ -372,24 +330,14 @@ export function addShot(
 		shot.shooterType === "player"
 			? state.players.map((p) => {
 					if (p.id !== shot.shooterId) return p;
-					return {
-						...p,
-						weapons: p.weapons.map((ws) =>
-							ws.id !== weaponId ? ws : { ...ws, lastStrikedAt: new Date(now) },
-						),
-					};
+					return p.hit(weaponId, now);
 				})
 			: state.players;
 	const newEnemies =
 		shot.shooterType === "enemy"
 			? state.enemies.map((e) => {
 					if (e.id !== shot.shooterId) return e;
-					return {
-						...e,
-						weapons: e.weapons.map((w) =>
-							w.id !== weaponId ? w : { ...w, lastStrikedAt: new Date(now) },
-						),
-					};
+					return e.hit(weaponId, now);
 				})
 			: state.enemies;
 	return {

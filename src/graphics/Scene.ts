@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js";
 import type { Size } from "../geometry";
-import type { Bulbro } from "../bulbro";
-import type { CurrentState, PlayerState, EnemyState } from "../currentState";
-import { PlayerSprite } from "./PlayerSprite";
-import { EnemySprite } from "./EnemySprite";
+import type { BulbroState } from "../bulbro";
+import type { CurrentState } from "../currentState";
+import type { EnemyState } from "../enemy/EnemyState";
+import { BulbroSprite } from "../bulbro/Sprite";
+import { createEnemySprite, type EnemySprite } from "../enemy/Sprite";
 import { TimerSprite } from "./TimerSprite";
 import { ShotSprite } from "./ShotSprite";
 import { HealthSprite } from "./HealthSprite";
@@ -14,8 +15,7 @@ import { PlayingFieldTile } from "./PlayingFieldTile";
  */
 export class Scene {
 	#app: PIXI.Application;
-	#bulbro: Bulbro;
-	#playerSprites: Map<string, PlayerSprite> = new Map();
+	#playerSprites: Map<string, BulbroSprite> = new Map();
 	#enemySprites: Map<string, EnemySprite> = new Map();
 	#shotSprites: Map<string, ShotSprite> = new Map();
 	#timerSprite!: TimerSprite;
@@ -23,9 +23,8 @@ export class Scene {
 	#healthSprite!: HealthSprite;
 	#playingFieldTile!: PlayingFieldTile;
 
-	constructor(app: PIXI.Application, bulbro: Bulbro) {
+	constructor(app: PIXI.Application) {
 		this.#app = app;
-		this.#bulbro = bulbro;
 	}
 
 	/**
@@ -39,14 +38,14 @@ export class Scene {
 		this.#playingFieldTile = new PlayingFieldTile(state.mapSize);
 		await this.#playingFieldTile.init(state, this.#app.stage);
 		// Create player sprites
-		state.players.forEach((p: PlayerState) => {
-			const sprite = new PlayerSprite();
+		state.players.forEach((p: BulbroState) => {
+			const sprite = new BulbroSprite();
 			sprite.appendTo(this.#app.stage);
 			this.#playerSprites.set(p.id, sprite);
 		});
 		// Create enemy sprites
 		state.enemies.forEach((e: EnemyState) => {
-			const sprite = new EnemySprite();
+			const sprite = createEnemySprite("orc");
 			sprite.appendTo(this.#app.stage);
 			this.#enemySprites.set(e.id, sprite);
 		});
@@ -72,9 +71,9 @@ export class Scene {
 
 	#updatePlayers(deltaTime: number, state: CurrentState) {
 		// Sync player sprites
-		state.players.forEach((p: PlayerState) => {
+		state.players.forEach((p: BulbroState) => {
 			if (!this.#playerSprites.has(p.id)) {
-				const sprite = new PlayerSprite();
+				const sprite = new BulbroSprite();
 				sprite.appendTo(this.#app.stage);
 				this.#playerSprites.set(p.id, sprite);
 			}
@@ -86,7 +85,7 @@ export class Scene {
 			}
 		});
 		// Update player positions and opacity
-		state.players.forEach((p: PlayerState) => {
+		state.players.forEach((p: BulbroState) => {
 			const sprite = this.#playerSprites.get(p.id)!;
 			sprite.update(p, deltaTime);
 		});
@@ -95,7 +94,7 @@ export class Scene {
 	#updateEnemies(deltaTime: number, state: CurrentState) {
 		state.enemies.forEach((e: EnemyState) => {
 			if (!this.#enemySprites.has(e.id)) {
-				const sprite = new EnemySprite();
+				const sprite = createEnemySprite("orc");
 				sprite.appendTo(this.#app.stage);
 				this.#enemySprites.set(e.id, sprite);
 			}
@@ -109,7 +108,7 @@ export class Scene {
 		// Update enemy positions
 		state.enemies.forEach((e: EnemyState) => {
 			const sprite = this.#enemySprites.get(e.id)!;
-			sprite.update(e);
+			sprite.update(e, deltaTime);
 		});
 	}
 

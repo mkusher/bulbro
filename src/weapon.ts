@@ -28,4 +28,5 @@ export interface Weapon {
 	name: string;
 	classes: WeaponClass[];
 	statsBonus: StatsBonus;
+	shotSpeed: number;
 }

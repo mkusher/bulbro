@@ -13,7 +13,7 @@ export class TimerSprite {
 	}
 	update(round: RoundState, viewSizeWidth: number) {
 		const timeLeft = getTimeLeft(round);
-		const totalSec = Math.ceil(timeLeft / 1000);
+		const totalSec = Math.max(Math.ceil(timeLeft / 1000), 0);
 		this.#gfx.text = totalSec.toString();
 		this.#gfx.x = (viewSizeWidth - this.#gfx.width) / 2;
 	}

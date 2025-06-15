@@ -2,7 +2,8 @@ import { describe, it, expect } from "bun:test";
 import type { CurrentState } from "./currentState";
 import { createInitialState, updateState } from "./currentState";
 import { wellRoundedBulbro } from "./characters-definitions";
-import { keysToDirection } from "./keyboard";
+import { keysToDirection } from "./controls/keyboard";
+import { BULBRO_SIZE } from "./bulbro";
 
 describe("updateState move actions", () => {
 	// Generic finder helper
@@ -17,6 +18,8 @@ describe("updateState move actions", () => {
 	const mapSize = { width: 800, height: 600 };
 	const centerX = mapSize.width / 2;
 	const centerY = mapSize.height / 2;
+	const halfW = BULBRO_SIZE.width / 2;
+	const halfH = BULBRO_SIZE.height / 2;
 	const initialState: CurrentState = createInitialState(
 		{
 			id: currentPlayerId,
@@ -35,7 +38,9 @@ describe("updateState move actions", () => {
 			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
-		expect(player.position.x).toBe(centerX - baseSpeed * delta);
+		expect(player.position.x).toBe(
+			Math.max(halfW, centerX - baseSpeed * delta),
+		);
 		expect(player.position.y).toBe(centerY);
 	});
 
@@ -49,7 +54,9 @@ describe("updateState move actions", () => {
 			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
-		expect(player.position.x).toBe(centerX + baseSpeed * delta);
+		expect(player.position.x).toBe(
+			Math.min(mapSize.width - halfW, centerX + baseSpeed * delta),
+		);
 		expect(player.position.y).toBe(centerY);
 	});
 
@@ -63,7 +70,9 @@ describe("updateState move actions", () => {
 			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
-		expect(player.position.y).toBe(centerY - baseSpeed * delta);
+		expect(player.position.y).toBe(
+			Math.max(halfH, centerY - baseSpeed * delta),
+		);
 		expect(player.position.x).toBe(centerX);
 	});
 
@@ -77,7 +86,9 @@ describe("updateState move actions", () => {
 			now: Date.now(),
 		});
 		const player = findById(state.players, currentPlayerId);
-		expect(player.position.y).toBe(centerY + baseSpeed * delta);
+		expect(player.position.y).toBe(
+			Math.min(mapSize.height - halfH, centerY + baseSpeed * delta),
+		);
 		expect(player.position.x).toBe(centerX);
 	});
 

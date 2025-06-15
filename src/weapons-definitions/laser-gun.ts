@@ -7,5 +7,6 @@ export const laserGun: Weapon = {
 	id: "laser-gun",
 	name: "Laser Gun",
 	classes: ["gun", "elemental", "precise"],
+	shotSpeed: 1500,
 	statsBonus: {},
 };

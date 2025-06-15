@@ -1,4 +1,4 @@
-import { orcFist } from "../weapons-definitions/orcFist";
+import { orcSlowGun } from "../weapons-definitions/orc-gun";
 import { baseStats } from "./base";
 
 export const spitterEnemy = {
@@ -12,5 +12,5 @@ export const spitterEnemy = {
 		range: 1,
 		attackSpeed: 1,
 	},
-	weapons: [orcFist],
+	weapons: [orcSlowGun],
 };

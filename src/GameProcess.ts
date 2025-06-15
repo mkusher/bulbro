@@ -5,8 +5,16 @@ import type { Bulbro } from "./bulbro";
 import { createInitialState, type CurrentState } from "./currentState";
 import { Scene } from "./graphics/Scene";
 import { TickProcess } from "./TickProcess";
-import { subscribeToKeyboard, type ArrowKeys } from "./keyboard";
-import { v4 } from "uuid";
+import {
+	keysToDirection,
+	subscribeToKeyboard,
+	type ArrowKeys,
+} from "./controls/keyboard";
+import { createPlayer } from "./player";
+import {
+	subscribeToTouch,
+	type DirectionContainer,
+} from "./controls/touchscreen";
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
@@ -16,6 +24,7 @@ export class GameProcess {
 	#logger: Logger;
 	#app: PIXI.Application;
 	#keys: ArrowKeys = {};
+	#touch: DirectionContainer = {};
 	#scene!: Scene;
 	#state: CurrentState;
 
@@ -26,16 +35,10 @@ export class GameProcess {
 			component: "GameProcess",
 			playerId: bulbro.id,
 		});
-		this.#state = createInitialState(
-			{
-				id: v4(),
-				bulbro: this.#bulbro,
-			},
-			{
-				width: 0,
-				height: 0,
-			},
-		);
+		this.#state = createInitialState(createPlayer(bulbro), {
+			width: 0,
+			height: 0,
+		});
 	}
 
 	/**
@@ -47,36 +50,35 @@ export class GameProcess {
 		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
 		document.body.appendChild(this.#app.view);
 
-		this.#keys = {};
 		subscribeToKeyboard(this.#keys);
+		subscribeToTouch(this.#touch);
 
 		// Initial game state
-		this.#state = createInitialState(
-			{
-				id: v4(),
-				bulbro: this.#bulbro,
-			},
-			mapSize,
-		);
+		this.#state = createInitialState(createPlayer(this.#bulbro), mapSize);
 		// Start round
 		this.#logger.info({ state: this.#state }, "GameProcess is starting");
 
 		// Setup scene
-		this.#scene = new Scene(this.#app, this.#bulbro);
+		this.#scene = new Scene(this.#app);
 		await this.#scene.init(this.#state);
 		let i = 0;
-		let lastTick: TickProcess;
 		this.#app.ticker.add(() => {
 			++i;
 			const now = Date.now();
 			const delta = this.#app.ticker.deltaMS / 1000;
 			if (i % 200 === 0) {
-				this.#logger.info({ state: this.#state, i }, "Tick");
+				this.#logger.info({ state: this.#state, i }, "Current state");
 			}
 			// Delegate per-tick updates to TickProcess
-			const tickProc = new TickProcess(this.#logger, this.#scene, lastTick);
-			this.#state = tickProc.tick(this.#state, delta, this.#keys, now);
-			lastTick = tickProc;
+			const tickProc = new TickProcess(this.#logger, this.#scene);
+			const keyboardDirection = keysToDirection(this.#keys);
+			const touchDirection = this.#touch.direction;
+			this.#state = tickProc.tick(
+				this.#state,
+				delta,
+				touchDirection ?? keyboardDirection,
+				now,
+			);
 		});
 	}
 }

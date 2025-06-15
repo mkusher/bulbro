@@ -1,4 +1,5 @@
-import type { CurrentState, EnemyState } from "./currentState";
+import type { CurrentState } from "./currentState";
+import type { EnemyState } from "./enemy/EnemyState";
 import { getTimeLeft, updateState } from "./currentState";
 import type { Scene } from "./graphics/Scene";
 import { v4 as uuidv4 } from "uuid";
@@ -11,11 +12,10 @@ import {
 	isInRange,
 	findClosestPlayerInRange,
 } from "./game-formulas";
-import { direction, distance } from "./geometry";
-import { keysToDirection, type ArrowKeys } from "./keyboard";
+import { direction, distance, type Direction } from "./geometry";
 import type { Logger } from "pino";
 import { babyEnemy, chaserEnemy, spitterEnemy } from "./enemies-definitions";
-import { toEnemyState } from "./enemy";
+import { spawnEnemy } from "./enemy";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -24,7 +24,7 @@ export class TickProcess {
 	#scene: Scene;
 	#logger = defaultLogger.child({ component: "TickProcess" });
 
-	constructor(logger: Logger, scene: Scene, now?: TickProcess) {
+	constructor(logger: Logger, scene: Scene) {
 		this.#scene = scene;
 		this.#logger = logger.child({});
 		this.#logger.debug("TickProcess initialized");
@@ -36,7 +36,7 @@ export class TickProcess {
 	tick(
 		state: CurrentState,
 		deltaTime: number,
-		keys: ArrowKeys,
+		moveDirection: Direction,
 		now: number,
 	): CurrentState {
 		this.#logger.debug({ event: "tick", now, deltaTime }, "Tick start");
@@ -47,7 +47,7 @@ export class TickProcess {
 			this.#scene.update(deltaTime, newState);
 			return newState;
 		}
-		newState = this.#movePlayer(newState, deltaTime, keys);
+		newState = this.#movePlayer(newState, deltaTime, moveDirection);
 		newState = this.#moveEnemies(newState, deltaTime);
 		newState = this.#spawnEnemies(newState, now);
 		newState = this.#shootPlayersWeapons(newState, now);
@@ -62,12 +62,11 @@ export class TickProcess {
 	#movePlayer(
 		state: CurrentState,
 		deltaTime: number,
-		keys: ArrowKeys,
+		moveDirection: Direction,
 	): CurrentState {
-		const direction = keysToDirection(keys);
 		return updateState(state, {
 			type: "move",
-			direction,
+			direction: moveDirection,
 			deltaTime,
 			now: Date.now(),
 		});
@@ -118,7 +117,7 @@ export class TickProcess {
 			const randomEnemy =
 				enemiesToSpawn[Math.floor(enemiesToSpawn.length * Math.random())] ??
 				babyEnemy;
-			const enemy: EnemyState = toEnemyState(id, position, randomEnemy);
+			const enemy: EnemyState = spawnEnemy(id, position, randomEnemy);
 			this.#logger.debug(
 				{ event: "spawnEnemy", id, position, enemy },
 				"spawning enemy",
@@ -151,7 +150,10 @@ export class TickProcess {
 						{ weapon, player: player },
 						"Weapon is ready to shoot",
 					);
-					const target = findClosestEnemyInRange(player, newState.enemies);
+					const target = findClosestEnemyInRange(
+						player,
+						newState.enemies.filter((e) => !e.killedAt),
+					);
 					if (target && isInRange(player, target, weapon)) {
 						this.#logger.info(
 							{ playerId: player.id, weaponId: weapon.id, targetId: target.id },

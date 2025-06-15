@@ -1,5 +1,4 @@
-import type { Weapon } from "./weapon";
-import type { Size } from "./geometry";
+import type { Weapon } from "../weapon";
 
 /**
  * Statistics for a Bulbro, Player, or Enemy.
@@ -37,6 +36,3 @@ export interface Player {
 	id: string;
 	bulbro: Bulbro;
 }
-
-/** Render size for player sprites. */
-export const PLAYER_SIZE: Size = { width: 24, height: 24 };
