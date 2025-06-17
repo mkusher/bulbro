@@ -8,27 +8,30 @@ export type Props = {
 
 export function WeaponsSelect({ selectedWeapons, selectWeapons }: Props) {
 	return (
-		<select
-			name="weapons"
-			multiple
-			onChange={(e) => {
-				const select = e.target as HTMLSelectElement;
-				const selected = Array.from(select.selectedOptions)
-					.map((option) => option.value)
-					.map((s) => weapons.find((w) => w.id === s))
-					.filter((w) => !!w);
-				selectWeapons(selected);
-			}}
-		>
-			{weapons.map((weapon) => (
-				<WeaponOption
-					key={weapon.id}
-					value={weapon}
-					selected={!!selectedWeapons.find((w) => w.id === weapon.id)}
-					onSelect={() => {}}
-				/>
-			))}
-		</select>
+		<label>
+			Weapons:
+			<select
+				name="weapons"
+				multiple
+				onChange={(e) => {
+					const select = e.target as HTMLSelectElement;
+					const selected = Array.from(select.selectedOptions)
+						.map((option) => option.value)
+						.map((s) => weapons.find((w) => w.id === s))
+						.filter((w) => !!w);
+					selectWeapons(selected);
+				}}
+			>
+				{weapons.map((weapon) => (
+					<WeaponOption
+						key={weapon.id}
+						value={weapon}
+						selected={!!selectedWeapons.find((w) => w.id === weapon.id)}
+						onSelect={() => {}}
+					/>
+				))}
+			</select>
+		</label>
 	);
 }
 

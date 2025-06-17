@@ -7,7 +7,7 @@ import type { EnemyType } from "./EnemyState";
  */
 export interface EnemyCharacter {
 	id: string;
-  sprite: EnemyType;
+	sprite: EnemyType;
 	name: string;
 	stats: EnemyStats;
 	weapons: Weapon[];

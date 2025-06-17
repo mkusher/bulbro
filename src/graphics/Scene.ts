@@ -10,6 +10,7 @@ import { ShotSprite } from "./ShotSprite";
 import { HealthSprite } from "./HealthSprite";
 import { PlayingFieldTile } from "./PlayingFieldTile";
 import { WaveSprite } from "./WaveSprite";
+import type { Logger } from "pino";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -24,9 +25,13 @@ export class Scene {
 	#viewSize!: Size;
 	#healthSprite!: HealthSprite;
 	#playingFieldTile!: PlayingFieldTile;
+	#scale: number;
+	#logger: Logger;
 
-	constructor(app: PIXI.Application) {
+	constructor(logger: Logger, app: PIXI.Application, scale: number) {
 		this.#app = app;
+		this.#scale = scale;
+		this.#logger = logger;
 	}
 
 	/**
@@ -37,17 +42,21 @@ export class Scene {
 			width: this.#app.view.width,
 			height: this.#app.view.height,
 		};
-		this.#playingFieldTile = new PlayingFieldTile(state.mapSize);
+		this.#logger.info(
+			{ scale: this.#scale, viewSize: this.#viewSize, mapSize: state.mapSize },
+			"Scene init",
+		);
+		this.#playingFieldTile = new PlayingFieldTile(this.#viewSize);
 		await this.#playingFieldTile.init(state, this.#app.stage);
 		// Create player sprites
 		state.players.forEach((p: BulbroState) => {
-			const sprite = new BulbroSprite();
+			const sprite = new BulbroSprite(this.#scale);
 			sprite.appendTo(this.#app.stage);
 			this.#playerSprites.set(p.id, sprite);
 		});
 		// Create enemy sprites
 		state.enemies.forEach((e: EnemyState) => {
-			const sprite = createEnemySprite(e.type);
+			const sprite = createEnemySprite(e.type, this.#scale);
 			sprite.appendTo(this.#app.stage);
 			this.#enemySprites.set(e.id, sprite);
 		});
@@ -56,7 +65,7 @@ export class Scene {
 		this.#timerSprite.appendTo(this.#app.stage);
 		this.#waveSprite = new WaveSprite();
 		this.#waveSprite.appendTo(this.#app.stage);
-		this.#healthSprite = new HealthSprite(state.mapSize);
+		this.#healthSprite = new HealthSprite(this.#viewSize);
 		this.#healthSprite.appendTo(this.#app.stage);
 	}
 
@@ -70,14 +79,14 @@ export class Scene {
 		this.#timerSprite.update(state.round, this.#viewSize.width);
 		this.#waveSprite.update(state.round, this.#viewSize.width);
 		const player = state.players.find((p) => p.id === state.currentPlayerId);
-		this.#healthSprite.update(state, player);
+		this.#healthSprite.update(this.#viewSize, player);
 	}
 
 	#updatePlayers(deltaTime: number, state: CurrentState) {
 		// Sync player sprites
 		state.players.forEach((p: BulbroState) => {
 			if (!this.#playerSprites.has(p.id)) {
-				const sprite = new BulbroSprite();
+				const sprite = new BulbroSprite(this.#scale);
 				sprite.appendTo(this.#app.stage);
 				this.#playerSprites.set(p.id, sprite);
 			}
@@ -98,7 +107,7 @@ export class Scene {
 	#updateEnemies(deltaTime: number, state: CurrentState) {
 		state.enemies.forEach((e: EnemyState) => {
 			if (!this.#enemySprites.has(e.id)) {
-				const sprite = createEnemySprite(e.type);
+				const sprite = createEnemySprite(e.type, this.#scale);
 				sprite.appendTo(this.#app.stage);
 				this.#enemySprites.set(e.id, sprite);
 			}
@@ -119,7 +128,7 @@ export class Scene {
 	#updateShots(deltaTime: number, state: CurrentState) {
 		state.shots.forEach((shot) => {
 			if (!this.#shotSprites.has(shot.id)) {
-				const sprite = new ShotSprite(shot);
+				const sprite = new ShotSprite(this.#scale, shot);
 				sprite.appendTo(this.#app.stage);
 				this.#shotSprites.set(shot.id, sprite);
 			}

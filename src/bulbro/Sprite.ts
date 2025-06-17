@@ -13,10 +13,12 @@ export class BulbroSprite {
 	#debugPosition: PIXI.Graphics;
 	#movement?: AnimatedSprite;
 	#idle?: AnimatedSprite;
-	#warning?: AnimatedSprite;
-	#danger?: AnimatedSprite;
+	#whenHit?: AnimatedSprite;
+	#whenDangerouslyHit?: AnimatedSprite;
+	#scale: number;
 
-	constructor(debug?: boolean) {
+	constructor(scale: number, debug?: boolean) {
+		this.#scale = scale;
 		this.#gfx = new PIXI.Container();
 		this.#debugPosition = new PIXI.Graphics();
 		this.#sprite = new PIXI.Sprite();
@@ -63,32 +65,36 @@ export class BulbroSprite {
 				}),
 		);
 
-		this.#warning = new AnimatedSprite(
-			1,
-			() =>
+		this.#whenHit = new AnimatedSprite(
+			4,
+			(frame) =>
 				new PIXI.Texture({
 					source: fullTexture,
 					frame: new PIXI.Rectangle(
-						2 * level + offset,
+						frame * level + offset,
 						5 * level + offset,
 						BULBRO_SIZE.width,
 						BULBRO_SIZE.height,
 					),
 				}),
+			75,
+			false,
 		);
 
-		this.#danger = new AnimatedSprite(
-			1,
-			() =>
+		this.#whenDangerouslyHit = new AnimatedSprite(
+			4,
+			(frame) =>
 				new PIXI.Texture({
 					source: fullTexture,
 					frame: new PIXI.Rectangle(
-						1 * level + offset,
+						frame * level + offset,
 						5 * level + offset,
 						BULBRO_SIZE.width,
 						BULBRO_SIZE.height,
 					),
 				}),
+			125,
+			false,
 		);
 
 		this.#sprite.texture = await this.#idle.getSprite(0);
@@ -115,9 +121,9 @@ export class BulbroSprite {
 			now - player.lastHitAt.getTime() < hitAnimationDelay
 		) {
 			const anim =
-				player.healthPoints / player.stats.maxHp < 0.3
-					? this.#danger
-					: this.#warning;
+				player.healthPoints / player.stats.maxHp >= 0.5
+					? this.#whenHit
+					: this.#whenDangerouslyHit;
 			anim?.getSprite(delta).then((texture) => {
 				this.#sprite.texture = texture;
 			});
@@ -143,7 +149,7 @@ export class BulbroSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x;
-		this.#gfx.y = pos.y;
+		this.#gfx.x = pos.x / this.#scale;
+		this.#gfx.y = pos.y / this.#scale;
 	}
 }

@@ -18,8 +18,10 @@ export class OrcSprite {
 	#warning?: AnimatedSprite;
 	#danger?: AnimatedSprite;
 	#death?: AnimatedSprite;
+	#scale: number;
 
-	constructor(debug?: boolean) {
+	constructor(scale: number, debug?: boolean) {
+		this.#scale = scale;
 		this.#gfx = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
 		this.#gfx.addChild(this.#sprite);
@@ -163,8 +165,8 @@ export class OrcSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x;
-		this.#gfx.y = pos.y;
+		this.#gfx.x = pos.x / this.#scale;
+		this.#gfx.y = pos.y / this.#scale;
 	}
 
 	/**

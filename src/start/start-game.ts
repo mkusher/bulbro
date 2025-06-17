@@ -8,4 +8,5 @@ export type StartGame = (
 	bulbro: Bulbro,
 	difficulty: Difficulty,
 	weapons: Weapon[],
+	duration: number,
 ) => Promise<void>;

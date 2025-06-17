@@ -8,7 +8,9 @@ import {
 import type { BulbroState } from "./bulbro";
 import type { EnemyState } from "./enemy/EnemyState";
 import { v4 as uuidv4 } from "uuid";
-import { direction, distance, type Position } from "./geometry";
+import { direction, distance, type Position, type Size } from "./geometry";
+
+const minWeaponRange = 25;
 
 export type Difficulty = 0 | 1 | 2 | 3 | 4 | 5;
 export const isDifficulty = (
@@ -47,36 +49,54 @@ export function isWeaponReadyToShoot(
 	return chanceForReloaded + (chanceForReloaded * attackSpeed) / 100 >= 1;
 }
 
-export function findClosestPlayerInRange(
-	enemy: EnemyState,
-	players: BulbroState[],
-): BulbroState | undefined {
-	let closest: BulbroState | undefined;
+export type WithPosition = { position: Position };
+
+/**
+ * @param from - who around is looking for
+ * @param candidates - list of possible candidates
+ * @param range - radius of the circle to look into
+ *
+ * @return candidate
+ */
+export function findClosestInRange<
+	S extends WithPosition,
+	O extends WithPosition,
+>(from: S, candidates: O[], range: number) {
+	let closest: O | undefined;
 	let minDist = Infinity;
-	for (const player of players) {
-		const dist = distance(enemy.position, player.position);
-		if (dist < minDist) {
+	for (const item of candidates) {
+		const dist = distance(from.position, item.position);
+		if (dist < minDist && dist <= range) {
 			minDist = dist;
-			closest = player;
+			closest = item;
 		}
 	}
 	return closest;
 }
+
+export function findClosestPlayerInRange(
+	enemy: EnemyState,
+	weapon: WeaponState,
+	players: BulbroState[],
+): BulbroState | undefined {
+	return findClosestInRange(
+		enemy,
+		players,
+		weapon.statsBonus.range ?? minWeaponRange,
+	);
+}
+
 /** Finds the closest enemy to a player based on Euclidean distance. */
 export function findClosestEnemyInRange(
 	player: BulbroState,
+	weapon: WeaponState,
 	enemies: EnemyState[],
 ): EnemyState | undefined {
-	let closest: EnemyState | undefined;
-	let minDist = Infinity;
-	for (const enemy of enemies) {
-		const dist = distance(enemy.position, player.position);
-		if (dist < minDist) {
-			minDist = dist;
-			closest = enemy;
-		}
-	}
-	return closest;
+	return findClosestInRange(
+		player,
+		enemies,
+		(weapon.statsBonus.range ?? 0) + player.stats.range,
+	);
 }
 
 export function shoot(
@@ -113,4 +133,20 @@ export function isInRange(
 		distance(player.position, enemy.position) <=
 		(player.stats.range ?? 0) + (weapon.statsBonus.range ?? 0)
 	);
+}
+
+export function mapScale(expected: Size, actual: Size) {
+	return (
+		Math.hypot(expected.width, expected.height) /
+		Math.hypot(actual.width, actual.height)
+	);
+}
+
+export const classicMapHypot = 2500;
+export function toClassicExpected(actual: Size) {
+	const scale = classicMapHypot / Math.hypot(actual.width, actual.height);
+	return {
+		width: actual.width * scale,
+		height: actual.height * scale,
+	};
 }

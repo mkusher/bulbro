@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import type { CurrentState } from "../currentState";
 import type { BulbroState } from "../bulbro";
 import type { Size } from "../geometry";
 
@@ -40,7 +39,8 @@ export class HealthSprite {
 	appendTo(parent: PIXI.Container): void {
 		parent.addChild(this.#gfx);
 	}
-	update(state: CurrentState, player?: BulbroState) {
+	update(canvasSize: Size, player?: BulbroState) {
+		const blackBorderRectangleWidth = canvasSize.width * 0.5 * 0.8;
 		const healthPercent = player?.stats.maxHp
 			? (player?.healthPoints ?? 0) / player.stats.maxHp
 			: 0;
@@ -48,8 +48,7 @@ export class HealthSprite {
 		redHealthRectangle.clear();
 		redHealthRectangle.beginFill(0xcc2222);
 		const padding = 5;
-		const redHealthRectangleWidth =
-			state.mapSize.width * 0.5 * 0.8 - 2 * padding;
+		const redHealthRectangleWidth = canvasSize.width * 0.5 * 0.8 - 2 * padding;
 		redHealthRectangle.drawRect(
 			padding,
 			padding,

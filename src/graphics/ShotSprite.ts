@@ -8,8 +8,10 @@ const SHOT_SIZE = 4;
  */
 export class ShotSprite {
 	#gfx: PIXI.Graphics;
+	#scale: number;
 
-	constructor(shot: ShotState) {
+	constructor(scale: number, shot: ShotState) {
+		this.#scale = scale;
 		this.#gfx = new PIXI.Graphics();
 		this.#gfx.beginFill(shot.shooterType === "player" ? 0x000000 : 0x961ea3);
 		this.#gfx.drawCircle(0, 0, SHOT_SIZE);
@@ -27,8 +29,8 @@ export class ShotSprite {
 	 * Updates sprite position.
 	 */
 	updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x;
-		this.#gfx.y = pos.y;
+		this.#gfx.x = pos.x / this.#scale;
+		this.#gfx.y = pos.y / this.#scale;
 	}
 
 	/**

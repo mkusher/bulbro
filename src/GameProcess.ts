@@ -14,7 +14,7 @@ import {
 	type DirectionContainer,
 } from "./controls/touchscreen";
 import type { Size } from "./geometry";
-import type { Difficulty } from "./game-formulas";
+import { mapScale, toClassicExpected, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
 import { toWeaponState, type Weapon } from "./weapon";
 
@@ -25,6 +25,7 @@ export class GameProcess {
 	#logger: Logger;
 	#app: PIXI.Application;
 	#scene!: Scene;
+	#canvasSize: Size;
 	#mapSize: Size;
 	#state?: CurrentState;
 	#waveProcess?: WaveProcess;
@@ -34,10 +35,13 @@ export class GameProcess {
 		this.#logger = defaultLogger.child({
 			component: "GameProcess",
 		});
-		this.#mapSize = { width: 800, height: 600 };
+		this.#canvasSize = { width: 800, height: 600 };
+		this.#mapSize = toClassicExpected(this.#canvasSize);
 	}
 
-	async initMap(mapSize = this.#mapSize) {
+	async initMap(mapSize = this.#canvasSize) {
+		this.#canvasSize = mapSize;
+		this.#mapSize = toClassicExpected(this.#canvasSize);
 		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
 	}
 
@@ -49,7 +53,12 @@ export class GameProcess {
 	 * Initializes Pixi, creates player, starts input & ticker, and begins the round.
 	 * Resolves when the round ends.
 	 */
-	async start(bulbro: Bulbro, weapons: Weapon[], difficulty: Difficulty) {
+	async start(
+		bulbro: Bulbro,
+		weapons: Weapon[],
+		difficulty: Difficulty,
+		duration: number,
+	) {
 		this.#logger.info({ difficulty, bulbro, weapons }, "starting the game");
 
 		// Initial game state
@@ -57,8 +66,14 @@ export class GameProcess {
 			createPlayer(bulbro, weapons),
 			this.#mapSize,
 			difficulty,
+			1,
+			duration,
 		);
-		this.#scene = new Scene(this.#app);
+		this.#scene = new Scene(
+			this.#logger,
+			this.#app,
+			mapScale(this.#mapSize, this.#canvasSize),
+		);
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
 			this.#state,

@@ -60,7 +60,13 @@ export function Game({ gameProcess }: Props) {
 			<MainContainer>
 				<SelectForStart
 					gameProcess={gameProcess}
-					startGame={async (gameProcess, bulbro, difficulty, weapons) => {
+					startGame={async (
+						gameProcess,
+						bulbro,
+						difficulty,
+						weapons,
+						duration,
+					) => {
 						setIsLoading(true);
 						setFinishedResult(undefined);
 						try {
@@ -69,6 +75,7 @@ export function Game({ gameProcess }: Props) {
 								bulbro,
 								weapons,
 								difficulty,
+								duration,
 							);
 							setIsLoading(false);
 							setIsRound(true);

@@ -114,6 +114,7 @@ export const createInitialState = (
 	mapSize: Size,
 	difficulty: Difficulty,
 	wave = 1,
+	duration = 60,
 ): CurrentState => {
 	return {
 		currentPlayerId: currentPlayer.id,
@@ -129,7 +130,7 @@ export const createInitialState = (
 		shots: [],
 		round: {
 			isRunning: true,
-			duration: 10,
+			duration,
 			difficulty,
 			wave,
 			startedAt: new Date(),
@@ -264,6 +265,7 @@ export function moveEnemy(
 	};
 }
 
+const enemiesBodiesDisappearAfter = 2000;
 export function moveShot(
 	state: CurrentState,
 	action: Extract<Action, { type: "moveShot" }>,
@@ -322,7 +324,8 @@ export function moveShot(
 	}
 	newEnemies = newEnemies.filter(
 		(e) =>
-			e.healthPoints > 0 || (e.killedAt && now - e.killedAt.getTime() < 2000),
+			e.healthPoints > 0 ||
+			(e.killedAt && now - e.killedAt.getTime() < enemiesBodiesDisappearAfter),
 	);
 	newPlayers = newPlayers.filter((p) => p.healthPoints > 0);
 	const isRunning = newPlayers.length > 0 && state.round.isRunning;

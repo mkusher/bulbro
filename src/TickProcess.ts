@@ -152,6 +152,7 @@ export class TickProcess {
 					);
 					const target = findClosestEnemyInRange(
 						player,
+						weapon,
 						newState.enemies.filter((e) => !e.killedAt),
 					);
 					if (target && isInRange(player, target, weapon)) {
@@ -193,7 +194,11 @@ export class TickProcess {
 					)
 				) {
 					this.#logger.debug({ weapon, enemy }, "Weapon is ready to shoot");
-					const target = findClosestPlayerInRange(enemy, newState.players);
+					const target = findClosestPlayerInRange(
+						enemy,
+						weapon,
+						newState.players,
+					);
 					if (target && isInRange(enemy, target, weapon)) {
 						this.#logger.debug(
 							{ enemy, target, weapon },

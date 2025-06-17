@@ -20,10 +20,11 @@ export class SlimeSprite {
 	#death?: AnimatedSprite;
 	#levels = {
 		x: [8, 40, 72, 104, 136, 168],
-		y: [12, 44, 76, 102, 134, 166, 194, 226, 258, 294],
+		y: [12, 44, 76, 102, 134, 166, 194, 226, 258, 294, 320, 354, 386],
 	};
+	#scale: number;
 
-	constructor(debug?: boolean) {
+	constructor(scale: number, debug?: boolean) {
 		this.#gfx = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
 		this.#gfx.addChild(this.#sprite);
@@ -35,6 +36,7 @@ export class SlimeSprite {
 			this.#gfx.addChild(this.#debugPosition);
 		}
 
+		this.#scale = scale;
 		this.init();
 	}
 
@@ -54,6 +56,7 @@ export class SlimeSprite {
 						ENEMY_SIZE.height,
 					),
 				}),
+			75,
 		);
 
 		this.#idle = new AnimatedSprite(
@@ -110,7 +113,7 @@ export class SlimeSprite {
 						ENEMY_SIZE.height,
 					),
 				}),
-			75,
+			125,
 			false,
 		);
 
@@ -162,8 +165,8 @@ export class SlimeSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x;
-		this.#gfx.y = pos.y;
+		this.#gfx.x = pos.x / this.#scale;
+		this.#gfx.y = pos.y / this.#scale;
 	}
 
 	/**
