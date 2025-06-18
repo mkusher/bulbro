@@ -3,18 +3,18 @@ import type { BulbroState } from "../BulbroState";
 import { ChibiSprite } from "./ChibiSprite";
 
 const path =
-	"/assets/craftpix-net-919731-free-chibi-dark-oracle-character-sprites/Dark_Oracle_1/PNG/PNG Sequences/";
+	"/assets/craftpix-net-469596-free-chibi-valkyrie-character-sprites/Valkyrie_1/PNG/PNG Sequences/";
 
-export class DarkOracleSprite {
+export class ValkyrieSprite {
 	#chibi: ChibiSprite;
 
 	constructor(scale: number, debug: boolean) {
 		this.#chibi = new ChibiSprite(
 			path,
 			{
-				idle: "Idle/0_Dark_Oracle_Idle_",
-				walking: "Running/0_Dark_Oracle_Running_",
-				hurt: "Hurt/0_Dark_Oracle_Hurt_",
+				idle: "Idle/0_Valkyrie_Idle_",
+				walking: "Running/0_Valkyrie_Running_",
+				hurt: "Hurt/0_Valkyrie_Hurt_",
 			},
 			scale,
 			debug,

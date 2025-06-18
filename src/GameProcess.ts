@@ -9,10 +9,6 @@ import {
 } from "./currentState";
 import { Scene } from "./graphics/Scene";
 import { createPlayer } from "./player";
-import {
-	subscribeToTouch,
-	type DirectionContainer,
-} from "./controls/touchscreen";
 import type { Size } from "./geometry";
 import { mapScale, toClassicExpected, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
@@ -30,11 +26,14 @@ export class GameProcess {
 	#mapSize: Size;
 	#state?: CurrentState;
 	#waveProcess?: WaveProcess;
+	#debug: boolean;
 
-	constructor() {
+	constructor(debug: boolean) {
 		this.#app = new PIXI.Application();
+		this.#debug = debug;
 		this.#logger = defaultLogger.child({
 			component: "GameProcess",
+			debug,
 		});
 		this.#canvasSize = { width: 800, height: 600 };
 		this.#mapSize = toClassicExpected(this.#canvasSize);
@@ -76,6 +75,7 @@ export class GameProcess {
 		);
 		this.#scene = new Scene(
 			this.#logger,
+			this.#debug,
 			this.#app,
 			mapScale(this.#mapSize, this.#canvasSize),
 		);
@@ -84,6 +84,7 @@ export class GameProcess {
 			this.#state,
 			this.#scene,
 			this.#app.ticker,
+			this.#debug,
 		);
 		return {
 			wavePromise: this.#waveProcess.start(),
@@ -106,6 +107,7 @@ export class GameProcess {
 			this.#state,
 			this.#scene,
 			this.#app.ticker,
+			this.#debug,
 		);
 		return {
 			wavePromise: this.#waveProcess.start(),

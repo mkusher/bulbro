@@ -45,7 +45,9 @@ export class OrcSprite {
 
 		const offset = 39;
 		const level = 100;
-		const fullTexture = await PIXI.Assets.load("/assets/Orc.png");
+		const fullTexture = await PIXI.Assets.load(
+			"/assets/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc with shadows/Orc.png",
+		);
 
 		this.#movement = new AnimatedSprite(
 			5,

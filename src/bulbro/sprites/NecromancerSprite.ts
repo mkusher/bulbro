@@ -3,18 +3,18 @@ import type { BulbroState } from "../BulbroState";
 import { ChibiSprite } from "./ChibiSprite";
 
 const path =
-	"/assets/craftpix-net-919731-free-chibi-dark-oracle-character-sprites/Dark_Oracle_1/PNG/PNG Sequences/";
+	"/assets/craftpix-net-935193-free-chibi-necromancer-of-the-shadow-character-sprites/Necromancer_of_the_Shadow_1/PNG/PNG Sequences/";
 
-export class DarkOracleSprite {
+export class NecromancerSprite {
 	#chibi: ChibiSprite;
 
 	constructor(scale: number, debug: boolean) {
 		this.#chibi = new ChibiSprite(
 			path,
 			{
-				idle: "Idle/0_Dark_Oracle_Idle_",
-				walking: "Running/0_Dark_Oracle_Running_",
-				hurt: "Hurt/0_Dark_Oracle_Hurt_",
+				idle: "Idle/0_Necromancer_of_the_Shadow_Idle_",
+				walking: "Running/0_Necromancer_of_the_Shadow_Running_",
+				hurt: "Hurt/0_Necromancer_of_the_Shadow_Hurt_",
 			},
 			scale,
 			debug,

@@ -27,11 +27,13 @@ export class Scene {
 	#playingFieldTile!: PlayingFieldTile;
 	#scale: number;
 	#logger: Logger;
+  #debug: boolean;
 
-	constructor(logger: Logger, app: PIXI.Application, scale: number) {
+	constructor(logger: Logger, debug: boolean, app: PIXI.Application, scale: number) {
 		this.#app = app;
 		this.#scale = scale;
 		this.#logger = logger;
+    this.#debug = debug;
 	}
 
 	/**
@@ -50,13 +52,13 @@ export class Scene {
 		await this.#playingFieldTile.init(state, this.#app.stage);
 		// Create player sprites
 		state.players.forEach((p: BulbroState) => {
-			const sprite = createBulbroSprite(p.type, this.#scale);
+			const sprite = createBulbroSprite(p.type, this.#scale, this.#debug);
 			sprite.appendTo(this.#app.stage);
 			this.#playerSprites.set(p.id, sprite);
 		});
 		// Create enemy sprites
 		state.enemies.forEach((e: EnemyState) => {
-			const sprite = createEnemySprite(e.type, this.#scale);
+			const sprite = createEnemySprite(e.type, this.#scale, this.#debug);
 			sprite.appendTo(this.#app.stage);
 			this.#enemySprites.set(e.id, sprite);
 		});
@@ -86,7 +88,7 @@ export class Scene {
 		// Sync player sprites
 		state.players.forEach((p: BulbroState) => {
 			if (!this.#playerSprites.has(p.id)) {
-				const sprite = createBulbroSprite(p.type, this.#scale);
+				const sprite = createBulbroSprite(p.type, this.#scale, this.#debug);
 				sprite.appendTo(this.#app.stage);
 				this.#playerSprites.set(p.id, sprite);
 			}
@@ -107,7 +109,7 @@ export class Scene {
 	#updateEnemies(deltaTime: number, state: CurrentState) {
 		state.enemies.forEach((e: EnemyState) => {
 			if (!this.#enemySprites.has(e.id)) {
-				const sprite = createEnemySprite(e.type, this.#scale);
+				const sprite = createEnemySprite(e.type, this.#scale, this.#debug);
 				sprite.appendTo(this.#app.stage);
 				this.#enemySprites.set(e.id, sprite);
 			}

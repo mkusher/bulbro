@@ -19,7 +19,9 @@ export class PlayingFieldTile {
 	 * Initializes sprites and UI elements.
 	 */
 	async init(state: CurrentState, parent: PIXI.Container) {
-		const texture = await PIXI.Assets.load("/assets/grass.png");
+		const texture = await PIXI.Assets.load(
+			"/assets/craftpix-net-504452-free-village-pixel-tileset-for-top-down-defense/1 Tiles/FieldsTile_38.png",
+		);
 		this.#sprite.texture = texture;
 		parent.addChild(this.#container);
 	}

@@ -7,14 +7,12 @@ import { isDifficulty, type Difficulty } from "../game-formulas";
 import type { Weapon } from "../weapon";
 import { fist } from "../weapons-definitions";
 import { WeaponsSelect } from "./WeaponsSelect";
-import type { SpriteType } from "../bulbro/Sprite";
+import { bulbrosStyles, type SpriteType } from "../bulbro/Sprite";
 
 type Props = {
 	startGame: StartGame;
 	gameProcess: GameProcess;
 };
-
-const bulbrosStyles: SpriteType[] = ["soldier", "shooter", "dark oracle"];
 
 export function StartScreen({ startGame, gameProcess }: Props) {
 	const [selectedBulbro, selectBulbro] = useState(wellRoundedBulbro);

@@ -22,9 +22,9 @@ export interface EnemySprite {
 	remove(): void;
 }
 
-export function createEnemySprite(type: EnemyType, scale: number): EnemySprite {
+export function createEnemySprite(type: EnemyType, scale: number, debug: boolean): EnemySprite {
 	if (type === "slime") {
-		return new SlimeSprite(scale);
+		return new SlimeSprite(scale, debug);
 	}
-	return new OrcSprite(scale);
+	return new OrcSprite(scale, debug);
 }

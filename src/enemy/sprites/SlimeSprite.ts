@@ -1,12 +1,15 @@
 import * as PIXI from "pixi.js";
 
-import { ENEMY_SIZE } from "..";
 import type { EnemyState } from "../EnemyState";
 
 import type { Position } from "../../geometry";
 import { AnimatedSprite } from "../../graphics/AnimatedSprite";
 import { CharacterSprites } from "../../graphics/CharacterSprite";
 
+const slimeSize = {
+  width: 28,
+  height: 32,
+}
 /**
  * Manages an enemy sprite graphic.
  */
@@ -29,6 +32,8 @@ export class SlimeSprite {
 	constructor(scale: number, debug?: boolean) {
 		this.#gfx = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
+		this.#sprite.x = -slimeSize.width;
+    this.#sprite.y = -slimeSize.height;
 		this.#gfx.addChild(this.#sprite);
 		this.#debugPosition = new PIXI.Graphics();
 		if (debug) {
@@ -44,7 +49,9 @@ export class SlimeSprite {
 
 	async init() {
 		this.#sprite.scale.set(2);
-		const fullTexture = await PIXI.Assets.load("/assets/slime.png");
+		const fullTexture = await PIXI.Assets.load(
+			"/assets/mystic_woods_free_2/sprites/characters/slime.png",
+		);
 
 		this.#movement = new AnimatedSprite(
 			6,
@@ -54,8 +61,8 @@ export class SlimeSprite {
 					frame: new PIXI.Rectangle(
 						this.#levels.x[frame],
 						this.#levels.y[4],
-						ENEMY_SIZE.width,
-						ENEMY_SIZE.height,
+						slimeSize.width,
+						slimeSize.height,
 					),
 				}),
 			75,
@@ -69,8 +76,8 @@ export class SlimeSprite {
 					frame: new PIXI.Rectangle(
 						this.#levels.x[frame],
 						this.#levels.y[3],
-						ENEMY_SIZE.width,
-						ENEMY_SIZE.height,
+						slimeSize.width,
+						slimeSize.height,
 					),
 				}),
 		);
@@ -83,8 +90,8 @@ export class SlimeSprite {
 					frame: new PIXI.Rectangle(
 						this.#levels.x[frame],
 						this.#levels.y[2],
-						ENEMY_SIZE.width,
-						ENEMY_SIZE.height,
+						slimeSize.width,
+						slimeSize.height,
 					),
 				}),
 		);
@@ -97,8 +104,8 @@ export class SlimeSprite {
 					frame: new PIXI.Rectangle(
 						this.#levels.x[frame],
 						this.#levels.y[9],
-						ENEMY_SIZE.width,
-						ENEMY_SIZE.height,
+						slimeSize.width,
+						slimeSize.height,
 					),
 				}),
 		);
@@ -111,8 +118,8 @@ export class SlimeSprite {
 					frame: new PIXI.Rectangle(
 						this.#levels.x[frame],
 						this.#levels.y[12],
-						ENEMY_SIZE.width,
-						ENEMY_SIZE.height,
+						slimeSize.width,
+						slimeSize.height,
 					),
 				}),
 			125,

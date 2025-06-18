@@ -3,8 +3,17 @@ import type { BulbroState } from "./BulbroState";
 import { SoldierSprite } from "./sprites/SoldierSprite";
 import { ShooterSprite } from "./sprites/ShooterSprite";
 import { DarkOracleSprite } from "./sprites/DarkOracleSprite";
+import { NecromancerSprite } from "./sprites/NecromancerSprite";
+import { ValkyrieSprite } from "./sprites/ValkyrieSprite";
 
-export type SpriteType = "soldier" | "shooter" | "dark oracle";
+export const bulbrosStyles = [
+	"soldier",
+	"shooter",
+	"dark oracle",
+	"necromancer",
+	"valkyrie",
+] as const;
+export type SpriteType = (typeof bulbrosStyles)[number];
 
 /**
  * Manages a player sprite graphic.
@@ -35,6 +44,12 @@ export function createBulbroSprite(
 	}
 	if (type === "dark oracle") {
 		return new DarkOracleSprite(scale, debugPosition);
+	}
+	if (type === "necromancer") {
+		return new NecromancerSprite(scale, debugPosition);
+	}
+	if (type === "valkyrie") {
+		return new ValkyrieSprite(scale, debugPosition);
 	}
 	return new SoldierSprite(scale, debugPosition);
 }

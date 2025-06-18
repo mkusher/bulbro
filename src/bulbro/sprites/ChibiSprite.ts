@@ -1,29 +1,61 @@
 import * as PIXI from "pixi.js";
 import type { Position } from "../../geometry";
-import { BULBRO_SIZE } from "../../bulbro";
 import type { BulbroState } from "../BulbroState";
 import { AnimatedSprite } from "../../graphics/AnimatedSprite";
 import { CharacterSprites } from "../../graphics/CharacterSprite";
 
+const chibiSize = {
+	width: 420,
+	height: 600,
+};
+
+const toThreeDigits = (i: number) =>
+	i >= 100 ? i : i >= 10 ? `0${i}` : `00${i}`;
+
+const loadAssets = (total: number, f: (i: number) => string) =>
+	Promise.all(
+		new Array(total)
+			.fill("")
+			.map((_, i) => f(i))
+			.map((path) => PIXI.Assets.load(path)),
+	);
+
+type FilePaths = {
+	idle: string;
+	walking: string;
+	hurt: string;
+};
+
 /**
  * Manages a player sprite graphic.
  */
-export class SoldierSprite {
+export class ChibiSprite {
 	#gfx: PIXI.Container;
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
 	#movement?: AnimatedSprite;
 	#idle?: AnimatedSprite;
-	#whenHit?: AnimatedSprite;
-	#whenDangerouslyHit?: AnimatedSprite;
-	#scale: number;
+	#hurt?: AnimatedSprite;
 	#characterSprites?: CharacterSprites;
+	#scale: number;
+	#basePath: string;
+	#filePaths: FilePaths;
 
-	constructor(scale: number, debug?: boolean) {
+	constructor(
+		basePath: string,
+		filePaths: FilePaths,
+		scale: number,
+		debug: boolean,
+	) {
+		this.#basePath = basePath;
+		this.#filePaths = filePaths;
 		this.#scale = scale;
 		this.#gfx = new PIXI.Container();
 		this.#debugPosition = new PIXI.Graphics();
 		this.#sprite = new PIXI.Sprite();
+		this.#sprite.scale.set(0.075);
+		this.#sprite.x = -20;
+		this.#sprite.y = -40;
 		this.#gfx.addChild(this.#sprite);
 		if (debug) {
 			this.#debugPosition.beginFill(0x0000ff, 0.4);
@@ -35,83 +67,78 @@ export class SoldierSprite {
 	}
 
 	async init() {
-		const offset = 39;
-		const level = 100;
-		const fullTexture = await PIXI.Assets.load(
-			"/assets/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Soldier/Soldier with shadows/Soldier.png",
-		);
+		const topPadding = 190;
+		const leftPadding = 215;
+		const [idlePositions, runningPositions, hurtPositions] = await Promise.all([
+			loadAssets(
+				18,
+				(i) =>
+					this.#basePath + `${this.#filePaths.idle}${toThreeDigits(i)}.png`,
+			),
+			loadAssets(
+				12,
+				(i) =>
+					this.#basePath + `${this.#filePaths.walking}${toThreeDigits(i)}.png`,
+			),
+			loadAssets(
+				12,
+				(i) =>
+					this.#basePath + `${this.#filePaths.hurt}${toThreeDigits(i)}.png`,
+			),
+		]);
 
 		this.#movement = new AnimatedSprite(
-			8,
+			runningPositions.length,
 			(frame) =>
 				new PIXI.Texture({
-					source: fullTexture,
+					source: runningPositions[frame],
 					frame: new PIXI.Rectangle(
-						frame * level + offset,
-						level + offset,
-						BULBRO_SIZE.width,
-						BULBRO_SIZE.height,
+						leftPadding,
+						topPadding,
+						chibiSize.width,
+						chibiSize.height,
 					),
 				}),
+			50,
 		);
 
 		this.#idle = new AnimatedSprite(
-			6,
+			idlePositions.length,
 			(frame) =>
 				new PIXI.Texture({
-					source: fullTexture,
+					source: idlePositions[frame],
 					frame: new PIXI.Rectangle(
-						frame * level + offset,
-						offset,
-						BULBRO_SIZE.width,
-						BULBRO_SIZE.height,
+						leftPadding,
+						topPadding,
+						chibiSize.width,
+						chibiSize.height,
 					),
 				}),
 		);
 
-		this.#whenHit = new AnimatedSprite(
-			4,
+		this.#hurt = new AnimatedSprite(
+			hurtPositions.length,
 			(frame) =>
 				new PIXI.Texture({
-					source: fullTexture,
+					source: hurtPositions[frame],
 					frame: new PIXI.Rectangle(
-						frame * level + offset,
-						5 * level + offset,
-						BULBRO_SIZE.width,
-						BULBRO_SIZE.height,
+						leftPadding,
+						topPadding,
+						chibiSize.width,
+						chibiSize.height,
 					),
 				}),
 			75,
 			false,
 		);
 
-		this.#whenDangerouslyHit = new AnimatedSprite(
-			4,
-			(frame) =>
-				new PIXI.Texture({
-					source: fullTexture,
-					frame: new PIXI.Rectangle(
-						frame * level + offset,
-						5 * level + offset,
-						BULBRO_SIZE.width,
-						BULBRO_SIZE.height,
-					),
-				}),
-			125,
-			false,
-		);
-
 		this.#characterSprites = new CharacterSprites({
+			hurt: this.#hurt,
 			walking: this.#movement,
-			hurt: this.#whenHit,
-			hurtALot: this.#whenDangerouslyHit,
 			idle: this.#idle,
 		});
 
 		this.#sprite.texture = await this.#idle.getSprite(0);
-		this.#sprite.scale.set(1.5);
-		this.#sprite.x = -20;
-		this.#sprite.y = -24;
 	}
 
 	/**
@@ -125,9 +152,7 @@ export class SoldierSprite {
 		this.#updatePosition(player.position);
 
 		this.#characterSprites?.getSprite(player, delta).then((texture) => {
-			if (texture) {
-				this.#sprite.texture = texture;
-			}
+			this.#sprite.texture = texture;
 		});
 	}
 

@@ -22,11 +22,14 @@ export class WaveProcess {
 	#touch: DirectionContainer = {};
 	#tickIndex = 0;
 	#resolvers = Promise.withResolvers<"win" | "fail">();
+	#debug: boolean;
+
 	constructor(
 		baseLogger: Logger,
 		initialState: CurrentState,
 		scene: Scene,
 		ticker: Ticker,
+		debug: boolean,
 	) {
 		this.#logger = baseLogger.child({
 			component: "WaveProcess",
@@ -34,6 +37,7 @@ export class WaveProcess {
 		this.#state = initialState;
 		this.#scene = scene;
 		this.#ticker = ticker;
+		this.#debug = debug;
 	}
 
 	async start() {
