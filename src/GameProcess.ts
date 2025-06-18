@@ -17,6 +17,7 @@ import type { Size } from "./geometry";
 import { mapScale, toClassicExpected, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
 import { toWeaponState, type Weapon } from "./weapon";
+import type { SpriteType } from "./bulbro/Sprite";
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
@@ -55,15 +56,19 @@ export class GameProcess {
 	 */
 	async start(
 		bulbro: Bulbro,
+		bulbroSprite: SpriteType,
 		weapons: Weapon[],
 		difficulty: Difficulty,
 		duration: number,
 	) {
-		this.#logger.info({ difficulty, bulbro, weapons }, "starting the game");
+		this.#logger.info(
+			{ difficulty, bulbro, weapons, bulbroSprite, duration },
+			"starting the game",
+		);
 
 		// Initial game state
 		this.#state = createInitialState(
-			createPlayer(bulbro, weapons),
+			createPlayer(bulbro, bulbroSprite, weapons),
 			this.#mapSize,
 			difficulty,
 			1,

@@ -1,4 +1,5 @@
 import type { Weapon } from "../weapon";
+import type { SpriteType } from "./Sprite";
 
 /**
  * Statistics for a Bulbro, Player, or Enemy.
@@ -36,4 +37,5 @@ export interface Bulbro {
 export interface Player {
 	id: string;
 	bulbro: Bulbro;
+	sprite: SpriteType;
 }

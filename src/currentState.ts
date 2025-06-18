@@ -122,6 +122,7 @@ export const createInitialState = (
 		players: [
 			spawnBulbro(
 				currentPlayer.id,
+				currentPlayer.sprite,
 				startPosition(mapSize),
 				currentPlayer.bulbro,
 			),

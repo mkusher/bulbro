@@ -4,12 +4,14 @@ import type { Bulbro, Stats } from "./BulbroCharacter";
 import type { MovableObject, Shape } from "../movement/Movement";
 import { BULBRO_SIZE } from "./index";
 import { toWeaponState } from "../weapon";
+import type { SpriteType } from "./Sprite";
 
 /**
  * Immutable runtime state of a single Bulbro (player).
  */
 export class BulbroState {
 	readonly id: string;
+	readonly type: SpriteType;
 	readonly position: Position;
 	readonly speed: number;
 	readonly healthPoints: number;
@@ -17,9 +19,11 @@ export class BulbroState {
 	readonly weapons: WeaponState[];
 	readonly lastMovedAt: Date;
 	readonly lastHitAt: Date;
+	readonly killedAt?: Date;
 
 	constructor(
 		id: string,
+		type: SpriteType,
 		position: Position,
 		speed: number,
 		healthPoints: number,
@@ -29,6 +33,7 @@ export class BulbroState {
 		lastHitAt: Date,
 	) {
 		this.id = id;
+		this.type = type;
 		this.position = position;
 		this.speed = speed;
 		this.healthPoints = healthPoints;
@@ -41,6 +46,7 @@ export class BulbroState {
 	useWeapons(weapons: WeaponState[]) {
 		return new BulbroState(
 			this.id,
+			this.type,
 			this.position,
 			this.speed,
 			this.healthPoints,
@@ -55,6 +61,7 @@ export class BulbroState {
 	move(position: Position, now: number): BulbroState {
 		return new BulbroState(
 			this.id,
+			this.type,
 			position,
 			this.speed,
 			this.healthPoints,
@@ -72,6 +79,7 @@ export class BulbroState {
 		);
 		return new BulbroState(
 			this.id,
+			this.type,
 			this.position,
 			this.speed,
 			this.healthPoints,
@@ -86,6 +94,7 @@ export class BulbroState {
 	beHit(damage: number, now: number): BulbroState {
 		return new BulbroState(
 			this.id,
+			this.type,
 			this.position,
 			this.speed,
 			this.healthPoints - damage,
@@ -113,12 +122,14 @@ export class BulbroState {
  */
 export function spawnBulbro(
 	id: string,
+	type: SpriteType,
 	position: Position,
 	character: Bulbro,
 ): BulbroState {
 	const weapons: WeaponState[] = character.weapons.map(toWeaponState);
 	return new BulbroState(
 		id,
+		type,
 		position,
 		character.baseStats.speed,
 		character.baseStats.maxHp,

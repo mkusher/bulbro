@@ -3,7 +3,7 @@ import type { Size } from "../geometry";
 import type { BulbroState } from "../bulbro";
 import type { CurrentState } from "../currentState";
 import type { EnemyState } from "../enemy/EnemyState";
-import { BulbroSprite } from "../bulbro/Sprite";
+import { type BulbroSprite, createBulbroSprite } from "../bulbro/Sprite";
 import { createEnemySprite, type EnemySprite } from "../enemy/Sprite";
 import { TimerSprite } from "./TimerSprite";
 import { ShotSprite } from "./ShotSprite";
@@ -50,7 +50,7 @@ export class Scene {
 		await this.#playingFieldTile.init(state, this.#app.stage);
 		// Create player sprites
 		state.players.forEach((p: BulbroState) => {
-			const sprite = new BulbroSprite(this.#scale);
+			const sprite = createBulbroSprite(p.type, this.#scale);
 			sprite.appendTo(this.#app.stage);
 			this.#playerSprites.set(p.id, sprite);
 		});
@@ -86,7 +86,7 @@ export class Scene {
 		// Sync player sprites
 		state.players.forEach((p: BulbroState) => {
 			if (!this.#playerSprites.has(p.id)) {
-				const sprite = new BulbroSprite(this.#scale);
+				const sprite = createBulbroSprite(p.type, this.#scale);
 				sprite.appendTo(this.#app.stage);
 				this.#playerSprites.set(p.id, sprite);
 			}

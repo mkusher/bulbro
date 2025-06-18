@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "preact/hooks";
 import type { GameProcess } from "./GameProcess";
-import { SelectForStart } from "./start/SelectForStart";
+import { StartScreen } from "./start/StartScreen";
 import { Loader } from "./start/Loading";
 import type { PropsWithChildren } from "preact/compat";
 import { Failed } from "./start/Failed";
@@ -58,11 +58,12 @@ export function Game({ gameProcess }: Props) {
 	if (!isRound) {
 		return (
 			<MainContainer>
-				<SelectForStart
+				<StartScreen
 					gameProcess={gameProcess}
 					startGame={async (
 						gameProcess,
 						bulbro,
+						bulbroSprite,
 						difficulty,
 						weapons,
 						duration,
@@ -73,6 +74,7 @@ export function Game({ gameProcess }: Props) {
 							await gameProcess.initMap();
 							const { wavePromise } = await gameProcess.start(
 								bulbro,
+								bulbroSprite,
 								weapons,
 								difficulty,
 								duration,

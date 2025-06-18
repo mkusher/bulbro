@@ -23,6 +23,7 @@ describe("updateState move actions", () => {
 	const initialState: CurrentState = createInitialState(
 		{
 			id: currentPlayerId,
+			sprite: "soldier",
 			bulbro: wellRoundedBulbro,
 		},
 		mapSize,

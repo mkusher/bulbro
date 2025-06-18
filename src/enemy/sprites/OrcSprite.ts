@@ -5,6 +5,7 @@ import type { EnemyState } from "../EnemyState";
 
 import type { Position } from "../../geometry";
 import { AnimatedSprite } from "../../graphics/AnimatedSprite";
+import { CharacterSprites } from "../../graphics/CharacterSprite";
 
 /**
  * Manages an enemy sprite graphic.
@@ -18,6 +19,7 @@ export class OrcSprite {
 	#warning?: AnimatedSprite;
 	#danger?: AnimatedSprite;
 	#death?: AnimatedSprite;
+	#characterSprites?: CharacterSprites;
 	#scale: number;
 
 	constructor(scale: number, debug?: boolean) {
@@ -117,6 +119,13 @@ export class OrcSprite {
 			false,
 		);
 
+		this.#characterSprites = new CharacterSprites({
+			walking: this.#movement,
+			hurt: this.#warning,
+			hurtALot: this.#danger,
+			dead: this.#death,
+		});
+
 		this.#sprite.texture = await this.#healthy.getSprite(0);
 	}
 
@@ -130,35 +139,9 @@ export class OrcSprite {
 	update(enemy: EnemyState, delta: number) {
 		this.#updatePosition(enemy.position);
 
-		const now = Date.now();
-		const hitAnimationDelay = 500;
-		const movingAnimationDelay = 100;
-		if (enemy.killedAt) {
-			this.#death?.getSprite(delta).then((texture) => {
-				this.#sprite.texture = texture;
-			});
-			return;
-		}
-		if (
-			enemy.lastHitAt &&
-			now - enemy.lastHitAt.getTime() < hitAnimationDelay
-		) {
-			const anim =
-				enemy.healthPoints / enemy.stats.maxHp < 0.3
-					? this.#danger
-					: this.#warning;
-			anim?.getSprite(delta).then((texture) => {
-				this.#sprite.texture = texture;
-			});
-		} else if (now - enemy.lastMovedAt.getTime() < movingAnimationDelay) {
-			this.#movement?.getSprite(delta).then((texture) => {
-				this.#sprite.texture = texture;
-			});
-		} else {
-			this.#healthy?.getSprite(delta).then((texture) => {
-				this.#sprite.texture = texture;
-			});
-		}
+		this.#characterSprites?.getSprite(enemy, delta).then((texture) => {
+			this.#sprite.texture = texture;
+		});
 	}
 
 	/**
