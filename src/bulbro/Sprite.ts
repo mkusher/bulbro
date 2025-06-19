@@ -24,7 +24,7 @@ export interface BulbroSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container): void;
+	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void;
 
 	update(player: BulbroState, delta: number): void;
 

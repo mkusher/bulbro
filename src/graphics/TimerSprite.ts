@@ -8,8 +8,9 @@ export class TimerSprite {
 		this.#gfx = new PIXI.Text("", style);
 		this.#gfx.y = 30;
 	}
-	appendTo(parent: PIXI.Container): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
 		parent.addChild(this.#gfx);
+		layer.attach(this.#gfx);
 	}
 	update(round: RoundState, viewSizeWidth: number) {
 		const timeLeft = getTimeLeft(round);

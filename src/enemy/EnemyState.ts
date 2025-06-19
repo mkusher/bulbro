@@ -1,6 +1,5 @@
 import type { Position } from "../geometry";
 import type { EnemyCharacter } from "./EnemyCharacter";
-import type { Stats } from "../bulbro";
 import type { WeaponState } from "../currentState";
 import type { MovableObject, Shape } from "../movement/Movement";
 import { ENEMY_SIZE } from "./index";
@@ -10,10 +9,21 @@ export type EnemyType = "orc" | "slime";
 /**
  * Immutable runtime state of a single enemy.
  */
-export type EnemyStats = Omit<
-	Stats,
-	"harvesting" | "engineering" | "luck" | "pickupRange"
->;
+export type EnemyStats = {
+	maxHp: number;
+	hpRegeneration: number;
+	damage: number;
+	meleeDamage: number;
+	rangedDamage: number;
+	elementalDamage: number;
+	attackSpeed: number;
+	critChance: number;
+	range: number;
+	armor: number;
+	dodge: number;
+	speed: number;
+	materialsDropped: number;
+};
 
 export class EnemyState {
 	readonly id: string;
@@ -109,6 +119,15 @@ export class EnemyState {
 			new Date(now),
 			killedAt,
 		);
+	}
+
+	toMaterial() {
+		return {
+			type: "material",
+			id: this.id,
+			position: this.position,
+			value: this.stats.materialsDropped,
+		} as const;
 	}
 }
 

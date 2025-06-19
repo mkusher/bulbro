@@ -1,4 +1,6 @@
 import type { Stats } from "./bulbro";
+import type { WeaponState } from "./currentState";
+import { fist, weapons } from "./weapons-definitions";
 
 /**
  * Weapon classes.
@@ -37,3 +39,6 @@ export const toWeaponState = (w: Weapon) => ({
 	statsBonus: w.statsBonus,
 	shotSpeed: w.shotSpeed,
 });
+
+export const fromWeaponState = (state: WeaponState) =>
+	weapons.find((w) => w.id === state.id) ?? fist;

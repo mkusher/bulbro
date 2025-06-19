@@ -4,25 +4,22 @@ import type { Scene } from "./graphics/Scene";
 import type { Ticker } from "pixi.js";
 import { TickProcess } from "./TickProcess";
 import {
-	keysToDirection,
-	subscribeToKeyboard,
-	type ArrowKeys,
-} from "./controls/keyboard";
-import {
-	subscribeToTouch,
-	type DirectionContainer,
-} from "./controls/touchscreen";
+	type PlayerControl,
+	MainKeyboardControl,
+	MultipleControl,
+	TouchscreenControl,
+} from "./controls";
+import { SecondaryKeyboardControl } from "./controls/SecondaryKeyboardControl";
 
 export class WaveProcess {
 	#logger: Logger;
 	#state: CurrentState;
 	#scene: Scene;
 	#ticker: Ticker;
-	#keys: ArrowKeys = {};
-	#touch: DirectionContainer = {};
 	#tickIndex = 0;
 	#resolvers = Promise.withResolvers<"win" | "fail">();
 	#debug: boolean;
+	#localPlayerControls: PlayerControl[];
 
 	constructor(
 		baseLogger: Logger,
@@ -38,12 +35,21 @@ export class WaveProcess {
 		this.#scene = scene;
 		this.#ticker = ticker;
 		this.#debug = debug;
+		const players = this.#state.players;
+		this.#localPlayerControls = [
+			new MultipleControl([
+				new MainKeyboardControl(),
+				new TouchscreenControl(),
+			]),
+		];
+		if (players.length > 1) {
+			this.#localPlayerControls.push(new SecondaryKeyboardControl());
+		}
 	}
 
 	async start() {
-		subscribeToKeyboard(this.#keys);
-		subscribeToTouch(this.#touch);
 		await this.#scene.init(this.#state);
+		await Promise.all(this.#localPlayerControls.map((c) => c.start()));
 		this.#ticker.add(this.#tick);
 		this.#ticker.start();
 		return this.#resolvers.promise;
@@ -54,6 +60,7 @@ export class WaveProcess {
 		this.#ticker.remove(this.#tick);
 
 		this.#resolvers.resolve(type);
+		await Promise.all(this.#localPlayerControls.map((c) => c.stop()));
 		return this.#resolvers.promise;
 	}
 
@@ -80,12 +87,10 @@ export class WaveProcess {
 		}
 		// Delegate per-tick updates to TickProcess
 		const tickProc = new TickProcess(this.#logger, this.#scene);
-		const keyboardDirection = keysToDirection(this.#keys);
-		const touchDirection = this.#touch.direction;
 		this.#state = tickProc.tick(
 			state,
 			delta,
-			touchDirection ?? keyboardDirection,
+			this.#localPlayerControls.map((c) => c.getDirection()),
 			now,
 		);
 	};

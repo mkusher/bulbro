@@ -19,12 +19,7 @@ export interface Size {
 /**
  * Axis-aligned rectangle (position is top-left corner).
  */
-export interface Rectangle {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-}
+export interface Rectangle extends Size, Point {}
 
 export interface Circle {
 	x: number;

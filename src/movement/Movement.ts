@@ -34,7 +34,11 @@ export class Movement {
 	private mapSize: Size;
 	private obstacles: MovableObject[];
 
-	constructor(obj: MovableObject, mapSize: Size, obstacles: MovableObject[]) {
+	constructor(
+		obj: MovableObject,
+		mapSize: Size,
+		obstacles: MovableObject[] = [],
+	) {
 		this.obj = obj;
 		this.mapSize = mapSize;
 		this.obstacles = obstacles;

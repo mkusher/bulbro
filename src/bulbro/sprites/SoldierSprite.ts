@@ -117,8 +117,9 @@ export class SoldierSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
 		parent.addChild(this.#gfx);
+		layer.attach(this.#gfx);
 	}
 
 	update(player: BulbroState, delta: number) {

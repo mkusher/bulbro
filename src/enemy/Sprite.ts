@@ -12,7 +12,7 @@ export interface EnemySprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container): void;
+	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void;
 
 	update(enemy: EnemyState, delta: number): void;
 
@@ -22,7 +22,11 @@ export interface EnemySprite {
 	remove(): void;
 }
 
-export function createEnemySprite(type: EnemyType, scale: number, debug: boolean): EnemySprite {
+export function createEnemySprite(
+	type: EnemyType,
+	scale: number,
+	debug: boolean,
+): EnemySprite {
 	if (type === "slime") {
 		return new SlimeSprite(scale, debug);
 	}

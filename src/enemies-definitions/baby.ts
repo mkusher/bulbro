@@ -13,6 +13,7 @@ export const babyEnemy: EnemyCharacter = {
 		damage: 1,
 		range: 0,
 		attackSpeed: 0,
+		materialsDropped: 1,
 	},
 	weapons: [orcFist],
 };

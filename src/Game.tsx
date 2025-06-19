@@ -5,6 +5,7 @@ import { Loader } from "./start/Loading";
 import type { PropsWithChildren } from "preact/compat";
 import { Failed } from "./start/Failed";
 import { PreRound } from "./start/PreRound";
+import type { CurrentState } from "./currentState";
 
 type Props = {
 	gameProcess: GameProcess;
@@ -37,11 +38,12 @@ export function Game({ gameProcess }: Props) {
 		return (
 			<MainContainer>
 				<PreRound
-					startRound={async (weapons) => {
+					state={gameProcess.currentState as CurrentState}
+					startRound={async (state: CurrentState) => {
 						setIsLoading(true);
 						setFinishedResult(undefined);
 						try {
-							const { wavePromise } = await gameProcess.startNextWave(weapons);
+							const { wavePromise } = await gameProcess.startNextWave(state);
 							setIsLoading(false);
 							setIsRound(true);
 							const result = await wavePromise;
@@ -59,23 +61,14 @@ export function Game({ gameProcess }: Props) {
 		return (
 			<MainContainer>
 				<StartScreen
-					gameProcess={gameProcess}
-					startGame={async (
-						gameProcess,
-						bulbro,
-						bulbroSprite,
-						difficulty,
-						weapons,
-						duration,
-					) => {
+					startGame={async (characters, difficulty, weaponsSetup, duration) => {
 						setIsLoading(true);
 						setFinishedResult(undefined);
 						try {
 							await gameProcess.initMap();
 							const { wavePromise } = await gameProcess.start(
-								bulbro,
-								bulbroSprite,
-								weapons,
+								characters,
+								weaponsSetup,
 								difficulty,
 								duration,
 							);

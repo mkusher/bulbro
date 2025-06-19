@@ -13,6 +13,7 @@ export const baseStats = {
 	range: 0,
 	armor: 0,
 	dodge: 0,
+	materialsDropped: 1,
 };
 
 export type EnemyStats = typeof baseStats;

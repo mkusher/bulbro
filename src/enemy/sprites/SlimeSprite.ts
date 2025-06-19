@@ -7,9 +7,9 @@ import { AnimatedSprite } from "../../graphics/AnimatedSprite";
 import { CharacterSprites } from "../../graphics/CharacterSprite";
 
 const slimeSize = {
-  width: 28,
-  height: 32,
-}
+	width: 28,
+	height: 32,
+};
 /**
  * Manages an enemy sprite graphic.
  */
@@ -33,7 +33,7 @@ export class SlimeSprite {
 		this.#gfx = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
 		this.#sprite.x = -slimeSize.width;
-    this.#sprite.y = -slimeSize.height;
+		this.#sprite.y = -slimeSize.height;
 		this.#gfx.addChild(this.#sprite);
 		this.#debugPosition = new PIXI.Graphics();
 		if (debug) {

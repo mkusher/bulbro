@@ -51,6 +51,22 @@ export function isWeaponReadyToShoot(
 
 export type WithPosition = { position: Position };
 
+export function findClosest<S extends WithPosition, O extends WithPosition>(
+	from: S,
+	candidates: O[],
+) {
+	let closest: O | undefined;
+	let minDist = Infinity;
+	for (const item of candidates) {
+		const dist = distance(from.position, item.position);
+		if (dist < minDist) {
+			minDist = dist;
+			closest = item;
+		}
+	}
+	return closest;
+}
+
 /**
  * @param from - who around is looking for
  * @param candidates - list of possible candidates
@@ -62,16 +78,10 @@ export function findClosestInRange<
 	S extends WithPosition,
 	O extends WithPosition,
 >(from: S, candidates: O[], range: number) {
-	let closest: O | undefined;
-	let minDist = Infinity;
-	for (const item of candidates) {
-		const dist = distance(from.position, item.position);
-		if (dist < minDist && dist <= range) {
-			minDist = dist;
-			closest = item;
-		}
+	const candidate = findClosest(from, candidates);
+	if (candidate && distance(from.position, candidate.position) < range) {
+		return candidate;
 	}
-	return closest;
 }
 
 export function findClosestPlayerInRange(
@@ -150,3 +160,6 @@ export function toClassicExpected(actual: Size) {
 		height: actual.height * scale,
 	};
 }
+
+export const getHpRegenerationPerSecond = (hpRegeneration: number) =>
+	hpRegeneration / 11.25 + 1 / 9;

@@ -6,6 +6,7 @@ import {
 	createInitialState,
 	nextWave,
 	type CurrentState,
+	type WeaponState,
 } from "./currentState";
 import { Scene } from "./graphics/Scene";
 import { createPlayer } from "./player";
@@ -14,6 +15,11 @@ import { mapScale, toClassicExpected, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
 import { toWeaponState, type Weapon } from "./weapon";
 import type { SpriteType } from "./bulbro/Sprite";
+
+export type CharacterSetup = {
+	bulbro: Bulbro;
+	sprite: SpriteType;
+};
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
@@ -45,6 +51,10 @@ export class GameProcess {
 		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
 	}
 
+	get currentState() {
+		return this.#state;
+	}
+
 	showMap(rootEl: HTMLElement) {
 		rootEl.appendChild(this.#app.view);
 	}
@@ -54,20 +64,21 @@ export class GameProcess {
 	 * Resolves when the round ends.
 	 */
 	async start(
-		bulbro: Bulbro,
-		bulbroSprite: SpriteType,
-		weapons: Weapon[],
+		characters: CharacterSetup[],
+		weapons: Weapon[][],
 		difficulty: Difficulty,
 		duration: number,
 	) {
 		this.#logger.info(
-			{ difficulty, bulbro, weapons, bulbroSprite, duration },
+			{ difficulty, characters, weapons, duration },
 			"starting the game",
 		);
 
 		// Initial game state
 		this.#state = createInitialState(
-			createPlayer(bulbro, bulbroSprite, weapons),
+			characters.map((character, i) =>
+				createPlayer(character.bulbro, character.sprite, weapons[i]),
+			),
 			this.#mapSize,
 			difficulty,
 			1,
@@ -91,16 +102,13 @@ export class GameProcess {
 		};
 	}
 
-	async startNextWave(weapons: Weapon[]) {
+	async startNextWave(state: CurrentState) {
 		if (!this.#state) {
 			this.#logger.error("no state set to start next wave");
 			throw new Error("No state set for the game");
 		}
-		this.#state = nextWave(this.#state, weapons.map(toWeaponState));
-		this.#logger.info(
-			{ weapons, state: this.#state },
-			"starting the next wave",
-		);
+		this.#state = nextWave(state, { now: Date.now(), deltaTime: 0 });
+		this.#logger.info({ state: this.#state }, "starting the next wave");
 		this.#app.ticker.start();
 		this.#waveProcess = new WaveProcess(
 			this.#logger,

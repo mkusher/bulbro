@@ -29,8 +29,8 @@ export class DarkOracleSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container): void {
-		this.#chibi.appendTo(parent);
+	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+		this.#chibi.appendTo(parent, layer);
 	}
 
 	update(player: BulbroState, delta: number) {

@@ -1,6 +1,11 @@
 import type { CurrentState } from "./currentState";
 import type { EnemyState } from "./enemy/EnemyState";
-import { getTimeLeft, updateState } from "./currentState";
+import {
+	getTimeLeft,
+	healPlayers,
+	moveMaterials,
+	updateState,
+} from "./currentState";
 import type { Scene } from "./graphics/Scene";
 import { v4 as uuidv4 } from "uuid";
 import { logger as defaultLogger } from "./logger";
@@ -36,7 +41,7 @@ export class TickProcess {
 	tick(
 		state: CurrentState,
 		deltaTime: number,
-		moveDirection: Direction,
+		localPlayerDirections: Direction[],
 		now: number,
 	): CurrentState {
 		this.#logger.debug({ event: "tick", now, deltaTime }, "Tick start");
@@ -47,11 +52,17 @@ export class TickProcess {
 			this.#scene.update(deltaTime, newState);
 			return newState;
 		}
-		newState = this.#movePlayer(newState, deltaTime, moveDirection);
+		newState = this.#healPlayers(newState, deltaTime);
+		newState = this.#moveLocalPlayers(
+			newState,
+			deltaTime,
+			localPlayerDirections,
+		);
 		newState = this.#moveEnemies(newState, deltaTime);
-		newState = this.#spawnEnemies(newState, now);
-		newState = this.#shootPlayersWeapons(newState, now);
-		newState = this.#shootEnemyWeapons(newState, now);
+		newState = this.#moveObjects(newState, deltaTime, now);
+		newState = this.#spawnEnemies(newState, deltaTime, now);
+		newState = this.#shootPlayersWeapons(newState, deltaTime, now);
+		newState = this.#shootEnemyWeapons(newState, deltaTime, now);
 		newState = this.#moveShoots(newState, now, deltaTime);
 		newState = this.#tick(newState, now, deltaTime);
 		this.#scene.update(deltaTime, newState);
@@ -59,17 +70,31 @@ export class TickProcess {
 	}
 
 	/** Handle player movement via state reducer */
-	#movePlayer(
-		state: CurrentState,
-		deltaTime: number,
-		moveDirection: Direction,
-	): CurrentState {
-		return updateState(state, {
-			type: "move",
-			direction: moveDirection,
+	#healPlayers(state: CurrentState, deltaTime: number): CurrentState {
+		return healPlayers(state, {
+			type: "heal",
 			deltaTime,
 			now: Date.now(),
 		});
+	}
+
+	/** Handle player movement via state reducer */
+	#moveLocalPlayers(
+		state: CurrentState,
+		deltaTime: number,
+		localPlayerDirections: Direction[],
+	): CurrentState {
+		return state.players.reduce(
+			(state, player, i) =>
+				updateState(state, {
+					type: "move",
+					direction: localPlayerDirections[i] ?? { x: 0, y: 0 },
+					deltaTime,
+					now: Date.now(),
+					currentPlayerId: player.id,
+				}),
+			state,
+		);
 	}
 
 	/** Update enemies to move towards nearest player */
@@ -104,8 +129,24 @@ export class TickProcess {
 		return newState;
 	}
 
+	#moveObjects(
+		state: CurrentState,
+		deltaTime: number,
+		now: number,
+	): CurrentState {
+		return moveMaterials(state, {
+			type: "moveObjects",
+			deltaTime,
+			now,
+		});
+	}
+
 	/** Spawn new enemies over time */
-	#spawnEnemies(state: CurrentState, now: number): CurrentState {
+	#spawnEnemies(
+		state: CurrentState,
+		deltaTime: number,
+		now: number,
+	): CurrentState {
 		let newState = state;
 		if (shouldSpawnEnemy(now, state)) {
 			const id = uuidv4();
@@ -127,12 +168,17 @@ export class TickProcess {
 				type: "spawnEnemy",
 				enemy,
 				now,
+				deltaTime,
 			});
 		}
 		return newState;
 	}
 
-	#shootPlayersWeapons(state: CurrentState, now: number): CurrentState {
+	#shootPlayersWeapons(
+		state: CurrentState,
+		deltaTime: number,
+		now: number,
+	): CurrentState {
 		let newState = state;
 		state.players.forEach((player) => {
 			player.weapons.forEach((weapon) => {
@@ -164,6 +210,7 @@ export class TickProcess {
 						const shot = shoot(player, "player", weapon, target.position);
 						newState = updateState(newState, {
 							type: "shot",
+							deltaTime,
 							now,
 							shot,
 							weaponId: weapon.id,
@@ -176,7 +223,11 @@ export class TickProcess {
 	}
 
 	/** Players' weapons shooting action */
-	#shootEnemyWeapons(state: CurrentState, now: number): CurrentState {
+	#shootEnemyWeapons(
+		state: CurrentState,
+		deltaTime: number,
+		now: number,
+	): CurrentState {
 		let newState = state;
 		state.enemies.forEach((enemy) => {
 			if (enemy.killedAt) {
@@ -208,6 +259,7 @@ export class TickProcess {
 						const shot = shoot(enemy, "enemy", weapon, target.position);
 						newState = updateState(newState, {
 							type: "shot",
+							deltaTime,
 							now,
 							shot,
 							weaponId: weapon.id,
@@ -233,6 +285,7 @@ export class TickProcess {
 				direction: shot.direction,
 				deltaTime,
 				now,
+				chance: Math.random(),
 			});
 		});
 		return newState;

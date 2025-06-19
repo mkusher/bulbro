@@ -1,17 +1,20 @@
 import * as PIXI from "pixi.js";
 import type { BulbroState } from "../bulbro";
 import type { Size } from "../geometry";
+import {
+	getExperienceForLevel,
+	getLeverForExperience,
+	getTotalExperienceForLevel,
+} from "../bulbro/Levels";
 
 const blackBorderRectangleHeight = 35;
 
-export class HealthSprite {
+export class ExperienceSprite {
 	#gfx: PIXI.Container;
 	#text: PIXI.Text;
 	#blackBorderRectangle: PIXI.Graphics;
-	#redHealthRectangle: PIXI.Graphics;
-	#playerIndex: number;
+	#greenExperienceRectangle: PIXI.Graphics;
 	constructor(playingfieldSize: Size, playerIndex: number) {
-		this.#playerIndex = playerIndex;
 		this.#gfx = new PIXI.Container();
 		const style = new PIXI.TextStyle({ fontSize: 14, fill: "#ffffff" });
 		this.#text = new PIXI.Text("", style);
@@ -27,20 +30,19 @@ export class HealthSprite {
 		blackBorderRectangle.endFill();
 
 		const padding = 10;
-
 		blackBorderRectangle.x =
 			playerIndex === 0
 				? padding
 				: playingfieldSize.width - blackBorderRectangleWidth - padding;
-		blackBorderRectangle.y = 10;
+		blackBorderRectangle.y = 50;
 
 		this.#text.y = 10;
 
-		const redHealthRectangle = new PIXI.Graphics();
-		blackBorderRectangle.addChild(redHealthRectangle);
+		const greenExperienceRectangle = new PIXI.Graphics();
+		blackBorderRectangle.addChild(greenExperienceRectangle);
 		blackBorderRectangle.addChild(this.#text);
 		this.#blackBorderRectangle = blackBorderRectangle;
-		this.#redHealthRectangle = redHealthRectangle;
+		this.#greenExperienceRectangle = greenExperienceRectangle;
 		this.#gfx.addChild(this.#blackBorderRectangle);
 	}
 	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
@@ -48,22 +50,26 @@ export class HealthSprite {
 		layer.attach(this.#gfx);
 	}
 	update(canvasSize: Size, player?: BulbroState) {
-		const healthPercent = player?.stats.maxHp
-			? (player?.healthPoints ?? 0) / player.stats.maxHp
-			: 0;
-		const redHealthRectangle = this.#redHealthRectangle;
-		redHealthRectangle.clear();
-		redHealthRectangle.beginFill(0xcc2222);
+		const totalExperience = player?.totalExperience ?? 0;
+		const currentLevelByExp = getLeverForExperience(totalExperience);
+		const currentLevelExp = getTotalExperienceForLevel(currentLevelByExp);
+		const nextLevelExp = getExperienceForLevel(currentLevelByExp + 1);
+		const experiencePercent =
+			(totalExperience - currentLevelExp) / nextLevelExp;
+		const greenExperienceRectangle = this.#greenExperienceRectangle;
+		greenExperienceRectangle.clear();
+		greenExperienceRectangle.beginFill(0x22cc22);
 		const padding = 5;
-		const redHealthRectangleWidth = canvasSize.width * 0.5 * 0.8 - 2 * padding;
-		redHealthRectangle.drawRect(
+		const greenExperienceRectangleWidth =
+			canvasSize.width * 0.5 * 0.8 - 2 * padding;
+		greenExperienceRectangle.drawRect(
 			padding,
 			padding,
-			redHealthRectangleWidth * healthPercent,
+			greenExperienceRectangleWidth * experiencePercent,
 			blackBorderRectangleHeight - 2 * padding,
 		);
-		redHealthRectangle.endFill();
-		this.#text.text = `${Math.floor(player?.healthPoints ?? 0)} / ${player?.stats.maxHp ?? 0}`;
-		this.#text.x = padding + redHealthRectangleWidth / 2 - this.#text.width / 2;
+		greenExperienceRectangle.endFill();
+		this.#text.text = `Lvl ${currentLevelByExp}`;
+		this.#text.x = greenExperienceRectangleWidth - this.#text.width - padding;
 	}
 }

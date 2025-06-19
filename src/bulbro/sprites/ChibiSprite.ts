@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import type { Position } from "../../geometry";
+import type { Direction, Position } from "../../geometry";
 import type { BulbroState } from "../BulbroState";
 import { AnimatedSprite } from "../../graphics/AnimatedSprite";
 import { CharacterSprites } from "../../graphics/CharacterSprite";
@@ -54,8 +54,6 @@ export class ChibiSprite {
 		this.#debugPosition = new PIXI.Graphics();
 		this.#sprite = new PIXI.Sprite();
 		this.#sprite.scale.set(0.075);
-		this.#sprite.x = -20;
-		this.#sprite.y = -40;
 		this.#gfx.addChild(this.#sprite);
 		if (debug) {
 			this.#debugPosition.beginFill(0x0000ff, 0.4);
@@ -144,12 +142,13 @@ export class ChibiSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
 		parent.addChild(this.#gfx);
+		layer.attach(this.#gfx);
 	}
 
 	update(player: BulbroState, delta: number) {
-		this.#updatePosition(player.position);
+		this.#updatePosition(player.position, player.lastDirection);
 
 		this.#characterSprites?.getSprite(player, delta).then((texture) => {
 			this.#sprite.texture = texture;
@@ -166,8 +165,18 @@ export class ChibiSprite {
 	/**
 	 * Updates sprite position.
 	 */
-	#updatePosition(pos: Position): void {
+	#updatePosition(pos: Position, lastDirection?: Direction): void {
 		this.#gfx.x = pos.x / this.#scale;
 		this.#gfx.y = pos.y / this.#scale;
+
+		if (lastDirection && lastDirection.x < 0) {
+			this.#sprite.scale.x = -1 * Math.abs(this.#sprite.scale.x);
+			this.#sprite.x = 8;
+			this.#sprite.y = -40;
+		} else {
+			this.#sprite.x = -20;
+			this.#sprite.y = -40;
+			this.#sprite.scale.x = Math.abs(this.#sprite.scale.y);
+		}
 	}
 }

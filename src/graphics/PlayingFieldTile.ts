@@ -18,12 +18,17 @@ export class PlayingFieldTile {
 	/**
 	 * Initializes sprites and UI elements.
 	 */
-	async init(state: CurrentState, parent: PIXI.Container) {
+	async init(
+		state: CurrentState,
+		parent: PIXI.Container,
+		layer: PIXI.IRenderLayer,
+	) {
 		const texture = await PIXI.Assets.load(
-			"/assets/craftpix-net-504452-free-village-pixel-tileset-for-top-down-defense/1 Tiles/FieldsTile_38.png",
+			"/assets/craftpix-net-504452-free-village-pixel-tileset-for-top-down-defense/1%20Tiles/FieldsTile_01.png",
 		);
 		this.#sprite.texture = texture;
 		parent.addChild(this.#container);
+		layer.attach(this.#container);
 	}
 
 	update(deltaTime: number, state: CurrentState): void {}

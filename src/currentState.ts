@@ -4,11 +4,12 @@ import {
 	type Direction,
 	type Rectangle,
 	rectContainsPoint,
-	rectsIntersect,
 	rectIntersectsLine,
 	distance,
 	rectFromCenter,
 	isEqual,
+	direction,
+	rectsIntersect,
 } from "./geometry";
 import { movePosition } from "./physics";
 import { Movement } from "./movement/Movement";
@@ -18,7 +19,16 @@ import type { Player } from "./bulbro";
 import { ENEMY_SIZE } from "./enemy";
 import type { StatsBonus } from "./weapon";
 import { EnemyState } from "./enemy/EnemyState";
-import type { Difficulty } from "./game-formulas";
+import { findClosest, type Difficulty } from "./game-formulas";
+
+export type Material = {
+	type: "material";
+	id: string;
+	position: Position;
+	value: number;
+};
+
+export type MapObject = Material;
 
 /**
  * Runtime state of a single weapon in play.
@@ -68,12 +78,11 @@ export interface RoundState {
  * The current live state of the game.
  */
 export interface CurrentState {
-	/** ID of the active player */
-	currentPlayerId: string;
 	/** The game map size for clamping positions */
 	mapSize: Size;
 	players: BulbroState[];
 	enemies: EnemyState[];
+	objects: MapObject[];
 	/** Active shots in play */
 	shots: ShotState[];
 	/** Timestamp of last enemy spawn */
@@ -83,50 +92,51 @@ export interface CurrentState {
 
 export const nextWave = (
 	currentState: CurrentState,
-	weapons: WeaponState[],
+	{ now }: Action,
 ): CurrentState => ({
 	...currentState,
-	players: currentState.players
-		.map((player) =>
-			player.move(startPosition(currentState.mapSize), Date.now()),
-		)
-		.map((player) =>
-			player.id === currentState.currentPlayerId
-				? player.useWeapons(weapons)
-				: player,
-		),
+	players: currentState.players.map((player, i) =>
+		player.move(startPosition(currentState.mapSize, i), now),
+	),
 	round: {
 		...currentState.round,
 		isRunning: true,
 		endedAt: undefined,
-		startedAt: new Date(),
+		startedAt: new Date(now),
 		wave: currentState.round.wave + 1,
 	},
 });
 
-const startPosition = (mapSize: Size) => ({
-	x: mapSize.width / 2,
+const startPosition = (mapSize: Size, i = 0) => ({
+	x:
+		mapSize.width / 2 +
+		-3 * i * (BULBRO_SIZE.width + 5) +
+		(i - 1) * -3 * (BULBRO_SIZE.width + 5),
 	y: mapSize.height / 2,
 });
 
 export const createInitialState = (
-	currentPlayer: Player,
+	currentPlayers: Player[],
 	mapSize: Size,
 	difficulty: Difficulty,
 	wave = 1,
 	duration = 60,
+	level = 1,
+	experience = 0,
 ): CurrentState => {
 	return {
-		currentPlayerId: currentPlayer.id,
 		mapSize,
-		players: [
+		objects: [],
+		players: currentPlayers.map((currentPlayer, i) =>
 			spawnBulbro(
 				currentPlayer.id,
 				currentPlayer.sprite,
-				startPosition(mapSize),
+				startPosition(mapSize, i),
+				level,
+				experience,
 				currentPlayer.bulbro,
 			),
-		],
+		),
 		enemies: [],
 		shots: [],
 		round: {
@@ -141,11 +151,24 @@ export const createInitialState = (
 
 // movePosition and keysToDirection moved to physics.ts and direction-vector.ts
 
+type SelectWeaponAction = {
+	type: "select-weapons";
+	playerId: string;
+	weapons: WeaponState[];
+	now: number;
+};
 /**
  * Actions for updating game state.
  */
 export type Action =
-	| { type: "move"; direction: Direction; deltaTime: number; now: number }
+	| {
+			type: "move";
+			direction: Direction;
+			deltaTime: number;
+			now: number;
+			currentPlayerId: string;
+	  }
+	| { type: "heal"; deltaTime: number; now: number }
 	| {
 			type: "moveEnemy";
 			id: string;
@@ -156,13 +179,20 @@ export type Action =
 	| {
 			type: "spawnEnemy";
 			enemy: EnemyState;
+			deltaTime: number;
 			now: number;
 	  }
 	| {
 			type: "shot";
 			shot: ShotState;
+			deltaTime: number;
 			now: number;
 			weaponId: string;
+	  }
+	| {
+			type: "moveObjects";
+			deltaTime: number;
+			now: number;
 	  }
 	| {
 			type: "moveShot";
@@ -170,30 +200,32 @@ export type Action =
 			direction: Direction;
 			deltaTime: number;
 			now: number;
+			chance: number;
 	  }
 	| {
 			type?: undefined;
 			deltaTime: number;
 			now: number;
-	  };
+	  }
+	| SelectWeaponAction;
 
 // Individual state update functions for each action type
 export function movePlayer(
 	state: CurrentState,
 	action: Extract<Action, { type: "move" }>,
 ): CurrentState {
-	const { direction, deltaTime, now } = action;
+	const { direction, deltaTime, now, currentPlayerId } = action;
 	// Movement handler: build obstacles from other players and alive enemies
 	const obstacles: MovableObject[] = [
 		...state.players
-			.filter((p2) => p2.id !== state.currentPlayerId)
+			.filter((p2) => p2.id !== currentPlayerId)
 			.map((p2) => p2.toMovableObject()),
 		...state.enemies.filter((e) => !e.killedAt).map((e) => e.toMovableObject()),
 	];
 	return {
 		...state,
 		players: state.players.map((p) => {
-			if (p.id !== state.currentPlayerId) return p;
+			if (p.id !== currentPlayerId) return p;
 			const mover = new Movement(
 				{
 					position: p.position,
@@ -266,6 +298,73 @@ export function moveEnemy(
 	};
 }
 
+const materialPickupSpeed = 1000;
+export function moveMaterials(
+	state: CurrentState,
+	action: Extract<Action, { type: "moveObjects" }>,
+) {
+	let objects = [];
+	let players = state.players;
+	for (const object of state.objects) {
+		const player = findClosest(object, players);
+		let position = object.position;
+
+		if (
+			player &&
+			distance(player.position, object.position) <= player.stats.pickupRange
+		) {
+			const deltaTime = action.deltaTime;
+			const shape = {
+				type: "rectangle",
+				width: 16,
+				height: 16,
+			} as const;
+			const mover = new Movement(
+				{
+					position: object.position,
+					shape,
+				},
+				state.mapSize,
+			);
+			const newPosition = mover.getPositionAfterMove(
+				direction(object.position, player.position),
+				materialPickupSpeed,
+				deltaTime,
+			);
+			position = newPosition;
+			const playerObject = player.toMovableObject();
+			if (
+				rectsIntersect(
+					{
+						...shape,
+						...position,
+					},
+					{
+						...playerObject.position,
+						...playerObject.shape,
+					} as Rectangle,
+				)
+			) {
+				players = players.map((p) =>
+					p.id === player.id ? p.takeMaterial(object) : p,
+				);
+				continue;
+			}
+		}
+
+		objects.push({
+			...object,
+			position,
+		});
+	}
+
+	return {
+		...state,
+		objects,
+		players,
+	};
+}
+
 const enemiesBodiesDisappearAfter = 2000;
 export function moveShot(
 	state: CurrentState,
@@ -281,6 +380,7 @@ export function moveShot(
 	let newShots: ShotState[] = [];
 	let newEnemies = state.enemies;
 	let newPlayers = state.players;
+	let newObjects = state.objects;
 	for (const shot of state.shots) {
 		if (shot.id !== shotId) {
 			newShots.push(shot);
@@ -297,7 +397,9 @@ export function moveShot(
 		if (shot.shooterType === "player") {
 			const segment = { start: prevPos, end: nextPos };
 			let isHit = false;
-			newEnemies = newEnemies.map((e) => {
+			const killedEnemies = newEnemies.filter((e) => e.killedAt);
+			const notKilled = newEnemies.filter((e) => !e.killedAt);
+			newEnemies = notKilled.map((e) => {
 				if (e.killedAt) return e;
 				const enemyRect = rectFromCenter(e.position, ENEMY_SIZE);
 				if (rectIntersectsLine(enemyRect, segment)) {
@@ -306,6 +408,9 @@ export function moveShot(
 				}
 				return e;
 			});
+			const newKilled = newEnemies.filter((e) => e.killedAt);
+			newObjects = [...newObjects, ...newKilled.map((e) => e.toMaterial())];
+			newEnemies = killedEnemies.concat(newEnemies);
 			if (isHit) continue;
 		}
 		if (shot.shooterType === "enemy") {
@@ -335,6 +440,7 @@ export function moveShot(
 		enemies: newEnemies,
 		players: newPlayers,
 		shots: newShots,
+		objects: newObjects,
 		round: {
 			...state.round,
 			isRunning,
@@ -391,6 +497,24 @@ export function updateRound(round: RoundState, action: Action) {
 		...round,
 		isRunning,
 		endedAt: !isRunning ? (round.endedAt ?? new Date(now)) : round.endedAt,
+	};
+}
+
+export function healPlayers(state: CurrentState, action: Action) {
+	const { now } = action;
+	return {
+		...state,
+		players: state.players.map((player) => player.healByHpRegeneration(now)),
+	};
+}
+
+export function selectWeapons(state: CurrentState, action: SelectWeaponAction) {
+	const { weapons, playerId } = action;
+	return {
+		...state,
+		players: state.players.map((newPlayer) =>
+			newPlayer.id === playerId ? newPlayer.useWeapons(weapons) : newPlayer,
+		),
 	};
 }
 

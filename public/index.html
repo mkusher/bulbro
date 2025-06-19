@@ -26,6 +26,16 @@
       height: 100vh;
     }
 
+    .main-container h1 {
+      font-size: 44px;
+      margin: 16px 0;
+      text-align: center;
+    }
+    .main-container h2 {
+      font-size: 36px;
+      margin: 8px 0;
+    }
+
     .main-container form {
       width: 80vw;
       display: flex;
@@ -33,19 +43,33 @@
       font-size: 32px;
       gap: 8px;
     }
-    .main-container form button,
-    .main-container form input,
-    .main-container form select {
+    .main-container button,
+    .main-container input,
+    .main-container select {
       padding: 8px 16px;
       width: 100%;
       font-size: 32px;
       box-sizing: border-box;
     }
-    .main-container form button {
+    .main-container button {
       background-color: #37f;
       color: #fff;
       border-radius: 24px;
       border: 0;
+      cursor: pointer;
+    }
+    .main-container > div {
+      width: 80vw;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .main-container .characters {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      width: 100%;
     }
     canvas { display: block; margin 0 auto; }
   </style>

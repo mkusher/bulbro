@@ -11,6 +11,8 @@ import { HealthSprite } from "./HealthSprite";
 import { PlayingFieldTile } from "./PlayingFieldTile";
 import { WaveSprite } from "./WaveSprite";
 import type { Logger } from "pino";
+import { MaterialSprite } from "./MaterialSprite";
+import { ExperienceSprite } from "./ExperienceSprite";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -20,20 +22,33 @@ export class Scene {
 	#playerSprites: Map<string, BulbroSprite> = new Map();
 	#enemySprites: Map<string, EnemySprite> = new Map();
 	#shotSprites: Map<string, ShotSprite> = new Map();
+	#materialSprites: Map<string, MaterialSprite> = new Map();
 	#timerSprite!: TimerSprite;
 	#waveSprite!: WaveSprite;
 	#viewSize!: Size;
-	#healthSprite!: HealthSprite;
+	#healthSprites: Map<string, HealthSprite> = new Map();
+	#experienceSprites: Map<string, ExperienceSprite> = new Map();
 	#playingFieldTile!: PlayingFieldTile;
+	#playingFieldLayer: PIXI.IRenderLayer;
+	#uiLayer: PIXI.IRenderLayer;
 	#scale: number;
 	#logger: Logger;
-  #debug: boolean;
+	#debug: boolean;
 
-	constructor(logger: Logger, debug: boolean, app: PIXI.Application, scale: number) {
+	constructor(
+		logger: Logger,
+		debug: boolean,
+		app: PIXI.Application,
+		scale: number,
+	) {
 		this.#app = app;
 		this.#scale = scale;
 		this.#logger = logger;
-    this.#debug = debug;
+		this.#debug = debug;
+		this.#playingFieldLayer = new PIXI.RenderLayer();
+		this.#uiLayer = new PIXI.RenderLayer();
+		this.#app.stage.addChild(this.#playingFieldLayer);
+		this.#app.stage.addChild(this.#uiLayer);
 	}
 
 	/**
@@ -49,26 +64,34 @@ export class Scene {
 			"Scene init",
 		);
 		this.#playingFieldTile = new PlayingFieldTile(this.#viewSize);
-		await this.#playingFieldTile.init(state, this.#app.stage);
+		await this.#playingFieldTile.init(
+			state,
+			this.#app.stage,
+			this.#playingFieldLayer,
+		);
 		// Create player sprites
-		state.players.forEach((p: BulbroState) => {
+		state.players.forEach((p: BulbroState, i: number) => {
 			const sprite = createBulbroSprite(p.type, this.#scale, this.#debug);
-			sprite.appendTo(this.#app.stage);
+			sprite.appendTo(this.#app.stage, this.#playingFieldLayer);
 			this.#playerSprites.set(p.id, sprite);
+			const healthSprite = new HealthSprite(this.#viewSize, i);
+			this.#healthSprites.set(p.id, healthSprite);
+			healthSprite.appendTo(this.#app.stage, this.#uiLayer);
+			const experienceSprite = new ExperienceSprite(this.#viewSize, i);
+			this.#experienceSprites.set(p.id, experienceSprite);
+			experienceSprite.appendTo(this.#app.stage, this.#uiLayer);
 		});
 		// Create enemy sprites
 		state.enemies.forEach((e: EnemyState) => {
 			const sprite = createEnemySprite(e.type, this.#scale, this.#debug);
-			sprite.appendTo(this.#app.stage);
+			sprite.appendTo(this.#app.stage, this.#playingFieldLayer);
 			this.#enemySprites.set(e.id, sprite);
 		});
 		// Timer text
 		this.#timerSprite = new TimerSprite();
-		this.#timerSprite.appendTo(this.#app.stage);
+		this.#timerSprite.appendTo(this.#app.stage, this.#uiLayer);
 		this.#waveSprite = new WaveSprite();
-		this.#waveSprite.appendTo(this.#app.stage);
-		this.#healthSprite = new HealthSprite(this.#viewSize);
-		this.#healthSprite.appendTo(this.#app.stage);
+		this.#waveSprite.appendTo(this.#app.stage, this.#uiLayer);
 	}
 
 	/**
@@ -78,10 +101,13 @@ export class Scene {
 		this.#updatePlayers(deltaTime, state);
 		this.#updateEnemies(deltaTime, state);
 		this.#updateShots(deltaTime, state);
+		this.#updateObjects(deltaTime, state);
 		this.#timerSprite.update(state.round, this.#viewSize.width);
 		this.#waveSprite.update(state.round, this.#viewSize.width);
-		const player = state.players.find((p) => p.id === state.currentPlayerId);
-		this.#healthSprite.update(this.#viewSize, player);
+		state.players.forEach((player) => {
+			this.#healthSprites.get(player.id)?.update(this.#viewSize, player);
+			this.#experienceSprites.get(player.id)?.update(this.#viewSize, player);
+		});
 	}
 
 	#updatePlayers(deltaTime: number, state: CurrentState) {
@@ -89,7 +115,7 @@ export class Scene {
 		state.players.forEach((p: BulbroState) => {
 			if (!this.#playerSprites.has(p.id)) {
 				const sprite = createBulbroSprite(p.type, this.#scale, this.#debug);
-				sprite.appendTo(this.#app.stage);
+				sprite.appendTo(this.#app.stage, this.#playingFieldLayer);
 				this.#playerSprites.set(p.id, sprite);
 			}
 		});
@@ -110,7 +136,7 @@ export class Scene {
 		state.enemies.forEach((e: EnemyState) => {
 			if (!this.#enemySprites.has(e.id)) {
 				const sprite = createEnemySprite(e.type, this.#scale, this.#debug);
-				sprite.appendTo(this.#app.stage);
+				sprite.appendTo(this.#app.stage, this.#playingFieldLayer);
 				this.#enemySprites.set(e.id, sprite);
 			}
 		});
@@ -131,7 +157,7 @@ export class Scene {
 		state.shots.forEach((shot) => {
 			if (!this.#shotSprites.has(shot.id)) {
 				const sprite = new ShotSprite(this.#scale, shot);
-				sprite.appendTo(this.#app.stage);
+				sprite.appendTo(this.#app.stage, this.#playingFieldLayer);
 				this.#shotSprites.set(shot.id, sprite);
 			}
 		});
@@ -146,6 +172,27 @@ export class Scene {
 			const sprite = this.#shotSprites.get(e.id)!;
 			sprite.updatePosition(e.position);
 			sprite.setAlpha(1);
+		});
+	}
+
+	#updateObjects(deltaTime: number, state: CurrentState) {
+		const materials = state.objects.filter(
+			(object) => object.type === "material",
+		);
+		materials.forEach((material) => {
+			if (!this.#materialSprites.has(material.id)) {
+				const sprite = new MaterialSprite(this.#scale, this.#debug);
+				sprite.init(material, this.#app.stage, this.#playingFieldLayer);
+				this.#materialSprites.set(material.id, sprite);
+			}
+			const sprite = this.#materialSprites.get(material.id)!;
+			sprite.update(material, deltaTime);
+		});
+		Array.from(this.#materialSprites.entries()).forEach(([id, sprite]) => {
+			if (!materials.find((e) => e.id === id)) {
+				sprite.remove();
+				this.#materialSprites.delete(id);
+			}
 		});
 	}
 }
