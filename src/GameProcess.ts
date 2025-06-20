@@ -4,9 +4,9 @@ import { logger as defaultLogger } from "./logger";
 import type { Bulbro } from "./bulbro";
 import {
 	createInitialState,
+	currentState,
 	nextWave,
 	type CurrentState,
-	type WeaponState,
 } from "./currentState";
 import { Scene } from "./graphics/Scene";
 import { createPlayer } from "./player";
@@ -30,7 +30,6 @@ export class GameProcess {
 	#scene!: Scene;
 	#canvasSize: Size;
 	#mapSize: Size;
-	#state?: CurrentState;
 	#waveProcess?: WaveProcess;
 	#debug: boolean;
 
@@ -49,10 +48,6 @@ export class GameProcess {
 		this.#canvasSize = mapSize;
 		this.#mapSize = toClassicExpected(this.#canvasSize);
 		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
-	}
-
-	get currentState() {
-		return this.#state;
 	}
 
 	showMap(rootEl: HTMLElement) {
@@ -75,7 +70,7 @@ export class GameProcess {
 		);
 
 		// Initial game state
-		this.#state = createInitialState(
+		currentState.value = createInitialState(
 			characters.map((character, i) =>
 				createPlayer(character.bulbro, character.sprite, weapons[i]),
 			),
@@ -92,7 +87,6 @@ export class GameProcess {
 		);
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
-			this.#state,
 			this.#scene,
 			this.#app.ticker,
 			this.#debug,
@@ -103,16 +97,15 @@ export class GameProcess {
 	}
 
 	async startNextWave(state: CurrentState) {
-		if (!this.#state) {
+		if (!currentState.value) {
 			this.#logger.error("no state set to start next wave");
 			throw new Error("No state set for the game");
 		}
-		this.#state = nextWave(state, { now: Date.now(), deltaTime: 0 });
-		this.#logger.info({ state: this.#state }, "starting the next wave");
+		currentState.value = nextWave(state, { now: Date.now(), deltaTime: 0 });
+		this.#logger.info({ state: currentState.value }, "starting the next wave");
 		this.#app.ticker.start();
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
-			this.#state,
 			this.#scene,
 			this.#app.ticker,
 			this.#debug,

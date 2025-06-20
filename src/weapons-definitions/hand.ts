@@ -8,5 +8,10 @@ export const hand: Weapon = {
 	name: "Hand",
 	classes: ["support"],
 	shotSpeed: 650,
-	statsBonus: {},
+	statsBonus: {
+		damage: 1,
+		range: 150,
+		knockback: 30,
+		attackSpeed: 1.01,
+	},
 };

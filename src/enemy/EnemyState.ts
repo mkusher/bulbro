@@ -1,8 +1,10 @@
-import type { Position } from "../geometry";
+import { isEqual, type Direction, type Position, type Size } from "../geometry";
 import type { EnemyCharacter } from "./EnemyCharacter";
 import type { WeaponState } from "../currentState";
-import type { MovableObject, Shape } from "../movement/Movement";
+import { Movement, type MovableObject, type Shape } from "../movement/Movement";
 import { ENEMY_SIZE } from "./index";
+import type { ShotState } from "../shot/ShotState";
+import { knockbackSpeed, knockbackTimeout } from "../game-formulas";
 
 export type EnemyType = "orc" | "slime";
 
@@ -23,9 +25,16 @@ export type EnemyStats = {
 	dodge: number;
 	speed: number;
 	materialsDropped: number;
+	knockback: number;
 };
 
-export class EnemyState {
+export type Knockback = {
+	strength: number;
+	direction: Direction;
+	startedAt: Date;
+};
+
+export type EnemyStateProps = {
 	readonly id: string;
 	readonly type: EnemyType;
 	readonly position: Position;
@@ -35,27 +44,45 @@ export class EnemyState {
 	readonly lastMovedAt: Date;
 	readonly lastHitAt: Date;
 	readonly killedAt?: Date;
+	readonly knockback?: Knockback;
+};
 
-	constructor(
-		id: string,
-		type: EnemyType,
-		position: Position,
-		healthPoints: number,
-		weapons: WeaponState[],
-		stats: EnemyStats,
-		lastMovedAt: Date,
-		lastHitAt: Date,
-		killedAt?: Date,
-	) {
-		this.id = id;
-		this.type = type;
-		this.position = position;
-		this.healthPoints = healthPoints;
-		this.weapons = weapons;
-		this.stats = stats;
-		this.lastMovedAt = lastMovedAt;
-		this.lastHitAt = lastHitAt;
-		this.killedAt = killedAt;
+export class EnemyState implements EnemyStateProps {
+	#props: EnemyStateProps;
+
+	get id() {
+		return this.#props.id;
+	}
+	get type() {
+		return this.#props.type;
+	}
+	get position() {
+		return this.#props.position;
+	}
+	get healthPoints() {
+		return this.#props.healthPoints;
+	}
+	get weapons() {
+		return this.#props.weapons;
+	}
+	get stats() {
+		return this.#props.stats;
+	}
+	get lastMovedAt() {
+		return this.#props.lastMovedAt;
+	}
+	get lastHitAt() {
+		return this.#props.lastHitAt;
+	}
+	get killedAt() {
+		return this.#props.killedAt;
+	}
+	get knockback() {
+		return this.#props.knockback;
+	}
+
+	constructor(props: EnemyStateProps) {
+		this.#props = props;
 	}
 
 	/** Returns this enemy as a MovableObject for collision logic. */
@@ -71,18 +98,40 @@ export class EnemyState {
 	}
 
 	/** Returns a new state with the enemy moved to a new position. */
-	move(position: Position, now: number): EnemyState {
-		return new EnemyState(
-			this.id,
-			this.type,
-			position,
-			this.healthPoints,
-			this.weapons,
-			this.stats,
-			new Date(now),
-			this.lastHitAt,
-			this.killedAt,
+	move(
+		direction: Direction,
+		obstacles: MovableObject[],
+		mapSize: Size,
+		deltaTime: number,
+		now: number,
+	): EnemyState {
+		let knockback = this.knockback;
+		const mover = new Movement(this.toMovableObject(), mapSize, obstacles);
+		if (knockback && now - knockback.startedAt.getTime() <= knockbackTimeout) {
+			const newPos = mover.getPositionAfterMove(
+				knockback.direction,
+				knockback.strength * knockbackSpeed,
+				deltaTime,
+			);
+			if (isEqual(this.position, newPos)) return this;
+			return new EnemyState({
+				...this.#props,
+				position: newPos,
+				lastMovedAt: new Date(now),
+			});
+		}
+		const newPos = mover.getPositionAfterMove(
+			direction,
+			this.stats.speed,
+			deltaTime,
 		);
+		if (isEqual(this.position, newPos)) return this;
+		return new EnemyState({
+			...this.#props,
+			position: newPos,
+			lastMovedAt: new Date(now),
+			knockback: undefined,
+		});
 	}
 
 	/** Returns a new state with updated weapon strike timestamp for a hit action. */
@@ -90,35 +139,28 @@ export class EnemyState {
 		const weapons = this.weapons.map((ws) =>
 			ws.id === weaponId ? { ...ws, lastStrikedAt: new Date(now) } : ws,
 		);
-		return new EnemyState(
-			this.id,
-			this.type,
-			this.position,
-			this.healthPoints,
+		return new EnemyState({
+			...this.#props,
 			weapons,
-			this.stats,
-			this.lastMovedAt,
-			this.lastHitAt,
-			this.killedAt,
-		);
+		});
 	}
 
 	/** Returns a new state after taking damage; may mark as killed. */
-	beHit(damage: number, now: number): EnemyState {
-		const healthPoints = this.healthPoints - damage;
+	beHit(shot: ShotState, now: number): EnemyState {
+		const healthPoints = this.healthPoints - shot.damage;
 		const killedAt =
 			healthPoints <= 0 && !this.killedAt ? new Date(now) : this.killedAt;
-		return new EnemyState(
-			this.id,
-			this.type,
-			this.position,
+		return new EnemyState({
+			...this.#props,
 			healthPoints,
-			this.weapons,
-			this.stats,
-			this.lastMovedAt,
-			new Date(now),
+			lastHitAt: new Date(now),
 			killedAt,
-		);
+			knockback: {
+				strength: shot.knockback,
+				startedAt: new Date(now),
+				direction: shot.direction,
+			},
+		});
 	}
 
 	toMaterial() {
@@ -145,14 +187,14 @@ export function spawnEnemy(
 		statsBonus: w.statsBonus,
 		shotSpeed: w.shotSpeed,
 	}));
-	return new EnemyState(
+	return new EnemyState({
 		id,
-		character.sprite,
+		type: character.sprite,
 		position,
-		character.stats.maxHp,
+		healthPoints: character.stats.maxHp,
 		weapons,
-		character.stats,
-		new Date(),
-		new Date(0),
-	);
+		stats: character.stats,
+		lastMovedAt: new Date(),
+		lastHitAt: new Date(0),
+	});
 }

@@ -1,6 +1,7 @@
 import { AnimatedSprite } from "./AnimatedSprite";
 import type { BulbroState } from "../bulbro";
 import type { EnemyState } from "../enemy";
+import { knockbackSpeed } from "../game-formulas";
 
 type Animations = {
 	walking: AnimatedSprite;
@@ -23,13 +24,12 @@ export class CharacterSprites {
 	async getSprite(character: BulbroState | EnemyState, delta: number) {
 		const now = Date.now();
 		const movingAnimationDelay = 100;
-		const hitAnimationDelay = movingAnimationDelay * 5;
 		if (character.killedAt && this.#animations.dead) {
 			return this.#animations.dead?.getSprite(delta);
 		}
 		if (
 			character.lastHitAt &&
-			now - character.lastHitAt.getTime() < hitAnimationDelay
+			now - character.lastHitAt.getTime() < knockbackSpeed
 		) {
 			const anim =
 				character.healthPoints / character.stats.maxHp >= 0.5

@@ -20,6 +20,8 @@ import { ENEMY_SIZE } from "./enemy";
 import type { StatsBonus } from "./weapon";
 import { EnemyState } from "./enemy/EnemyState";
 import { findClosest, type Difficulty } from "./game-formulas";
+import { signal } from "@preact/signals";
+import type { ShotState } from "./shot/ShotState";
 
 export type Material = {
 	type: "material";
@@ -40,29 +42,6 @@ export interface WeaponState {
 	lastStrikedAt: Date;
 	statsBonus: StatsBonus;
 	shotSpeed: number;
-}
-
-/**
- * Runtime state of an individual projectile (shot) in play.
- */
-export interface ShotState {
-	/** Unique shot identifier */
-	id: string;
-	/** ID of the entity that fired this shot */
-	shooterId: string;
-	/** Whether the shooter was a player or enemy */
-	shooterType: "player" | "enemy";
-	/** Damage inflicted on hit */
-	damage: number;
-	/** Movement speed of the shot */
-	speed: number;
-	/** Maximum travel range */
-	range: number;
-	/** Current position */
-	position: Position;
-	startPosition: Position;
-	/** Direction vector */
-	direction: Direction;
 }
 
 export interface RoundState {
@@ -275,25 +254,7 @@ export function moveEnemy(
 		...state,
 		enemies: state.enemies.map((e) => {
 			if (e.id !== id) return e;
-			const mover = new Movement(
-				{
-					position: e.position,
-					shape: {
-						type: "rectangle",
-						width: ENEMY_SIZE.width,
-						height: ENEMY_SIZE.height,
-					},
-				},
-				state.mapSize,
-				obstacles,
-			);
-			const newPos = mover.getPositionAfterMove(
-				direction,
-				e.stats.speed,
-				deltaTime,
-			);
-			if (isEqual(e.position, newPos)) return e;
-			return e.move(newPos, now);
+			return e.move(direction, obstacles, state.mapSize, deltaTime, now);
 		}),
 	};
 }
@@ -345,9 +306,7 @@ export function moveMaterials(
 					} as Rectangle,
 				)
 			) {
-				players = players.map((p) =>
-					p.id === player.id ? p.takeMaterial(object) : p,
-				);
+				players = players.map((p) => p.takeMaterial(object));
 				continue;
 			}
 		}
@@ -404,7 +363,7 @@ export function moveShot(
 				const enemyRect = rectFromCenter(e.position, ENEMY_SIZE);
 				if (rectIntersectsLine(enemyRect, segment)) {
 					isHit = true;
-					return e.beHit(shot.damage, now);
+					return e.beHit(shot, now);
 				}
 				return e;
 			});
@@ -566,3 +525,7 @@ export const getTimeLeft = (round: RoundState) => {
 			? duration - Date.now() + round.startedAt.getTime()
 			: 0;
 };
+
+export const currentState = signal(
+	createInitialState([], { width: 800, height: 600 }, 0),
+);

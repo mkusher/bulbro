@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import type { Position } from "../geometry";
-import type { ShotState } from "../currentState";
+import type { ShotState } from "./ShotState";
 
 const SHOT_SIZE = 4;
 /**
@@ -13,7 +13,7 @@ export class ShotSprite {
 	constructor(scale: number, shot: ShotState) {
 		this.#scale = scale;
 		this.#gfx = new PIXI.Graphics();
-		this.#gfx.beginFill(shot.shooterType === "player" ? 0x000000 : 0x961ea3);
+		this.#gfx.beginFill(shot.shooterType === "player" ? 0xcccc22 : 0x961ea3);
 		this.#gfx.drawCircle(0, 0, SHOT_SIZE);
 		this.#gfx.endFill();
 	}

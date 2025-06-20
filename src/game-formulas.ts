@@ -1,7 +1,6 @@
 import {
 	type CurrentState,
 	type WeaponState,
-	type ShotState,
 	type RoundState,
 	getTimeLeft,
 } from "./currentState";
@@ -9,6 +8,7 @@ import type { BulbroState } from "./bulbro";
 import type { EnemyState } from "./enemy/EnemyState";
 import { v4 as uuidv4 } from "uuid";
 import { direction, distance, type Position, type Size } from "./geometry";
+import type { ShotState } from "./shot/ShotState";
 
 const minWeaponRange = 25;
 
@@ -121,6 +121,7 @@ export function shoot(
 	const playerRange = player.stats.range ?? 0;
 	const weaponDamage = weapon.statsBonus.damage ?? 0;
 	const weaponRange = weapon.statsBonus.range ?? 0;
+	const knockback = player.stats.knockback + (weapon.statsBonus.knockback ?? 0);
 	return {
 		id,
 		shooterType,
@@ -131,6 +132,7 @@ export function shoot(
 		startPosition: currentPosition,
 		direction: direction(currentPosition, targetPosition),
 		speed: weapon.shotSpeed,
+		knockback,
 	};
 }
 
@@ -163,3 +165,6 @@ export function toClassicExpected(actual: Size) {
 
 export const getHpRegenerationPerSecond = (hpRegeneration: number) =>
 	hpRegeneration / 11.25 + 1 / 9;
+
+export const knockbackSpeed = 10;
+export const knockbackTimeout = 125;

@@ -12,5 +12,6 @@ export const doubleBarrelShotgun: Weapon = {
 		damage: 12,
 		attackSpeed: 1.37,
 		range: 350,
+		knockback: 8,
 	},
 };

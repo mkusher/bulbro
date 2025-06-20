@@ -49,7 +49,7 @@ export class HealthSprite {
 	}
 	update(canvasSize: Size, player?: BulbroState) {
 		const healthPercent = player?.stats.maxHp
-			? (player?.healthPoints ?? 0) / player.stats.maxHp
+			? Math.min((player?.healthPoints ?? 0) / player.stats.maxHp, 1)
 			: 0;
 		const redHealthRectangle = this.#redHealthRectangle;
 		redHealthRectangle.clear();

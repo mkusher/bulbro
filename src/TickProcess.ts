@@ -29,7 +29,7 @@ export class TickProcess {
 	#scene: Scene;
 	#logger = defaultLogger.child({ component: "TickProcess" });
 
-	constructor(logger: Logger, scene: Scene) {
+	constructor(logger: Logger, scene: Scene, debug: boolean) {
 		this.#scene = scene;
 		this.#logger = logger.child({});
 		this.#logger.debug("TickProcess initialized");

@@ -21,6 +21,7 @@ export function PreRound({ startRound, state }: Props) {
 				{currentState.players.map((p) => (
 					<div key={p.id} class="character">
 						<h3>{p.type}</h3>
+						<p>Materials: {p.materialsAvailable}</p>
 						<WeaponsSelect
 							selectedWeapons={p.weapons.map(fromWeaponState)}
 							selectWeapons={(weapons) =>

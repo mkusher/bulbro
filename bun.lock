@@ -4,6 +4,7 @@
     "": {
       "name": "pixi-demo",
       "dependencies": {
+        "@preact/signals": "^2.2.0",
         "pino": "^9.7.0",
         "pixi.js": "^8.10.1",
         "preact": "^10.26.9",
@@ -39,6 +40,10 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@1.9.4", "", { "os": "win32", "cpu": "x64" }, "sha512-8Y5wMhVIPaWe6jw2H+KlEm4wP/f7EW3810ZLmDlrEEy5KvBsb9ECEfu/kMWD484ijfQ8+nIi0giMgu9g1UAuuA=="],
 
     "@pixi/colord": ["@pixi/colord@2.9.6", "", {}, "sha512-nezytU2pw587fQstUu1AsJZDVEynjskwOL+kibwcdxsMBFqPsFFNA7xl0ii/gXuDi6M0xj3mfRJj8pBSc2jCfA=="],
+
+    "@preact/signals": ["@preact/signals@2.2.0", "", { "dependencies": { "@preact/signals-core": "^1.9.0" }, "peerDependencies": { "preact": ">= 10.25.0" } }, "sha512-P3KPcEYyVk9Wiwfw68QQzRpPkt0H+zjfH3X4AaGCDlc86GuRBYFGiAxT1nC5F5qlsVIEmjNJ9yVYe7C91z3L+g=="],
+
+    "@preact/signals-core": ["@preact/signals-core@1.10.0", "", {}, "sha512-qlKeXlfqtlC+sjxCPHt6Sk0/dXBrKZVcPlianqjNc/vW263YBFiP5mRrgKpHoO0q222Thm1TdYQWfCKpbbgvwA=="],
 
     "@types/bun": ["@types/bun@1.2.15", "", { "dependencies": { "bun-types": "1.2.15" } }, "sha512-U1ljPdBEphF0nw1MIk0hI7kPg7dFdPyM7EenHsp6W5loNHl7zqy6JQf/RKCgnUn2KDzUpkBwHPnEJEjII594bA=="],
 

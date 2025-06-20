@@ -1,14 +1,18 @@
-<!DOCTYPE html>
+<!DOCTYPE htm>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>BulBro</title>
   <meta name="viewport" content="width=device-width, initial-scale=0.5" />
   <style>
+    :root {
+      --main-gap: 16px;
+    }
     body {
       margin: 0 auto;
       overflow: hidden;
       user-select: none;
+      box-sizing: border-box;
       -webkit-touch-callout: none;
       -webkit-user-select: none;
     }
@@ -20,6 +24,8 @@
       flex-wrap: wrap;
       align-self: center;
       justify-content: center;
+      font-size: 32px;
+      margin: 0;
     }
     .full-viewport {
       width: 100vw;
@@ -40,13 +46,12 @@
       width: 80vw;
       display: flex;
       flex-direction: column;
-      font-size: 32px;
-      gap: 8px;
+      gap: var(--main-gap);
     }
     .main-container button,
     .main-container input,
     .main-container select {
-      padding: 8px 16px;
+      padding: 12px 20px;
       width: 100%;
       font-size: 32px;
       box-sizing: border-box;
@@ -62,13 +67,18 @@
       width: 80vw;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: var(--main-gap);
     }
 
     .main-container .characters {
       display: flex;
       flex-direction: row;
-      gap: 8px;
+      gap: var(--main-gap);
+      width: 100%;
+    }
+    .main-container .character {
+      display: flex;
+      flex-direction: column;
       width: 100%;
     }
     canvas { display: block; margin 0 auto; }

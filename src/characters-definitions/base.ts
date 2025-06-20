@@ -20,4 +20,5 @@ export const baseStats: Stats = {
 	dodge: 0,
 	luck: 0,
 	pickupRange: 50,
+	knockback: 0,
 };

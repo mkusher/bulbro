@@ -5,7 +5,7 @@ import { Loader } from "./start/Loading";
 import type { PropsWithChildren } from "preact/compat";
 import { Failed } from "./start/Failed";
 import { PreRound } from "./start/PreRound";
-import type { CurrentState } from "./currentState";
+import { currentState, type CurrentState } from "./currentState";
 
 type Props = {
 	gameProcess: GameProcess;
@@ -38,7 +38,7 @@ export function Game({ gameProcess }: Props) {
 		return (
 			<MainContainer>
 				<PreRound
-					state={gameProcess.currentState as CurrentState}
+					state={currentState.value}
 					startRound={async (state: CurrentState) => {
 						setIsLoading(true);
 						setFinishedResult(undefined);

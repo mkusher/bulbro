@@ -6,7 +6,7 @@ import type { EnemyState } from "../enemy/EnemyState";
 import { type BulbroSprite, createBulbroSprite } from "../bulbro/Sprite";
 import { createEnemySprite, type EnemySprite } from "../enemy/Sprite";
 import { TimerSprite } from "./TimerSprite";
-import { ShotSprite } from "./ShotSprite";
+import { ShotSprite } from "../shot/ShotSprite";
 import { HealthSprite } from "./HealthSprite";
 import { PlayingFieldTile } from "./PlayingFieldTile";
 import { WaveSprite } from "./WaveSprite";

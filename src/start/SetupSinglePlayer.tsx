@@ -3,33 +3,31 @@ import type { StartGame } from "./start-game";
 import { wellRoundedBulbro } from "../characters-definitions";
 import { isDifficulty, type Difficulty } from "../game-formulas";
 import type { Weapon } from "../weapon";
-import { fist } from "../weapons-definitions";
-import { type SpriteType } from "../bulbro/Sprite";
+import { fist, pistol } from "../weapons-definitions";
 import { DifficultyOption } from "./Options";
 import { BulbroConfig } from "./BulbroConfig";
+import type { CharacterSetup } from "../GameProcess";
 
 type Props = {
 	startGame: StartGame;
 };
 
 export function SetupSinglePlayer({ startGame }: Props) {
-	const [selectedBulbro, selectBulbro] = useState(wellRoundedBulbro);
-	const [selectedBulbroStyle, selectBulbroStyle] =
-		useState<SpriteType>("dark oracle");
+	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
+		bulbro: wellRoundedBulbro,
+		sprite: "dark oracle",
+	});
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
-	const [selectedWeapons, selectWeapons] = useState<Weapon[]>([fist]);
+	const [selectedWeapons, selectWeapons] = useState<Weapon[][]>([
+		[pistol, fist],
+	]);
 	const [selectedDuration, setDuration] = useState<number>(60);
 	const onSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
 		startGame(
-			[
-				{
-					bulbro: selectedBulbro,
-					sprite: selectedBulbroStyle,
-				},
-			],
+			[firstBulbro],
 			selectedDifficulty,
-			[selectedWeapons],
+			selectedWeapons,
 			selectedDuration,
 		);
 	};
@@ -37,12 +35,14 @@ export function SetupSinglePlayer({ startGame }: Props) {
 		<form onSubmit={onSubmit}>
 			<h2>Start new session</h2>
 			<BulbroConfig
-				selectBulbro={selectBulbro}
-				selectedBulbro={selectedBulbro}
-				selectBulbroStyle={selectBulbroStyle}
-				selectedBulbroStyle={selectedBulbroStyle}
-				selectedWeapons={selectedWeapons}
-				selectWeapons={selectWeapons}
+				selectBulbro={(bulbro) => changeFirstBulbro({ ...firstBulbro, bulbro })}
+				selectedBulbro={firstBulbro.bulbro}
+				selectBulbroStyle={(sprite) =>
+					changeFirstBulbro({ ...firstBulbro, sprite })
+				}
+				selectedBulbroStyle={firstBulbro.sprite}
+				selectedWeapons={selectedWeapons[0] ?? []}
+				selectWeapons={(weapons) => selectWeapons(([w]) => [weapons, w ?? []])}
 			/>
 			<div id="difficulty-select">
 				<label>

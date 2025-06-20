@@ -1,4 +1,4 @@
-import { direction, type Direction, type Position } from "../geometry";
+import { type Direction, type Position } from "../geometry";
 import type { Material, WeaponState } from "../currentState";
 import type { Bulbro, Stats } from "./BulbroCharacter";
 import type { MovableObject, Shape } from "../movement/Movement";
@@ -14,6 +14,7 @@ type BulbroStateProperties = {
 	readonly speed: number;
 	readonly level: number;
 	readonly totalExperience: number;
+	readonly materialsAvailable: number;
 	readonly healthPoints: number;
 	readonly stats: Stats;
 	readonly weapons: WeaponState[];
@@ -47,6 +48,9 @@ export class BulbroState implements BulbroStateProperties {
 	}
 	get totalExperience() {
 		return this.#props.totalExperience;
+	}
+	get materialsAvailable() {
+		return this.#props.materialsAvailable;
 	}
 	get healthPoints() {
 		return this.#props.healthPoints;
@@ -122,6 +126,7 @@ export class BulbroState implements BulbroStateProperties {
 		return new BulbroState({
 			...this.#props,
 			totalExperience: this.#props.totalExperience + material.value,
+			materialsAvailable: this.#props.materialsAvailable + material.value,
 		});
 	}
 
@@ -135,13 +140,16 @@ export class BulbroState implements BulbroStateProperties {
 			return this;
 		}
 
+		const timeSinceLastHit = now - this.lastHitAt.getTime();
+
 		const hpPerSecond = getHpRegenerationPerSecond(this.stats.hpRegeneration);
 
 		return new BulbroState({
 			...this.#props,
 			healedByHpRegenerationAt: new Date(now),
 			healthPoints:
-				this.healthPoints + (hpPerSecond * timeSinceLastHeal) / 1000,
+				this.healthPoints +
+				(hpPerSecond * Math.min(timeSinceLastHeal, timeSinceLastHit)) / 1000,
 		});
 	}
 	/** Returns this player as a MovableObject for collision logic. */
@@ -183,5 +191,6 @@ export function spawnBulbro(
 		lastMovedAt: now,
 		lastHitAt: new Date(0),
 		healedByHpRegenerationAt: now,
+		materialsAvailable: 0,
 	});
 }

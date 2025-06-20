@@ -11,13 +11,18 @@ const blackBorderRectangleHeight = 35;
 
 export class ExperienceSprite {
 	#gfx: PIXI.Container;
-	#text: PIXI.Text;
+	#lvlText: PIXI.Text;
+	#materialsText: PIXI.Text;
 	#blackBorderRectangle: PIXI.Graphics;
 	#greenExperienceRectangle: PIXI.Graphics;
 	constructor(playingfieldSize: Size, playerIndex: number) {
 		this.#gfx = new PIXI.Container();
 		const style = new PIXI.TextStyle({ fontSize: 14, fill: "#ffffff" });
-		this.#text = new PIXI.Text("", style);
+		this.#lvlText = new PIXI.Text("", style);
+		this.#materialsText = new PIXI.Text(
+			"",
+			new PIXI.TextStyle({ fontSize: 16, fill: "#22ff22" }),
+		);
 		const blackBorderRectangle = new PIXI.Graphics();
 		blackBorderRectangle.beginFill(0x000000);
 		const blackBorderRectangleWidth = playingfieldSize.width * 0.5 * 0.8;
@@ -30,20 +35,27 @@ export class ExperienceSprite {
 		blackBorderRectangle.endFill();
 
 		const padding = 10;
-		blackBorderRectangle.x =
+
+		const leftBorder =
 			playerIndex === 0
 				? padding
 				: playingfieldSize.width - blackBorderRectangleWidth - padding;
+
+		blackBorderRectangle.x = leftBorder;
 		blackBorderRectangle.y = 50;
 
-		this.#text.y = 10;
+		this.#lvlText.y = 10;
+		this.#materialsText.y =
+			blackBorderRectangle.y + blackBorderRectangle.height + padding;
+		this.#materialsText.x = leftBorder + padding;
 
 		const greenExperienceRectangle = new PIXI.Graphics();
 		blackBorderRectangle.addChild(greenExperienceRectangle);
-		blackBorderRectangle.addChild(this.#text);
+		blackBorderRectangle.addChild(this.#lvlText);
 		this.#blackBorderRectangle = blackBorderRectangle;
 		this.#greenExperienceRectangle = greenExperienceRectangle;
 		this.#gfx.addChild(this.#blackBorderRectangle);
+		this.#gfx.addChild(this.#materialsText);
 	}
 	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
 		parent.addChild(this.#gfx);
@@ -69,7 +81,10 @@ export class ExperienceSprite {
 			blackBorderRectangleHeight - 2 * padding,
 		);
 		greenExperienceRectangle.endFill();
-		this.#text.text = `Lvl ${currentLevelByExp}`;
-		this.#text.x = greenExperienceRectangleWidth - this.#text.width - padding;
+		const materials = player?.materialsAvailable.toString() ?? "0";
+		this.#lvlText.text = `Lvl ${currentLevelByExp}`;
+		this.#lvlText.x =
+			greenExperienceRectangleWidth - this.#lvlText.width - padding;
+		this.#materialsText.text = materials;
 	}
 }

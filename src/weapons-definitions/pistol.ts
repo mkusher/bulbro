@@ -12,5 +12,6 @@ export const pistol: Weapon = {
 		damage: 12,
 		range: 400,
 		attackSpeed: 1.2,
+		knockback: 15,
 	},
 };

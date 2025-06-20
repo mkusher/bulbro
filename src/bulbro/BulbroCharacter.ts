@@ -1,10 +1,11 @@
 import type { Weapon } from "../weapon";
 import type { SpriteType } from "./Sprite";
 
-/**
- * Statistics for a Bulbro, Player, or Enemy.
- */
-export interface Stats {
+export interface SecondaryStats {
+	pickupRange: number;
+	knockback: number;
+}
+export interface MainStats {
 	maxHp: number;
 	hpRegeneration: number;
 	damage: number;
@@ -20,8 +21,8 @@ export interface Stats {
 	speed: number;
 	luck: number;
 	harvesting: number;
-	pickupRange: number;
 }
+export interface Stats extends MainStats, SecondaryStats {}
 
 /**
  * Bulbro character model.

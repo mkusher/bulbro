@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import type { CurrentState } from "./currentState";
+import { currentState, type CurrentState } from "./currentState";
 import type { Scene } from "./graphics/Scene";
 import type { Ticker } from "pixi.js";
 import { TickProcess } from "./TickProcess";
@@ -13,7 +13,6 @@ import { SecondaryKeyboardControl } from "./controls/SecondaryKeyboardControl";
 
 export class WaveProcess {
 	#logger: Logger;
-	#state: CurrentState;
 	#scene: Scene;
 	#ticker: Ticker;
 	#tickIndex = 0;
@@ -23,7 +22,6 @@ export class WaveProcess {
 
 	constructor(
 		baseLogger: Logger,
-		initialState: CurrentState,
 		scene: Scene,
 		ticker: Ticker,
 		debug: boolean,
@@ -31,11 +29,10 @@ export class WaveProcess {
 		this.#logger = baseLogger.child({
 			component: "WaveProcess",
 		});
-		this.#state = initialState;
 		this.#scene = scene;
 		this.#ticker = ticker;
 		this.#debug = debug;
-		const players = this.#state.players;
+		const players = currentState.value.players;
 		this.#localPlayerControls = [
 			new MultipleControl([
 				new MainKeyboardControl(),
@@ -48,7 +45,7 @@ export class WaveProcess {
 	}
 
 	async start() {
-		await this.#scene.init(this.#state);
+		await this.#scene.init(currentState.value);
 		await Promise.all(this.#localPlayerControls.map((c) => c.start()));
 		this.#ticker.add(this.#tick);
 		this.#ticker.start();
@@ -68,12 +65,15 @@ export class WaveProcess {
 		const i = this.#tickIndex++;
 		const now = Date.now();
 		const delta = this.#ticker.deltaMS / 1000;
-		const state = this.#state;
-		if (!this.#state?.round.isRunning) {
+		const state = currentState.value;
+		if (!state) {
+			this.#logger.warn({ i }, "No current state set");
+			return;
+		}
+		if (!state.round.isRunning) {
 			this.#logger.info({ state }, "Stop wave");
 			this.stop(
-				this.#state.players.filter((player) => player.healthPoints > 0).length >
-					0
+				state.players.filter((player) => player.healthPoints > 0).length > 0
 					? "win"
 					: "fail",
 			);
@@ -81,13 +81,9 @@ export class WaveProcess {
 		if (i % 500 === 0) {
 			this.#logger.info({ state, i }, "Current state");
 		}
-		if (!state) {
-			this.#logger.warn({ i }, "No current state set");
-			return;
-		}
 		// Delegate per-tick updates to TickProcess
-		const tickProc = new TickProcess(this.#logger, this.#scene);
-		this.#state = tickProc.tick(
+		const tickProc = new TickProcess(this.#logger, this.#scene, this.#debug);
+		currentState.value = tickProc.tick(
 			state,
 			delta,
 			this.#localPlayerControls.map((c) => c.getDirection()),
