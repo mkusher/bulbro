@@ -8,5 +8,10 @@ export const knife: Weapon = {
 	name: "Knife",
 	classes: ["blade", "precise"],
 	shotSpeed: 500,
-	statsBonus: {},
+	statsBonus: {
+		damage: 6,
+		attackSpeed: 1.01,
+		range: 150,
+		knockback: 2,
+	},
 };

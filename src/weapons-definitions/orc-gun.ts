@@ -7,9 +7,9 @@ export const orcSlowGun: Weapon = {
 	id: "orc-gun",
 	name: "Orc Very Slow Gun",
 	classes: ["gun"],
-	shotSpeed: 150,
+	shotSpeed: 250,
 	statsBonus: {
-		range: 3000,
+		range: 2000,
 		damage: 5,
 	},
 };

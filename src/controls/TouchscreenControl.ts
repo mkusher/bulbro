@@ -1,14 +1,22 @@
+import { signal, type Signal } from "@preact/signals";
 import { direction, distance, type Direction, type Point } from "../geometry";
 import type { PlayerControl } from "./PlayerControl";
 
 const zeroPoint = () => ({ x: 0, y: 0 });
 
 export class TouchscreenControl implements PlayerControl {
-	#startPoint: Point = zeroPoint();
-	#direction: Direction = zeroPoint();
+	#startPoint: Signal<Point> = signal(zeroPoint());
+	#direction: Signal<Direction> = signal(zeroPoint());
+	#joystickSize: number;
+	#minimalDistance: number;
+
+	constructor(joystickSize: number, minimalDistance: number = 16) {
+		this.#joystickSize = joystickSize;
+		this.#minimalDistance = minimalDistance;
+	}
 
 	async start() {
-		this.#startPoint = zeroPoint();
+		this.#startPoint.value = zeroPoint();
 		window.addEventListener("touchstart", this.#handleStart);
 		window.addEventListener("touchend", this.#handleEnd);
 		window.addEventListener("touchcancel", this.#handleCancel);
@@ -22,30 +30,47 @@ export class TouchscreenControl implements PlayerControl {
 	}
 
 	getDirection() {
-		return this.#direction;
+		return this.#direction.value;
+	}
+
+	get direction() {
+		return this.#direction.value;
+	}
+
+	get startPoint() {
+		return this.#startPoint.value;
 	}
 
 	#handleStart = (e: TouchEvent) => {
 		const touch = e.touches[0];
 		if (!touch) return;
-		this.#startPoint.x = touch.clientX;
-		this.#startPoint.y = touch.clientY;
+		this.#startPoint.value = {
+			x: touch.clientX,
+			y: touch.clientY,
+		};
 	};
 	#handleEnd = () => {
-		this.#direction = zeroPoint();
+		this.#direction.value = zeroPoint();
+		this.#startPoint.value = zeroPoint();
 	};
 	#handleCancel = () => {
-		this.#direction = zeroPoint();
+		this.#direction.value = zeroPoint();
+		this.#startPoint.value = zeroPoint();
 	};
-	#minimalDistance = 16;
 	#handleMove = (e: TouchEvent) => {
 		const touch = e.touches[0];
 		if (!touch) return;
 		const move = { x: touch.clientX, y: touch.clientY };
-		if (distance(this.#startPoint, move) < this.#minimalDistance) {
+		const d = distance(this.#startPoint.value, move);
+		if (d < this.#minimalDistance) {
 			return;
 		}
 
-		this.#direction = direction(this.#startPoint, move);
+		const direct = direction(this.#startPoint.value, move);
+
+		this.#direction.value = {
+			x: direct.x * Math.min(d / this.#joystickSize, 1),
+			y: direct.y * Math.min(d / this.#joystickSize, 1),
+		};
 	};
 }

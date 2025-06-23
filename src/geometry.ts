@@ -8,6 +8,8 @@ export interface Point {
 export type Position = Point;
 export type Direction = Point;
 
+export const zeroPoint = () => ({ x: 0, y: 0 });
+
 /**
  * 2D size.
  */

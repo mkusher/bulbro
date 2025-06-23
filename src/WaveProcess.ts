@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import { currentState, type CurrentState } from "./currentState";
+import { currentState } from "./currentState";
 import type { Scene } from "./graphics/Scene";
 import type { Ticker } from "pixi.js";
 import { TickProcess } from "./TickProcess";
@@ -7,9 +7,9 @@ import {
 	type PlayerControl,
 	MainKeyboardControl,
 	MultipleControl,
-	TouchscreenControl,
+	touchscreenControl,
+	SecondaryKeyboardControl,
 } from "./controls";
-import { SecondaryKeyboardControl } from "./controls/SecondaryKeyboardControl";
 
 export class WaveProcess {
 	#logger: Logger;
@@ -34,10 +34,7 @@ export class WaveProcess {
 		this.#debug = debug;
 		const players = currentState.value.players;
 		this.#localPlayerControls = [
-			new MultipleControl([
-				new MainKeyboardControl(),
-				new TouchscreenControl(),
-			]),
+			new MultipleControl([new MainKeyboardControl(), touchscreenControl]),
 		];
 		if (players.length > 1) {
 			this.#localPlayerControls.push(new SecondaryKeyboardControl());

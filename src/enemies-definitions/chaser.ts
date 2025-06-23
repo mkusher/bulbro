@@ -1,5 +1,5 @@
 import type { EnemyCharacter } from "../enemy";
-import { orcFist } from "../weapons-definitions/orcFist";
+import { orcFist } from "../weapons-definitions/orc-fist";
 import { baseStats } from "./base";
 
 export const chaserEnemy: EnemyCharacter = {

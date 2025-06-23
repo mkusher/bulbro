@@ -13,8 +13,9 @@ import { createPlayer } from "./player";
 import type { Size } from "./geometry";
 import { mapScale, toClassicExpected, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
-import { toWeaponState, type Weapon } from "./weapon";
+import { type Weapon } from "./weapon";
 import type { SpriteType } from "./bulbro/Sprite";
+import { canvasSize } from "./game-canvas";
 
 export type CharacterSetup = {
 	bulbro: Bulbro;
@@ -28,8 +29,6 @@ export class GameProcess {
 	#logger: Logger;
 	#app: PIXI.Application;
 	#scene!: Scene;
-	#canvasSize: Size;
-	#mapSize: Size;
 	#waveProcess?: WaveProcess;
 	#debug: boolean;
 
@@ -40,18 +39,31 @@ export class GameProcess {
 			component: "GameProcess",
 			debug,
 		});
-		this.#canvasSize = { width: 800, height: 600 };
-		this.#mapSize = toClassicExpected(this.#canvasSize);
 	}
 
-	async initMap(mapSize = this.#canvasSize) {
-		this.#canvasSize = mapSize;
-		this.#mapSize = toClassicExpected(this.#canvasSize);
-		await this.#app.init({ ...mapSize, backgroundColor: 0x1099bb });
+	get #canvasSize() {
+		return canvasSize.value;
+	}
+
+	get #mapSize() {
+		return toClassicExpected(this.#canvasSize);
+	}
+
+	async initMap() {
+		await this.#app.init({
+			backgroundColor: 0x1099bb,
+			sharedTicker: true,
+			width: this.#canvasSize.width,
+			height: this.#canvasSize.height,
+		});
 	}
 
 	showMap(rootEl: HTMLElement) {
 		rootEl.appendChild(this.#app.view);
+		canvasSize.value = {
+			width: rootEl.offsetWidth,
+			height: rootEl.offsetHeight,
+		};
 	}
 
 	/**

@@ -6,6 +6,7 @@ import type { PropsWithChildren } from "preact/compat";
 import { Failed } from "./start/Failed";
 import { PreRound } from "./start/PreRound";
 import { currentState, type CurrentState } from "./currentState";
+import { TouchscreenJoystick } from "./controls/TouchscreenJoystick";
 
 type Props = {
 	gameProcess: GameProcess;
@@ -86,7 +87,8 @@ export function Game({ gameProcess }: Props) {
 	}
 
 	return (
-		<MainContainer>
+		<MainContainer noPadding>
+			<TouchscreenJoystick />
 			<ShowRound gameProcess={gameProcess} />
 		</MainContainer>
 	);
@@ -100,9 +102,18 @@ export function ShowRound({ gameProcess }: Props) {
 		}
 	}, [gameProcess]);
 
-	return <div ref={rootEl} />;
+	return <div className="full-viewport" ref={rootEl} />;
 }
 
-export function MainContainer({ children }: PropsWithChildren) {
-	return <div className="main-container full-viewport">{children}</div>;
+export function MainContainer({
+	children,
+	noPadding,
+}: PropsWithChildren<{ noPadding?: boolean }>) {
+	return (
+		<div
+			className={`main-container full-viewport${!!noPadding ? " no-padding" : ""}`}
+		>
+			{children}
+		</div>
+	);
 }

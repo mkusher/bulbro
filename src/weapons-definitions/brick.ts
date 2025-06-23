@@ -8,5 +8,10 @@ export const brick: Weapon = {
 	name: "Brick",
 	classes: ["blunt", "heavy"],
 	shotSpeed: 1000,
-	statsBonus: {},
+	statsBonus: {
+		range: 150,
+		knockback: 5,
+		attackSpeed: 1.39,
+		damage: 30,
+	},
 };

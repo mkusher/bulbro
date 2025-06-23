@@ -1,10 +1,18 @@
-import { isEqual, type Direction, type Position, type Size } from "../geometry";
+import {
+	direction,
+	distance,
+	isEqual,
+	type Direction,
+	type Position,
+	type Size,
+} from "../geometry";
 import type { EnemyCharacter } from "./EnemyCharacter";
 import type { WeaponState } from "../currentState";
 import { Movement, type MovableObject, type Shape } from "../movement/Movement";
 import { ENEMY_SIZE } from "./index";
 import type { ShotState } from "../shot/ShotState";
 import { knockbackSpeed, knockbackTimeout } from "../game-formulas";
+import type { BulbroState } from "../bulbro";
 
 export type EnemyType = "orc" | "slime";
 
@@ -98,15 +106,15 @@ export class EnemyState implements EnemyStateProps {
 	}
 
 	/** Returns a new state with the enemy moved to a new position. */
-	move(
-		direction: Direction,
+	moveToClosestBulbro(
+		bulbros: BulbroState[],
 		obstacles: MovableObject[],
 		mapSize: Size,
 		deltaTime: number,
 		now: number,
 	): EnemyState {
-		let knockback = this.knockback;
 		const mover = new Movement(this.toMovableObject(), mapSize, obstacles);
+		const knockback = this.knockback;
 		if (knockback && now - knockback.startedAt.getTime() <= knockbackTimeout) {
 			const newPos = mover.getPositionAfterMove(
 				knockback.direction,
@@ -120,8 +128,25 @@ export class EnemyState implements EnemyStateProps {
 				lastMovedAt: new Date(now),
 			});
 		}
+		if (this.killedAt) {
+			return this;
+		}
+		// pick first as baseline
+		let minDist = Infinity;
+		let closest: BulbroState | undefined = bulbros[0];
+		bulbros.forEach((p) => {
+			const dist = distance(this.position, p.position);
+			if (dist < minDist) {
+				minDist = dist;
+				closest = p;
+			}
+		});
+		if (!closest) {
+			return this;
+		}
+		const closestBulbroDirection = direction(this.position, closest.position);
 		const newPos = mover.getPositionAfterMove(
-			direction,
+			closestBulbroDirection,
 			this.stats.speed,
 			deltaTime,
 		);

@@ -9,7 +9,7 @@ export const doubleBarrelShotgun: Weapon = {
 	classes: ["gun", "heavy", "explosive"],
 	shotSpeed: 2500,
 	statsBonus: {
-		damage: 12,
+		damage: 3 * 4,
 		attackSpeed: 1.37,
 		range: 350,
 		knockback: 8,

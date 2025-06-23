@@ -147,11 +147,10 @@ export type Action =
 			now: number;
 			currentPlayerId: string;
 	  }
+	| { type: "tick"; deltaTime: number; now: number }
 	| { type: "heal"; deltaTime: number; now: number }
 	| {
-			type: "moveEnemy";
-			id: string;
-			direction: Direction;
+			type: "moveEnemies";
 			deltaTime: number;
 			now: number;
 	  }
@@ -224,39 +223,41 @@ export function movePlayer(
 	};
 }
 
-export function moveEnemy(
+export function moveEnemies(
 	state: CurrentState,
-	action: Extract<Action, { type: "moveEnemy" }>,
-): CurrentState {
-	const { id, direction, deltaTime, now } = action;
-	// Movement handler: build obstacles from other enemies and players
-	const obstacles: MovableObject[] = [
-		...state.enemies
-			.filter((e2) => e2.id !== id && !e2.killedAt)
-			.map((e2) => ({
-				position: e2.position,
-				shape: {
-					type: "rectangle",
-					width: ENEMY_SIZE.width,
-					height: ENEMY_SIZE.height,
-				} as Shape,
-			})),
-		...state.players.map((p2) => ({
+	action: Extract<Action, { type: "moveEnemies" }>,
+) {
+	let newState = { ...state };
+	const players = state.players;
+	let enemies = [...state.enemies];
+	const { now, deltaTime } = action;
+	if (players.length > 0) {
+		const mapSize = state.mapSize;
+		const playersObjects = state.players.map((p2) => ({
 			position: p2.position,
 			shape: {
 				type: "rectangle",
 				width: BULBRO_SIZE.width,
 				height: BULBRO_SIZE.height,
 			} as Shape,
-		})),
-	];
-	return {
-		...state,
-		enemies: state.enemies.map((e) => {
-			if (e.id !== id) return e;
-			return e.move(direction, obstacles, state.mapSize, deltaTime, now);
-		}),
-	};
+		}));
+		newState.enemies = enemies.map((enemy) => {
+			const obstacles: MovableObject[] = [
+				...enemies
+					.filter((e2) => e2.id !== enemy.id && !e2.killedAt)
+					.map((e2) => e2.toMovableObject()),
+				...playersObjects,
+			];
+			return enemy.moveToClosestBulbro(
+				players,
+				obstacles,
+				mapSize,
+				deltaTime,
+				now,
+			);
+		});
+	}
+	return newState;
 }
 
 const materialPickupSpeed = 1000;
@@ -487,29 +488,26 @@ export function selectWeapons(state: CurrentState, action: SelectWeaponAction) {
  * Pure reducer: returns new state after applying an action.
  */
 export function updateState(state: CurrentState, action: Action): CurrentState {
-	const round = updateRound(state.round, action);
 	switch (action.type) {
 		case "move": {
-			return { ...movePlayer(state, action), round };
-		}
-		case "moveEnemy": {
-			return { ...moveEnemy(state, action), round };
+			return movePlayer(state, action);
 		}
 		case "moveShot": {
 			const newState = moveShot(state, action);
 			return {
 				...newState,
-				round: !newState.round.isRunning ? newState.round : round,
+				round: !newState.round.isRunning ? newState.round : state.round,
 			};
 		}
 		case "spawnEnemy": {
-			return { ...spawnEnemy(state, action), round };
+			return spawnEnemy(state, action);
 		}
 		case "shot": {
-			return { ...addShot(state, action), round };
+			return addShot(state, action);
 		}
-
+		case "tick":
 		default:
+			const round = updateRound(state.round, action);
 			return {
 				...state,
 				round,

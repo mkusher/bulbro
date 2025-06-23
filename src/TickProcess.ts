@@ -1,13 +1,12 @@
 import type { CurrentState } from "./currentState";
-import type { EnemyState } from "./enemy/EnemyState";
 import {
 	getTimeLeft,
 	healPlayers,
+	moveEnemies,
 	moveMaterials,
 	updateState,
 } from "./currentState";
 import type { Scene } from "./graphics/Scene";
-import { v4 as uuidv4 } from "uuid";
 import { logger as defaultLogger } from "./logger";
 import {
 	shouldSpawnEnemy,
@@ -17,10 +16,11 @@ import {
 	isInRange,
 	findClosestPlayerInRange,
 } from "./game-formulas";
-import { direction, distance, type Direction } from "./geometry";
+import { type Direction } from "./geometry";
 import type { Logger } from "pino";
 import { babyEnemy, chaserEnemy, spitterEnemy } from "./enemies-definitions";
-import { spawnEnemy } from "./enemy";
+import { EnemyState, spawnEnemy } from "./enemy";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -99,34 +99,11 @@ export class TickProcess {
 
 	/** Update enemies to move towards nearest player */
 	#moveEnemies(state: CurrentState, deltaTime: number): CurrentState {
-		let newState = state;
-		const players = state.players;
-		if (players.length > 0) {
-			state.enemies.forEach((enemy) => {
-				if (enemy.killedAt) {
-					return;
-				}
-				// pick first as baseline
-				let closest = players[0]!;
-				let minDist = Infinity;
-				players.forEach((p) => {
-					const dist = distance(p.position, enemy.position);
-					if (dist < minDist) {
-						minDist = dist;
-						closest = p;
-					}
-				});
-				const d = direction(enemy.position, closest.position);
-				newState = updateState(newState, {
-					type: "moveEnemy",
-					id: enemy.id,
-					direction: d,
-					deltaTime,
-					now: Date.now(),
-				});
-			});
-		}
-		return newState;
+		return moveEnemies(state, {
+			type: "moveEnemies",
+			deltaTime,
+			now: Date.now(),
+		});
 	}
 
 	#moveObjects(
@@ -147,7 +124,7 @@ export class TickProcess {
 		deltaTime: number,
 		now: number,
 	): CurrentState {
-		let newState = state;
+		let newState = { ...state };
 		if (shouldSpawnEnemy(now, state)) {
 			const id = uuidv4();
 			const position = {
@@ -292,6 +269,6 @@ export class TickProcess {
 	}
 
 	#tick(state: CurrentState, now: number, deltaTime: number): CurrentState {
-		return updateState(state, { now, deltaTime });
+		return updateState(state, { type: "tick", now, deltaTime });
 	}
 }
