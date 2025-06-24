@@ -94,15 +94,15 @@ export class EnemyState implements EnemyStateProps {
 	}
 
 	/** Returns this enemy as a MovableObject for collision logic. */
-	toMovableObject(): MovableObject {
+	toMovableObject() {
 		return {
 			position: this.position,
 			shape: {
 				type: "rectangle",
 				width: ENEMY_SIZE.width,
 				height: ENEMY_SIZE.height,
-			} as Shape,
-		};
+			} as const,
+		} as const;
 	}
 
 	/** Returns a new state with the enemy moved to a new position. */

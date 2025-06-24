@@ -32,7 +32,19 @@ export class SpawningEnemySprite {
 		parent.addChild(this.#container);
 	}
 
-	update(enemy: EnemyState, delta: number) {}
+	update(enemy: EnemyState, delta: number) {
+		this.#sprite.clear();
+		this.#container.x = enemy.position.x / this.#scale;
+		this.#container.y = enemy.position.y / this.#scale;
+
+		const obj = enemy.toMovableObject();
+		this.#sprite.x = -obj.shape.width / 2;
+		this.#sprite.y = -obj.shape.height;
+		this.#sprite.moveTo(0, 0);
+		this.#sprite.lineTo(obj.shape.width, obj.shape.height);
+		this.#sprite.moveTo(0, obj.shape.height);
+		this.#sprite.lineTo(obj.shape.width, obj.shape.height);
+	}
 
 	/**
 	 * Removes this sprite from its parent container.

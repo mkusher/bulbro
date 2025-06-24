@@ -12,6 +12,9 @@ import type { Logger } from "pino";
 import { MaterialSprite } from "../object/MaterialSprite";
 import { canvasSize, playingFieldSize } from "../game-canvas";
 import { InWaveStats } from "../bulbro/sprites/InWaveStats";
+import type { Material } from "../object";
+import type { SpawningEnemy } from "../object/SpawningEnemyState";
+import { SpawningEnemySprite } from "../object/SpawningEnemySprite";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -22,6 +25,7 @@ export class Scene {
 	#enemySprites: Map<string, EnemySprite> = new Map();
 	#shotSprites: Map<string, ShotSprite> = new Map();
 	#materialSprites: Map<string, MaterialSprite> = new Map();
+	#spawningSprites: Map<string, SpawningEnemySprite> = new Map();
 	#timerSprite!: TimerSprite;
 	#waveSprite!: WaveSprite;
 	#inWaveStats: Map<string, InWaveStats> = new Map();
@@ -170,9 +174,39 @@ export class Scene {
 	}
 
 	#updateObjects(deltaTime: number, state: CurrentState) {
-		const materials = state.objects.filter(
-			(object) => object.type === "material",
+		this.#updateMaterials(
+			deltaTime,
+			state.objects.filter((object) => object.type === "material"),
 		);
+
+		this.#updateSpawnings(
+			deltaTime,
+			state.objects.filter((object) => object.type === "spawning-enemy"),
+		);
+	}
+
+	#updateSpawnings(deltaTime: number, spawnings: SpawningEnemy[]) {
+		spawnings.forEach((spawning) => {
+			if (!this.#spawningSprites.has(spawning.id)) {
+				const sprite = new SpawningEnemySprite(this.#scale, this.#debug);
+				sprite.appendTo(
+					this.#playingFieldTile.container,
+					this.#playingFieldLayer,
+				);
+				this.#spawningSprites.set(spawning.id, sprite);
+			}
+			const sprite = this.#spawningSprites.get(spawning.id)!;
+			sprite.update(spawning, deltaTime);
+		});
+		Array.from(this.#spawningSprites.entries()).forEach(([id, sprite]) => {
+			if (!spawnings.find((e) => e.id === id)) {
+				sprite.remove();
+				this.#spawningSprites.delete(id);
+			}
+		});
+	}
+
+	#updateMaterials(deltaTime: number, materials: Material[]) {
 		materials.forEach((material) => {
 			if (!this.#materialSprites.has(material.id)) {
 				const sprite = new MaterialSprite(this.#scale, this.#debug);
