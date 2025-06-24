@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import type { Material } from "../currentState";
+import type { Material } from "./MaterialState";
 import type { Position } from "../geometry";
 
 const size = {

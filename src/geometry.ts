@@ -55,6 +55,9 @@ export function direction(from: Point, to: Point) {
 }
 
 export function normalize(p: Point) {
+	if (isEqual(p, zeroPoint())) {
+		return zeroPoint();
+	}
 	const d = Math.hypot(p.x, p.y);
 	return {
 		x: p.x / d,

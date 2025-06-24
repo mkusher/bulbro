@@ -18,7 +18,7 @@ import {
 } from "./game-formulas";
 import { type Direction } from "./geometry";
 import type { Logger } from "pino";
-import { babyEnemy, chaserEnemy, spitterEnemy } from "./enemies-definitions";
+import { allEnemies } from "./enemies-definitions";
 import { EnemyState, spawnEnemy } from "./enemy";
 import { v4 as uuidv4 } from "uuid";
 
@@ -131,10 +131,9 @@ export class TickProcess {
 				x: Math.random() * newState.mapSize.width,
 				y: Math.random() * newState.mapSize.height,
 			};
-			const enemiesToSpawn = [babyEnemy, chaserEnemy, spitterEnemy];
+			const enemiesToSpawn = allEnemies;
 			const randomEnemy =
-				enemiesToSpawn[Math.floor(enemiesToSpawn.length * Math.random())] ??
-				babyEnemy;
+				enemiesToSpawn[Math.floor(enemiesToSpawn.length * Math.random())]!;
 			const enemy: EnemyState = spawnEnemy(id, position, randomEnemy);
 			this.#logger.debug(
 				{ event: "spawnEnemy", id, position, enemy },

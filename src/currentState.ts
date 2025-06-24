@@ -22,15 +22,7 @@ import { EnemyState } from "./enemy/EnemyState";
 import { findClosest, type Difficulty } from "./game-formulas";
 import { signal } from "@preact/signals";
 import type { ShotState } from "./shot/ShotState";
-
-export type Material = {
-	type: "material";
-	id: string;
-	position: Position;
-	value: number;
-};
-
-export type MapObject = Material;
+import type { MapObject } from "./object";
 
 /**
  * Runtime state of a single weapon in play.
@@ -272,6 +264,7 @@ export function moveMaterials(
 		let position = object.position;
 
 		if (
+			object.type === "material" &&
 			player &&
 			distance(player.position, object.position) <= player.stats.pickupRange
 		) {
@@ -414,9 +407,33 @@ export function spawnEnemy(
 	action: Extract<Action, { type: "spawnEnemy" }>,
 ): CurrentState {
 	const { enemy, now } = action;
+	let objects = [];
+	let enemiesToSpawn = [];
+	for (let object of state.objects) {
+		if (object.type !== "spawning-enemy") {
+			objects.push(object);
+			continue;
+		}
+		if (now - object.startedAt.getTime() >= object.duration * 1000) {
+			enemiesToSpawn.push(object.enemy);
+			continue;
+		}
+		objects.push(object);
+	}
 	return {
 		...state,
-		enemies: [...state.enemies, enemy],
+		enemies: [...state.enemies, ...enemiesToSpawn],
+		objects: [
+			...objects,
+			{
+				type: "spawning-enemy",
+				id: enemy.id,
+				position: enemy.position,
+				startedAt: new Date(now),
+				duration: 3,
+				enemy,
+			},
+		],
 		lastSpawnAt: new Date(now),
 	};
 }

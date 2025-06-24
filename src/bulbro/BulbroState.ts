@@ -1,5 +1,6 @@
 import { type Direction, type Position } from "../geometry";
-import type { Material, WeaponState } from "../currentState";
+import type { Material } from "../object";
+import type { WeaponState } from "../currentState";
 import type { Bulbro, Stats } from "./BulbroCharacter";
 import type { MovableObject, Shape } from "../movement/Movement";
 import { BULBRO_SIZE } from "./index";

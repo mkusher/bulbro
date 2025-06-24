@@ -10,7 +10,7 @@ export class TouchscreenControl implements PlayerControl {
 	#joystickSize: number;
 	#minimalDistance: number;
 
-	constructor(joystickSize: number, minimalDistance: number = 16) {
+	constructor(joystickSize: number, minimalDistance: number = 8) {
 		this.#joystickSize = joystickSize;
 		this.#minimalDistance = minimalDistance;
 	}

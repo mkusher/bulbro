@@ -10,12 +10,11 @@ import {
 } from "./currentState";
 import { Scene } from "./graphics/Scene";
 import { createPlayer } from "./player";
-import type { Size } from "./geometry";
-import { mapScale, toClassicExpected, type Difficulty } from "./game-formulas";
+import { mapScale, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
 import { type Weapon } from "./weapon";
 import type { SpriteType } from "./bulbro/Sprite";
-import { canvasSize } from "./game-canvas";
+import { canvasSize, mapSize, playingFieldSize } from "./game-canvas";
 
 export type CharacterSetup = {
 	bulbro: Bulbro;
@@ -45,8 +44,12 @@ export class GameProcess {
 		return canvasSize.value;
 	}
 
+	get #playingFieldSize() {
+		return playingFieldSize.value;
+	}
+
 	get #mapSize() {
-		return toClassicExpected(this.#canvasSize);
+		return mapSize.value;
 	}
 
 	async initMap() {
@@ -95,7 +98,7 @@ export class GameProcess {
 			this.#logger,
 			this.#debug,
 			this.#app,
-			mapScale(this.#mapSize, this.#canvasSize),
+			mapScale(this.#mapSize, this.#playingFieldSize),
 		);
 		this.#waveProcess = new WaveProcess(
 			this.#logger,

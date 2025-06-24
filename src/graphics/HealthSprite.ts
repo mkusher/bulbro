@@ -10,14 +10,14 @@ export class HealthSprite {
 	#blackBorderRectangle: PIXI.Graphics;
 	#redHealthRectangle: PIXI.Graphics;
 	#playerIndex: number;
-	constructor(playingfieldSize: Size, playerIndex: number) {
+	constructor(canvasSize: Size, playerIndex: number) {
 		this.#playerIndex = playerIndex;
 		this.#gfx = new PIXI.Container();
 		const style = new PIXI.TextStyle({ fontSize: 14, fill: "#ffffff" });
 		this.#text = new PIXI.Text("", style);
 		const blackBorderRectangle = new PIXI.Graphics();
 		blackBorderRectangle.beginFill(0x000000);
-		const blackBorderRectangleWidth = playingfieldSize.width * 0.5 * 0.8;
+		const blackBorderRectangleWidth = canvasSize.width * 0.5 * 0.8;
 		blackBorderRectangle.drawRect(
 			0,
 			0,
@@ -31,7 +31,7 @@ export class HealthSprite {
 		blackBorderRectangle.x =
 			playerIndex === 0
 				? padding
-				: playingfieldSize.width - blackBorderRectangleWidth - padding;
+				: canvasSize.width - blackBorderRectangleWidth - padding;
 		blackBorderRectangle.y = 10;
 
 		this.#text.y = 10;

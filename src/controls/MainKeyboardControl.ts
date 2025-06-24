@@ -1,3 +1,4 @@
+import { normalize } from "../geometry";
 import type { PlayerControl } from "./PlayerControl";
 
 export type ArrowKeys = {
@@ -7,10 +8,10 @@ export type ArrowKeys = {
 	down?: boolean;
 };
 function keysToDirection(keys: ArrowKeys) {
-	return {
+	return normalize({
 		x: Number(!!keys.right) - Number(!!keys.left),
 		y: Number(!!keys.down) - Number(!!keys.up),
-	};
+	});
 }
 
 export class MainKeyboardControl implements PlayerControl {

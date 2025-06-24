@@ -21,7 +21,15 @@ export class ExperienceSprite {
 		this.#lvlText = new PIXI.Text("", style);
 		this.#materialsText = new PIXI.Text(
 			"",
-			new PIXI.TextStyle({ fontSize: 16, fill: "#22ff22" }),
+			new PIXI.TextStyle({
+				fontSize: 16,
+				fill: "#22ff22",
+				stroke: {
+					width: 2,
+					color: 0x000000,
+					alignment: 1,
+				},
+			}),
 		);
 		const blackBorderRectangle = new PIXI.Graphics();
 		blackBorderRectangle.beginFill(0x000000);
