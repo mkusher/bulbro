@@ -6,13 +6,12 @@ import { type BulbroSprite, createBulbroSprite } from "../bulbro/Sprite";
 import { createEnemySprite, type EnemySprite } from "../enemy/Sprite";
 import { TimerSprite } from "./TimerSprite";
 import { ShotSprite } from "../shot/ShotSprite";
-import { HealthSprite } from "./HealthSprite";
 import { PlayingFieldTile } from "./PlayingFieldTile";
 import { WaveSprite } from "./WaveSprite";
 import type { Logger } from "pino";
 import { MaterialSprite } from "../object/MaterialSprite";
-import { ExperienceSprite } from "./ExperienceSprite";
 import { canvasSize, playingFieldSize } from "../game-canvas";
+import { InWaveStats } from "../bulbro/sprites/InWaveStats";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -25,8 +24,7 @@ export class Scene {
 	#materialSprites: Map<string, MaterialSprite> = new Map();
 	#timerSprite!: TimerSprite;
 	#waveSprite!: WaveSprite;
-	#healthSprites: Map<string, HealthSprite> = new Map();
-	#experienceSprites: Map<string, ExperienceSprite> = new Map();
+	#inWaveStats: Map<string, InWaveStats> = new Map();
 	#playingFieldTile!: PlayingFieldTile;
 	#playingFieldLayer: PIXI.IRenderLayer;
 	#groundLayer: PIXI.IRenderLayer;
@@ -198,18 +196,12 @@ export class Scene {
 
 	#updatePlayerStats(deltaTime: number, state: CurrentState) {
 		state.players.forEach((player, i) => {
-			if (!this.#healthSprites.get(player.id)) {
-				const sprite = new HealthSprite(canvasSize.value, i);
+			if (!this.#inWaveStats.get(player.id)) {
+				const sprite = new InWaveStats(canvasSize.value, i);
 				sprite.appendTo(this.#app.stage, this.#uiLayer);
-				this.#healthSprites.set(player.id, sprite);
+				this.#inWaveStats.set(player.id, sprite);
 			}
-			if (!this.#experienceSprites.get(player.id)) {
-				const sprite = new ExperienceSprite(canvasSize.value, i);
-				sprite.appendTo(this.#app.stage, this.#uiLayer);
-				this.#experienceSprites.set(player.id, sprite);
-			}
-			this.#healthSprites.get(player.id)?.update(canvasSize.value, player);
-			this.#experienceSprites.get(player.id)?.update(canvasSize.value, player);
+			this.#inWaveStats.get(player.id)?.update(canvasSize.value, player);
 		});
 	}
 }

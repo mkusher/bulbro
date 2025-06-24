@@ -1,45 +1,21 @@
-import { normalize } from "../geometry";
+import { KeyboardControl } from "./KeyboardControl";
 import type { PlayerControl } from "./PlayerControl";
 
-export type ArrowKeys = {
-	up?: boolean;
-	left?: boolean;
-	right?: boolean;
-	down?: boolean;
-};
-function keysToDirection(keys: ArrowKeys) {
-	return normalize({
-		x: Number(!!keys.right) - Number(!!keys.left),
-		y: Number(!!keys.down) - Number(!!keys.up),
-	});
-}
-
 export class MainKeyboardControl implements PlayerControl {
-	#keys: ArrowKeys = {};
+	#control: KeyboardControl;
+	constructor() {
+		this.#control = new KeyboardControl(codeToArrow);
+	}
 	async start() {
-		window.addEventListener("keydown", this.#onKeyDown);
-		window.addEventListener("keyup", this.#onKeyUp);
+		this.#control.start();
 	}
 	async stop() {
-		window.removeEventListener("keydown", this.#onKeyDown);
-		window.removeEventListener("keyup", this.#onKeyUp);
+		this.#control.stop();
 	}
 
 	getDirection() {
-		return keysToDirection(this.#keys);
+		return this.#control.getDirection();
 	}
-
-	#onKeyUp = (e: KeyboardEvent) => {
-		const arrow = codeToArrow(e.code);
-		if (!arrow) return;
-		this.#keys[arrow] = false;
-	};
-
-	#onKeyDown = (e: KeyboardEvent) => {
-		const arrow = codeToArrow(e.code);
-		if (!arrow) return;
-		this.#keys[arrow] = true;
-	};
 }
 
 const codeToArrow = (code: string) => {

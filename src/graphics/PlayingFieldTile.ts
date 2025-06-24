@@ -27,7 +27,7 @@ export class PlayingFieldTile {
 		layer?: PIXI.IRenderLayer,
 	) {
 		const texture = await PIXI.Assets.load(
-			"/assets/craftpix-net-504452-free-village-pixel-tileset-for-top-down-defense/1%20Tiles/FieldsTile_01.png",
+			"/assets/craftpix-net-504452-free-village-pixel-tileset-for-top-down-defense/1%20Tiles/FieldsTileset.png",
 		);
 		this.#sprite.texture = texture;
 		parent.addChild(this.#container);

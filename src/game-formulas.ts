@@ -166,5 +166,5 @@ export function toClassicExpected(actual: Size) {
 export const getHpRegenerationPerSecond = (hpRegeneration: number) =>
 	hpRegeneration / 11.25 + 1 / 9;
 
-export const knockbackSpeed = 10;
-export const knockbackTimeout = 125;
+export const knockbackSpeed = 25;
+export const knockbackTimeout = 250;

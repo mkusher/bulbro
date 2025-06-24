@@ -64,6 +64,12 @@ export function normalize(p: Point) {
 		y: p.y / d,
 	};
 }
+export function scale(p: Point, s: number) {
+	return {
+		x: p.x / s,
+		y: p.y / s,
+	};
+}
 
 const epsilon = 0.001;
 export function isEqual(p1: Point, p2: Point) {
