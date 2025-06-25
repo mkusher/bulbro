@@ -1,49 +1,45 @@
 import * as PIXI from "pixi.js";
-import type { Position } from "../geometry";
 import type { ShotState } from "./ShotState";
+import { BulletSprite } from "./BulletSprite";
+import { EnemyProjectileSprite } from "./EnemyProjectileSprite";
 
-const SHOT_SIZE = 4;
-/**
- * Manages an enemy sprite graphic.
- */
 export class ShotSprite {
 	#gfx: PIXI.Graphics;
+	#sprite: EnemyProjectileSprite | BulletSprite;
 	#scale: number;
 
 	constructor(scale: number, shot: ShotState) {
 		this.#scale = scale;
 		this.#gfx = new PIXI.Graphics();
-		this.#gfx.beginFill(shot.shooterType === "player" ? 0xcccc22 : 0x961ea3);
-		this.#gfx.drawCircle(0, 0, SHOT_SIZE);
-		this.#gfx.endFill();
+		this.#sprite =
+			shot.shooterType === "player"
+				? new BulletSprite(scale, shot)
+				: new EnemyProjectileSprite(scale, shot);
+		this.#sprite.appendTo(this.#gfx);
 	}
 
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer?: PIXI.IRenderLayer): void {
 		parent.addChild(this.#gfx);
-		layer.attach(this.#gfx);
+		layer?.attach(this.#gfx);
 	}
 
 	/**
 	 * Updates sprite position.
 	 */
-	updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x / this.#scale;
-		this.#gfx.y = pos.y / this.#scale;
+	update(deltaTime: number, shot: ShotState) {
+		this.#gfx.x = shot.position.x / this.#scale;
+		this.#gfx.y = shot.position.y / this.#scale;
+		this.#sprite.update(deltaTime, shot);
 	}
 
 	/**
 	 * Removes this sprite from its parent container.
 	 */
 	remove(): void {
+		this.#sprite.remove();
 		this.#gfx.parent?.removeChild(this.#gfx);
-	}
-	/**
-	 * Sets sprite opacity.
-	 */
-	setAlpha(alpha: number): void {
-		this.#gfx.alpha = alpha;
 	}
 }

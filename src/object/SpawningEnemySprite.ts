@@ -55,7 +55,7 @@ export class SpawningEnemySprite {
 		this.#container.x = spawningEnemy.position.x / this.#scale;
 		this.#container.y = spawningEnemy.position.y / this.#scale;
 		this.#sprite.alpha = Math.sin(
-			(((Date.now() - spawningEnemy.startedAt.getTime()) / 50) * Math.PI) / 16,
+			(((Date.now() - spawningEnemy.startedAt.getTime()) / 50) * Math.PI) / 8,
 		);
 	}
 

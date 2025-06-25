@@ -5,7 +5,7 @@ export class TimerSprite {
 	#gfx: PIXI.Text;
 	constructor() {
 		const style = new PIXI.TextStyle({
-			fontSize: 24,
+			fontSize: 28,
 			fill: "#ffffff",
 			stroke: {
 				width: 2,

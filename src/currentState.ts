@@ -252,7 +252,7 @@ export function moveEnemies(
 	return newState;
 }
 
-const materialPickupSpeed = 1000;
+const materialPickupSpeed = 600;
 export function moveMaterials(
 	state: CurrentState,
 	action: Extract<Action, { type: "moveObjects" }>,

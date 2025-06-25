@@ -171,3 +171,11 @@ export function rectFromCenter(center: Point, size: Size): Rectangle {
 		height: size.height,
 	};
 }
+
+export function rotation(direction: Direction) {
+	if (direction.y === 0) {
+		return Math.PI / 2;
+	}
+	const r = Math.atan(direction.x / direction.y);
+	return r;
+}

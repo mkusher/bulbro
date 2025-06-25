@@ -5,7 +5,7 @@ export class WaveSprite {
 	#gfx: PIXI.Text;
 	constructor() {
 		const style = new PIXI.TextStyle({
-			fontSize: 16,
+			fontSize: 20,
 			fill: "#ffffff",
 			stroke: {
 				width: 2,

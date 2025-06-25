@@ -1,5 +1,11 @@
 import { signal, type Signal } from "@preact/signals";
-import { direction, distance, type Direction, type Point } from "../geometry";
+import {
+	direction,
+	distance,
+	normalize,
+	type Direction,
+	type Point,
+} from "../geometry";
 import type { PlayerControl } from "./PlayerControl";
 
 const zeroPoint = () => ({ x: 0, y: 0 });
@@ -66,7 +72,7 @@ export class TouchscreenControl implements PlayerControl {
 			return;
 		}
 
-		const direct = direction(this.#startPoint.value, move);
+		const direct = normalize(direction(this.#startPoint.value, move));
 
 		this.#direction.value = {
 			x: direct.x * Math.min(d / this.#joystickSize, 1),

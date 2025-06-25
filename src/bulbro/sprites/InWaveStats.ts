@@ -45,6 +45,6 @@ export class InWaveStats {
 		this.#materialsIndicator.update(width, player);
 	}
 	#width(canvasSize: Size) {
-		return Math.max(canvasSize.width * 0.3 - 2 * this.#padding, 120);
+		return Math.max(canvasSize.width * 0.35 - 2 * this.#padding, 120);
 	}
 }

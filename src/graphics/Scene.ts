@@ -165,11 +165,9 @@ export class Scene {
 				this.#shotSprites.delete(id);
 			}
 		});
-		// Update enemy positions
-		state.shots.forEach((e) => {
-			const sprite = this.#shotSprites.get(e.id)!;
-			sprite.updatePosition(e.position);
-			sprite.setAlpha(1);
+		state.shots.forEach((s) => {
+			const sprite = this.#shotSprites.get(s.id)!;
+			sprite.update(deltaTime, s);
 		});
 	}
 
