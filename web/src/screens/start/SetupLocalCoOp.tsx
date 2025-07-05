@@ -1,12 +1,12 @@
 import { useState } from "preact/hooks";
-import type { StartGame } from "./start-game";
-import { wellRoundedBulbro } from "../characters-definitions";
-import { isDifficulty, type Difficulty } from "../game-formulas";
-import type { Weapon } from "../weapon";
-import { fist, smg } from "../weapons-definitions";
-import { DifficultyOption } from "./Options";
-import { BulbroConfig } from "./BulbroConfig";
-import type { CharacterSetup } from "../GameProcess";
+import type { StartGame } from "@/ui/start-game";
+import { wellRoundedBulbro } from "@/characters-definitions";
+import { isDifficulty, type Difficulty } from "@/game-formulas";
+import type { Weapon } from "@/weapon";
+import { smg } from "@/weapons-definitions";
+import { DifficultyOption } from "@/ui/Options";
+import { BulbroConfig } from "@/ui/BulbroConfig";
+import type { CharacterSetup } from "@/GameProcess";
 
 type Props = {
 	startGame: StartGame;

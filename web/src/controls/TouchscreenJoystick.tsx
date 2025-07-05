@@ -1,12 +1,10 @@
 import { isEqual, zeroPoint } from "../geometry";
 import { TouchscreenControl } from "./TouchscreenControl";
+import styles from "./joystick.module.css";
 
 const joystickSize = 80;
 
 export const touchscreenControl = new TouchscreenControl(joystickSize);
-type Props = {
-	scale?: number;
-};
 export function TouchscreenJoystick() {
 	const hasStartedTouch =
 		!!touchscreenControl.startPoint &&
@@ -38,8 +36,8 @@ export function TouchscreenJoystick() {
 	};
 
 	return (
-		<div class="joystick" style={joystickStyle}>
-			<div class="touchpad" style={touchpadStyle}></div>
+		<div className={styles["joystick"]} style={joystickStyle}>
+			<div className={styles["touchpad"]} style={touchpadStyle}></div>
 		</div>
 	);
 }

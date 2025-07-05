@@ -57,6 +57,11 @@ export class Scene {
 		this.#timerSprite.appendTo(this.#app.stage, this.#uiLayer);
 		this.#waveSprite = new WaveSprite();
 		this.#waveSprite.appendTo(this.#app.stage, this.#uiLayer);
+		this.#playingFieldTile = new PlayingFieldTile(
+			this.#scale,
+			playingFieldSize.value,
+		);
+		this.#playingFieldTile.init(this.#app.stage, this.#groundLayer);
 	}
 
 	/**
@@ -72,15 +77,6 @@ export class Scene {
 				state,
 			},
 			"Scene init",
-		);
-		this.#playingFieldTile = new PlayingFieldTile(
-			this.#scale,
-			playingFieldSize.value,
-		);
-		await this.#playingFieldTile.init(
-			state,
-			this.#app.stage,
-			this.#groundLayer,
 		);
 		this.update(0, state);
 	}

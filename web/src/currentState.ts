@@ -66,6 +66,9 @@ export const nextWave = (
 	{ now }: Action,
 ): CurrentState => ({
 	...currentState,
+	shots: [],
+	objects: [],
+	enemies: [],
 	players: currentState.players.map((player, i) =>
 		player.move(startPosition(currentState.mapSize, i), now),
 	),

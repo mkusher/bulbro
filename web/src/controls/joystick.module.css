@@ -1,0 +1,11 @@
+.joystick {
+	position: absolute;
+	background: rgba(0, 0, 0, 0.4);
+	opacity: 0.4;
+}
+.joystick .touchpad {
+	position: absolute;
+	display: block;
+	background: rgba(0, 0, 0, 0.95);
+	opacity: 0.95;
+}

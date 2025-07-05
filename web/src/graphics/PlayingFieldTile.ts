@@ -21,11 +21,7 @@ export class PlayingFieldTile {
 	/**
 	 * Initializes sprites and UI elements.
 	 */
-	async init(
-		state: CurrentState,
-		parent: PIXI.Container,
-		layer?: PIXI.IRenderLayer,
-	) {
+	async init(parent: PIXI.Container, layer?: PIXI.IRenderLayer) {
 		const texture = await PIXI.Assets.load(
 			"/assets/craftpix-net-436971-free-top-down-roguelike-game-kit-pixel-art/2%20Dungeon%20Tileset/1%20Tiles/Tileset.png",
 		);

@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "preact/compat";
-import { WeaponsSelect } from "./WeaponsSelect";
-import type { CurrentState } from "../currentState";
-import { selectWeapons as selectWeaponsInState } from "../currentState";
-import { fromWeaponState, toWeaponState } from "../weapon";
+import { WeaponsSelect } from "@/ui/WeaponsSelect";
+import type { CurrentState } from "@/currentState";
+import { selectWeapons as selectWeaponsInState } from "@/currentState";
+import { fromWeaponState, toWeaponState } from "@/weapon";
 
 type Props = {
 	startRound: (state: CurrentState) => void;

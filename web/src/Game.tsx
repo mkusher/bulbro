@@ -1,12 +1,14 @@
+import "./ui/global.css";
 import { useRef, useEffect, useState } from "preact/hooks";
 import type { GameProcess } from "./GameProcess";
-import { StartScreen } from "./start/StartScreen";
-import { Loader } from "./start/Loading";
-import type { PropsWithChildren } from "preact/compat";
-import { Failed } from "./start/Failed";
-import { PreRound } from "./start/PreRound";
+import { StartScreen } from "./screens/StartScreen";
+import { Loader } from "./ui/Loading";
+import { Failed } from "./screens/Failed";
+import { PreRound } from "./screens/PreRound";
 import { currentState, type CurrentState } from "./currentState";
 import { TouchscreenJoystick } from "./controls/TouchscreenJoystick";
+import { SplashBanner } from "./ui/Splash";
+import { MainContainer } from "./ui/Layout";
 
 type Props = {
 	gameProcess: GameProcess;
@@ -60,7 +62,8 @@ export function Game({ gameProcess }: Props) {
 
 	if (!isRound) {
 		return (
-			<MainContainer>
+			<MainContainer noPadding top>
+				<SplashBanner />
 				<StartScreen
 					startGame={async (characters, difficulty, weaponsSetup, duration) => {
 						setIsLoading(true);
@@ -103,17 +106,4 @@ export function ShowRound({ gameProcess }: Props) {
 	}, [gameProcess]);
 
 	return <div className="full-viewport" ref={rootEl} />;
-}
-
-export function MainContainer({
-	children,
-	noPadding,
-}: PropsWithChildren<{ noPadding?: boolean }>) {
-	return (
-		<div
-			className={`main-container full-viewport${!!noPadding ? " no-padding" : ""}`}
-		>
-			{children}
-		</div>
-	);
 }

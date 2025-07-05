@@ -1,12 +1,13 @@
 import { useState } from "preact/hooks";
-import type { StartGame } from "./start-game";
-import { wellRoundedBulbro } from "../characters-definitions";
-import { isDifficulty, type Difficulty } from "../game-formulas";
-import type { Weapon } from "../weapon";
-import { fist, pistol } from "../weapons-definitions";
-import { DifficultyOption } from "./Options";
-import { BulbroConfig } from "./BulbroConfig";
-import type { CharacterSetup } from "../GameProcess";
+import type { StartGame } from "@/ui/start-game";
+import { wellRoundedBulbro } from "@/characters-definitions";
+import { isDifficulty, type Difficulty } from "@/game-formulas";
+import type { Weapon } from "@/weapon";
+import { fist, pistol } from "@/weapons-definitions";
+import { DifficultyOption } from "@/ui/Options";
+import { BulbroConfig } from "@/ui/BulbroConfig";
+import type { CharacterSetup } from "@/GameProcess";
+import layoutStyles from "@/ui/layout.module.css";
 
 type Props = {
 	startGame: StartGame;
@@ -32,7 +33,7 @@ export function SetupSinglePlayer({ startGame }: Props) {
 		);
 	};
 	return (
-		<form onSubmit={onSubmit}>
+		<form className={layoutStyles["screen"]} onSubmit={onSubmit}>
 			<h2>Start new session</h2>
 			<BulbroConfig
 				selectBulbro={(bulbro) => changeFirstBulbro({ ...firstBulbro, bulbro })}

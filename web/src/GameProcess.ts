@@ -54,7 +54,7 @@ export class GameProcess {
 
 	async initMap() {
 		await this.#app.init({
-			backgroundColor: 0x1099bb,
+			backgroundColor: 0x111,
 			sharedTicker: true,
 			width: this.#canvasSize.width,
 			height: this.#canvasSize.height,

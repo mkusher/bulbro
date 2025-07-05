@@ -1,8 +1,9 @@
 import { useState } from "preact/hooks";
-import type { StartGame } from "./start-game";
-import { SetupSinglePlayer } from "./SetupSinglePlayer";
-import { SetupLocalCoOp } from "./SetupLocalCoOp";
-import { GameGlobalSettings } from "./GameGlobalSettings";
+import type { StartGame } from "@/ui/start-game";
+import layoutStyles from "@/ui/layout.module.css";
+import { SetupSinglePlayer } from "./start/SetupSinglePlayer";
+import { SetupLocalCoOp } from "./start/SetupLocalCoOp";
+import { GameGlobalSettings } from "./start/GameGlobalSettings";
 
 type Props = {
 	startGame: StartGame;
@@ -21,8 +22,7 @@ export function StartScreen({ startGame }: Props) {
 		return <GameGlobalSettings goBack={toScreen("start")} />;
 	}
 	return (
-		<div className="screen">
-			<h1>BulBro</h1>
+		<div className={layoutStyles["screen"]}>
 			<button onClick={toScreen("setup-single-player")}>
 				Start single player
 			</button>
