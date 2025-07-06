@@ -31,32 +31,36 @@ export function Game({ gameProcess }: Props) {
 
 	if (finishedResult === "fail") {
 		return (
-			<MainContainer>
-				<Failed />
-			</MainContainer>
+			<SplashBanner>
+				<MainContainer noPadding top>
+					<Failed />
+				</MainContainer>
+			</SplashBanner>
 		);
 	}
 
 	if (finishedResult === "win") {
 		return (
-			<MainContainer>
-				<PreRound
-					state={currentState.value}
-					startRound={async (state: CurrentState) => {
-						setIsLoading(true);
-						setFinishedResult(undefined);
-						try {
-							const { wavePromise } = await gameProcess.startNextWave(state);
-							setIsLoading(false);
-							setIsRound(true);
-							const result = await wavePromise;
-							setFinishedResult(result);
-						} finally {
-							setIsLoading(false);
-						}
-					}}
-				/>
-			</MainContainer>
+			<SplashBanner>
+				<MainContainer noPadding top>
+					<PreRound
+						state={currentState.value}
+						startRound={async (state: CurrentState) => {
+							setIsLoading(true);
+							setFinishedResult(undefined);
+							try {
+								const { wavePromise } = await gameProcess.startNextWave(state);
+								setIsLoading(false);
+								setIsRound(true);
+								const result = await wavePromise;
+								setFinishedResult(result);
+							} finally {
+								setIsLoading(false);
+							}
+						}}
+					/>
+				</MainContainer>
+			</SplashBanner>
 		);
 	}
 

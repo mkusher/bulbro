@@ -1,3 +1,6 @@
+import { useState } from "preact/hooks";
+
 export function Failed() {
-	return <h1>Failed</h1>;
+	const [v, set] = useState(0);
+	return <h1>Failed {v}</h1>;
 }

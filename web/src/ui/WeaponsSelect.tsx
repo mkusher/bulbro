@@ -9,13 +9,13 @@ export type Props = {
 };
 
 export function WeaponsSelect({ selectedWeapons, selectWeapons }: Props) {
-	const onChange = (e: Event) => {
-		const select = e.target as HTMLSelectElement;
-		const selected = Array.from(select.selectedOptions)
-			.map((option) => option.value)
-			.map((s) => weapons.find((w) => w.id === s))
-			.filter((w) => !!w);
-		selectWeapons(selected);
+	const onChange = (e: { weapon: Weapon; checked: boolean }) => {
+		const withoutCurrent = selectedWeapons.filter((w) => w.id !== e.weapon.id);
+		if (!e.checked) {
+			return selectWeapons(withoutCurrent);
+		} else {
+			return selectWeapons([...withoutCurrent, e.weapon]);
+		}
 	};
 	return (
 		<>
@@ -34,25 +34,28 @@ export function WeaponsSelect({ selectedWeapons, selectWeapons }: Props) {
 	);
 }
 
-type OptionProps<V> = {
-	value: V;
-	onSelect: (e: Event) => void;
+type OptionProps = {
+	value: Weapon;
+	onSelect: (e: { weapon: Weapon; checked: boolean }) => void;
 	selected: boolean;
 };
 
-export function WeaponOption({
-	value,
-	onSelect,
-	selected,
-}: OptionProps<Weapon>) {
+export function WeaponOption({ value, onSelect, selected }: OptionProps) {
 	return (
-		<Label className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
+		<Label
+			className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950"
+			htmlFor={`weapons-${value.id}`}
+		>
 			<Checkbox
-				name="weapons"
+				name={`weapons-${value.id}`}
 				value={value.id}
 				checked={selected}
-				onSelect={(e) => {
-					onSelect(e);
+				onClick={(e) => {
+					onSelect({
+						weapon: value,
+						checked: !selected,
+					});
+					e.preventDefault();
 				}}
 				className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
 			/>

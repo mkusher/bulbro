@@ -1,12 +1,17 @@
 import { useState } from "preact/hooks";
 import type { StartGame } from "@/ui/start-game";
 import { wellRoundedBulbro } from "@/characters-definitions";
-import { isDifficulty, type Difficulty } from "@/game-formulas";
+import { type Difficulty } from "@/game-formulas";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
-import { DifficultyOption } from "@/ui/Options";
 import { BulbroConfig } from "@/ui/BulbroConfig";
 import type { CharacterSetup } from "@/GameProcess";
+import { CardPosition } from "./CardPosition";
+import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
+import { Button } from "@/ui/shadcn/button";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/ui/shadcn/input";
+import { DifficultySelector } from "@/ui/DifficultySelector";
 
 type Props = {
 	startGame: StartGame;
@@ -34,78 +39,71 @@ export function SetupLocalCoOp({ startGame }: Props) {
 		);
 	};
 	return (
-		<form onSubmit={onSubmit}>
-			<h2>Start new co-op session</h2>
-			<div className="characters">
-				<div className="character">
-					<BulbroConfig
-						selectBulbro={(bulbro) =>
-							changeFirstBulbro({ ...firstBulbro, bulbro })
-						}
-						selectedBulbro={firstBulbro.bulbro}
-						selectBulbroStyle={(sprite) =>
-							changeFirstBulbro({ ...firstBulbro, sprite })
-						}
-						selectedBulbroStyle={firstBulbro.sprite}
-						selectedWeapons={weaponsSetup[0] ?? []}
-						selectWeapons={(weapons) =>
-							setWeaponsSetup(([w]) => [weapons, w ?? []])
-						}
-					/>
-				</div>
-				<div className="character">
-					<BulbroConfig
-						selectBulbro={(bulbro) =>
-							changeSecondBulbro({ ...secondBulbro, bulbro })
-						}
-						selectedBulbro={secondBulbro.bulbro}
-						selectBulbroStyle={(sprite) =>
-							changeSecondBulbro({ ...secondBulbro, sprite })
-						}
-						selectedBulbroStyle={secondBulbro.sprite}
-						selectedWeapons={weaponsSetup[1] ?? []}
-						selectWeapons={(weapons) =>
-							setWeaponsSetup(([w]) => [w ?? [], weapons])
-						}
-					/>
-				</div>
-			</div>
-			<div id="difficulty-select">
-				<label>
-					Difficulty:
-					<select
-						name="difficulty"
-						value={selectedDifficulty}
-						onChange={(e) => {
-							const newValue = Number(e.currentTarget.value);
-							if (isDifficulty(newValue)) {
-								selectDifficulty(newValue);
-							}
-						}}
-					>
-						{([0, 1, 2, 3, 4, 5] as const).map((difficulty: Difficulty) => (
-							<DifficultyOption
-								key={difficulty}
-								value={difficulty}
-								selected={selectedDifficulty === difficulty}
+		<CardPosition>
+			<Card>
+				<CardHeader>
+					<h2>Start new co-op session</h2>
+				</CardHeader>
+				<CardContent className="grid gap-6">
+					<form onSubmit={onSubmit}>
+						<div className="flex flex-col md:flex-row gap-3">
+							<div className="character">
+								<BulbroConfig
+									selectBulbro={(bulbro) =>
+										changeFirstBulbro({ ...firstBulbro, bulbro })
+									}
+									selectedBulbro={firstBulbro.bulbro}
+									selectBulbroStyle={(sprite) =>
+										changeFirstBulbro({ ...firstBulbro, sprite })
+									}
+									selectedBulbroStyle={firstBulbro.sprite}
+									selectedWeapons={weaponsSetup[0] ?? []}
+									selectWeapons={(weapons) =>
+										setWeaponsSetup(([w]) => [weapons, w ?? []])
+									}
+								/>
+							</div>
+							<div className="character">
+								<BulbroConfig
+									selectBulbro={(bulbro) =>
+										changeSecondBulbro({ ...secondBulbro, bulbro })
+									}
+									selectedBulbro={secondBulbro.bulbro}
+									selectBulbroStyle={(sprite) =>
+										changeSecondBulbro({ ...secondBulbro, sprite })
+									}
+									selectedBulbroStyle={secondBulbro.sprite}
+									selectedWeapons={weaponsSetup[1] ?? []}
+									selectWeapons={(weapons) =>
+										setWeaponsSetup(([w]) => [w ?? [], weapons])
+									}
+								/>
+							</div>
+						</div>
+						<div id="difficulty-select">
+							<DifficultySelector
+								selectDifficulty={selectDifficulty}
+								selectedDifficulty={selectedDifficulty}
 							/>
-						))}
-					</select>
-				</label>
-			</div>
-			<div id="duration">
-				<label>
-					Wave duration:
-					<input
-						type="number"
-						value={selectedDuration}
-						onChange={(e) => {
-							setDuration(Number(e.currentTarget.value));
-						}}
-					/>
-				</label>
-			</div>
-			<button type="submit">Start</button>
-		</form>
+						</div>
+						<div id="duration">
+							<Label>Wave duration:</Label>
+							<Input
+								type="number"
+								value={selectedDuration}
+								onChange={(e) => {
+									setDuration(Number(e.currentTarget.value));
+								}}
+							/>
+						</div>
+					</form>
+				</CardContent>
+				<CardFooter>
+					<Button type="submit" className="w-full">
+						Start
+					</Button>
+				</CardFooter>
+			</Card>
+		</CardPosition>
 	);
 }

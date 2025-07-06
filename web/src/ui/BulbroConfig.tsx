@@ -9,9 +9,11 @@ import {
 	CarouselItem,
 	CarouselNext,
 	CarouselPrevious,
+	type CarouselApi,
 } from "./shadcn/carousel";
 import { Label } from "./shadcn/label";
 import { WeaponsSelect } from "./WeaponsSelect";
+import { useEffect, useState } from "preact/compat";
 
 type BulbroProps = {
 	selectedBulbro: Bulbro;
@@ -29,6 +31,21 @@ export function BulbroConfig({
 	selectedWeapons,
 	selectWeapons,
 }: BulbroProps) {
+	const [api, setApi] = useState<CarouselApi>();
+	const current =
+		bulbrosStyles.findIndex((style) => style === selectedBulbroStyle) ?? 0;
+
+	useEffect(() => {
+		if (!api) {
+			return;
+		}
+
+		api.scrollTo(current);
+
+		api.on("select", () => {
+			selectBulbroStyle(bulbrosStyles[api.selectedScrollSnap() + 1]!);
+		});
+	}, [api]);
 	return (
 		<div className="flex flex-col gap-3">
 			<div id="bulbro-select">
@@ -52,8 +69,10 @@ export function BulbroConfig({
 				</select>
 			</div>
 			<div id="bulbro-style-select">
-				<Label>BulBro Style:</Label>
-				<Carousel className="w-full">
+				<Carousel
+					className="box-border w-60 align-center m-auto md:w-100 sm:w-80"
+					setApi={setApi}
+				>
 					<CarouselContent>
 						{bulbrosStyles.map((bulbro) => (
 							<CarouselItem>
@@ -67,11 +86,11 @@ export function BulbroConfig({
 							</CarouselItem>
 						))}
 					</CarouselContent>
-					<CarouselPrevious />
-					<CarouselNext />
+					<CarouselPrevious type="button" />
+					<CarouselNext type="button" />
 				</Carousel>
 			</div>
-			<div id="weapons-select" className="w-full">
+			<div id="weapons-select">
 				<WeaponsSelect
 					selectedWeapons={selectedWeapons}
 					selectWeapons={selectWeapons}

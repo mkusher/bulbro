@@ -5,8 +5,6 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
     "allowJs": true,
 
     // Bundler mode

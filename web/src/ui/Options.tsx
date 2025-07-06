@@ -1,6 +1,5 @@
 import type { Bulbro } from "../bulbro";
 import type { SpriteType } from "../bulbro/Sprite";
-import type { Difficulty } from "../game-formulas";
 import { Card, CardContent } from "./shadcn/card";
 
 export type OptionProps<V> = {
@@ -34,14 +33,6 @@ export function BulbroOption({
 			}}
 		>
 			{value.name}
-		</option>
-	);
-}
-
-export function DifficultyOption({ value, selected }: OptionProps<Difficulty>) {
-	return (
-		<option value={value} selected={selected}>
-			{value}
 		</option>
 	);
 }
