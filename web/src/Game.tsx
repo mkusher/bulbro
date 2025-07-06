@@ -62,30 +62,36 @@ export function Game({ gameProcess }: Props) {
 
 	if (!isRound) {
 		return (
-			<MainContainer noPadding top>
-				<SplashBanner />
-				<StartScreen
-					startGame={async (characters, difficulty, weaponsSetup, duration) => {
-						setIsLoading(true);
-						setFinishedResult(undefined);
-						try {
-							await gameProcess.initMap();
-							const { wavePromise } = await gameProcess.start(
-								characters,
-								weaponsSetup,
-								difficulty,
-								duration,
-							);
-							setIsLoading(false);
-							setIsRound(true);
-							const result = await wavePromise;
-							setFinishedResult(result);
-						} finally {
-							setIsLoading(false);
-						}
-					}}
-				/>
-			</MainContainer>
+			<SplashBanner>
+				<MainContainer noPadding top>
+					<StartScreen
+						startGame={async (
+							characters,
+							difficulty,
+							weaponsSetup,
+							duration,
+						) => {
+							setIsLoading(true);
+							setFinishedResult(undefined);
+							try {
+								await gameProcess.initMap();
+								const { wavePromise } = await gameProcess.start(
+									characters,
+									weaponsSetup,
+									difficulty,
+									duration,
+								);
+								setIsLoading(false);
+								setIsRound(true);
+								const result = await wavePromise;
+								setFinishedResult(result);
+							} finally {
+								setIsLoading(false);
+							}
+						}}
+					/>
+				</MainContainer>
+			</SplashBanner>
 		);
 	}
 

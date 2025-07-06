@@ -1,19 +1,9 @@
 .splash-container {
 	display: block;
-	width: 100vw;
-	min-height: 40vh;
-}
-.splash-banner {
-	display: block;
-	width: 100vw;
-	min-height: 40vh;
-	position: relative;
 	background: no-repeat url(../../public/assets/bulbro-splash-title.png) top
 		center, no-repeat url(../../public/assets/bulbro-splash-characters.png)
 		bottom center;
 	background-size: contain, contain;
-	position: fixed;
-	z-index: -1;
 }
 .splash-title {
 	display: block;

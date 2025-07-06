@@ -3,6 +3,14 @@ import { bulbrosStyles, type SpriteType } from "../bulbro/Sprite";
 import { bulbros } from "../characters-definitions";
 import type { Weapon } from "../weapon";
 import { BulbroOption, BulbroStyleOption } from "./Options";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from "./shadcn/carousel";
+import { Label } from "./shadcn/label";
 import { WeaponsSelect } from "./WeaponsSelect";
 
 type BulbroProps = {
@@ -22,55 +30,53 @@ export function BulbroConfig({
 	selectWeapons,
 }: BulbroProps) {
 	return (
-		<>
+		<div className="flex flex-col gap-3">
 			<div id="bulbro-select">
-				<label>
-					BulBro Class:
-					<select
-						name="bulbro"
-						value={selectedBulbro.id}
-						onChange={(e) => {
-							const found = bulbros.find((b) => b.id === e.currentTarget.value);
-							if (found) {
-								selectBulbro(found);
-							}
-						}}
-					>
-						{bulbros.map((bulbro) => (
-							<BulbroOption
-								value={bulbro}
-								selected={bulbro.id === selectedBulbro.id}
-							/>
-						))}
-					</select>
-				</label>
+				<Label>BulBro Class:</Label>
+				<select
+					name="bulbro"
+					value={selectedBulbro.id}
+					onChange={(e) => {
+						const found = bulbros.find((b) => b.id === e.currentTarget.value);
+						if (found) {
+							selectBulbro(found);
+						}
+					}}
+				>
+					{bulbros.map((bulbro) => (
+						<BulbroOption
+							value={bulbro}
+							selected={bulbro.id === selectedBulbro.id}
+						/>
+					))}
+				</select>
 			</div>
 			<div id="bulbro-style-select">
-				<label>
-					BulBro Style:
-					<select
-						name="bulbro-style"
-						value={selectedBulbroStyle}
-						onChange={(e) => {
-							selectBulbroStyle(e.currentTarget.value as SpriteType);
-						}}
-					>
+				<Label>BulBro Style:</Label>
+				<Carousel className="w-full">
+					<CarouselContent>
 						{bulbrosStyles.map((bulbro) => (
-							<BulbroStyleOption
-								key={bulbro}
-								value={bulbro}
-								selected={bulbro === selectedBulbroStyle}
-							/>
+							<CarouselItem>
+								<div className="p-1">
+									<BulbroStyleOption
+										key={bulbro}
+										value={bulbro}
+										selected={bulbro === selectedBulbroStyle}
+									/>
+								</div>
+							</CarouselItem>
 						))}
-					</select>
-				</label>
+					</CarouselContent>
+					<CarouselPrevious />
+					<CarouselNext />
+				</Carousel>
 			</div>
-			<div id="weapons-select">
+			<div id="weapons-select" className="w-full">
 				<WeaponsSelect
 					selectedWeapons={selectedWeapons}
 					selectWeapons={selectWeapons}
 				/>
 			</div>
-		</>
+		</div>
 	);
 }
