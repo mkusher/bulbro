@@ -18,19 +18,16 @@ export function WeaponsSelect({ selectedWeapons, selectWeapons }: Props) {
 		}
 	};
 	return (
-		<>
-			<Label htmlFor="weapons">Weapons:</Label>
-			<div className="grid grid-rows-4 grid-flow-col gap-2">
-				{weapons.map((weapon) => (
-					<WeaponOption
-						key={weapon.id}
-						value={weapon}
-						selected={!!selectedWeapons.find((w) => w.id === weapon.id)}
-						onSelect={onChange}
-					/>
-				))}
-			</div>
-		</>
+		<div className="grid grid-rows-4 grid-flow-col gap-2">
+			{weapons.map((weapon) => (
+				<WeaponOption
+					key={weapon.id}
+					value={weapon}
+					selected={!!selectedWeapons.find((w) => w.id === weapon.id)}
+					onSelect={onChange}
+				/>
+			))}
+		</div>
 	);
 }
 

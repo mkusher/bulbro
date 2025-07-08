@@ -6,6 +6,10 @@ import { cors } from "hono/cors";
 import { serveStatic } from "hono/bun";
 import { createBunWebSocket } from "hono/bun";
 import type { ServerWebSocket } from "bun";
+import { type } from "arktype";
+import { Player, registry } from "./games-registry";
+import { websocketConnections } from "./websocket-connections";
+import { onMessage } from "./websocket-controller";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
@@ -19,45 +23,80 @@ const api = app.basePath("/api");
 api
 	.use(cors())
 	.post("/users", async (c: Context) => {
+		const body = await c.req.json();
+		const username = type("string")(body?.username);
+		if (username instanceof type.errors) {
+			c.status(400);
+			return c.json({
+				errors: username,
+			});
+		}
 		return c.json({
 			user: {
 				id: crypto.randomUUID(),
+				username,
 				createdAt: Date.now(),
 			},
 		});
 	})
 	.post("/game-lobby", async (c: Context) => {
+		const body = await c.req.json();
+		const host = Player(body.host);
+		if (host instanceof type.errors) {
+			c.status(400);
+			return c.json({
+				errors: host,
+			});
+		}
+		const lobby = registry.registerLobby(host);
 		return c.json({
-			lobby: {
-				id: crypto.randomUUID(),
-				createdAt: Date.now(),
-			},
+			lobby,
 		});
 	})
 	.post("/game-lobby/:id/join-requests", async (c: Context) => {
+		const id = c.req.param("id");
+		const body = await c.req.json();
+		const player = Player(body.host);
+		if (player instanceof type.errors) {
+			c.status(400);
+			return c.json({
+				errors: player,
+			});
+		}
+		const lobby = registry.addPlayer(id, player);
 		return c.json({
-			lobby: {
-				id: crypto.randomUUID(),
-				createdAt: Date.now(),
-			},
+			lobby,
 		});
 	});
 
 const wsApp = app.get(
 	"/ws",
 	upgradeWebSocket((c) => {
+		const authHeader = c.req.header("Authorization") ?? "";
+		const userId = authHeader.split(" ").pop();
 		const l = logger.child({
 			requestId: c.var.requestId,
+			userId,
 			emitter: "websocket",
 		});
-		l.info("Connection has been established");
+		l.info("Establishing new websocket connection");
+		if (!userId) {
+			c.status(401);
+			c.json({ error: { message: "Auth error" } });
+		}
 		return {
+			onOpen(event, ws) {
+				l.info("New connection has been established");
+			},
 			onMessage(event, ws) {
 				l.info({ data: event.data }, "Message received");
-				ws.send(JSON.stringify({ ok: true }));
+				onMessage(l, ws, event.data as string);
 			},
 			onClose() {
 				l.info("Connection has been closed");
+				if (userId) {
+					websocketConnections.remove(userId);
+				}
 			},
 		};
 	}),

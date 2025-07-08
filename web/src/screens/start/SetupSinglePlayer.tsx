@@ -38,12 +38,12 @@ export function SetupSinglePlayer({ startGame }: Props) {
 	};
 	return (
 		<CardPosition>
-			<Card>
-				<form className="flex flex-col gap-3" onSubmit={onSubmit}>
+			<form onSubmit={onSubmit}>
+				<Card className="flex flex-col gap-6">
 					<CardHeader>
-						<h2>Start new session</h2>
+						<h1>Start single player run</h1>
 					</CardHeader>
-					<CardContent className="grid gap-6">
+					<CardContent className="flex flex-col gap-6 max-w-screen">
 						<BulbroConfig
 							selectBulbro={(bulbro) =>
 								changeFirstBulbro({ ...firstBulbro, bulbro })
@@ -56,13 +56,13 @@ export function SetupSinglePlayer({ startGame }: Props) {
 							selectedWeapons={selectedWeapons[0] ?? []}
 							selectWeapons={(weapons) => selectWeapons([weapons])}
 						/>
-						<div id="difficulty-select">
+						<div id="difficulty-select" className="gap-3">
 							<DifficultySelector
 								selectDifficulty={selectDifficulty}
 								selectedDifficulty={selectedDifficulty}
 							/>
 						</div>
-						<div id="duration grid gap-3">
+						<div id="duration" className="gap-3">
 							<Label htmlFor="wave-duration">Wave duration:</Label>
 							<Input
 								type="number"
@@ -74,13 +74,13 @@ export function SetupSinglePlayer({ startGame }: Props) {
 							/>
 						</div>
 					</CardContent>
-					<CardFooter className="flex">
+					<CardFooter className="flex gap-6">
 						<Button type="submit" className="w-full">
 							Start
 						</Button>
 					</CardFooter>
-				</form>
-			</Card>
+				</Card>
+			</form>
 		</CardPosition>
 	);
 }

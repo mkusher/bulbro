@@ -5,6 +5,7 @@ import { SetupLocalCoOp } from "./start/SetupLocalCoOp";
 import { GameGlobalSettings } from "./start/GameGlobalSettings";
 
 import { MainMenu } from "./start/MainMenu";
+import { SetupOnlineGame } from "./start/SetupOnlineGame";
 
 type Props = {
 	startGame: StartGame;
@@ -18,6 +19,9 @@ export function StartScreen({ startGame }: Props) {
 	}
 	if (screen === "setup-local-co-op-player") {
 		return <SetupLocalCoOp startGame={startGame} />;
+	}
+	if (screen === "setup-online-game") {
+		return <SetupOnlineGame startGame={startGame} />;
 	}
 	if (screen === "game-settings") {
 		return <GameGlobalSettings goBack={toScreen("start")} />;

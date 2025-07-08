@@ -43,9 +43,9 @@ export function BulbroConfig({
 		api.scrollTo(current);
 
 		api.on("select", () => {
-			selectBulbroStyle(bulbrosStyles[api.selectedScrollSnap() + 1]!);
+			selectBulbroStyle(bulbrosStyles[api.selectedScrollSnap()]!);
 		});
-	}, [api]);
+	}, [api, selectBulbroStyle]);
 	return (
 		<div className="flex flex-col gap-3">
 			<div id="bulbro-select">

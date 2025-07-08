@@ -14,7 +14,7 @@ export function DifficultySelector({
 		<div className="gap-3 flex flex-col">
 			<Label>Difficulty:</Label>
 			<RadioGroup
-				className="gap-3 flex"
+				className="gap-3 flex overflow-hidden flex-wrap"
 				onValueChange={(e) => {
 					const difficulty = Number(e);
 					if (isDifficulty(difficulty)) {
