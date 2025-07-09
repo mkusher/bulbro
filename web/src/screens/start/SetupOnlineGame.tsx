@@ -19,9 +19,14 @@ import { Button } from "@/ui/shadcn/button";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/ui/shadcn/input";
 import { DifficultySelector } from "@/ui/DifficultySelector";
-import { currentLobby } from "@/network/currentLobby";
-import { BulbroConfigView } from "@/ui/BulbroConfigView";
+import {
+	currentLobby,
+	markAsReady,
+	readyPlayers,
+} from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import { createPlayer } from "@/player";
+import { BulbroConfigView } from "@/ui/BulbroConfigView";
 
 type Props = {
 	startGame: StartGame;
@@ -32,53 +37,64 @@ export function SetupOnlineGame({ startGame }: Props) {
 		bulbro: wellRoundedBulbro,
 		sprite: "dark oracle",
 	});
-	const [secondBulbro, changeSecondBulbro] = useState<CharacterSetup>({
-		bulbro: wellRoundedBulbro,
-		sprite: "valkyrie",
-	});
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
-	const [weaponsSetup, setWeaponsSetup] = useState<Weapon[][]>([[smg], [smg]]);
+	const [weaponsSetup, setWeaponsSetup] = useState<Weapon[]>([smg]);
 	const [selectedDuration, setDuration] = useState<number>(60);
-	const onSubmit = (e: SubmitEvent) => {
-		e.preventDefault();
-		startGame(
-			[firstBulbro, secondBulbro],
-			selectedDifficulty,
-			weaponsSetup,
-			selectedDuration,
-		);
-	};
 	const lobby = currentLobby.value ?? {
 		id: "",
 		players: [],
+		hostId: "",
 	};
 	const iam = currentUser.value;
 	if (iam.isGuest) {
 		return <h1>Not authenticated</h1>;
 	}
+	const onReady = (e: SubmitEvent) => {
+		e.preventDefault();
+		markAsReady(
+			lobby.id,
+			createPlayer(
+				iam.id,
+				firstBulbro.bulbro,
+				firstBulbro.sprite,
+				weaponsSetup,
+			),
+		);
+	};
+	const onStart = (e: Event) => {
+		e.preventDefault();
+	};
 	const anotherPlayer = lobby.players.find((p) => p.id !== iam.id);
+
+	const isLocalReady = readyPlayers.value.find((p) => p.id === iam.id);
+	const anotherPlayerBulbro = readyPlayers.value.find(
+		(p) => p.id === anotherPlayer?.id,
+	);
+	const isAnotherPlayerReady = !!anotherPlayerBulbro;
+	const isHost = iam.id === lobby.hostId;
 	return (
 		<CardPosition>
 			<Card>
 				<CardHeader>
-					<CardTitle>Lobby {lobby.players.length}</CardTitle>
+					<CardTitle>Lobby</CardTitle>
 					<CardDescription>
 						<p>
 							ID for joining:{" "}
 							<span className="bg-gray-200 can-select p-1">{lobby.id}</span>
 						</p>
-						<p>Connection status: Connected</p>
+						<p>Status: Connected {isLocalReady ? "Ready" : "Not ready"}</p>
 						<p>
 							Another player status:{" "}
-							{!anotherPlayer ? "Disconnected" : "Connected"}
+							{!anotherPlayer ? "Disconnected" : "Connected"}{" "}
+							{isAnotherPlayerReady ? "Ready" : "Not ready"}
 						</p>
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-6">
 					<h2>Hi, {currentUser.value.username}!</h2>
-					<form onSubmit={onSubmit}>
-						<div className="flex md:flex-row gap-3 flex-wrap">
-							<div className="character">
+					<div className="flex flex-col xl:flex-row gap-3 flex-wrap">
+						{!isLocalReady ? (
+							<form onSubmit={onReady} className="flex flex-col gap-3">
 								<BulbroConfig
 									selectBulbro={(bulbro) =>
 										changeFirstBulbro({ ...firstBulbro, bulbro })
@@ -88,47 +104,65 @@ export function SetupOnlineGame({ startGame }: Props) {
 										changeFirstBulbro({ ...firstBulbro, sprite })
 									}
 									selectedBulbroStyle={firstBulbro.sprite}
-									selectedWeapons={weaponsSetup[0] ?? []}
-									selectWeapons={(weapons) =>
-										setWeaponsSetup(([w]) => [weapons, w ?? []])
-									}
+									selectedWeapons={weaponsSetup ?? []}
+									selectWeapons={setWeaponsSetup}
 								/>
-							</div>
-							<div className="flex flex-col gap-6 my-3">
-								<h2>{anotherPlayer?.username}</h2>
-								{!!anotherPlayer ? (
-									<BulbroConfigView
-										selectedBulbro={secondBulbro.bulbro}
-										selectedBulbroStyle={secondBulbro.sprite}
-										selectedWeapons={weaponsSetup[1] ?? []}
-									/>
+								<div className="grid">
+									<Button type="submit">Ready</Button>
+								</div>
+							</form>
+						) : (
+							<BulbroConfigView
+								selectedBulbro={firstBulbro.bulbro}
+								selectedBulbroStyle={firstBulbro.sprite}
+								selectedWeapons={weaponsSetup}
+							/>
+						)}
+						<div className="flex flex-col gap-6 my-3">
+							<h2>{anotherPlayer?.username}</h2>
+							{!!anotherPlayer ? (
+								anotherPlayerBulbro ? (
+									<>
+										<p>Ready</p>
+										<BulbroConfigView
+											selectedBulbro={anotherPlayerBulbro.bulbro}
+											selectedBulbroStyle={anotherPlayerBulbro.sprite}
+											selectedWeapons={anotherPlayerBulbro.bulbro.weapons}
+										/>
+									</>
 								) : (
-									<h1>Disconnected</h1>
-								)}
-							</div>
+									<p>Not Ready</p>
+								)
+							) : (
+								<h1>Waiting for a player to connect...</h1>
+							)}
 						</div>
-						<div id="difficulty-select">
-							<DifficultySelector
-								selectDifficulty={selectDifficulty}
-								selectedDifficulty={selectedDifficulty}
-							/>
-						</div>
-						<div id="duration">
-							<Label>Wave duration:</Label>
-							<Input
-								type="number"
-								value={selectedDuration}
-								onChange={(e) => {
-									setDuration(Number(e.currentTarget.value));
-								}}
-							/>
-						</div>
-					</form>
+					</div>
+					<div id="difficulty-select">
+						<DifficultySelector
+							selectDifficulty={selectDifficulty}
+							selectedDifficulty={selectedDifficulty}
+						/>
+					</div>
+					<div id="duration">
+						<Label>Wave duration:</Label>
+						<Input
+							type="number"
+							value={selectedDuration}
+							onChange={(e) => {
+								setDuration(Number(e.currentTarget.value));
+							}}
+						/>
+					</div>
 				</CardContent>
-				<CardFooter>
-					<Button type="submit" className="w-full">
-						Start
-					</Button>
+				<CardFooter className="grid">
+					{isHost ? (
+						<Button onClick={onStart} disabled={readyPlayers.value.length < 2}>
+							Start game
+						</Button>
+					) : (
+						<p>Waiting for the game to start...</p>
+					)}
 				</CardFooter>
 			</Card>
 		</CardPosition>

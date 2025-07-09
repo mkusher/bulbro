@@ -2,6 +2,7 @@ import { signal } from "@preact/signals";
 import { apiUrl, wsUrl } from "./clientConfig";
 import { type } from "arktype";
 import { currentUser } from "./currentUser";
+import type { Player } from "@/player";
 
 const LobbySchema = type({
 	id: "string",
@@ -39,6 +40,7 @@ export async function createLobby() {
 }
 
 export const currentLobby = signal<Lobby | null>(null);
+export const readyPlayers = signal<Player[]>([]);
 
 export async function joinLobby(id: string) {
 	const url = new URL(`game-lobby/${id}/join-requests`, apiUrl);
@@ -64,9 +66,24 @@ export async function joinLobby(id: string) {
 	startLobbyWebsocket();
 }
 
+export async function markAsReady(id: string, player: Player) {
+	const url = new URL(`game-lobby/${id}/ready`, apiUrl);
+
+	const res = await fetch(url, {
+		method: "POST",
+		body: JSON.stringify({
+			player,
+		}),
+	});
+	await res.json();
+
+	readyPlayers.value = [...readyPlayers.value, player];
+}
+
 const Connected = type({ type: "'connection'", connected: "boolean" });
-const LobbyUpdate = type({ type: "'lobby-update'", lobby: LobbySchema });
-const WebsocketMessage = Connected.or(LobbyUpdate);
+const PlayerJoined = type({ type: "'player-joined'", lobby: LobbySchema });
+const PlayerReady = type({ type: "'player-ready'", readyPlayer: "object" });
+const WebsocketMessage = Connected.or(PlayerJoined).or(PlayerReady);
 
 async function startLobbyWebsocket() {
 	const { id: userId } = currentUser.value;
@@ -96,9 +113,17 @@ export function processMessage(message: typeof WebsocketMessage.infer) {
 			console.log("Websocket connection", message.connected);
 			return;
 		}
-		case "lobby-update": {
-			console.log("Lobby update", message.lobby);
+		case "player-joined": {
+			console.log("PlayerJoined", message.lobby);
 			currentLobby.value = message.lobby;
+			return;
+		}
+		case "player-ready": {
+			console.log("player ready", message.readyPlayer);
+			readyPlayers.value = [
+				...readyPlayers.value,
+				message.readyPlayer as Player,
+			];
 			return;
 		}
 	}

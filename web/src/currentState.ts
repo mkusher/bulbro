@@ -15,7 +15,7 @@ import { movePosition } from "./physics";
 import { Movement } from "./movement/Movement";
 import type { MovableObject, Shape } from "./movement/Movement";
 import { BULBRO_SIZE, BulbroState, spawnBulbro } from "./bulbro";
-import type { Player } from "./bulbro";
+import type { Player } from "./player";
 import { ENEMY_SIZE } from "./enemy";
 import type { StatsBonus } from "./weapon";
 import { EnemyState } from "./enemy/EnemyState";

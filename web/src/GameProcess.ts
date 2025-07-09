@@ -15,6 +15,7 @@ import { WaveProcess } from "./WaveProcess";
 import { type Weapon } from "./weapon";
 import type { SpriteType } from "./bulbro/Sprite";
 import { canvasSize, mapSize, playingFieldSize } from "./game-canvas";
+import { v4 } from "uuid";
 
 export type CharacterSetup = {
 	bulbro: Bulbro;
@@ -87,7 +88,7 @@ export class GameProcess {
 		// Initial game state
 		currentState.value = createInitialState(
 			characters.map((character, i) =>
-				createPlayer(character.bulbro, character.sprite, weapons[i]),
+				createPlayer(v4(), character.bulbro, character.sprite, weapons[i]),
 			),
 			this.#mapSize,
 			difficulty,

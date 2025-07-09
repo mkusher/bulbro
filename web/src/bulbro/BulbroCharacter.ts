@@ -1,5 +1,4 @@
 import type { Weapon } from "../weapon";
-import type { SpriteType } from "./Sprite";
 
 export interface SecondaryStats {
 	pickupRange: number;
@@ -32,11 +31,4 @@ export interface Bulbro {
 	name: string;
 	baseStats: Stats;
 	weapons: Weapon[];
-}
-
-/** Player controlling a Bulbro. */
-export interface Player {
-	id: string;
-	bulbro: Bulbro;
-	sprite: SpriteType;
 }

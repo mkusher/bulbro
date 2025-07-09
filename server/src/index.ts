@@ -7,9 +7,10 @@ import { serveStatic } from "hono/bun";
 import { createBunWebSocket } from "hono/bun";
 import type { ServerWebSocket } from "bun";
 import { type } from "arktype";
-import { Player, registry } from "./games-registry";
+import { Player, ReadyPlayer, registry } from "./games-registry";
 import { websocketConnections } from "./websocket-connections";
 import { onMessage } from "./websocket-controller";
+import { joinLobby, markPlayerReady } from "./game-lobby-controller";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
@@ -63,22 +64,35 @@ api
 				errors: player,
 			});
 		}
-		const lobby = registry.addPlayer(id, player);
+		const lobby = await joinLobby(id, player);
 
 		if (!lobby) {
 			c.status(404);
 			return c.json({ error: "Lobby not found" });
 		}
 
-		const hostSocket = websocketConnections.get(lobby.hostId);
-		if (hostSocket) {
-			hostSocket.send(
-				JSON.stringify({
-					type: "lobby-update",
-					lobby,
-				}),
-			);
+		return c.json({
+			lobby,
+		});
+	})
+	.post("/game-lobby/:id/ready", async (c) => {
+		const id = c.req.param("id");
+		const body = await c.req.json();
+		const player = ReadyPlayer(body.player);
+		if (player instanceof type.errors) {
+			c.status(400);
+			return c.json({
+				errors: player,
+			});
 		}
+
+		const lobby = await markPlayerReady(id, player);
+
+		if (!lobby) {
+			c.status(404);
+			return c.json({ error: "Lobby not found" });
+		}
+
 		return c.json({
 			lobby,
 		});

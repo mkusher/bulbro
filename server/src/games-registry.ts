@@ -5,23 +5,48 @@ export const Player = type({
 	username: "string",
 });
 
+export const Weapon = type({
+	id: "string",
+	name: "string",
+	classes: "string[]",
+	statsBonus: "Record<string, string | number | boolean>",
+	shotSpeed: "number",
+});
+
+export const Bulbro = type({
+	id: "string",
+	name: "string",
+	baseStats: "Record<string, string | number | boolean>",
+	weapons: Weapon.array(),
+});
+
+export const ReadyPlayer = type({
+	id: "string",
+	sprite: "string",
+	bulbro: Bulbro,
+});
+
 export const Lobby = type({
 	id: "string",
 	hostId: "string",
 	players: Player.array(),
+	readyPlayers: ReadyPlayer.array(),
+	createdAt: "number",
 });
 
-type Player = typeof Player.infer;
-type Lobby = typeof Lobby.infer;
+export type Player = typeof Player.infer;
+export type ReadyPlayer = typeof ReadyPlayer.infer;
+export type Lobby = typeof Lobby.infer;
 
 export class GamesRegistry {
 	#registry = new Map<string, Lobby>();
 
 	registerLobby(host: Player) {
-		const lobby = {
+		const lobby: Lobby = {
 			id: crypto.randomUUID(),
 			hostId: host.id,
 			players: [host],
+			readyPlayers: [],
 			createdAt: Date.now(),
 		};
 		this.#registry.set(lobby.id, lobby);
@@ -41,6 +66,20 @@ export class GamesRegistry {
 		const lobby = {
 			...game,
 			players: [...game.players, player],
+		};
+		this.#registry.set(id, lobby);
+
+		return lobby;
+	}
+
+	markReady(id: string, readyPlayer: ReadyPlayer) {
+		const game = this.#registry.get(id);
+		if (!game) {
+			return;
+		}
+		const lobby: Lobby = {
+			...game,
+			readyPlayers: [...game.readyPlayers, readyPlayer],
 		};
 		this.#registry.set(id, lobby);
 
