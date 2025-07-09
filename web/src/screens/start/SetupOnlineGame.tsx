@@ -63,14 +63,22 @@ export function SetupOnlineGame({ startGame }: Props) {
 				<CardHeader>
 					<CardTitle>Lobby {lobby.players.length}</CardTitle>
 					<CardDescription>
-						ID for joining: <span className="bg-gray-300">{lobby.id}</span>
+						<p>
+							ID for joining:{" "}
+							<span className="bg-gray-200 can-select p-1">{lobby.id}</span>
+						</p>
+						<p>Connection status: Connected</p>
+						<p>
+							Another player status:{" "}
+							{!anotherPlayer ? "Disconnected" : "Connected"}
+						</p>
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-6">
+					<h2>Hi, {currentUser.value.username}!</h2>
 					<form onSubmit={onSubmit}>
 						<div className="flex md:flex-row gap-3 flex-wrap">
 							<div className="character">
-								<h2>Your BulBro:</h2>
 								<BulbroConfig
 									selectBulbro={(bulbro) =>
 										changeFirstBulbro({ ...firstBulbro, bulbro })

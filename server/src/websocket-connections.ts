@@ -4,18 +4,18 @@ export class WebsocketConnections {
 	#byUser = new Map<string, WSContext>();
 	#byConnection = new Map<WSContext, string>();
 
-	add(id: string, ws: WSContext) {
-		this.#byUser.set(id, ws);
-		this.#byConnection.set(ws, id);
+	add(userId: string, ws: WSContext) {
+		this.#byUser.set(userId, ws);
+		this.#byConnection.set(ws, userId);
 	}
 
-	get(id: string) {
-		return this.#byUser.get(id);
+	get(userId: string) {
+		return this.#byUser.get(userId);
 	}
 
-	remove(id: string) {
-		const ws = this.get(id);
-		this.#byUser.delete(id);
+	remove(userId: string) {
+		const ws = this.get(userId);
+		this.#byUser.delete(userId);
 		if (ws) this.#byConnection.delete(ws);
 	}
 

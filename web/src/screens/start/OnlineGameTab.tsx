@@ -17,10 +17,9 @@ type Props = {
 	toScreen: (screen: string) => () => void;
 };
 
-const registerInstruction =
-	"Nothing special, an online session. Create a user and create or join a lobby";
+const registerInstruction = "Nothing special, an online session. First sign up";
 const createOrJoinLobbyInstruction =
-	"Nothing special, an online session. Create or join a lobby";
+	"Nothing special, an online session. Now create or join a lobby";
 
 export function OnlineGameTab({ toScreen }: Props) {
 	const [searchLobbyId, setSarchLobbdyId] = useState("");
@@ -46,14 +45,14 @@ export function OnlineGameTab({ toScreen }: Props) {
 				<CardDescription>{instruction}</CardDescription>
 			</CardHeader>
 			{isGuest ? (
-				<CardContent className="grid gap-6">
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							createUser();
-						}}
-					>
-						<div className="grid gap-3">
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						createUser();
+					}}
+				>
+					<CardContent className="flex flex-col gap-3">
+						<div className="flex flex-col gap-3">
 							<Label htmlFor="tabs-demo-name">Name</Label>
 							<Input
 								id="tabs-demo-name"
@@ -66,25 +65,22 @@ export function OnlineGameTab({ toScreen }: Props) {
 								}}
 							/>
 						</div>
-						<div className="grid gap-3">
-							<Button type="submit" variant="outline">
-								Create user
-							</Button>
+						<div className="grid">
+							<Button type="submit">Sign up</Button>
 						</div>
-					</form>
-				</CardContent>
+					</CardContent>
+				</form>
 			) : (
-				<CardContent className="grid gap-6">
-					<div className="grid gap-3">
-						<h2>Name {user.username}</h2>
-					</div>
+				<CardContent className="flex flex-col gap-6">
+					<h2>Hi, {user.username}!</h2>
 					<form
 						onSubmit={(e) => {
 							joinLobbyById(searchLobbyId);
 							e.preventDefault();
 						}}
+						className="flex flex-col gap-3"
 					>
-						<div className="grid gap-3">
+						<div className="flex flex-col gap-3">
 							<Label htmlFor="join-lobby-id">Enter lobby id:</Label>
 							<Input
 								id="join-lobby-id"
@@ -94,13 +90,13 @@ export function OnlineGameTab({ toScreen }: Props) {
 								}}
 							/>
 						</div>
-						<div className="grid gap-3">
+						<div className="grid">
 							<Button type="submit" variant="outline">
 								Join lobby by id
 							</Button>
 						</div>
 					</form>
-					<div className="grid gap-3">
+					<div className="grid">
 						<Button onClick={() => createNewLobby()}>Start new lobby</Button>
 					</div>
 				</CardContent>

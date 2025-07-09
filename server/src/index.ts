@@ -56,7 +56,7 @@ api
 	.post("/game-lobby/:id/join-requests", async (c: Context) => {
 		const id = c.req.param("id");
 		const body = await c.req.json();
-		const player = Player(body.host);
+		const player = Player(body.player);
 		if (player instanceof type.errors) {
 			c.status(400);
 			return c.json({
@@ -64,6 +64,21 @@ api
 			});
 		}
 		const lobby = registry.addPlayer(id, player);
+
+		if (!lobby) {
+			c.status(404);
+			return c.json({ error: "Lobby not found" });
+		}
+
+		const hostSocket = websocketConnections.get(lobby.hostId);
+		if (hostSocket) {
+			hostSocket.send(
+				JSON.stringify({
+					type: "lobby-update",
+					lobby,
+				}),
+			);
+		}
 		return c.json({
 			lobby,
 		});

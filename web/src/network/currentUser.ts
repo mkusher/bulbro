@@ -1,6 +1,7 @@
 import { signal } from "@preact/signals";
 import { apiUrl } from "./clientConfig";
 import { type } from "arktype";
+import { generateStupidName } from "@/profile/silly-name";
 
 const UserSchema = type({
 	id: "string",
@@ -35,7 +36,7 @@ export async function createUser() {
 
 const guest = {
 	id: "guest",
-	username: "Le Guest",
+	username: generateStupidName(),
 	isGuest: true,
 };
 

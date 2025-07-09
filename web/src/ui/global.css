@@ -131,8 +131,13 @@
 }
 body {
 	margin: 0 auto;
-	user-select: none;
 	background-color: #fff;
+	user-select: none;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
+}
+.can-select {
+	user-select: text;
+	-webkit-touch-callout: text;
+	-webkit-user-select: text;
 }
