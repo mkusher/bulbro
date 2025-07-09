@@ -7,12 +7,21 @@ import { smg } from "@/weapons-definitions";
 import { BulbroConfig } from "@/ui/BulbroConfig";
 import type { CharacterSetup } from "@/GameProcess";
 import { CardPosition } from "./CardPosition";
-import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/ui/shadcn/card";
 import { Button } from "@/ui/shadcn/button";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/ui/shadcn/input";
 import { DifficultySelector } from "@/ui/DifficultySelector";
 import { currentLobby } from "@/network/currentLobby";
+import { BulbroConfigView } from "@/ui/BulbroConfigView";
+import { currentUser } from "@/network/currentUser";
 
 type Props = {
 	startGame: StartGame;
@@ -39,17 +48,29 @@ export function SetupOnlineGame({ startGame }: Props) {
 			selectedDuration,
 		);
 	};
+	const lobby = currentLobby.value ?? {
+		id: "",
+		players: [],
+	};
+	const iam = currentUser.value;
+	if (iam.isGuest) {
+		return <h1>Not authenticated</h1>;
+	}
+	const anotherPlayer = lobby.players.find((p) => p.id !== iam.id);
 	return (
 		<CardPosition>
 			<Card>
 				<CardHeader>
-					<h2>Lobby</h2>
-					<p>{currentLobby.value?.id}</p>
+					<CardTitle>Lobby {lobby.players.length}</CardTitle>
+					<CardDescription>
+						ID for joining: <span className="bg-gray-300">{lobby.id}</span>
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-6">
 					<form onSubmit={onSubmit}>
-						<div className="flex flex-col md:flex-row gap-3">
+						<div className="flex md:flex-row gap-3 flex-wrap">
 							<div className="character">
+								<h2>Your BulBro:</h2>
 								<BulbroConfig
 									selectBulbro={(bulbro) =>
 										changeFirstBulbro({ ...firstBulbro, bulbro })
@@ -65,21 +86,17 @@ export function SetupOnlineGame({ startGame }: Props) {
 									}
 								/>
 							</div>
-							<div className="character">
-								<BulbroConfig
-									selectBulbro={(bulbro) =>
-										changeSecondBulbro({ ...secondBulbro, bulbro })
-									}
-									selectedBulbro={secondBulbro.bulbro}
-									selectBulbroStyle={(sprite) =>
-										changeSecondBulbro({ ...secondBulbro, sprite })
-									}
-									selectedBulbroStyle={secondBulbro.sprite}
-									selectedWeapons={weaponsSetup[1] ?? []}
-									selectWeapons={(weapons) =>
-										setWeaponsSetup(([w]) => [w ?? [], weapons])
-									}
-								/>
+							<div className="flex flex-col gap-6 my-3">
+								<h2>{anotherPlayer?.username}</h2>
+								{!!anotherPlayer ? (
+									<BulbroConfigView
+										selectedBulbro={secondBulbro.bulbro}
+										selectedBulbroStyle={secondBulbro.sprite}
+										selectedWeapons={weaponsSetup[1] ?? []}
+									/>
+								) : (
+									<h1>Disconnected</h1>
+								)}
 							</div>
 						</div>
 						<div id="difficulty-select">
