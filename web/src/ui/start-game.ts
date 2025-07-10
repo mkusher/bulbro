@@ -1,10 +1,8 @@
+import type { Player } from "@/player";
 import type { Difficulty } from "../game-formulas";
-import type { CharacterSetup } from "../GameProcess";
-import type { Weapon } from "../weapon";
 
 export type StartGame = (
-	characters: CharacterSetup[],
+	players: Player[],
 	difficulty: Difficulty,
-	weapons: Weapon[][],
 	duration: number,
 ) => Promise<void>;

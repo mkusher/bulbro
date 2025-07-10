@@ -12,8 +12,9 @@ coverage
 
 # logs
 logs
-_.log
+*.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+var/
 
 # dotenv environment variable files
 .env

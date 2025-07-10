@@ -69,19 +69,13 @@ export function Game({ gameProcess }: Props) {
 			<SplashBanner>
 				<MainContainer noPadding top>
 					<StartScreen
-						startGame={async (
-							characters,
-							difficulty,
-							weaponsSetup,
-							duration,
-						) => {
+						startGame={async (players, difficulty, duration) => {
 							setIsLoading(true);
 							setFinishedResult(undefined);
 							try {
 								await gameProcess.initMap();
 								const { wavePromise } = await gameProcess.start(
-									characters,
-									weaponsSetup,
+									players,
 									difficulty,
 									duration,
 								);

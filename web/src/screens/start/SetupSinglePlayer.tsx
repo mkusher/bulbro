@@ -12,6 +12,8 @@ import { Input } from "@/ui/shadcn/input";
 import { Button } from "@/ui/shadcn/button";
 import { CardPosition } from "./CardPosition";
 import { DifficultySelector } from "@/ui/DifficultySelector";
+import { createPlayer } from "@/player";
+import { v4 } from "uuid";
 
 type Props = {
 	startGame: StartGame;
@@ -30,9 +32,15 @@ export function SetupSinglePlayer({ startGame }: Props) {
 	const onSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
 		startGame(
-			[firstBulbro],
+			[firstBulbro].map((character, i) =>
+				createPlayer(
+					v4(),
+					character.bulbro,
+					character.sprite,
+					selectedWeapons[i],
+				),
+			),
 			selectedDifficulty,
-			selectedWeapons,
 			selectedDuration,
 		);
 	};

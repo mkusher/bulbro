@@ -9,7 +9,7 @@ import {
 	type CurrentState,
 } from "./currentState";
 import { Scene } from "./graphics/Scene";
-import { createPlayer } from "./player";
+import { createPlayer, type Player } from "./player";
 import { mapScale, type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
 import { type Weapon } from "./weapon";
@@ -74,22 +74,12 @@ export class GameProcess {
 	 * Initializes Pixi, creates player, starts input & ticker, and begins the round.
 	 * Resolves when the round ends.
 	 */
-	async start(
-		characters: CharacterSetup[],
-		weapons: Weapon[][],
-		difficulty: Difficulty,
-		duration: number,
-	) {
-		this.#logger.info(
-			{ difficulty, characters, weapons, duration },
-			"starting the game",
-		);
+	async start(players: Player[], difficulty: Difficulty, duration: number) {
+		this.#logger.info({ difficulty, players, duration }, "starting the game");
 
 		// Initial game state
 		currentState.value = createInitialState(
-			characters.map((character, i) =>
-				createPlayer(v4(), character.bulbro, character.sprite, weapons[i]),
-			),
+			players,
 			this.#mapSize,
 			difficulty,
 			1,

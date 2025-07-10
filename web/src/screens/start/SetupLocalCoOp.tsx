@@ -12,6 +12,8 @@ import { Button } from "@/ui/shadcn/button";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/ui/shadcn/input";
 import { DifficultySelector } from "@/ui/DifficultySelector";
+import { createPlayer } from "@/player";
+import { v4 } from "uuid";
 
 type Props = {
 	startGame: StartGame;
@@ -32,9 +34,10 @@ export function SetupLocalCoOp({ startGame }: Props) {
 	const onSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
 		startGame(
-			[firstBulbro, secondBulbro],
+			[firstBulbro, secondBulbro].map((character, i) =>
+				createPlayer(v4(), character.bulbro, character.sprite, weaponsSetup[i]),
+			),
 			selectedDifficulty,
-			weaponsSetup,
 			selectedDuration,
 		);
 	};
