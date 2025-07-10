@@ -1,5 +1,4 @@
 import { Hono, type Context } from "hono";
-import { compress } from "hono/compress";
 import { requestId } from "hono/request-id";
 import { logger } from "./logger";
 import { logger as honoLogger } from "hono/logger";
@@ -10,7 +9,6 @@ import type { ServerWebSocket } from "bun";
 import { type } from "arktype";
 import { Player, ReadyPlayer, registry } from "./games-registry";
 import { websocketConnections } from "./websocket-connections";
-import { onMessage } from "./websocket-controller";
 import {
 	joinLobby,
 	markAsDisconnected,
