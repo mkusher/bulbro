@@ -85,7 +85,9 @@ export function SetupOnlineGame({ startGame }: Props) {
 						<p>Status: Connected {isLocalReady ? "Ready" : "Not ready"}</p>
 						<p>
 							Another player status:{" "}
-							{!anotherPlayer ? "Disconnected" : "Connected"}{" "}
+							{!anotherPlayer
+								? "Disconnected"
+								: (anotherPlayer.status ?? "Connected")}{" "}
 							{isAnotherPlayerReady ? "Ready" : "Not ready"}
 						</p>
 					</CardDescription>

@@ -8,15 +8,13 @@ export async function joinLobby(id: string, player: Player) {
 		return;
 	}
 
-	const hostSocket = websocketConnections.get(lobby.hostId);
-	if (hostSocket) {
-		hostSocket.send(
-			JSON.stringify({
-				type: "player-joined",
-				lobby,
-			}),
-		);
-	}
+	await sendUpdatesToPlayers(
+		lobby.players.filter((p) => p.id !== player.id).map((p) => p.id),
+		{
+			type: "player-joined",
+			lobby,
+		},
+	);
 	return lobby;
 }
 
@@ -26,20 +24,43 @@ export async function markPlayerReady(id: string, readyPlayer: ReadyPlayer) {
 	if (!lobby) {
 		return;
 	}
+	await sendUpdatesToPlayers(
+		lobby.players.filter((p) => p.id !== readyPlayer.id).map((p) => p.id),
+		{
+			type: "player-ready",
+			readyPlayer,
+		},
+	);
 
-	lobby.players.forEach((p) => {
-		if (p.id === readyPlayer.id) {
+	return lobby;
+}
+
+export async function markAsDisconnected(playerId: string) {
+	const games = registry.findGamesForPlayer(playerId);
+	for (const id of games) {
+		const lobby = registry.markDisconnected(id, playerId);
+
+		if (!lobby) {
 			return;
 		}
-		const socket = websocketConnections.get(lobby.hostId);
+
+		const player = lobby.players.find((p) => p.id === playerId);
+
+		await sendUpdatesToPlayers(
+			lobby.players.filter((p) => p.id !== playerId).map((p) => p.id),
+			{
+				type: "player-disconnected",
+				player,
+			},
+		);
+	}
+}
+
+async function sendUpdatesToPlayers(players: string[], message: object) {
+	players.forEach((p) => {
+		const socket = websocketConnections.get(p);
 		if (socket) {
-			socket.send(
-				JSON.stringify({
-					type: "player-ready",
-					readyPlayer,
-				}),
-			);
+			socket.send(JSON.stringify(message));
 		}
 	});
-	return lobby;
 }

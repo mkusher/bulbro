@@ -1,10 +1,10 @@
-import type { WSContext } from "hono/ws";
+import type { WebsocketConnection } from "./websocket-connection";
 
 export class WebsocketConnections {
-	#byUser = new Map<string, WSContext>();
-	#byConnection = new Map<WSContext, string>();
+	#byUser = new Map<string, WebsocketConnection>();
+	#byConnection = new Map<WebsocketConnection, string>();
 
-	add(userId: string, ws: WSContext) {
+	add(userId: string, ws: WebsocketConnection) {
 		this.#byUser.set(userId, ws);
 		this.#byConnection.set(ws, userId);
 	}
@@ -13,13 +13,17 @@ export class WebsocketConnections {
 		return this.#byUser.get(userId);
 	}
 
+	getByConnection(ws: WebsocketConnection) {
+		return this.#byConnection.get(ws);
+	}
+
 	remove(userId: string) {
 		const ws = this.get(userId);
 		this.#byUser.delete(userId);
 		if (ws) this.#byConnection.delete(ws);
 	}
 
-	removeConnection(ws: WSContext) {
+	removeConnection(ws: WebsocketConnection) {
 		const userId = this.#byConnection.get(ws);
 		this.#byConnection.delete(ws);
 		if (userId) this.#byUser.delete(userId);

@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { compress } from "hono/compress";
 import { requestId } from "hono/request-id";
 import { logger } from "./logger";
 import { logger as honoLogger } from "hono/logger";
@@ -10,7 +11,12 @@ import { type } from "arktype";
 import { Player, ReadyPlayer, registry } from "./games-registry";
 import { websocketConnections } from "./websocket-connections";
 import { onMessage } from "./websocket-controller";
-import { joinLobby, markPlayerReady } from "./game-lobby-controller";
+import {
+	joinLobby,
+	markAsDisconnected,
+	markPlayerReady,
+} from "./game-lobby-controller";
+import { WebsocketConnection } from "./websocket-connection";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
@@ -101,38 +107,51 @@ api
 const wsApp = app.get(
 	"/ws",
 	upgradeWebSocket((c) => {
-		const authHeader = c.req.header("Authorization") ?? "";
-		const userId = authHeader.split(" ").pop();
 		const l = logger.child({
 			requestId: c.var.requestId,
-			userId,
 			emitter: "websocket",
 		});
 		l.info("Establishing new websocket connection");
-		if (!userId) {
-			c.status(401);
-			c.json({ error: { message: "Auth error" } });
-		}
+		let connection: WebsocketConnection | null = null;
 		return {
 			onOpen(event, ws) {
 				l.info("New connection has been established");
+				connection = new WebsocketConnection(l, ws);
 			},
 			onMessage(event, ws) {
 				l.info({ data: event.data }, "Message received");
-				onMessage(l, ws, event.data as string);
+				connection?.updateConnection(ws);
+				connection?.onMessage(event.data as string);
 			},
-			onClose() {
-				l.info("Connection has been closed");
+			async onClose(event, ws) {
+				l.info("Closing connection");
+				if (!connection) {
+					l.warn("Connection is closed before established");
+					return;
+				}
+				const userId = websocketConnections.getByConnection(connection);
+
+				connection.onClose(ws);
+
 				if (userId) {
-					websocketConnections.remove(userId);
+					await markAsDisconnected(userId).catch(() => {});
 				}
 			},
 		};
 	}),
 );
 
-app.get("*", serveStatic({ root: "./public" }));
-app.get("*", serveStatic({ root: "./public", path: "/" }));
+app.get(
+	"*",
+	serveStatic({
+		root: "./public",
+		onFound: (_path, c) => {
+			c.header("Cache-Control", `public, immutable, max-age=31536000`);
+		},
+		onNotFound: (path, c) => {},
+		precompressed: true,
+	}),
+);
 
 export default {
 	fetch: app.fetch,

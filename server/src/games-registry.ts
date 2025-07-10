@@ -3,6 +3,7 @@ import { type } from "arktype";
 export const Player = type({
 	id: "string",
 	username: "string",
+	"status?": "string",
 });
 
 export const Weapon = type({
@@ -65,7 +66,7 @@ export class GamesRegistry {
 
 		const lobby = {
 			...game,
-			players: [...game.players, player],
+			players: [...game.players.filter((p) => p.id !== player.id), player],
 		};
 		this.#registry.set(id, lobby);
 
@@ -84,6 +85,34 @@ export class GamesRegistry {
 		this.#registry.set(id, lobby);
 
 		return lobby;
+	}
+
+	markDisconnected(id: string, playerId: string) {
+		const game = this.#registry.get(id);
+		if (!game) {
+			return;
+		}
+		const lobby: Lobby = {
+			...game,
+			players: game.players.map((p) =>
+				p.id === playerId
+					? {
+							...p,
+							status: "offline",
+						}
+					: p,
+			),
+		};
+		this.#registry.set(id, lobby);
+
+		return lobby;
+	}
+
+	findGamesForPlayer(playerId: string) {
+		return this.#registry
+			.values()
+			.filter((game) => !!game.players.find((p) => p.id === playerId))
+			.map((game) => game.id);
 	}
 }
 

@@ -4,16 +4,19 @@ import { type } from "arktype";
 import { currentUser } from "./currentUser";
 import type { Player } from "@/player";
 
+const PlayerAttendee = type({
+	id: "string",
+	username: "string",
+	"status?": "string",
+});
 const LobbySchema = type({
 	id: "string",
 	createdAt: "number",
 	hostId: "string",
-	players: type({
-		id: "string",
-		username: "string",
-	}).array(),
+	players: PlayerAttendee.array(),
 });
 
+type PlayerAttendee = typeof PlayerAttendee.infer;
 type Lobby = typeof LobbySchema.infer;
 
 export async function createLobby() {
@@ -83,7 +86,13 @@ export async function markAsReady(id: string, player: Player) {
 const Connected = type({ type: "'connection'", connected: "boolean" });
 const PlayerJoined = type({ type: "'player-joined'", lobby: LobbySchema });
 const PlayerReady = type({ type: "'player-ready'", readyPlayer: "object" });
-const WebsocketMessage = Connected.or(PlayerJoined).or(PlayerReady);
+const PlayerDisconnected = type({
+	type: "'player-disconnected'",
+	player: "object",
+});
+const WebsocketMessage = Connected.or(PlayerJoined)
+	.or(PlayerReady)
+	.or(PlayerDisconnected);
 
 async function startLobbyWebsocket() {
 	const { id: userId } = currentUser.value;
@@ -124,6 +133,18 @@ export function processMessage(message: typeof WebsocketMessage.infer) {
 				...readyPlayers.value,
 				message.readyPlayer as Player,
 			];
+			return;
+		}
+		case "player-disconnected": {
+			console.log("player ready", message.player);
+			const player = message.player as PlayerAttendee;
+			const playerId = player.id;
+			const lobby = currentLobby.value;
+			if (!lobby) return;
+			currentLobby.value = {
+				...lobby,
+				players: lobby.players.map((p) => (p.id === playerId ? player : p)),
+			};
 			return;
 		}
 	}
