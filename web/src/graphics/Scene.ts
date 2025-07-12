@@ -10,17 +10,24 @@ import { PlayingFieldTile } from "./PlayingFieldTile";
 import { WaveSprite } from "./WaveSprite";
 import type { Logger } from "pino";
 import { MaterialSprite } from "../object/MaterialSprite";
-import { canvasSize, playingFieldSize } from "../game-canvas";
+import { canvasSize, classicMapSize } from "../game-canvas";
 import { InWaveStats } from "../bulbro/sprites/InWaveStats";
+import { zeroPoint } from "@/geometry";
 import type { Material } from "../object";
 import type { SpawningEnemy } from "../object/SpawningEnemyState";
 import { SpawningEnemySprite } from "../object/SpawningEnemySprite";
+import type { Camera } from "./Camera";
+
+export type ObjectSprite<O> = {
+	init(deltaTime: number, o: O): Promise<void>;
+	update(deltaTime: number, o: O): Promise<void>;
+};
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
  */
 export class Scene {
-	#app: PIXI.Application;
+	#camera: Camera;
 	#playerSprites: Map<string, BulbroSprite> = new Map();
 	#enemySprites: Map<string, EnemySprite> = new Map();
 	#shotSprites: Map<string, ShotSprite> = new Map();
@@ -33,35 +40,26 @@ export class Scene {
 	#playingFieldLayer: PIXI.IRenderLayer;
 	#groundLayer: PIXI.IRenderLayer;
 	#uiLayer: PIXI.IRenderLayer;
-	#scale: number;
 	#logger: Logger;
 	#debug: boolean;
 
-	constructor(
-		logger: Logger,
-		debug: boolean,
-		app: PIXI.Application,
-		scale: number,
-	) {
-		this.#app = app;
-		this.#scale = scale;
+	constructor(logger: Logger, debug: boolean, camera: Camera, scale: number) {
+		this.#camera = camera;
+		this.#camera.zoom(scale);
 		this.#logger = logger;
 		this.#debug = debug;
 		this.#groundLayer = new PIXI.RenderLayer();
 		this.#playingFieldLayer = new PIXI.RenderLayer();
 		this.#uiLayer = new PIXI.RenderLayer();
-		this.#app.stage.addChild(this.#groundLayer);
-		this.#app.stage.addChild(this.#playingFieldLayer);
-		this.#app.stage.addChild(this.#uiLayer);
+		this.#camera.stage.addChild(this.#groundLayer);
+		this.#camera.stage.addChild(this.#playingFieldLayer);
+		this.#camera.stage.addChild(this.#uiLayer);
 		this.#timerSprite = new TimerSprite();
-		this.#timerSprite.appendTo(this.#app.stage, this.#uiLayer);
+		this.#timerSprite.appendTo(this.#camera.ui, this.#uiLayer);
 		this.#waveSprite = new WaveSprite();
-		this.#waveSprite.appendTo(this.#app.stage, this.#uiLayer);
-		this.#playingFieldTile = new PlayingFieldTile(
-			this.#scale,
-			playingFieldSize.value,
-		);
-		this.#playingFieldTile.init(this.#app.stage, this.#groundLayer);
+		this.#waveSprite.appendTo(this.#camera.ui, this.#uiLayer);
+		this.#playingFieldTile = new PlayingFieldTile(classicMapSize);
+		this.#playingFieldTile.init(this.#camera.stage, this.#groundLayer);
 	}
 
 	/**
@@ -70,9 +68,8 @@ export class Scene {
 	async init(state: CurrentState) {
 		this.#logger.info(
 			{
-				scale: this.#scale,
 				canvasSize: canvasSize.value,
-				playingFieldSize: playingFieldSize.value,
+				playingFieldSize: classicMapSize,
 				mapSize: state.mapSize,
 				state,
 			},
@@ -90,6 +87,7 @@ export class Scene {
 		this.#updateShots(deltaTime, state);
 		this.#updateObjects(deltaTime, state);
 		this.#playingFieldTile.update(deltaTime, state);
+		this.#camera.update(state.players[0]?.position ?? zeroPoint());
 		this.#timerSprite.update(state.round, canvasSize.value.width);
 		this.#waveSprite.update(state.round, canvasSize.value.width);
 		this.#updatePlayerStats(deltaTime, state);
@@ -99,7 +97,7 @@ export class Scene {
 		// Sync player sprites
 		state.players.forEach((p: BulbroState) => {
 			if (!this.#playerSprites.has(p.id)) {
-				const sprite = createBulbroSprite(p.type, this.#scale, this.#debug);
+				const sprite = createBulbroSprite(p.type, this.#debug);
 				sprite.appendTo(
 					this.#playingFieldTile.container,
 					this.#playingFieldLayer,
@@ -123,13 +121,15 @@ export class Scene {
 	#updateEnemies(deltaTime: number, state: CurrentState) {
 		state.enemies.forEach((e: EnemyState) => {
 			if (!this.#enemySprites.has(e.id)) {
-				const sprite = createEnemySprite(e.type, this.#scale, this.#debug);
+				const sprite = createEnemySprite(e.type, this.#debug);
 				sprite.appendTo(
 					this.#playingFieldTile.container,
 					this.#playingFieldLayer,
 				);
 				this.#enemySprites.set(e.id, sprite);
 			}
+			const sprite = this.#enemySprites.get(e.id)!;
+			sprite.update(e, deltaTime);
 		});
 		Array.from(this.#enemySprites.entries()).forEach(([id, sprite]) => {
 			if (!state.enemies.find((e) => e.id === id)) {
@@ -137,17 +137,12 @@ export class Scene {
 				this.#enemySprites.delete(id);
 			}
 		});
-		// Update enemy positions
-		state.enemies.forEach((e: EnemyState) => {
-			const sprite = this.#enemySprites.get(e.id)!;
-			sprite.update(e, deltaTime);
-		});
 	}
 
 	#updateShots(deltaTime: number, state: CurrentState) {
 		state.shots.forEach((shot) => {
 			if (!this.#shotSprites.has(shot.id)) {
-				const sprite = new ShotSprite(this.#scale, shot);
+				const sprite = new ShotSprite(shot);
 				sprite.appendTo(
 					this.#playingFieldTile.container,
 					this.#playingFieldLayer,
@@ -182,7 +177,7 @@ export class Scene {
 	#updateSpawnings(deltaTime: number, spawnings: SpawningEnemy[]) {
 		spawnings.forEach((spawning) => {
 			if (!this.#spawningSprites.has(spawning.id)) {
-				const sprite = new SpawningEnemySprite(this.#scale, this.#debug);
+				const sprite = new SpawningEnemySprite(this.#debug);
 				sprite.appendTo(
 					this.#playingFieldTile.container,
 					this.#playingFieldLayer,
@@ -203,7 +198,7 @@ export class Scene {
 	#updateMaterials(deltaTime: number, materials: Material[]) {
 		materials.forEach((material) => {
 			if (!this.#materialSprites.has(material.id)) {
-				const sprite = new MaterialSprite(this.#scale, this.#debug);
+				const sprite = new MaterialSprite(this.#debug);
 				sprite.init(
 					material,
 					this.#playingFieldTile.container,
@@ -226,7 +221,7 @@ export class Scene {
 		state.players.forEach((player, i) => {
 			if (!this.#inWaveStats.get(player.id)) {
 				const sprite = new InWaveStats(canvasSize.value, i);
-				sprite.appendTo(this.#app.stage, this.#uiLayer);
+				sprite.appendTo(this.#camera.ui, this.#uiLayer);
 				this.#inWaveStats.set(player.id, sprite);
 			}
 			this.#inWaveStats.get(player.id)?.update(canvasSize.value, player);

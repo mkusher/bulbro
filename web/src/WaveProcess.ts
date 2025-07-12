@@ -1,49 +1,54 @@
 import type { Logger } from "pino";
 import { currentState } from "./currentState";
-import type { Scene } from "./graphics/Scene";
-import type { Ticker } from "pixi.js";
+import { Scene } from "./graphics/Scene";
 import { TickProcess } from "./TickProcess";
-import {
-	type PlayerControl,
-	MainKeyboardControl,
-	MultipleControl,
-	touchscreenControl,
-	SecondaryKeyboardControl,
-} from "./controls";
+import { type PlayerControl } from "./controls";
+import { canvasSize, scale } from "./game-canvas";
+import { Camera } from "./graphics/Camera";
 
 export class WaveProcess {
 	#logger: Logger;
 	#scene: Scene;
-	#ticker: Ticker;
 	#tickIndex = 0;
 	#resolvers = Promise.withResolvers<"win" | "fail">();
 	#debug: boolean;
-	#localPlayerControls: PlayerControl[];
+	#playerControls: PlayerControl[];
+	#camera: Camera;
 
 	constructor(
 		baseLogger: Logger,
-		scene: Scene,
-		ticker: Ticker,
+		playerControls: PlayerControl[],
 		debug: boolean,
 	) {
 		this.#logger = baseLogger.child({
 			component: "WaveProcess",
 		});
-		this.#scene = scene;
-		this.#ticker = ticker;
 		this.#debug = debug;
-		const players = currentState.value.players;
-		this.#localPlayerControls = [
-			new MultipleControl([new MainKeyboardControl(), touchscreenControl]),
-		];
-		if (players.length > 1) {
-			this.#localPlayerControls.push(new SecondaryKeyboardControl());
-		}
+		this.#camera = new Camera();
+		this.#scene = new Scene(
+			this.#logger,
+			this.#debug,
+			this.#camera,
+			scale.value,
+		);
+		this.#playerControls = playerControls;
+	}
+
+	get gameCanvas() {
+		return this.#camera.canvas;
+	}
+
+	get #ticker() {
+		return this.#camera.ticker;
+	}
+
+	async init() {
+		await this.#camera.init(canvasSize.value);
+		await this.#scene.init(currentState.value);
 	}
 
 	async start() {
-		await this.#scene.init(currentState.value);
-		await Promise.all(this.#localPlayerControls.map((c) => c.start()));
+		await Promise.all(this.#playerControls.map((c) => c.start()));
 		this.#ticker.add(this.#tick);
 		this.#ticker.start();
 		return this.#resolvers.promise;
@@ -54,7 +59,7 @@ export class WaveProcess {
 		this.#ticker.remove(this.#tick);
 
 		this.#resolvers.resolve(type);
-		await Promise.all(this.#localPlayerControls.map((c) => c.stop()));
+		await Promise.all(this.#playerControls.map((c) => c.stop()));
 		return this.#resolvers.promise;
 	}
 
@@ -83,7 +88,7 @@ export class WaveProcess {
 		currentState.value = tickProc.tick(
 			state,
 			delta,
-			this.#localPlayerControls.map((c) => c.getDirection()),
+			this.#playerControls.map((c) => c.getDirection()),
 			now,
 		);
 	};

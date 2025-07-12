@@ -27,9 +27,8 @@ export class SlimeSprite {
 		x: [8, 40, 72, 104, 136, 168],
 		y: [12, 44, 76, 102, 134, 166, 194, 226, 258, 294, 320, 354, 386],
 	};
-	#scale: number;
 
-	constructor(scale: number, debug?: boolean) {
+	constructor(debug?: boolean) {
 		this.#gfx = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
 		this.#sprite.x = -slimeSize.width;
@@ -43,7 +42,6 @@ export class SlimeSprite {
 			this.#gfx.addChild(this.#debugPosition);
 		}
 
-		this.#scale = scale;
 		this.init();
 	}
 
@@ -156,8 +154,8 @@ export class SlimeSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x / this.#scale;
-		this.#gfx.y = pos.y / this.#scale;
+		this.#gfx.x = pos.x;
+		this.#gfx.y = pos.y;
 	}
 
 	/**

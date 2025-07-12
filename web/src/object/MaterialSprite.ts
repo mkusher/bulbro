@@ -11,10 +11,8 @@ export class MaterialSprite {
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
 	#container: PIXI.Container;
-	#scale: number;
 
-	constructor(scale: number, debug: boolean) {
-		this.#scale = scale;
+	constructor(debug: boolean) {
 		this.#sprite = new PIXI.Sprite();
 		this.#container = new PIXI.Container();
 		this.#container.addChild(this.#sprite);
@@ -60,7 +58,7 @@ export class MaterialSprite {
 	}
 
 	#updatePosition(position: Position) {
-		this.#container.x = position.x / this.#scale;
-		this.#container.y = position.y / this.#scale;
+		this.#container.x = position.x;
+		this.#container.y = position.y;
 	}
 }

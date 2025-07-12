@@ -69,13 +69,18 @@ export function Game({ gameProcess }: Props) {
 			<SplashBanner>
 				<MainContainer noPadding top>
 					<StartScreen
-						startGame={async (players, difficulty, duration) => {
+						startGame={async (
+							players,
+							playerControls,
+							difficulty,
+							duration,
+						) => {
 							setIsLoading(true);
 							setFinishedResult(undefined);
 							try {
-								await gameProcess.initMap();
 								const { wavePromise } = await gameProcess.start(
 									players,
+									playerControls,
 									difficulty,
 									duration,
 								);
@@ -104,10 +109,10 @@ export function Game({ gameProcess }: Props) {
 export function ShowRound({ gameProcess }: Props) {
 	const rootEl = useRef<HTMLDivElement | null>(null);
 	useEffect(() => {
-		if (rootEl.current) {
-			gameProcess.showMap(rootEl.current);
+		if (rootEl.current && gameProcess.gameCanvas) {
+			rootEl.current.appendChild(gameProcess.gameCanvas);
 		}
-	}, [gameProcess]);
+	}, [gameProcess.gameCanvas]);
 
 	return <div className="full-viewport" ref={rootEl} />;
 }

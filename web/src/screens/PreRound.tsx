@@ -3,7 +3,7 @@ import { WeaponsSelect } from "@/ui/WeaponsSelect";
 import type { CurrentState } from "@/currentState";
 import { selectWeapons as selectWeaponsInState } from "@/currentState";
 import { fromWeaponState, toWeaponState } from "@/weapon";
-import { CardPosition } from "./start/CardPosition";
+import { CentralCard } from "@/ui/Layout";
 import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
 import { Button } from "@/ui/shadcn/button";
 
@@ -19,7 +19,7 @@ export function PreRound({ startRound, state }: Props) {
 		startRound(currentState);
 	};
 	return (
-		<CardPosition>
+		<CentralCard>
 			<Card>
 				<form className="flex flex-col gap-3" onSubmit={onSubmit}>
 					<CardHeader>
@@ -53,6 +53,6 @@ export function PreRound({ startRound, state }: Props) {
 					</CardFooter>
 				</form>
 			</Card>
-		</CardPosition>
+		</CentralCard>
 	);
 }

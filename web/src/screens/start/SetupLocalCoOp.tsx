@@ -6,7 +6,7 @@ import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
 import { BulbroConfig } from "@/ui/BulbroConfig";
 import type { CharacterSetup } from "@/GameProcess";
-import { CardPosition } from "./CardPosition";
+import { CentralCard } from "@/ui/Layout";
 import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
 import { Button } from "@/ui/shadcn/button";
 import { Label } from "@radix-ui/react-label";
@@ -14,6 +14,7 @@ import { Input } from "@/ui/shadcn/input";
 import { DifficultySelector } from "@/ui/DifficultySelector";
 import { createPlayer } from "@/player";
 import { v4 } from "uuid";
+import { createMainControls, SecondaryKeyboardControl } from "@/controls";
 
 type Props = {
 	startGame: StartGame;
@@ -37,12 +38,13 @@ export function SetupLocalCoOp({ startGame }: Props) {
 			[firstBulbro, secondBulbro].map((character, i) =>
 				createPlayer(v4(), character.bulbro, character.sprite, weaponsSetup[i]),
 			),
+			[createMainControls(), new SecondaryKeyboardControl()],
 			selectedDifficulty,
 			selectedDuration,
 		);
 	};
 	return (
-		<CardPosition>
+		<CentralCard>
 			<Card>
 				<CardHeader>
 					<h2>Start new co-op session</h2>
@@ -107,6 +109,6 @@ export function SetupLocalCoOp({ startGame }: Props) {
 					</Button>
 				</CardFooter>
 			</Card>
-		</CardPosition>
+		</CentralCard>
 	);
 }

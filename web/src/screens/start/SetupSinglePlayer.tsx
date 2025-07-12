@@ -10,10 +10,11 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
 import { Label } from "@/ui/shadcn/label";
 import { Input } from "@/ui/shadcn/input";
 import { Button } from "@/ui/shadcn/button";
-import { CardPosition } from "./CardPosition";
+import { CentralCard } from "@/ui/Layout";
 import { DifficultySelector } from "@/ui/DifficultySelector";
 import { createPlayer } from "@/player";
 import { v4 } from "uuid";
+import { createMainControls } from "@/controls";
 
 type Props = {
 	startGame: StartGame;
@@ -40,16 +41,17 @@ export function SetupSinglePlayer({ startGame }: Props) {
 					selectedWeapons[i],
 				),
 			),
+			[createMainControls()],
 			selectedDifficulty,
 			selectedDuration,
 		);
 	};
 	return (
-		<CardPosition>
+		<CentralCard>
 			<form onSubmit={onSubmit}>
-				<Card className="flex flex-col gap-6">
+				<Card className="flex flex-col gap-6 mt-30">
 					<CardHeader>
-						<h1>Start single player run</h1>
+						<h1 className="text-3xl">Start single player run</h1>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-6 max-w-screen">
 						<BulbroConfig
@@ -89,6 +91,6 @@ export function SetupSinglePlayer({ startGame }: Props) {
 					</CardFooter>
 				</Card>
 			</form>
-		</CardPosition>
+		</CentralCard>
 	);
 }

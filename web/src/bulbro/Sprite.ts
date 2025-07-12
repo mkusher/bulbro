@@ -34,22 +34,18 @@ export interface BulbroSprite {
 	remove(): void;
 }
 
-export function createBulbroSprite(
-	type: SpriteType,
-	scale: number,
-	debugPosition = false,
-) {
+export function createBulbroSprite(type: SpriteType, debugPosition = false) {
 	if (type === "shooter") {
-		return new ShooterSprite(scale, debugPosition);
+		return new ShooterSprite(debugPosition);
 	}
 	if (type === "dark oracle") {
-		return new DarkOracleSprite(scale, debugPosition);
+		return new DarkOracleSprite(debugPosition);
 	}
 	if (type === "necromancer") {
-		return new NecromancerSprite(scale, debugPosition);
+		return new NecromancerSprite(debugPosition);
 	}
 	if (type === "valkyrie") {
-		return new ValkyrieSprite(scale, debugPosition);
+		return new ValkyrieSprite(debugPosition);
 	}
-	return new SoldierSprite(scale, debugPosition);
+	return new SoldierSprite(debugPosition);
 }

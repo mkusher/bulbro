@@ -37,19 +37,12 @@ export class ChibiSprite {
 	#idle?: AnimatedSprite;
 	#hurt?: AnimatedSprite;
 	#characterSprites?: CharacterSprites;
-	#scale: number;
 	#basePath: string;
 	#filePaths: FilePaths;
 
-	constructor(
-		basePath: string,
-		filePaths: FilePaths,
-		scale: number,
-		debug: boolean,
-	) {
+	constructor(basePath: string, filePaths: FilePaths, debug: boolean) {
 		this.#basePath = basePath;
 		this.#filePaths = filePaths;
-		this.#scale = scale;
 		this.#gfx = new PIXI.Container();
 		this.#debugPosition = new PIXI.Graphics();
 		this.#sprite = new PIXI.Sprite();
@@ -166,8 +159,8 @@ export class ChibiSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position, lastDirection?: Direction): void {
-		this.#gfx.x = pos.x / this.#scale;
-		this.#gfx.y = pos.y / this.#scale;
+		this.#gfx.x = pos.x;
+		this.#gfx.y = pos.y;
 
 		if (lastDirection && lastDirection.x < 0) {
 			this.#sprite.scale.x = -1 * Math.abs(this.#sprite.scale.x);

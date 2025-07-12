@@ -16,11 +16,9 @@ export class SoldierSprite {
 	#idle?: AnimatedSprite;
 	#whenHit?: AnimatedSprite;
 	#whenDangerouslyHit?: AnimatedSprite;
-	#scale: number;
 	#characterSprites?: CharacterSprites;
 
-	constructor(scale: number, debug?: boolean) {
-		this.#scale = scale;
+	constructor(debug?: boolean) {
 		this.#gfx = new PIXI.Container();
 		this.#debugPosition = new PIXI.Graphics();
 		this.#sprite = new PIXI.Sprite();
@@ -143,7 +141,7 @@ export class SoldierSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position): void {
-		this.#gfx.x = pos.x / this.#scale;
-		this.#gfx.y = pos.y / this.#scale;
+		this.#gfx.x = pos.x;
+		this.#gfx.y = pos.y;
 	}
 }

@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@happy-dom/global-registrator": "^18.0.1",
     "@preact/preset-vite": "^2.10.2",
     "@storybook/preact-vite": "^9.0.15",
     "@tailwindcss/vite": "^4.1.11",

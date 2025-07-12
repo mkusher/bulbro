@@ -8,7 +8,7 @@ const path =
 export class DarkOracleSprite {
 	#chibi: ChibiSprite;
 
-	constructor(scale: number, debug: boolean) {
+	constructor(debug: boolean) {
 		this.#chibi = new ChibiSprite(
 			path,
 			{
@@ -16,7 +16,6 @@ export class DarkOracleSprite {
 				walking: "Running/0_Dark_Oracle_Running_",
 				hurt: "Hurt/0_Dark_Oracle_Hurt_",
 			},
-			scale,
 			debug,
 		);
 		this.init();

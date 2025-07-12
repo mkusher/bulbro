@@ -147,24 +147,8 @@ export function isInRange(
 	);
 }
 
-export function mapScale(expected: Size, actual: Size) {
-	return (
-		Math.hypot(expected.width, expected.height) /
-		Math.hypot(actual.width, actual.height)
-	);
-}
-
-export const classicMapHypot = 2500;
-export function toClassicExpected(actual: Size) {
-	const scale = classicMapHypot / Math.hypot(actual.width, actual.height);
-	return {
-		width: actual.width * scale,
-		height: actual.height * scale,
-	};
-}
-
 export const getHpRegenerationPerSecond = (hpRegeneration: number) =>
 	hpRegeneration / 11.25 + 1 / 9;
 
 export const knockbackSpeed = 25;
-export const knockbackTimeout = 250;
+export const knockbackTimeout = 200;

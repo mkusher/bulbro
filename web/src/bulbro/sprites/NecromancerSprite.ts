@@ -8,7 +8,7 @@ const path =
 export class NecromancerSprite {
 	#chibi: ChibiSprite;
 
-	constructor(scale: number, debug: boolean) {
+	constructor(debug: boolean) {
 		this.#chibi = new ChibiSprite(
 			path,
 			{
@@ -16,7 +16,6 @@ export class NecromancerSprite {
 				walking: "Running/0_Necromancer_of_the_Shadow_Running_",
 				hurt: "Hurt/0_Necromancer_of_the_Shadow_Hurt_",
 			},
-			scale,
 			debug,
 		);
 		this.init();

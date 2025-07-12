@@ -6,7 +6,7 @@ import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
 import { BulbroConfig } from "@/ui/BulbroConfig";
 import type { CharacterSetup } from "@/GameProcess";
-import { CardPosition } from "./CardPosition";
+import { CentralCard } from "@/ui/Layout";
 import {
 	Card,
 	CardContent,
@@ -27,6 +27,8 @@ import {
 import { currentUser } from "@/network/currentUser";
 import { createPlayer } from "@/player";
 import { BulbroConfigView } from "@/ui/BulbroConfigView";
+import { createMainControls } from "@/controls";
+import { RemoteRepeatLastKnownDirectionControl } from "@/network/RemoteControl";
 
 type Props = {
 	startGame: StartGame;
@@ -63,6 +65,12 @@ export function SetupOnlineGame({ startGame }: Props) {
 	};
 	const onStart = (e: Event) => {
 		e.preventDefault();
+		startGame(
+			readyPlayers.value,
+			[createMainControls(), new RemoteRepeatLastKnownDirectionControl()],
+			selectedDifficulty,
+			selectedDuration,
+		);
 	};
 	const anotherPlayer = lobby.players.find((p) => p.id !== iam.id);
 
@@ -73,7 +81,7 @@ export function SetupOnlineGame({ startGame }: Props) {
 	const isAnotherPlayerReady = !!anotherPlayerBulbro;
 	const isHost = iam.id === lobby.hostId;
 	return (
-		<CardPosition>
+		<CentralCard>
 			<Card>
 				<CardHeader>
 					<CardTitle>Lobby</CardTitle>
@@ -167,6 +175,6 @@ export function SetupOnlineGame({ startGame }: Props) {
 					)}
 				</CardFooter>
 			</Card>
-		</CardPosition>
+		</CentralCard>
 	);
 }

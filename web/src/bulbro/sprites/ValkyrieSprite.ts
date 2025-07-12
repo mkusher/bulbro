@@ -8,7 +8,7 @@ const path =
 export class ValkyrieSprite {
 	#chibi: ChibiSprite;
 
-	constructor(scale: number, debug: boolean) {
+	constructor(debug: boolean) {
 		this.#chibi = new ChibiSprite(
 			path,
 			{
@@ -16,7 +16,6 @@ export class ValkyrieSprite {
 				walking: "Running/0_Valkyrie_Running_",
 				hurt: "Hurt/0_Valkyrie_Hurt_",
 			},
-			scale,
 			debug,
 		);
 		this.init();

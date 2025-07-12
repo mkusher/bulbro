@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import type { Logger } from "pino";
 import { logger as defaultLogger } from "./logger";
 import type { Bulbro } from "./bulbro";
@@ -8,14 +7,12 @@ import {
 	nextWave,
 	type CurrentState,
 } from "./currentState";
-import { Scene } from "./graphics/Scene";
-import { createPlayer, type Player } from "./player";
-import { mapScale, type Difficulty } from "./game-formulas";
+import { type Player } from "./player";
+import { type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
-import { type Weapon } from "./weapon";
 import type { SpriteType } from "./bulbro/Sprite";
-import { canvasSize, mapSize, playingFieldSize } from "./game-canvas";
-import { v4 } from "uuid";
+import { classicMapSize } from "./game-canvas";
+import type { PlayerControl } from "./controls";
 
 export type CharacterSetup = {
 	bulbro: Bulbro;
@@ -27,13 +24,11 @@ export type CharacterSetup = {
  */
 export class GameProcess {
 	#logger: Logger;
-	#app: PIXI.Application;
-	#scene!: Scene;
 	#waveProcess?: WaveProcess;
 	#debug: boolean;
+	#playerControls: PlayerControl[] = [];
 
 	constructor(debug: boolean) {
-		this.#app = new PIXI.Application();
 		this.#debug = debug;
 		this.#logger = defaultLogger.child({
 			component: "GameProcess",
@@ -41,62 +36,34 @@ export class GameProcess {
 		});
 	}
 
-	get #canvasSize() {
-		return canvasSize.value;
-	}
-
-	get #playingFieldSize() {
-		return playingFieldSize.value;
-	}
-
-	get #mapSize() {
-		return mapSize.value;
-	}
-
-	async initMap() {
-		await this.#app.init({
-			backgroundColor: 0x111,
-			sharedTicker: true,
-			width: this.#canvasSize.width,
-			height: this.#canvasSize.height,
-		});
-	}
-
-	showMap(rootEl: HTMLElement) {
-		rootEl.appendChild(this.#app.view);
-		canvasSize.value = {
-			width: rootEl.offsetWidth,
-			height: rootEl.offsetHeight,
-		};
-	}
-
 	/**
 	 * Initializes Pixi, creates player, starts input & ticker, and begins the round.
 	 * Resolves when the round ends.
 	 */
-	async start(players: Player[], difficulty: Difficulty, duration: number) {
+	async start(
+		players: Player[],
+		playerControls: PlayerControl[],
+		difficulty: Difficulty,
+		duration: number,
+	) {
 		this.#logger.info({ difficulty, players, duration }, "starting the game");
+
+		this.#playerControls = playerControls;
 
 		// Initial game state
 		currentState.value = createInitialState(
 			players,
-			this.#mapSize,
+			classicMapSize,
 			difficulty,
 			1,
 			duration,
 		);
-		this.#scene = new Scene(
-			this.#logger,
-			this.#debug,
-			this.#app,
-			mapScale(this.#mapSize, this.#playingFieldSize),
-		);
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
-			this.#scene,
-			this.#app.ticker,
+			this.#playerControls,
 			this.#debug,
 		);
+		await this.#waveProcess.init();
 		return {
 			wavePromise: this.#waveProcess.start(),
 		};
@@ -109,15 +76,17 @@ export class GameProcess {
 		}
 		currentState.value = nextWave(state, { now: Date.now(), deltaTime: 0 });
 		this.#logger.info({ state: currentState.value }, "starting the next wave");
-		this.#app.ticker.start();
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
-			this.#scene,
-			this.#app.ticker,
+			this.#playerControls,
 			this.#debug,
 		);
 		return {
 			wavePromise: this.#waveProcess.start(),
 		};
+	}
+
+	get gameCanvas() {
+		return this.#waveProcess?.gameCanvas;
 	}
 }

@@ -24,11 +24,10 @@ export interface EnemySprite {
 
 export function createEnemySprite(
 	type: EnemyType,
-	scale: number,
 	debug: boolean,
 ): EnemySprite {
 	if (type === "slime") {
-		return new SlimeSprite(scale, debug);
+		return new SlimeSprite(debug);
 	}
-	return new OrcSprite(scale, debug);
+	return new OrcSprite(debug);
 }

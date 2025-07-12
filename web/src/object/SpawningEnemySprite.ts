@@ -8,13 +8,11 @@ export class SpawningEnemySprite {
 	#container: PIXI.Container;
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
-	#scale: number;
 	#size = 16;
 	#width = 83;
 	#height = 72;
 
-	constructor(scale: number, debug?: boolean) {
-		this.#scale = scale;
+	constructor(debug?: boolean) {
 		this.#container = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
 		this.#sprite.scale.set(0.5);
@@ -52,8 +50,8 @@ export class SpawningEnemySprite {
 	}
 
 	update(spawningEnemy: SpawningEnemy, deltaTime: number) {
-		this.#container.x = spawningEnemy.position.x / this.#scale;
-		this.#container.y = spawningEnemy.position.y / this.#scale;
+		this.#container.x = spawningEnemy.position.x;
+		this.#container.y = spawningEnemy.position.y;
 		this.#sprite.alpha = Math.sin(
 			(((Date.now() - spawningEnemy.startedAt.getTime()) / 50) * Math.PI) / 8,
 		);

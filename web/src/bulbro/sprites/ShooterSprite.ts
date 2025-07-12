@@ -23,10 +23,8 @@ export class ShooterSprite {
 	#idle?: AnimatedSprite;
 	#hurt?: AnimatedSprite;
 	#characterSprites?: CharacterSprites;
-	#scale: number;
 
-	constructor(scale: number, debug?: boolean) {
-		this.#scale = scale;
+	constructor(debug?: boolean) {
 		this.#gfx = new PIXI.Container();
 		this.#debugPosition = new PIXI.Graphics();
 		this.#sprite = new PIXI.Sprite();
@@ -134,8 +132,8 @@ export class ShooterSprite {
 	 * Updates sprite position.
 	 */
 	#updatePosition(pos: Position, lastDirection?: Direction): void {
-		this.#gfx.x = pos.x / this.#scale;
-		this.#gfx.y = pos.y / this.#scale;
+		this.#gfx.x = pos.x;
+		this.#gfx.y = pos.y;
 		if (lastDirection && lastDirection.x < 0) {
 			this.#sprite.scale.x = -1 * Math.abs(this.#sprite.scale.x);
 			this.#sprite.x = 8;

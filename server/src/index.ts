@@ -15,6 +15,12 @@ import {
 	markPlayerReady,
 } from "./game-lobby-controller";
 import { WebsocketConnection } from "./websocket-connection";
+import {
+	GameState,
+	hostUpdate,
+	playerUpdate,
+	startGame,
+} from "./game-controller";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
@@ -99,6 +105,45 @@ api
 
 		return c.json({
 			lobby,
+		});
+	})
+	.post("/game/:id/start", async (c) => {
+		const id = c.req.param("id");
+		const body = await c.req.json();
+
+		const state = GameState(body.state);
+
+		await startGame(id, state);
+
+		return c.json({
+			id,
+			state,
+		});
+	})
+	.put("/game/:id/host", async (c) => {
+		const id = c.req.param("id");
+		const body = await c.req.json();
+
+		const state = GameState(body.state);
+
+		await hostUpdate(id, state);
+
+		return c.json({
+			id,
+			state,
+		});
+	})
+	.put("/game/:id/player", async (c) => {
+		const id = c.req.param("id");
+		const body = await c.req.json();
+
+		const state = GameState(body.state);
+
+		await playerUpdate(id, state);
+
+		return c.json({
+			id,
+			state,
 		});
 	});
 

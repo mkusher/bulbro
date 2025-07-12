@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
-import { zeroPoint, type Position, type Size } from "../geometry";
+import { type Size } from "../geometry";
 import type { CurrentState } from "../currentState";
-import { canvasSize, playingFieldSize } from "../game-canvas";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -9,10 +8,8 @@ import { canvasSize, playingFieldSize } from "../game-canvas";
 export class PlayingFieldTile {
 	#sprite: PIXI.TilingSprite;
 	#container: PIXI.Container;
-	#scale: number;
 
-	constructor(scale: number, size: Size) {
-		this.#scale = scale;
+	constructor(size: Size) {
 		this.#sprite = new PIXI.TilingSprite(size);
 		this.#container = new PIXI.Container();
 		this.#container.addChild(this.#sprite);
@@ -37,27 +34,5 @@ export class PlayingFieldTile {
 		return this.#container;
 	}
 
-	update(deltaTime: number, state: CurrentState): void {
-		this.#moveCameraOnSmallScreen(state.players[0]?.position ?? zeroPoint());
-	}
-
-	#moveCameraOnSmallScreen(playerPosition: Position) {
-		if (!this.#isSmallScreen(playingFieldSize.value, canvasSize.value)) {
-			return;
-		}
-		const scaledPosition = {
-			x: playerPosition.x / this.#scale,
-			y: playerPosition.y / this.#scale,
-		};
-
-		this.#container.x = -scaledPosition.x + canvasSize.value.width / 2;
-		this.#container.y = -scaledPosition.y + canvasSize.value.height / 2;
-	}
-
-	#isSmallScreen(playingFieldSize: Size, canvasSize: Size) {
-		return (
-			playingFieldSize.width > canvasSize.width ||
-			playingFieldSize.height > canvasSize.height
-		);
-	}
+	update(deltaTime: number, state: CurrentState): void {}
 }

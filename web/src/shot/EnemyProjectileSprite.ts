@@ -4,10 +4,8 @@ import type { ShotState } from "./ShotState";
 const radius = 4;
 export class EnemyProjectileSprite {
 	#gfx: PIXI.Graphics;
-	#scale: number;
 
-	constructor(scale: number, shot: ShotState) {
-		this.#scale = scale;
+	constructor(shot: ShotState) {
 		this.#gfx = new PIXI.Graphics()
 			.circle(-radius, -radius, radius)
 			.fill(0xff0000)

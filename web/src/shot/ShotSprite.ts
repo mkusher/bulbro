@@ -6,15 +6,13 @@ import { EnemyProjectileSprite } from "./EnemyProjectileSprite";
 export class ShotSprite {
 	#gfx: PIXI.Graphics;
 	#sprite: EnemyProjectileSprite | BulletSprite;
-	#scale: number;
 
-	constructor(scale: number, shot: ShotState) {
-		this.#scale = scale;
+	constructor(shot: ShotState) {
 		this.#gfx = new PIXI.Graphics();
 		this.#sprite =
 			shot.shooterType === "player"
-				? new BulletSprite(scale, shot)
-				: new EnemyProjectileSprite(scale, shot);
+				? new BulletSprite(shot)
+				: new EnemyProjectileSprite(shot);
 		this.#sprite.appendTo(this.#gfx);
 	}
 
@@ -30,8 +28,8 @@ export class ShotSprite {
 	 * Updates sprite position.
 	 */
 	update(deltaTime: number, shot: ShotState) {
-		this.#gfx.x = shot.position.x / this.#scale;
-		this.#gfx.y = shot.position.y / this.#scale;
+		this.#gfx.x = shot.position.x;
+		this.#gfx.y = shot.position.y;
 		this.#sprite.update(deltaTime, shot);
 	}
 

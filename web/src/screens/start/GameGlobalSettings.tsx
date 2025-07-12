@@ -2,7 +2,7 @@ import { Button } from "@/ui/shadcn/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
-import { CardPosition } from "./CardPosition";
+import { CentralCard } from "@/ui/Layout";
 
 type Props = {
 	goBack: () => void;
@@ -20,7 +20,7 @@ const toggleFullscreen = () => {
 
 export function GameGlobalSettings({ goBack }: Props) {
 	return (
-		<CardPosition>
+		<CentralCard>
 			<Card>
 				<CardHeader>
 					<h2>Settings</h2>
@@ -50,6 +50,6 @@ export function GameGlobalSettings({ goBack }: Props) {
 					</Button>
 				</CardFooter>
 			</Card>
-		</CardPosition>
+		</CentralCard>
 	);
 }

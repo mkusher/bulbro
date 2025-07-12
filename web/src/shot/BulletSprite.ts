@@ -9,10 +9,8 @@ const height = 16;
  */
 export class BulletSprite {
 	#gfx: PIXI.Graphics;
-	#scale: number;
 
-	constructor(scale: number, shot: ShotState) {
-		this.#scale = scale;
+	constructor(shot: ShotState) {
 		this.#gfx = new PIXI.Graphics()
 			.roundRect(-width / 2, -height / 2, width, height, width)
 			.fill(0xfff625)
