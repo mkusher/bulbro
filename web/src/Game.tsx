@@ -1,10 +1,10 @@
 import "./ui/global.css";
-import { useRef, useEffect, useState } from "preact/hooks";
+import { useRef, useEffect } from "preact/hooks";
 import { StartScreen } from "./screens/StartScreen";
 import { Loader } from "./ui/Loading";
 import { Failed } from "./screens/Failed";
 import { PreRound } from "./screens/PreRound";
-import { currentState, type CurrentState } from "./currentState";
+import { currentState } from "./currentState";
 import { TouchscreenJoystick } from "./controls/TouchscreenJoystick";
 import { SplashBanner } from "./ui/Splash";
 import { MainContainer } from "./ui/Layout";
