@@ -5,10 +5,7 @@ import { type } from "arktype";
 import type { GameProcess, WavePromises } from "@/GameProcess";
 import { StateSync } from "./StateSync";
 import { createMainControls } from "@/controls";
-import {
-	RemoteRepeatLastKnownDirectionControl,
-	WebsocketDirectionRemember,
-} from "./RemoteControl";
+import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { currentState } from "@/currentState";
 
 export const HostStateUpdate = type({
@@ -36,10 +33,13 @@ export class NetworkGameConnection {
 	#gameProcess: GameProcess;
 	#stateSync!: StateSync;
 	#isHost: boolean;
-	#directionContainer!: WebsocketDirectionRemember;
+	#remoteControl: RemoteRepeatLastKnownDirectionControl;
+	#remotePlayerId: string;
+
 	get id() {
 		return this.#lobby.id;
 	}
+
 	constructor(
 		logger: Logger,
 		connection: WebsocketConnection,
@@ -51,17 +51,21 @@ export class NetworkGameConnection {
 		this.#logger = logger;
 		this.#connection = connection;
 		this.#lobby = lobby;
+		this.#remotePlayerId = this.#lobby.players.find(
+			(p) => p.id !== this.#lobby.hostId,
+		)!.id;
 		this.#gameProcess = gameProcess;
 		this.#processMessage = processMessage;
 		this.#isHost = isHost;
+		this.#remoteControl = new RemoteRepeatLastKnownDirectionControl(
+			this.#isHost,
+			this.#remotePlayerId,
+		);
 		this.#subscribeToSocket();
 	}
 
 	createControls() {
-		return [
-			createMainControls(),
-			new RemoteRepeatLastKnownDirectionControl(this.#directionContainer),
-		];
+		return [createMainControls(), this.#remoteControl];
 	}
 
 	onStart({ waveInitPromise, wavePromise }: WavePromises) {
@@ -85,10 +89,6 @@ export class NetworkGameConnection {
 	}
 
 	#subscribeToSocket() {
-		this.#directionContainer = new WebsocketDirectionRemember(
-			this.#isHost,
-			this.#lobby.hostId,
-		);
 		this.#connection.onMessage((event) => {
 			const message = WebsocketMessage(JSON.parse(event.data));
 			if (message instanceof type.errors) {
@@ -96,7 +96,7 @@ export class NetworkGameConnection {
 				return;
 			}
 			this.#logger.debug({ message }, "In game message received");
-			this.#directionContainer.onMessage(message);
+			this.#remoteControl.onMessage(message);
 			this.#processMessage(message);
 		});
 	}
