@@ -5,7 +5,7 @@ export type SpawningEnemy = {
 	type: "spawning-enemy";
 	id: string;
 	position: Position;
-	startedAt: Date;
+	startedAt: number;
 	duration: number;
 	enemy: EnemyState;
 };

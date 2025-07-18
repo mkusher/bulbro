@@ -48,7 +48,7 @@ export class WebsocketConnection {
 					userId: message.userId,
 				});
 				this.#logger.info("Websocket authentication succeeded");
-				return this.sendObject({ connected: true });
+				return this.sendObject({ type: "connection", connected: true });
 			}
 		} catch (err) {
 			this.#logger.warn({ err }, "Error processing websocket message");

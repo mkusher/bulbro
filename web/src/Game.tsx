@@ -1,6 +1,5 @@
 import "./ui/global.css";
 import { useRef, useEffect, useState } from "preact/hooks";
-import type { GameProcess } from "./GameProcess";
 import { StartScreen } from "./screens/StartScreen";
 import { Loader } from "./ui/Loading";
 import { Failed } from "./screens/Failed";
@@ -9,17 +8,19 @@ import { currentState, type CurrentState } from "./currentState";
 import { TouchscreenJoystick } from "./controls/TouchscreenJoystick";
 import { SplashBanner } from "./ui/Splash";
 import { MainContainer } from "./ui/Layout";
+import {
+	currentGameProcess,
+	isRound as isRoundSignal,
+	isLoading as isLoadingSignal,
+	waveResult,
+} from "./currentGameProcess";
+import type { GameProcess } from "./GameProcess";
 
-type Props = {
-	gameProcess: GameProcess;
-};
-
-export function Game({ gameProcess }: Props) {
-	const [isRound, setIsRound] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
-	const [finishedResult, setFinishedResult] = useState<
-		"win" | "fail" | undefined
-	>(undefined);
+export function Game() {
+	const gameProcess = currentGameProcess.value;
+	const finishedResult = waveResult.value;
+	const isRound = isRoundSignal.value;
+	const isLoading = isLoadingSignal.value;
 
 	if (isLoading) {
 		return (
@@ -43,22 +44,7 @@ export function Game({ gameProcess }: Props) {
 		return (
 			<SplashBanner>
 				<MainContainer noPadding top>
-					<PreRound
-						state={currentState.value}
-						startRound={async (state: CurrentState) => {
-							setIsLoading(true);
-							setFinishedResult(undefined);
-							try {
-								const { wavePromise } = await gameProcess.startNextWave(state);
-								setIsLoading(false);
-								setIsRound(true);
-								const result = await wavePromise;
-								setFinishedResult(result);
-							} finally {
-								setIsLoading(false);
-							}
-						}}
-					/>
+					<PreRound state={currentState.value} />
 				</MainContainer>
 			</SplashBanner>
 		);
@@ -68,31 +54,7 @@ export function Game({ gameProcess }: Props) {
 		return (
 			<SplashBanner>
 				<MainContainer noPadding top>
-					<StartScreen
-						startGame={async (
-							players,
-							playerControls,
-							difficulty,
-							duration,
-						) => {
-							setIsLoading(true);
-							setFinishedResult(undefined);
-							try {
-								const { wavePromise } = await gameProcess.start(
-									players,
-									playerControls,
-									difficulty,
-									duration,
-								);
-								setIsLoading(false);
-								setIsRound(true);
-								const result = await wavePromise;
-								setFinishedResult(result);
-							} finally {
-								setIsLoading(false);
-							}
-						}}
-					/>
+					<StartScreen />
 				</MainContainer>
 			</SplashBanner>
 		);
@@ -105,6 +67,10 @@ export function Game({ gameProcess }: Props) {
 		</MainContainer>
 	);
 }
+
+type Props = {
+	gameProcess: GameProcess;
+};
 
 export function ShowRound({ gameProcess }: Props) {
 	const rootEl = useRef<HTMLDivElement | null>(null);

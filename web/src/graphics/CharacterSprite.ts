@@ -27,16 +27,13 @@ export class CharacterSprites {
 		if (character.killedAt && this.#animations.dead) {
 			return this.#animations.dead?.getSprite(delta);
 		}
-		if (
-			character.lastHitAt &&
-			now - character.lastHitAt.getTime() < knockbackSpeed
-		) {
+		if (character.lastHitAt && now - character.lastHitAt < knockbackSpeed) {
 			const anim =
 				character.healthPoints / character.stats.maxHp >= 0.5
 					? this.#animations.hurt
 					: (this.#animations.hurtALot ?? this.#animations.hurt);
 			return anim?.getSprite(delta);
-		} else if (now - character.lastMovedAt.getTime() < movingAnimationDelay) {
+		} else if (now - character.lastMovedAt < movingAnimationDelay) {
 			return this.#animations.walking.getSprite(delta);
 		} else if (this.#animations.idle) {
 			return this.#animations.idle.getSprite(delta);

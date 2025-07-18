@@ -19,6 +19,11 @@ export type CharacterSetup = {
 	sprite: SpriteType;
 };
 
+export type WavePromises = {
+	waveInitPromise: Promise<void>;
+	wavePromise: Promise<"win" | "fail" | undefined>;
+};
+
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
  */
@@ -40,15 +45,13 @@ export class GameProcess {
 	 * Initializes Pixi, creates player, starts input & ticker, and begins the round.
 	 * Resolves when the round ends.
 	 */
-	async start(
+	start(
 		players: Player[],
 		playerControls: PlayerControl[],
 		difficulty: Difficulty,
 		duration: number,
 	) {
 		this.#logger.info({ difficulty, players, duration }, "starting the game");
-
-		this.#playerControls = playerControls;
 
 		// Initial game state
 		currentState.value = createInitialState(
@@ -58,14 +61,22 @@ export class GameProcess {
 			1,
 			duration,
 		);
+
+		return this.startWave(playerControls);
+	}
+
+	startWave(playerControls: PlayerControl[]): WavePromises {
+		this.#playerControls = playerControls;
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
 			this.#playerControls,
 			this.#debug,
 		);
-		await this.#waveProcess.init();
+		const waveInitPromise = this.#waveProcess.init();
+		const wavePromise = waveInitPromise.then(() => this.#waveProcess?.start());
 		return {
-			wavePromise: this.#waveProcess.start(),
+			waveInitPromise,
+			wavePromise,
 		};
 	}
 

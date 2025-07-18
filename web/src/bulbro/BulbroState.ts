@@ -19,10 +19,10 @@ type BulbroStateProperties = {
 	readonly healthPoints: number;
 	readonly stats: Stats;
 	readonly weapons: WeaponState[];
-	readonly lastMovedAt: Date;
-	readonly lastHitAt: Date;
-	readonly healedByHpRegenerationAt: Date;
-	readonly killedAt?: Date;
+	readonly lastMovedAt: number;
+	readonly lastHitAt: number;
+	readonly healedByHpRegenerationAt: number;
+	readonly killedAt?: number;
 	readonly lastDirection?: Direction;
 };
 
@@ -83,6 +83,10 @@ export class BulbroState implements BulbroStateProperties {
 		this.#props = props;
 	}
 
+	toJSON() {
+		return { ...this.#props };
+	}
+
 	useWeapons(weapons: WeaponState[]) {
 		return new BulbroState({
 			...this.#props,
@@ -90,12 +94,16 @@ export class BulbroState implements BulbroStateProperties {
 		});
 	}
 
+	isAlive() {
+		return this.healthPoints > 0;
+	}
+
 	/** Returns a new state with the Bulbro moved to a new position. */
 	move(position: Position, now: number): BulbroState {
 		return new BulbroState({
 			...this.#props,
 			position,
-			lastMovedAt: new Date(now),
+			lastMovedAt: now,
 			lastDirection: {
 				x: position.x - this.position.x || this.lastDirection?.x || 0,
 				y: position.y - this.position.y || this.lastDirection?.y || 0,
@@ -106,7 +114,7 @@ export class BulbroState implements BulbroStateProperties {
 	/** Returns a new state with updated weapon strike timestamp for a hit action. */
 	hit(weaponId: string, now: number): BulbroState {
 		const weapons = this.weapons.map((ws) =>
-			ws.id === weaponId ? { ...ws, lastStrikedAt: new Date(now) } : ws,
+			ws.id === weaponId ? { ...ws, lastStrikedAt: now } : ws,
 		);
 		return new BulbroState({
 			...this.#props,
@@ -119,7 +127,7 @@ export class BulbroState implements BulbroStateProperties {
 		return new BulbroState({
 			...this.#props,
 			healthPoints: this.healthPoints - damage,
-			lastHitAt: new Date(now),
+			lastHitAt: now,
 		});
 	}
 
@@ -136,18 +144,18 @@ export class BulbroState implements BulbroStateProperties {
 			return this;
 		}
 
-		const timeSinceLastHeal = now - this.healedByHpRegenerationAt.getTime();
+		const timeSinceLastHeal = now - this.healedByHpRegenerationAt;
 		if (timeSinceLastHeal < 1_000) {
 			return this;
 		}
 
-		const timeSinceLastHit = now - this.lastHitAt.getTime();
+		const timeSinceLastHit = now - this.lastHitAt;
 
 		const hpPerSecond = getHpRegenerationPerSecond(this.stats.hpRegeneration);
 
 		return new BulbroState({
 			...this.#props,
-			healedByHpRegenerationAt: new Date(now),
+			healedByHpRegenerationAt: now,
 			healthPoints:
 				this.healthPoints +
 				(hpPerSecond * Math.min(timeSinceLastHeal, timeSinceLastHit)) / 1000,
@@ -177,7 +185,7 @@ export function spawnBulbro(
 	experience: number,
 	character: Bulbro,
 ): BulbroState {
-	const now = new Date();
+	const now = Date.now();
 	const weapons: WeaponState[] = character.weapons.map(toWeaponState);
 	return new BulbroState({
 		id,
@@ -190,7 +198,7 @@ export function spawnBulbro(
 		stats: { ...character.baseStats },
 		weapons,
 		lastMovedAt: now,
-		lastHitAt: new Date(0),
+		lastHitAt: 0,
 		healedByHpRegenerationAt: now,
 		materialsAvailable: 0,
 	});

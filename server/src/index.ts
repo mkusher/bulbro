@@ -103,6 +103,11 @@ api
 			return c.json({ error: "Lobby not found" });
 		}
 
+		logger.info(
+			{ id: lobby.id, playerId: player.id },
+			"Marking player as ready",
+		);
+
 		return c.json({
 			lobby,
 		});
@@ -112,6 +117,17 @@ api
 		const body = await c.req.json();
 
 		const state = GameState(body.state);
+
+		if (state instanceof type.errors) {
+			logger.warn(
+				{
+					state,
+				},
+				"Invalid state passed for game start",
+			);
+			c.status(400);
+			return c.json({ error: "Invalid state" });
+		}
 
 		await startGame(id, state);
 

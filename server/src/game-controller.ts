@@ -13,6 +13,9 @@ export async function startGame(id: string, initialState: object) {
 	const serverStartTime = Date.now();
 
 	lobby.players.forEach((player) => {
+		if (player.id === lobby.hostId) {
+			return;
+		}
 		const socket = websocketConnections.get(player.id);
 
 		socket?.sendObject({
@@ -33,13 +36,16 @@ export async function hostUpdate(id: string, state: object) {
 	const serverUpdateTime = Date.now();
 
 	lobby.players.forEach((player) => {
+		if (player.id === lobby.hostId) {
+			return;
+		}
 		const socket = websocketConnections.get(player.id);
 
 		socket?.sendObject({
-			type: "game-updated-by-host",
+			type: "game-state-updated-by-host",
 			lobby,
 			state,
-			serverStartTime: serverUpdateTime,
+			serverUpdateTime,
 		});
 	});
 }
@@ -53,13 +59,16 @@ export async function playerUpdate(id: string, state: object) {
 	const serverUpdateTime = Date.now();
 
 	lobby.players.forEach((player) => {
+		if (player.id !== lobby.hostId) {
+			return;
+		}
 		const socket = websocketConnections.get(player.id);
 
 		socket?.sendObject({
-			type: "game-updated-by-player",
+			type: "game-state-updated-by-player",
 			lobby,
 			state,
-			serverStartTime: serverUpdateTime,
+			serverUpdateTime,
 		});
 	});
 }

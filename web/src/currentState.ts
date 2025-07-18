@@ -31,7 +31,7 @@ export interface WeaponState {
 	/** Weapon identifier */
 	id: string;
 	/** Timestamp of the last time this weapon struck */
-	lastStrikedAt: Date;
+	lastStrikedAt: number;
 	statsBonus: StatsBonus;
 	shotSpeed: number;
 }
@@ -41,8 +41,8 @@ export interface RoundState {
 	duration: number;
 	wave: number;
 	difficulty: number;
-	startedAt?: Date;
-	endedAt?: Date;
+	startedAt?: number;
+	endedAt?: number;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface CurrentState {
 	/** Active shots in play */
 	shots: ShotState[];
 	/** Timestamp of last enemy spawn */
-	lastSpawnAt?: Date;
+	lastSpawnAt?: number;
 	round: RoundState;
 }
 
@@ -76,7 +76,7 @@ export const nextWave = (
 		...currentState.round,
 		isRunning: true,
 		endedAt: undefined,
-		startedAt: new Date(now),
+		startedAt: now,
 		wave: currentState.round.wave + 1,
 	},
 });
@@ -118,7 +118,7 @@ export const createInitialState = (
 			duration,
 			difficulty,
 			wave,
-			startedAt: new Date(),
+			startedAt: Date.now(),
 		},
 	};
 };
@@ -191,7 +191,7 @@ export function movePlayer(
 	// Movement handler: build obstacles from other players and alive enemies
 	const obstacles: MovableObject[] = [
 		...state.players
-			.filter((p2) => p2.id !== currentPlayerId)
+			.filter((p2) => p2.id !== currentPlayerId && p2.isAlive())
 			.map((p2) => p2.toMovableObject()),
 		...state.enemies.filter((e) => !e.killedAt).map((e) => e.toMovableObject()),
 	];
@@ -199,6 +199,9 @@ export function movePlayer(
 		...state,
 		players: state.players.map((p) => {
 			if (p.id !== currentPlayerId) return p;
+			if (!p.isAlive()) {
+				return p;
+			}
 			const mover = new Movement(
 				{
 					position: p.position,
@@ -226,16 +229,10 @@ export function moveEnemies(
 	const players = state.players;
 	let enemies = [...state.enemies];
 	const { now, deltaTime } = action;
-	if (players.length > 0) {
+	const alive = players.filter((p) => p.isAlive());
+	if (alive.length > 0) {
 		const mapSize = state.mapSize;
-		const playersObjects = state.players.map((p2) => ({
-			position: p2.position,
-			shape: {
-				type: "rectangle",
-				width: BULBRO_SIZE.width,
-				height: BULBRO_SIZE.height,
-			} as Shape,
-		}));
+		const playersObjects = alive.map((p2) => p2.toMovableObject());
 		newState.enemies = enemies.map((enemy) => {
 			const obstacles: MovableObject[] = [
 				...enemies
@@ -244,7 +241,7 @@ export function moveEnemies(
 				...playersObjects,
 			];
 			return enemy.moveToClosestBulbro(
-				players,
+				alive,
 				obstacles,
 				mapSize,
 				deltaTime,
@@ -263,7 +260,10 @@ export function moveMaterials(
 	let objects = [];
 	let players = state.players;
 	for (const object of state.objects) {
-		const player = findClosest(object, players);
+		const player = findClosest(
+			object,
+			players.filter((p) => p.isAlive()),
+		);
 		let position = object.position;
 
 		if (
@@ -373,6 +373,9 @@ export function moveShot(
 			const segment = { start: prevPos, end: nextPos };
 			let isHit = false;
 			newPlayers = newPlayers.map((p) => {
+				if (!p.isAlive()) {
+					return p;
+				}
 				const playerRect = rectFromCenter(p.position, BULBRO_SIZE);
 				if (rectIntersectsLine(playerRect, segment)) {
 					isHit = true;
@@ -387,9 +390,8 @@ export function moveShot(
 	newEnemies = newEnemies.filter(
 		(e) =>
 			e.healthPoints > 0 ||
-			(e.killedAt && now - e.killedAt.getTime() < enemiesBodiesDisappearAfter),
+			(e.killedAt && now - e.killedAt < enemiesBodiesDisappearAfter),
 	);
-	newPlayers = newPlayers.filter((p) => p.healthPoints > 0);
 	const isRunning = newPlayers.length > 0 && state.round.isRunning;
 	return {
 		...state,
@@ -400,7 +402,7 @@ export function moveShot(
 		round: {
 			...state.round,
 			isRunning,
-			endedAt: !isRunning ? (state.round.endedAt ?? new Date(now)) : undefined,
+			endedAt: !isRunning ? (state.round.endedAt ?? now) : undefined,
 		},
 	};
 }
@@ -417,7 +419,7 @@ export function spawnEnemy(
 			objects.push(object);
 			continue;
 		}
-		if (now - object.startedAt.getTime() >= object.duration * 1000) {
+		if (now - object.startedAt >= object.duration * 1000) {
 			enemiesToSpawn.push(object.enemy);
 			continue;
 		}
@@ -432,12 +434,12 @@ export function spawnEnemy(
 				type: "spawning-enemy",
 				id: enemy.id,
 				position: enemy.position,
-				startedAt: new Date(now),
+				startedAt: now,
 				duration: 3,
 				enemy,
 			},
 		],
-		lastSpawnAt: new Date(now),
+		lastSpawnAt: now,
 	};
 }
 
@@ -450,6 +452,7 @@ export function addShot(
 		shot.shooterType === "player"
 			? state.players.map((p) => {
 					if (p.id !== shot.shooterId) return p;
+					if (!p.isAlive()) return p;
 					return p.hit(weaponId, now);
 				})
 			: state.players;
@@ -476,7 +479,7 @@ export function updateRound(round: RoundState, action: Action) {
 	return {
 		...round,
 		isRunning,
-		endedAt: !isRunning ? (round.endedAt ?? new Date(now)) : round.endedAt,
+		endedAt: !isRunning ? (round.endedAt ?? now) : round.endedAt,
 	};
 }
 
@@ -484,7 +487,9 @@ export function healPlayers(state: CurrentState, action: Action) {
 	const { now } = action;
 	return {
 		...state,
-		players: state.players.map((player) => player.healByHpRegeneration(now)),
+		players: state.players.map((player) =>
+			player.isAlive() ? player.healByHpRegeneration(now) : player,
+		),
 	};
 }
 
@@ -538,12 +543,33 @@ export function updateState(state: CurrentState, action: Action): CurrentState {
 export const getTimeLeft = (round: RoundState) => {
 	const duration = round.duration * 1000;
 	return round.endedAt && round.startedAt
-		? duration - round.endedAt.getTime() + round.startedAt.getTime()
+		? duration - round.endedAt + round.startedAt
 		: round.startedAt
-			? duration - Date.now() + round.startedAt.getTime()
+			? duration - Date.now() + round.startedAt
 			: 0;
 };
 
 export const currentState = signal(
 	createInitialState([], { width: 800, height: 600 }, 0),
 );
+
+export function fromJSON(state: CurrentState) {
+	currentState.value = {
+		...state,
+		objects: state.objects.map((o) =>
+			o.type === "spawning-enemy"
+				? {
+						...o,
+						enemy:
+							o.enemy instanceof EnemyState ? o.enemy : new EnemyState(o.enemy),
+					}
+				: o,
+		),
+		enemies: state.enemies.map((e) =>
+			e instanceof EnemyState ? e : new EnemyState(e),
+		),
+		players: state.players.map((p) =>
+			p instanceof BulbroState ? p : new BulbroState(p),
+		),
+	};
+}

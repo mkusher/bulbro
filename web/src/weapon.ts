@@ -35,7 +35,7 @@ export interface Weapon {
 
 export const toWeaponState = (w: Weapon) => ({
 	id: w.id,
-	lastStrikedAt: new Date(0),
+	lastStrikedAt: 0,
 	statsBonus: w.statsBonus,
 	shotSpeed: w.shotSpeed,
 });

@@ -1,32 +1,32 @@
-import { signal } from "@preact/signals";
-import { apiUrl, wsUrl } from "./clientConfig";
+import { computed, signal } from "@preact/signals";
+import { apiUrl } from "./clientConfig";
 import { type } from "arktype";
-import { currentUser } from "./currentUser";
 import type { Player } from "@/player";
-
-const PlayerAttendee = type({
-	id: "string",
-	username: "string",
-	"status?": "string",
-});
-const LobbySchema = type({
-	id: "string",
-	createdAt: "number",
-	hostId: "string",
-	players: PlayerAttendee.array(),
-});
-
-type PlayerAttendee = typeof PlayerAttendee.infer;
-type Lobby = typeof LobbySchema.infer;
+import { currentUser } from "./currentUser";
+import { logger, type Logger } from "@/logger";
+import {
+	LobbySchema,
+	PlayerAttendee,
+	WebsocketMessage,
+} from "./LobbySocketMessages";
+import { LobbyConnection } from "./LobbyConnection";
+import {
+	type NetworkGameConnection,
+	WebsocketMessage as GameWebsocketMessage,
+} from "./NetworkGameConnection";
+import { currentGameProcess } from "@/currentGameProcess";
+import { currentState, fromJSON, type CurrentState } from "@/currentState";
+import { startNetworkGameAsNonHost } from "./start-game";
 
 export async function createLobby() {
 	const url = new URL("game-lobby", apiUrl);
+	const iam = currentUser.value;
 	const res = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
 			host: {
-				id: currentUser.value.id,
-				username: currentUser.value.username,
+				id: iam.id,
+				username: iam.username,
 			},
 		}),
 	});
@@ -38,21 +38,30 @@ export async function createLobby() {
 		throw newLobby;
 	}
 
-	currentLobby.value = newLobby;
-	startLobbyWebsocket();
+	currentLobby.value = new LobbyConnection(
+		logger,
+		iam.id,
+		newLobby,
+		processLobbySocketMessage(logger),
+	);
 }
 
-export const currentLobby = signal<Lobby | null>(null);
+export const currentLobby = signal<LobbyConnection | null>(null);
+export const isLocalPlayerHost = computed(
+	() => currentLobby.value?.hostId === currentUser.value.id,
+);
+export const currentNetworkGame = signal<NetworkGameConnection | null>(null);
 export const readyPlayers = signal<Player[]>([]);
 
 export async function joinLobby(id: string) {
 	const url = new URL(`game-lobby/${id}/join-requests`, apiUrl);
+	const iam = currentUser.value;
 	const res = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
 			player: {
-				id: currentUser.value.id,
-				username: currentUser.value.username,
+				id: iam.id,
+				username: iam.username,
 			},
 		}),
 	});
@@ -64,9 +73,12 @@ export async function joinLobby(id: string) {
 		throw newLobby;
 	}
 
-	currentLobby.value = newLobby;
-
-	startLobbyWebsocket();
+	currentLobby.value = new LobbyConnection(
+		logger,
+		iam.id,
+		newLobby,
+		processLobbySocketMessage(logger),
+	);
 }
 
 export async function markAsReady(id: string, player: Player) {
@@ -83,79 +95,101 @@ export async function markAsReady(id: string, player: Player) {
 	readyPlayers.value = [...readyPlayers.value, player];
 }
 
-const Connected = type({ type: "'connection'", connected: "boolean" });
-const PlayerJoined = type({ type: "'player-joined'", lobby: LobbySchema });
-const PlayerReady = type({ type: "'player-ready'", readyPlayer: "object" });
-const PlayerDisconnected = type({
-	type: "'player-disconnected'",
-	player: "object",
-});
-const WebsocketMessage = Connected.or(PlayerJoined)
-	.or(PlayerReady)
-	.or(PlayerDisconnected);
+export function startGame() {
+	const lobby = currentLobby.value;
+	if (!lobby) return;
+	const game = lobby.createGame(
+		currentGameProcess.value,
+		processGameSocketMessage(logger),
+	);
+	currentNetworkGame.value = game;
 
-async function startLobbyWebsocket() {
-	const { id: userId } = currentUser.value;
-	const ws = new WebSocket(wsUrl);
-
-	ws.addEventListener("close", () => {
-		console.log("[WS] Close");
-	});
-	ws.addEventListener("open", () => {
-		ws.send(JSON.stringify({ userId, type: "auth" }));
-	});
-	ws.addEventListener("message", (e) => {
-		console.log("[WS] message", e);
-		const message = parseMessage(e.data);
-		return processMessage(message);
-	});
-	ws.addEventListener("error", (e) => {
-		console.log("[WS] error", e);
-	});
-
-	return ws;
+	return game;
 }
 
-export function processMessage(message: typeof WebsocketMessage.infer) {
-	switch (message.type) {
-		case "connection": {
-			console.log("Websocket connection", message.connected);
-			return;
+export function processLobbySocketMessage(logger: Logger) {
+	return (receivedMessage: typeof WebsocketMessage.infer) => {
+		switch (receivedMessage.type) {
+			case "connection": {
+				logger.info({ receivedMessage }, "Websocket connection");
+				return;
+			}
+			case "player-joined": {
+				logger.info({ receivedMessage }, "player joined");
+				const lobby = currentLobby.value;
+				if (!lobby) return;
+				currentLobby.value = lobby.addPlayers(receivedMessage.lobby.players);
+				return;
+			}
+			case "player-ready": {
+				logger.info({ receivedMessage }, "player ready");
+				readyPlayers.value = [
+					...readyPlayers.value,
+					receivedMessage.readyPlayer as Player,
+				];
+				return;
+			}
+			case "player-disconnected": {
+				logger.info({ receivedMessage }, "player disconnected");
+				const player = receivedMessage.player as PlayerAttendee;
+				const lobby = currentLobby.value;
+				if (!lobby) return;
+				currentLobby.value = lobby.removePlayer(player);
+				return;
+			}
+			case "game-started": {
+				logger.info({ receivedMessage }, "game started");
+				const state = receivedMessage.initialState as CurrentState;
+				return startNetworkGameAsNonHost(state);
+			}
 		}
-		case "player-joined": {
-			console.log("PlayerJoined", message.lobby);
-			currentLobby.value = message.lobby;
-			return;
-		}
-		case "player-ready": {
-			console.log("player ready", message.readyPlayer);
-			readyPlayers.value = [
-				...readyPlayers.value,
-				message.readyPlayer as Player,
-			];
-			return;
-		}
-		case "player-disconnected": {
-			console.log("player ready", message.player);
-			const player = message.player as PlayerAttendee;
-			const playerId = player.id;
-			const lobby = currentLobby.value;
-			if (!lobby) return;
-			currentLobby.value = {
-				...lobby,
-				players: lobby.players.map((p) => (p.id === playerId ? player : p)),
-			};
-			return;
-		}
-	}
+	};
 }
 
-export function parseMessage(message: string) {
-	const data = WebsocketMessage(JSON.parse(message));
+const lastReceivedGameUpdate = signal(0);
 
-	if (data instanceof type.errors) {
-		throw data;
-	}
-
-	return data;
+export function processGameSocketMessage(logger: Logger) {
+	return (receivedMessage: typeof GameWebsocketMessage.infer) => {
+		logger.debug({ receivedMessage }, "In game message received");
+		if (receivedMessage.serverUpdateTime < lastReceivedGameUpdate.value) {
+			logger.warn(
+				{ receivedMessage, lastReceivedUpdate: lastReceivedGameUpdate.value },
+				"Old message received",
+			);
+			return;
+		}
+		switch (receivedMessage.type) {
+			case "game-state-updated-by-host": {
+				const state = receivedMessage.state as CurrentState;
+				const prevState = currentState.value;
+				const iam = currentUser.value;
+				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
+				const remotePlayer = state.players.find((p) => p.id !== iam.id)!;
+				fromJSON({
+					...prevState,
+					round: state.round,
+					mapSize: state.mapSize,
+					objects: state.objects,
+					enemies: state.enemies,
+					shots: state.shots,
+					players: [localPlayer, remotePlayer],
+				});
+				lastReceivedGameUpdate.value = receivedMessage.serverUpdateTime;
+				return;
+			}
+			case "game-state-updated-by-player": {
+				const state = receivedMessage.state as CurrentState;
+				const prevState = currentState.value;
+				const iam = currentUser.value;
+				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
+				const remotePlayer = state.players.find((p) => p.id !== iam.id)!;
+				fromJSON({
+					...prevState,
+					players: [localPlayer, remotePlayer],
+				});
+				lastReceivedGameUpdate.value = receivedMessage.serverUpdateTime;
+				return;
+			}
+		}
+	};
 }

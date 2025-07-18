@@ -53,7 +53,7 @@ export class SpawningEnemySprite {
 		this.#container.x = spawningEnemy.position.x;
 		this.#container.y = spawningEnemy.position.y;
 		this.#sprite.alpha = Math.sin(
-			(((Date.now() - spawningEnemy.startedAt.getTime()) / 50) * Math.PI) / 8,
+			(((Date.now() - spawningEnemy.startedAt) / 50) * Math.PI) / 8,
 		);
 	}
 

@@ -6,17 +6,17 @@ import { fromWeaponState, toWeaponState } from "@/weapon";
 import { CentralCard } from "@/ui/Layout";
 import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
 import { Button } from "@/ui/shadcn/button";
+import { startWave } from "@/currentGameProcess";
 
 type Props = {
-	startRound: (state: CurrentState) => void;
 	state: CurrentState;
 };
 
-export function PreRound({ startRound, state }: Props) {
+export function PreRound({ state }: Props) {
 	const [currentState, setCurrentState] = useState(state);
 	const onSubmit = (e: FormEvent) => {
 		e.preventDefault();
-		startRound(currentState);
+		startWave(currentState);
 	};
 	return (
 		<CentralCard>

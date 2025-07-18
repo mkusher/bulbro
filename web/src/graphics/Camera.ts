@@ -50,11 +50,13 @@ export class Camera {
 	}
 
 	#moveCamera(playerPosition: Position) {
-		if (!this.#isSmallScreen(computedMapSizeForWindow.value, canvasSize.value)) {
+		if (
+			!this.#isSmallScreen(computedMapSizeForWindow.value, canvasSize.value)
+		) {
 			this.#moveToCenter();
 			return;
 		}
-    const scale = this.#stage.scale.x
+		const scale = this.#stage.scale.x;
 		const position = {
 			x: playerPosition.x * scale,
 			y: playerPosition.y * scale,
@@ -72,7 +74,9 @@ export class Camera {
 	}
 
 	#moveToCenter() {
-		this.#stage.x = (canvasSize.value.width - computedMapSizeForWindow.value.width) / 2;
-		this.#stage.y = (canvasSize.value.height - computedMapSizeForWindow.value.height) / 2;
+		this.#stage.x =
+			(canvasSize.value.width - computedMapSizeForWindow.value.width) / 2;
+		this.#stage.y =
+			(canvasSize.value.height - computedMapSizeForWindow.value.height) / 2;
 	}
 }

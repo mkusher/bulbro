@@ -1,27 +1,23 @@
 import { useState } from "preact/hooks";
-import type { StartGame } from "@/ui/start-game";
 import { SetupSinglePlayer } from "./start/SetupSinglePlayer";
 import { SetupLocalCoOp } from "./start/SetupLocalCoOp";
 import { GameGlobalSettings } from "./start/GameGlobalSettings";
 
 import { MainMenu } from "./start/MainMenu";
 import { SetupOnlineGame } from "./start/SetupOnlineGame";
+import { startLocalGame } from "@/currentGameProcess";
 
-type Props = {
-	startGame: StartGame;
-};
-
-export function StartScreen({ startGame }: Props) {
+export function StartScreen() {
 	const [screen, setScreen] = useState("start");
 	const toScreen = (screen: string) => () => setScreen(screen);
 	if (screen === "setup-single-player") {
-		return <SetupSinglePlayer startGame={startGame} />;
+		return <SetupSinglePlayer startGame={startLocalGame} />;
 	}
 	if (screen === "setup-local-co-op-player") {
-		return <SetupLocalCoOp startGame={startGame} />;
+		return <SetupLocalCoOp startGame={startLocalGame} />;
 	}
 	if (screen === "setup-online-game") {
-		return <SetupOnlineGame startGame={startGame} />;
+		return <SetupOnlineGame />;
 	}
 	if (screen === "game-settings") {
 		return <GameGlobalSettings goBack={toScreen("start")} />;

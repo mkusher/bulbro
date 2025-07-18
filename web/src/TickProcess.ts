@@ -53,11 +53,7 @@ export class TickProcess {
 			return newState;
 		}
 		newState = this.#healPlayers(newState, deltaTime);
-		newState = this.#moveLocalPlayers(
-			newState,
-			deltaTime,
-			localPlayerDirections,
-		);
+		newState = this.#movePlayers(newState, deltaTime, localPlayerDirections);
 		newState = this.#moveEnemies(newState, deltaTime);
 		newState = this.#moveObjects(newState, deltaTime, now);
 		newState = this.#spawnEnemies(newState, deltaTime, now);
@@ -79,20 +75,22 @@ export class TickProcess {
 	}
 
 	/** Handle player movement via state reducer */
-	#moveLocalPlayers(
+	#movePlayers(
 		state: CurrentState,
 		deltaTime: number,
 		localPlayerDirections: Direction[],
 	): CurrentState {
 		return state.players.reduce(
 			(state, player, i) =>
-				updateState(state, {
-					type: "move",
-					direction: localPlayerDirections[i] ?? { x: 0, y: 0 },
-					deltaTime,
-					now: Date.now(),
-					currentPlayerId: player.id,
-				}),
+				player.isAlive()
+					? updateState(state, {
+							type: "move",
+							direction: localPlayerDirections[i] ?? { x: 0, y: 0 },
+							deltaTime,
+							now: Date.now(),
+							currentPlayerId: player.id,
+						})
+					: state,
 			state,
 		);
 	}
@@ -157,6 +155,7 @@ export class TickProcess {
 	): CurrentState {
 		let newState = state;
 		state.players.forEach((player) => {
+			if (!player.isAlive()) return;
 			player.weapons.forEach((weapon) => {
 				const reloadTime = weapon.statsBonus.attackSpeed ?? 0;
 				const attackSpeed = player.stats.attackSpeed;

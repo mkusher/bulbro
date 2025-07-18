@@ -26,7 +26,7 @@ export const spawnIntervalForRound = (round: RoundState) => {
 };
 export const shouldSpawnEnemy = (now: number, state: CurrentState) => {
 	const spawnInterval = spawnIntervalForRound(state.round);
-	const timeSinceLastSpawn = now - (state.lastSpawnAt?.getTime() ?? 0);
+	const timeSinceLastSpawn = now - (state.lastSpawnAt ?? 0);
 	const timeLeftInRound = getTimeLeft(state.round);
 	const timeModifier =
 		(1 - timeLeftInRound / state.round.duration / 1000) * timeSinceLastSpawn;
@@ -39,12 +39,12 @@ export const shouldSpawnEnemy = (now: number, state: CurrentState) => {
  * Returns true if the weapon is ready to fire (fraction >= 1).
  */
 export function isWeaponReadyToShoot(
-	lastStrikedAt: Date,
+	lastStrikedAt: number,
 	reloadTime: number,
 	attackSpeed: number,
 	now: number,
 ): boolean {
-	const elapsed = now - lastStrikedAt.getTime();
+	const elapsed = now - lastStrikedAt;
 	const chanceForReloaded = elapsed / reloadTime / 1000;
 	return chanceForReloaded + (chanceForReloaded * attackSpeed) / 100 >= 1;
 }

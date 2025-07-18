@@ -27,14 +27,9 @@ import {
 import { currentUser } from "@/network/currentUser";
 import { createPlayer } from "@/player";
 import { BulbroConfigView } from "@/ui/BulbroConfigView";
-import { createMainControls } from "@/controls";
-import { RemoteRepeatLastKnownDirectionControl } from "@/network/RemoteControl";
+import { startNetworkGameAsHost } from "@/network/start-game";
 
-type Props = {
-	startGame: StartGame;
-};
-
-export function SetupOnlineGame({ startGame }: Props) {
+export function SetupOnlineGame() {
 	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
 		bulbro: wellRoundedBulbro,
 		sprite: "dark oracle",
@@ -48,6 +43,7 @@ export function SetupOnlineGame({ startGame }: Props) {
 		hostId: "",
 	};
 	const iam = currentUser.value;
+	const [isStarting, setIsStarting] = useState(false);
 	if (iam.isGuest) {
 		return <h1>Not authenticated</h1>;
 	}
@@ -65,12 +61,8 @@ export function SetupOnlineGame({ startGame }: Props) {
 	};
 	const onStart = (e: Event) => {
 		e.preventDefault();
-		startGame(
-			readyPlayers.value,
-			[createMainControls(), new RemoteRepeatLastKnownDirectionControl()],
-			selectedDifficulty,
-			selectedDuration,
-		);
+		setIsStarting(true);
+		startNetworkGameAsHost(selectedDifficulty, selectedDuration);
 	};
 	const anotherPlayer = lobby.players.find((p) => p.id !== iam.id);
 
@@ -167,7 +159,10 @@ export function SetupOnlineGame({ startGame }: Props) {
 				</CardContent>
 				<CardFooter className="grid">
 					{isHost ? (
-						<Button onClick={onStart} disabled={readyPlayers.value.length < 2}>
+						<Button
+							onClick={onStart}
+							disabled={readyPlayers.value.length < 2 || isStarting}
+						>
 							Start game
 						</Button>
 					) : (
