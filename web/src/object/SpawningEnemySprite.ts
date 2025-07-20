@@ -31,7 +31,7 @@ export class SpawningEnemySprite {
 
 	async init() {
 		const texture = await PIXI.Assets.load(
-			"/assets/craftpix-net-266622-free-top-down-pixel-art-cave-objects/PNG/Cave_objects_source.png",
+			"/game-assets/craftpix-net-266622-free-top-down-pixel-art-cave-objects/PNG/Cave_objects_source.png",
 		);
 		const top = 590;
 		const left = 230;

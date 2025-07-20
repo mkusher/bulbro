@@ -3,7 +3,7 @@ import type { BulbroState } from "../BulbroState";
 import { ChibiSprite } from "./ChibiSprite";
 
 const path =
-	"/assets/craftpix-net-919731-free-chibi-dark-oracle-character-sprites/Dark_Oracle_1/PNG/PNG Sequences/";
+	"/game-assets/craftpix-net-919731-free-chibi-dark-oracle-character-sprites/Dark_Oracle_1/PNG/PNG Sequences/";
 
 export class DarkOracleSprite {
 	#chibi: ChibiSprite;

@@ -3,7 +3,7 @@ import type { BulbroState } from "../BulbroState";
 import { ChibiSprite } from "./ChibiSprite";
 
 const path =
-	"/assets/craftpix-net-469596-free-chibi-valkyrie-character-sprites/Valkyrie_1/PNG/PNG Sequences/";
+	"/game-assets/craftpix-net-469596-free-chibi-valkyrie-character-sprites/Valkyrie_1/PNG/PNG Sequences/";
 
 export class ValkyrieSprite {
 	#chibi: ChibiSprite;

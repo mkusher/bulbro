@@ -28,6 +28,7 @@ import { currentUser } from "@/network/currentUser";
 import { createPlayer } from "@/player";
 import { BulbroConfigView } from "@/ui/BulbroConfigView";
 import { startNetworkGameAsHost } from "@/network/start-game";
+import { useRouter } from "@/ui/routing";
 
 export function SetupOnlineGame() {
 	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
@@ -44,6 +45,7 @@ export function SetupOnlineGame() {
 	};
 	const iam = currentUser.value;
 	const [isStarting, setIsStarting] = useState(false);
+	const router = useRouter();
 	if (iam.isGuest) {
 		return <h1>Not authenticated</h1>;
 	}
@@ -63,6 +65,7 @@ export function SetupOnlineGame() {
 		e.preventDefault();
 		setIsStarting(true);
 		startNetworkGameAsHost(selectedDifficulty, selectedDuration);
+		router.toGame();
 	};
 	const anotherPlayer = lobby.players.find((p) => p.id !== iam.id);
 

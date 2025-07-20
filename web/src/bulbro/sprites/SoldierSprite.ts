@@ -36,7 +36,7 @@ export class SoldierSprite {
 		const offset = 39;
 		const level = 100;
 		const fullTexture = await PIXI.Assets.load(
-			"/assets/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Soldier/Soldier with shadows/Soldier.png",
+			"/game-assets/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Soldier/Soldier with shadows/Soldier.png",
 		);
 
 		this.#movement = new AnimatedSprite(

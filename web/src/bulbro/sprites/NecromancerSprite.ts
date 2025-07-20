@@ -3,7 +3,7 @@ import type { BulbroState } from "../BulbroState";
 import { ChibiSprite } from "./ChibiSprite";
 
 const path =
-	"/assets/craftpix-net-935193-free-chibi-necromancer-of-the-shadow-character-sprites/Necromancer_of_the_Shadow_1/PNG/PNG Sequences/";
+	"/game-assets/craftpix-net-935193-free-chibi-necromancer-of-the-shadow-character-sprites/Necromancer_of_the_Shadow_1/PNG/PNG Sequences/";
 
 export class NecromancerSprite {
 	#chibi: ChibiSprite;

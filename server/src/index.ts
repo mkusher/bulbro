@@ -200,6 +200,8 @@ const wsApp = app.get(
 	}),
 );
 
+app.use("/tg-app", serveStatic({ root: "./public", path: "/index.html" }));
+
 app.get(
 	"*",
 	serveStatic({

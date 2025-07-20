@@ -392,7 +392,8 @@ export function moveShot(
 			e.healthPoints > 0 ||
 			(e.killedAt && now - e.killedAt < enemiesBodiesDisappearAfter),
 	);
-	const isRunning = newPlayers.length > 0 && state.round.isRunning;
+	const isRunning =
+		newPlayers.filter((p) => p.isAlive()).length > 0 && state.round.isRunning;
 	return {
 		...state,
 		enemies: newEnemies,

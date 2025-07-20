@@ -36,7 +36,7 @@ export class MaterialSprite {
 		layer: PIXI.IRenderLayer,
 	) {
 		const source = await PIXI.Assets.load(
-			"/assets/craftpix-net-106469-top-down-crystals-pixel-art/PNG/Assets_source.png",
+			"/game-assets/craftpix-net-106469-top-down-crystals-pixel-art/PNG/Assets_source.png",
 		);
 		const texture = new PIXI.Texture({
 			source,

@@ -5,7 +5,7 @@ import { AnimatedSprite } from "../../graphics/AnimatedSprite";
 import { CharacterSprites } from "../../graphics/CharacterSprite";
 
 const path =
-	"/assets/craftpix-net-671351-free-pixel-prototype-character-sprites-for-shooter/Animations/";
+	"/game-assets/craftpix-net-671351-free-pixel-prototype-character-sprites-for-shooter/Animations/";
 
 const shooterSize = {
 	width: 40,

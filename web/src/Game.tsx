@@ -1,84 +1,25 @@
 import "./ui/global.css";
-import { useRef, useEffect } from "preact/hooks";
 import { StartScreen } from "./screens/StartScreen";
-import { Loader } from "./ui/Loading";
-import { Failed } from "./screens/Failed";
-import { PreRound } from "./screens/PreRound";
-import { currentState } from "./currentState";
-import { TouchscreenJoystick } from "./controls/TouchscreenJoystick";
-import { SplashBanner } from "./ui/Splash";
-import { MainContainer } from "./ui/Layout";
-import {
-	currentGameProcess,
-	isRound as isRoundSignal,
-	isLoading as isLoadingSignal,
-	waveResult,
-} from "./currentGameProcess";
-import type { GameProcess } from "./GameProcess";
+import { LocationProvider, Route, Router } from "preact-iso";
+import { TgAppStartScreen } from "./screens/TgAppStartScreen";
+import { SetupSinglePlayer } from "./screens/start/SetupSinglePlayer";
+import { SetupLocalCoOp } from "./screens/start/SetupLocalCoOp";
+import { SetupOnlineGame } from "./screens/start/SetupOnlineGame";
+import { GameGlobalSettings } from "./screens/start/GameGlobalSettings";
+import { InGame } from "./screens/Game";
 
 export function Game() {
-	const gameProcess = currentGameProcess.value;
-	const finishedResult = waveResult.value;
-	const isRound = isRoundSignal.value;
-	const isLoading = isLoadingSignal.value;
-
-	if (isLoading) {
-		return (
-			<MainContainer>
-				<Loader />
-			</MainContainer>
-		);
-	}
-
-	if (finishedResult === "fail") {
-		return (
-			<SplashBanner>
-				<MainContainer noPadding top>
-					<Failed />
-				</MainContainer>
-			</SplashBanner>
-		);
-	}
-
-	if (finishedResult === "win") {
-		return (
-			<SplashBanner>
-				<MainContainer noPadding top>
-					<PreRound state={currentState.value} />
-				</MainContainer>
-			</SplashBanner>
-		);
-	}
-
-	if (!isRound) {
-		return (
-			<SplashBanner>
-				<MainContainer noPadding top>
-					<StartScreen />
-				</MainContainer>
-			</SplashBanner>
-		);
-	}
-
 	return (
-		<MainContainer noPadding>
-			<TouchscreenJoystick />
-			<ShowRound gameProcess={gameProcess} />
-		</MainContainer>
+		<LocationProvider>
+			<Router>
+				<Route path="/" component={StartScreen} />
+				<Route path="/game" component={InGame} />
+				<Route path="/tg-app" component={TgAppStartScreen} />
+				<Route path="/setup-single-player" component={SetupSinglePlayer} />
+				<Route path="/setup-local-co-op-player" component={SetupLocalCoOp} />
+				<Route path="/setup-online-game" component={SetupOnlineGame} />
+				<Route path="/settings" component={GameGlobalSettings} />
+			</Router>
+		</LocationProvider>
 	);
-}
-
-type Props = {
-	gameProcess: GameProcess;
-};
-
-export function ShowRound({ gameProcess }: Props) {
-	const rootEl = useRef<HTMLDivElement | null>(null);
-	useEffect(() => {
-		if (rootEl.current && gameProcess.gameCanvas) {
-			rootEl.current.appendChild(gameProcess.gameCanvas);
-		}
-	}, [gameProcess.gameCanvas]);
-
-	return <div className="full-viewport" ref={rootEl} />;
 }

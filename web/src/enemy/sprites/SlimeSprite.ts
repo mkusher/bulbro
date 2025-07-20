@@ -48,7 +48,7 @@ export class SlimeSprite {
 	async init() {
 		this.#sprite.scale.set(2);
 		const fullTexture = await PIXI.Assets.load(
-			"/assets/mystic_woods_free_2/sprites/characters/slime.png",
+			"/game-assets/mystic_woods_free_2/sprites/characters/slime.png",
 		);
 
 		this.#movement = new AnimatedSprite(

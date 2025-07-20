@@ -1,5 +1,4 @@
 import { useState } from "preact/hooks";
-import type { StartGame } from "@/ui/start-game";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { type Difficulty } from "@/game-formulas";
 import type { Weapon } from "@/weapon";
@@ -15,12 +14,10 @@ import { DifficultySelector } from "@/ui/DifficultySelector";
 import { createPlayer } from "@/player";
 import { v4 } from "uuid";
 import { createMainControls, SecondaryKeyboardControl } from "@/controls";
+import { startLocalGame } from "@/currentGameProcess";
+import { useRouter } from "@/ui/routing";
 
-type Props = {
-	startGame: StartGame;
-};
-
-export function SetupLocalCoOp({ startGame }: Props) {
+export function SetupLocalCoOp() {
 	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
 		bulbro: wellRoundedBulbro,
 		sprite: "dark oracle",
@@ -32,9 +29,10 @@ export function SetupLocalCoOp({ startGame }: Props) {
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
 	const [weaponsSetup, setWeaponsSetup] = useState<Weapon[][]>([[smg], [smg]]);
 	const [selectedDuration, setDuration] = useState<number>(60);
+	const router = useRouter();
 	const onSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
-		startGame(
+		startLocalGame(
 			[firstBulbro, secondBulbro].map((character, i) =>
 				createPlayer(v4(), character.bulbro, character.sprite, weaponsSetup[i]),
 			),
@@ -42,6 +40,7 @@ export function SetupLocalCoOp({ startGame }: Props) {
 			selectedDifficulty,
 			selectedDuration,
 		);
+		router.toGame();
 	};
 	return (
 		<CentralCard>
