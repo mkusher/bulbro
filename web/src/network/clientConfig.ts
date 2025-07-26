@@ -1,2 +1,2 @@
-export const apiUrl = "http://45.10.163.180:3000/api/";
-export const wsUrl = `ws://45.10.163.180:3000/ws`;
+export const apiUrl = "https://bulbro.lol/api/";
+export const wsUrl = `wss://bulbro.lol/ws`;

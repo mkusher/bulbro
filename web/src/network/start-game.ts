@@ -63,7 +63,10 @@ export async function sendGameStartedRequest(
 	return res.ok;
 }
 
-export async function startNetworkGameAsNonHost(initialState: CurrentState) {
+export async function startNetworkGameAsNonHost(
+	initialState: CurrentState,
+	toGame: () => void,
+) {
 	const game = startGameFromLobby();
 	if (!game) {
 		throw new Error("Game hasn't started");
@@ -80,6 +83,7 @@ export async function startNetworkGameAsNonHost(initialState: CurrentState) {
 	try {
 		const { wavePromise, waveInitPromise } = game.startRemote();
 		await waveInitPromise;
+		toGame();
 		game.onStart({ waveInitPromise, wavePromise });
 		markAsRunningWave();
 		const result = await wavePromise;

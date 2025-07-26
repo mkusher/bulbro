@@ -1,7 +1,7 @@
 import { Failed as FailedScreen } from "@/screens/Failed";
 
 export default {
-	title: "Failed screen",
+	title: "Screens/Failed screen",
 	component: FailedScreen,
 };
 

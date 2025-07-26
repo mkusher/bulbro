@@ -17,8 +17,9 @@ import {
 import { currentGameProcess } from "@/currentGameProcess";
 import { currentState, fromJSON, type CurrentState } from "@/currentState";
 import { startNetworkGameAsNonHost } from "./start-game";
+import type { ShotState } from "@/shot/ShotState";
 
-export async function createLobby() {
+export async function createLobby(toGame: () => void) {
 	const url = new URL("game-lobby", apiUrl);
 	const iam = currentUser.value;
 	const res = await fetch(url, {
@@ -42,7 +43,7 @@ export async function createLobby() {
 		logger,
 		iam.id,
 		newLobby,
-		processLobbySocketMessage(logger),
+		processLobbySocketMessage(logger, toGame),
 	);
 }
 
@@ -53,7 +54,7 @@ export const isLocalPlayerHost = computed(
 export const currentNetworkGame = signal<NetworkGameConnection | null>(null);
 export const readyPlayers = signal<Player[]>([]);
 
-export async function joinLobby(id: string) {
+export async function joinLobby(id: string, toGame: () => void) {
 	const url = new URL(`game-lobby/${id}/join-requests`, apiUrl);
 	const iam = currentUser.value;
 	const res = await fetch(url, {
@@ -77,7 +78,7 @@ export async function joinLobby(id: string) {
 		logger,
 		iam.id,
 		newLobby,
-		processLobbySocketMessage(logger),
+		processLobbySocketMessage(logger, toGame),
 	);
 }
 
@@ -107,7 +108,7 @@ export function startGame() {
 	return game;
 }
 
-export function processLobbySocketMessage(logger: Logger) {
+export function processLobbySocketMessage(logger: Logger, toGame: () => void) {
 	return (receivedMessage: typeof WebsocketMessage.infer) => {
 		switch (receivedMessage.type) {
 			case "connection": {
@@ -140,7 +141,7 @@ export function processLobbySocketMessage(logger: Logger) {
 			case "game-started": {
 				logger.info({ receivedMessage }, "game started");
 				const state = receivedMessage.initialState as CurrentState;
-				return startNetworkGameAsNonHost(state);
+				startNetworkGameAsNonHost(state, toGame);
 			}
 		}
 	};
@@ -165,13 +166,19 @@ export function processGameSocketMessage(logger: Logger) {
 				const iam = currentUser.value;
 				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
 				const remotePlayer = state.players.find((p) => p.id !== iam.id)!;
+				const isFromLocalPlayer = (shot: ShotState) =>
+					shot.shooterType === "player" && shot.shooterId === localPlayer.id;
+				const shots = [
+					...prevState.shots.filter(isFromLocalPlayer),
+					...state.shots.filter((shot) => !isFromLocalPlayer(shot)),
+				];
 				fromJSON({
 					...prevState,
 					round: state.round,
 					mapSize: state.mapSize,
 					objects: state.objects,
 					enemies: state.enemies,
-					shots: state.shots,
+					shots,
 					players: [localPlayer, remotePlayer],
 				});
 				lastReceivedGameUpdate.value = receivedMessage.serverUpdateTime;
@@ -183,8 +190,15 @@ export function processGameSocketMessage(logger: Logger) {
 				const iam = currentUser.value;
 				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
 				const remotePlayer = state.players.find((p) => p.id !== iam.id)!;
+				const isFromRemotePlayer = (shot: ShotState) =>
+					shot.shooterType === "player" && shot.shooterId === remotePlayer.id;
+				const shots = [
+					...prevState.shots.filter((shot) => !isFromRemotePlayer(shot)),
+					...state.shots.filter(isFromRemotePlayer),
+				];
 				fromJSON({
 					...prevState,
+					shots,
 					players: [localPlayer, remotePlayer],
 				});
 				lastReceivedGameUpdate.value = receivedMessage.serverUpdateTime;

@@ -1,9 +1,8 @@
-import { MainMenu } from "@/screens/start/MainMenu";
-import { SetupSinglePlayer } from "@/screens/start/SetupSinglePlayer";
+import { StartScreen } from "@/screens/StartScreen";
 
 export default {
-	title: "Start screen",
-	component: MainMenu,
+	title: "Screens/Start screen",
+	component: StartScreen,
 };
 
 const toScreen = (screen: unknown) => () => {
@@ -11,9 +10,5 @@ const toScreen = (screen: unknown) => () => {
 };
 
 export const Main = {
-	render: () => <MainMenu toScreen={toScreen} />,
-};
-
-export const SetupSinglePlayerGame = {
-	render: () => <SetupSinglePlayer startGame={async () => {}} />,
+	render: () => <StartScreen />,
 };

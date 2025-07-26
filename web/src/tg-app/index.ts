@@ -1,5 +1,8 @@
 import { logger } from "@/logger";
+import { joinLobby } from "@/network/currentLobby";
+import { createUser, currentUser } from "@/network/currentUser";
 import { computed, signal } from "@preact/signals";
+import { type } from "arktype";
 
 declare global {
 	interface Window {
@@ -9,10 +12,12 @@ declare global {
 	}
 }
 
-export async function fetchWebApp() {
+const getWebApp = () => window.Telegram.WebApp;
+
+export async function initWebApp() {
 	await import("https://telegram.org/js/telegram-web-app.js?58" as any);
 
-	const WebApp = window.Telegram.WebApp;
+	const WebApp = getWebApp();
 
 	if (!WebApp) {
 		logger.error("Telegram web app was not loaded");
@@ -21,16 +26,46 @@ export async function fetchWebApp() {
 
 	await WebApp.ready();
 	await WebApp.expand();
-  await WebApp.requestFullscreen();
+	await WebApp.disableVerticalSwipes();
 
-	if (!WebApp.WebAppUser) {
+	const initData = WebApp.initDataUnsafe;
+
+	if (!initData.user) {
 		logger.error("Telegram web app user was not loaded");
 		return;
 	}
 
-	tgUser.value = WebApp.WebAppUser;
+	tgUser.value = initData.user;
 
-	return WebApp;
+	currentUser.value = {
+		...currentUser.value,
+		username: tgUserName.value,
+	};
+
+	await createUser();
+
+	const command = await parseStartApp(initData.start_param);
+
+	return command;
+}
+
+const joinLobbyCommand = type({
+	type: "'joinlobby'",
+	lobbyId: "string",
+});
+async function parseStartApp(startParamRaw?: string) {
+	try {
+		const param = JSON.parse(window.atob(startParamRaw ?? ""));
+		const command = joinLobbyCommand(param);
+		if (command instanceof type.errors) {
+			return;
+		}
+
+		return command;
+	} catch (err) {
+		logger.warn({ err }, "Unable to parse tg start app params");
+		return;
+	}
 }
 
 export type TgUser = {
