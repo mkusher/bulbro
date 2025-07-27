@@ -17,6 +17,11 @@ export const classicMapSize = {
 	height: 1500,
 } as const;
 
+const minimalMapSize = {
+	width: 1000,
+	height: 750,
+};
+
 export type FitMode = "fit-width" | "fit-height";
 export const manualFitMode = signal<FitMode | null>(null);
 export const automaticFitMode = computed(() => {
@@ -41,8 +46,8 @@ export const autoScale = computed(() => {
 	const canvas = canvasSize.value;
 
 	return fitWidth
-		? canvas.width / classicMapSize.width
-		: canvas.height / classicMapSize.height;
+		? Math.max(canvas.width, minimalMapSize.width) / classicMapSize.width
+		: Math.max(canvas.height, minimalMapSize.height) / classicMapSize.height;
 });
 
 export const manualScale = signal<number | null>(null);

@@ -6,7 +6,7 @@ import {
 	moveMaterials,
 	updateState,
 } from "./currentState";
-import type { Scene } from "./graphics/Scene";
+import type { StageWithUi } from "./graphics/StageWithUi";
 import { logger as defaultLogger } from "./logger";
 import {
 	shouldSpawnEnemy,
@@ -26,10 +26,10 @@ import { v4 as uuidv4 } from "uuid";
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
  */
 export class TickProcess {
-	#scene: Scene;
+	#scene: StageWithUi;
 	#logger = defaultLogger.child({ component: "TickProcess" });
 
-	constructor(logger: Logger, scene: Scene, debug: boolean) {
+	constructor(logger: Logger, scene: StageWithUi, debug: boolean) {
 		this.#scene = scene;
 		this.#logger = logger.child({});
 		this.#logger.debug("TickProcess initialized");

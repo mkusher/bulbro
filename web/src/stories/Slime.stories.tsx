@@ -21,11 +21,9 @@ export const Idle = {
 		/>
 	),
 	args: {
-		canvasScale: 0.6,
 		debug: false,
 	},
 	argTypes: {
-		canvasScale: { control: { type: "range", min: 0.2, max: 1.5, step: 0.05 } },
 		debug: { control: "boolean" },
 	},
 };
@@ -58,11 +56,9 @@ export const Walking = {
 		/>
 	),
 	args: {
-		canvasScale: 0.6,
 		debug: false,
 	},
 	argTypes: {
-		canvasScale: { control: { type: "range", min: 0.2, max: 1.5, step: 0.05 } },
 		debug: { control: "boolean" },
 	},
 };

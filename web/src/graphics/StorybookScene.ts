@@ -13,7 +13,7 @@ import { zeroPoint } from "@/geometry";
 import type { Material } from "../object";
 import type { SpawningEnemy } from "../object/SpawningEnemyState";
 import { SpawningEnemySprite } from "../object/SpawningEnemySprite";
-import type { AutoCenterOnPlayerCamera } from "./AutoCenterOnPlayerCamera";
+import type { Camera } from "./Camera";
 
 export type ObjectSprite<O> = {
 	init(deltaTime: number, o: O): Promise<void>;
@@ -21,11 +21,11 @@ export type ObjectSprite<O> = {
 };
 
 /**
- * Core scene that handles display of players, enemies, and game objects.
- * Does not include UI elements like timers, health bars, etc.
+ * Storybook scene that handles display of players, enemies, and game objects.
+ * Uses generic Camera for manual positioning in stories.
  */
-export class Scene {
-	#camera: AutoCenterOnPlayerCamera;
+export class StorybookScene {
+	#camera: Camera;
 	#playerSprites: Map<string, BulbroSprite> = new Map();
 	#enemySprites: Map<string, EnemySprite> = new Map();
 	#shotSprites: Map<string, ShotSprite> = new Map();
@@ -37,12 +37,7 @@ export class Scene {
 	#logger: Logger;
 	#debug: boolean;
 
-	constructor(
-		logger: Logger,
-		debug: boolean,
-		camera: AutoCenterOnPlayerCamera,
-		scale: number,
-	) {
+	constructor(logger: Logger, debug: boolean, camera: Camera, scale: number) {
 		this.#camera = camera;
 		this.#camera.zoom(scale);
 		this.#logger = logger;
@@ -65,7 +60,7 @@ export class Scene {
 				mapSize: state.mapSize,
 				state,
 			},
-			"Scene init",
+			"StorybookScene init",
 		);
 		this.update(0, state);
 	}
@@ -79,7 +74,7 @@ export class Scene {
 		this.#updateShots(deltaTime, state);
 		this.#updateObjects(deltaTime, state);
 		this.#playingFieldTile.update(deltaTime, state);
-		this.#camera.update(state.players[0]?.position ?? zeroPoint());
+		// Note: No automatic camera update - storybooks control camera manually
 	}
 
 	get playingFieldContainer() {

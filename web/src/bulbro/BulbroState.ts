@@ -105,8 +105,8 @@ export class BulbroState implements BulbroStateProperties {
 			position,
 			lastMovedAt: now,
 			lastDirection: {
-				x: position.x - this.position.x || this.lastDirection?.x || 0,
-				y: position.y - this.position.y || this.lastDirection?.y || 0,
+				x: position.x - this.position.x,
+				y: position.y - this.position.y,
 			},
 		});
 	}

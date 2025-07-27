@@ -1,19 +1,19 @@
 import type { Logger } from "pino";
 import { currentState } from "./currentState";
-import { Scene } from "./graphics/Scene";
+import { StageWithUi } from "./graphics/StageWithUi";
 import { TickProcess } from "./TickProcess";
 import { type PlayerControl } from "./controls";
 import { canvasSize, scale } from "./game-canvas";
-import { Camera } from "./graphics/Camera";
+import { AutoCenterOnPlayerCamera } from "./graphics/AutoCenterOnPlayerCamera";
 
 export class WaveProcess {
 	#logger: Logger;
-	#scene: Scene;
+	#scene: StageWithUi;
 	#tickIndex = 0;
 	#resolvers = Promise.withResolvers<"win" | "fail">();
 	#debug: boolean;
 	#playerControls: PlayerControl[];
-	#camera: Camera;
+	#camera: AutoCenterOnPlayerCamera;
 
 	constructor(
 		baseLogger: Logger,
@@ -24,8 +24,8 @@ export class WaveProcess {
 			component: "WaveProcess",
 		});
 		this.#debug = debug;
-		this.#camera = new Camera();
-		this.#scene = new Scene(
+		this.#camera = new AutoCenterOnPlayerCamera();
+		this.#scene = new StageWithUi(
 			this.#logger,
 			this.#debug,
 			this.#camera,

@@ -23,7 +23,7 @@ export interface StorybookSceneProps<S> {
 export function StorybookScene<S>({
 	sprite,
 	state: mockState,
-	canvasScale = 0.6,
+	canvasScale = 1,
 	backgroundColor = 0x1a1a1a,
 	spriteScale = 2,
 	centerSprite = true,

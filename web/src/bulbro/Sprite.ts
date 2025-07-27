@@ -5,6 +5,7 @@ import { ShooterSprite } from "./sprites/ShooterSprite";
 import { DarkOracleSprite } from "./sprites/DarkOracleSprite";
 import { NecromancerSprite } from "./sprites/NecromancerSprite";
 import { ValkyrieSprite } from "./sprites/ValkyrieSprite";
+import { SimpleBulbroSprite } from "./sprites/SimpleBulbroSprite";
 
 export const bulbrosStyles = [
 	"soldier",
@@ -12,6 +13,7 @@ export const bulbrosStyles = [
 	"dark oracle",
 	"necromancer",
 	"valkyrie",
+	"simple bulbro",
 ] as const;
 export type SpriteType = (typeof bulbrosStyles)[number];
 
@@ -47,5 +49,8 @@ export function createBulbroSprite(type: SpriteType, debugPosition = false) {
 	if (type === "valkyrie") {
 		return new ValkyrieSprite(debugPosition);
 	}
-	return new SoldierSprite(debugPosition);
+	if (type === "soldier") {
+		return new SoldierSprite(debugPosition);
+	}
+	return new SimpleBulbroSprite(debugPosition);
 }

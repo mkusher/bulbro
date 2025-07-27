@@ -166,7 +166,7 @@ export class ChibiSprite {
 			this.#sprite.scale.x = -1 * Math.abs(this.#sprite.scale.x);
 			this.#sprite.x = 8;
 			this.#sprite.y = -40;
-		} else {
+		} else if (lastDirection && lastDirection.x > 0) {
 			this.#sprite.x = -20;
 			this.#sprite.y = -40;
 			this.#sprite.scale.x = Math.abs(this.#sprite.scale.y);

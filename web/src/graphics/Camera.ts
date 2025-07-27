@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import type { Position, Size } from "@/geometry";
-import { canvasSize, computedMapSizeForWindow } from "@/game-canvas";
+import { canvasSize } from "@/game-canvas";
 
 export class Camera {
 	#app: PIXI.Application;
@@ -41,42 +41,13 @@ export class Camera {
 		}
 	}
 
-	update(playerPosition: Position) {
-		this.#moveCamera(playerPosition);
-	}
-
 	zoom(scale: number) {
 		this.#stage.scale = scale;
 	}
 
-	#moveCamera(playerPosition: Position) {
-		if (
-			!this.#isSmallScreen(computedMapSizeForWindow.value, canvasSize.value)
-		) {
-			this.#moveToCenter();
-			return;
-		}
+	setCenter(position: Position) {
 		const scale = this.#stage.scale.x;
-		const position = {
-			x: playerPosition.x * scale,
-			y: playerPosition.y * scale,
-		};
-
-		this.#stage.x = -position.x + canvasSize.value.width / 2;
-		this.#stage.y = -position.y + canvasSize.value.height / 2;
-	}
-
-	#isSmallScreen(playingFieldSize: Size, canvasSize: Size) {
-		return (
-			playingFieldSize.width > canvasSize.width ||
-			playingFieldSize.height > canvasSize.height
-		);
-	}
-
-	#moveToCenter() {
-		this.#stage.x =
-			(canvasSize.value.width - computedMapSizeForWindow.value.width) / 2;
-		this.#stage.y =
-			(canvasSize.value.height - computedMapSizeForWindow.value.height) / 2;
+		this.#stage.x = -position.x * scale + canvasSize.value.width / 2;
+		this.#stage.y = -position.y * scale + canvasSize.value.height / 2;
 	}
 }
