@@ -43,6 +43,10 @@ export class TouchscreenControl implements PlayerControl {
 		return this.#direction.value;
 	}
 
+	get signal() {
+		return this.#direction;
+	}
+
 	get startPoint() {
 		return this.#startPoint.value;
 	}

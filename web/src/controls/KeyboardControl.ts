@@ -1,4 +1,5 @@
-import { normalize } from "../geometry";
+import { signal, type Signal } from "@preact/signals";
+import { normalize, zeroPoint, type Direction } from "../geometry";
 import type { PlayerControl } from "./PlayerControl";
 
 export type ArrowKeys = {
@@ -19,8 +20,10 @@ export type CodeToArrow = (code: string) => keyof ArrowKeys | undefined;
 export class KeyboardControl implements PlayerControl {
 	#keys: ArrowKeys = {};
 	#codeToArrow: CodeToArrow;
+	#signal: Signal<Direction>;
 	constructor(codeToArrow: CodeToArrow) {
 		this.#codeToArrow = codeToArrow;
+		this.#signal = signal(zeroPoint());
 	}
 	async start() {
 		window.addEventListener("keydown", this.#onKeyDown);
@@ -31,19 +34,25 @@ export class KeyboardControl implements PlayerControl {
 		window.removeEventListener("keyup", this.#onKeyUp);
 	}
 
-	getDirection() {
-		return keysToDirection(this.#keys);
+	get direction() {
+		return this.#signal.value;
+	}
+
+	get signal() {
+		return this.#signal;
 	}
 
 	#onKeyUp = (e: KeyboardEvent) => {
 		const arrow = this.#codeToArrow(e.code);
 		if (!arrow) return;
 		this.#keys[arrow] = false;
+		this.#signal.value = keysToDirection(this.#keys);
 	};
 
 	#onKeyDown = (e: KeyboardEvent) => {
 		const arrow = this.#codeToArrow(e.code);
 		if (!arrow) return;
 		this.#keys[arrow] = true;
+		this.#signal.value = keysToDirection(this.#keys);
 	};
 }

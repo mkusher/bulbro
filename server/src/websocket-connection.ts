@@ -3,17 +3,23 @@ import type { Logger } from "pino";
 import { type } from "arktype";
 import { websocketConnections } from "./websocket-connections";
 
-export const Message = type({
+export const AuthMessage = type({
 	type: "'auth'",
 	userId: "string",
 });
 
+export const Message = AuthMessage.or(type({ type: "string" }));
+
+export type ProcessMessage = (m: { type: string }) => void;
+
 export class WebsocketConnection {
 	#ws: WSContext;
 	#logger: Logger;
-	constructor(logger: Logger, ws: WSContext) {
+	#processMessage: ProcessMessage;
+	constructor(logger: Logger, ws: WSContext, processMessage: ProcessMessage) {
 		this.#logger = logger;
 		this.#ws = ws;
+		this.#processMessage = processMessage;
 	}
 
 	updateConnection(ws: WSContext) {
@@ -42,13 +48,18 @@ export class WebsocketConnection {
 				return this.sendObject({ error: "Invalid message" });
 			}
 
-			if (message.type === "auth") {
-				websocketConnections.add(message.userId, this);
-				this.#logger = this.#logger.child({
-					userId: message.userId,
-				});
-				this.#logger.info("Websocket authentication succeeded");
-				return this.sendObject({ type: "connection", connected: true });
+			switch (message.type) {
+				case "auth": {
+					const userId = (message as { userId: string }).userId;
+					websocketConnections.add(userId, this);
+					this.#logger = this.#logger.child({
+						userId: userId,
+					});
+					this.#logger.info("Websocket authentication succeeded");
+					return this.sendObject({ type: "connection", connected: true });
+				}
+				default:
+					this.#processMessage(message as { type: string });
 			}
 		} catch (err) {
 			this.#logger.warn({ err }, "Error processing websocket message");

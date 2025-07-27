@@ -13,8 +13,11 @@ export class MainKeyboardControl implements PlayerControl {
 		this.#control.stop();
 	}
 
-	getDirection() {
-		return this.#control.getDirection();
+	get direction() {
+		return this.#control.direction;
+	}
+	get signal() {
+		return this.#control.signal;
 	}
 }
 

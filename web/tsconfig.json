@@ -13,5 +13,8 @@
             "react-dom": ["../node_modules/preact/compat/"],
             "react-dom/*": ["../node_modules/preact/compat/*"]
       }
-    }
+    },
+    "include": [
+        "src/*"
+    ]
 }

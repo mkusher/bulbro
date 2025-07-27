@@ -1,11 +1,21 @@
-import { isEqual } from "../geometry";
+import { isEqual, type Direction, zeroPoint } from "../geometry";
+import { type Signal, computed } from "@preact/signals";
 import type { PlayerControl } from "./PlayerControl";
 
-const z = { x: 0, y: 0 };
+const z = zeroPoint();
 export class MultipleControl implements PlayerControl {
 	#controls: PlayerControl[];
+	#signal: Signal<Direction>;
 	constructor(controls: PlayerControl[]) {
 		this.#controls = controls;
+		this.#signal = computed(() => {
+			for (const c of this.#controls) {
+				if (!isEqual(c.direction, z)) {
+					return c.direction;
+				}
+			}
+			return z;
+		});
 	}
 
 	async start() {
@@ -15,12 +25,11 @@ export class MultipleControl implements PlayerControl {
 		await Promise.all(this.#controls.map((c) => c.stop()));
 	}
 
-	getDirection() {
-		for (const c of this.#controls) {
-			if (!isEqual(c.getDirection(), z)) {
-				return c.getDirection();
-			}
-		}
-		return z;
+	get direction() {
+		return this.#signal.value;
+	}
+
+	get signal() {
+		return this.#signal;
 	}
 }

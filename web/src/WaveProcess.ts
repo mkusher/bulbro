@@ -88,7 +88,7 @@ export class WaveProcess {
 		currentState.value = tickProc.tick(
 			state,
 			delta,
-			this.#playerControls.map((c) => c.getDirection()),
+			this.#playerControls.map((c) => c.direction),
 			now,
 		);
 	};

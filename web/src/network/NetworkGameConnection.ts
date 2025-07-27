@@ -1,40 +1,27 @@
 import type { Logger } from "@/logger";
-import type { WebsocketConnection } from "./WebsocketConnection";
-import { LobbySchema, type Lobby } from "./LobbySocketMessages";
-import { type } from "arktype";
+import { type Lobby } from "./LobbySocketMessages";
 import type { GameProcess, WavePromises } from "@/GameProcess";
 import { StateSync } from "./StateSync";
-import { createMainControls } from "@/controls";
+import { createMainControls, type PlayerControl } from "@/controls";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { currentState } from "@/currentState";
-
-export const HostStateUpdate = type({
-	type: "'game-state-updated-by-host'",
-	lobby: LobbySchema,
-	state: "object",
-	serverUpdateTime: "number",
-});
-export const PlayerStateUpdate = type({
-	type: "'game-state-updated-by-player'",
-	lobby: LobbySchema,
-	state: "object",
-	serverUpdateTime: "number",
-});
-export const WebsocketMessage = HostStateUpdate.or(PlayerStateUpdate);
-export type WebsocketMessage = typeof WebsocketMessage.infer;
-
-export type ProcessMessage = (message: typeof WebsocketMessage.infer) => void;
+import type {
+	InGameCommunicationChannel,
+	ProcessMessage,
+} from "./InGameCommunicationChannel";
+import { currentUser } from "./currentUser";
 
 export class NetworkGameConnection {
 	#logger: Logger;
-	#connection: WebsocketConnection;
+	#inGameCommunicationChannel: InGameCommunicationChannel;
 	#lobby: Lobby;
-	#processMessage: ProcessMessage;
 	#gameProcess: GameProcess;
 	#stateSync!: StateSync;
 	#isHost: boolean;
 	#remoteControl: RemoteRepeatLastKnownDirectionControl;
+	#mainControl: PlayerControl;
 	#remotePlayerId: string;
+	#processMessage: ProcessMessage;
 
 	get id() {
 		return this.#lobby.id;
@@ -42,30 +29,30 @@ export class NetworkGameConnection {
 
 	constructor(
 		logger: Logger,
-		connection: WebsocketConnection,
+		inGameCommunicationChannel: InGameCommunicationChannel,
 		lobby: Lobby,
 		gameProcess: GameProcess,
 		processMessage: ProcessMessage,
 		isHost: boolean,
 	) {
 		this.#logger = logger;
-		this.#connection = connection;
 		this.#lobby = lobby;
 		this.#remotePlayerId = this.#lobby.players.find(
 			(p) => p.id !== this.#lobby.hostId,
 		)!.id;
 		this.#gameProcess = gameProcess;
-		this.#processMessage = processMessage;
+		this.#inGameCommunicationChannel = inGameCommunicationChannel;
 		this.#isHost = isHost;
+		this.#mainControl = createMainControls();
 		this.#remoteControl = new RemoteRepeatLastKnownDirectionControl(
 			this.#isHost,
 			this.#remotePlayerId,
 		);
-		this.#subscribeToSocket();
+		this.#processMessage = processMessage;
 	}
 
 	createControls() {
-		return [createMainControls(), this.#remoteControl];
+		return [this.#mainControl, this.#remoteControl];
 	}
 
 	onStart({ waveInitPromise, wavePromise }: WavePromises) {
@@ -88,24 +75,18 @@ export class NetworkGameConnection {
 		return { wavePromise, waveInitPromise };
 	}
 
-	#subscribeToSocket() {
-		this.#connection.onMessage((event) => {
-			const message = WebsocketMessage(JSON.parse(event.data));
-			if (message instanceof type.errors) {
-				this.#logger.warn({ err: message }, "Unknown message received");
-				return;
-			}
-			this.#logger.debug({ message }, "In game message received");
-			this.#remoteControl.onMessage(message);
-			this.#processMessage(message);
-		});
-	}
-
 	#startStateSync(isHost: boolean) {
-		const url = isHost
-			? `game/${this.#lobby.id}/host`
-			: `game/${this.#lobby.id}/player`;
-		this.#stateSync = new StateSync(url, () => currentState.value);
+		this.#stateSync = new StateSync(
+			this.#logger.child({ component: "state-sync" }),
+			this.#lobby.id,
+			currentUser.value.id,
+			isHost,
+			this.#inGameCommunicationChannel,
+			this.#processMessage,
+			currentState,
+			this.#mainControl,
+			this.#remoteControl,
+		);
 		this.#stateSync.start();
 	}
 }

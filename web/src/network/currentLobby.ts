@@ -10,10 +10,8 @@ import {
 	WebsocketMessage,
 } from "./LobbySocketMessages";
 import { LobbyConnection } from "./LobbyConnection";
-import {
-	type NetworkGameConnection,
-	WebsocketMessage as GameWebsocketMessage,
-} from "./NetworkGameConnection";
+import { type NetworkGameConnection } from "./NetworkGameConnection";
+import type { WebsocketMessage as GameWebsocketMessage } from "./InGameCommunicationChannel";
 import { currentGameProcess } from "@/currentGameProcess";
 import { currentState, fromJSON, type CurrentState } from "@/currentState";
 import { startNetworkGameAsNonHost } from "./start-game";
@@ -147,20 +145,41 @@ export function processLobbySocketMessage(logger: Logger, toGame: () => void) {
 	};
 }
 
-const lastReceivedGameUpdate = signal(0);
-
 export function processGameSocketMessage(logger: Logger) {
+	let lastStateVersion = 0;
+	let lastPositionVersion = 0;
 	return (receivedMessage: typeof GameWebsocketMessage.infer) => {
 		logger.debug({ receivedMessage }, "In game message received");
-		if (receivedMessage.serverUpdateTime < lastReceivedGameUpdate.value) {
-			logger.warn(
-				{ receivedMessage, lastReceivedUpdate: lastReceivedGameUpdate.value },
-				"Old message received",
-			);
-			return;
-		}
 		switch (receivedMessage.type) {
+			case "game-state-position-updated": {
+				if (lastPositionVersion >= receivedMessage.version) return;
+				lastPositionVersion = receivedMessage.version;
+				const prevState = currentState.value;
+				const iam = currentUser.value;
+				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
+				const remotePlayer = prevState.players.find((p) => p.id !== iam.id)!;
+				const now = Date.now();
+				const { position, direction } = receivedMessage;
+				fromJSON({
+					...prevState,
+					players: [
+						localPlayer,
+						remotePlayer
+							.move(
+								{
+									x: position.x - direction.x,
+									y: position.y - direction.y,
+								},
+								now,
+							)
+							.move(position, now),
+					],
+				});
+				return;
+			}
 			case "game-state-updated-by-host": {
+				if (lastStateVersion >= receivedMessage.version) return;
+				lastStateVersion = receivedMessage.version;
 				const state = receivedMessage.state as CurrentState;
 				const prevState = currentState.value;
 				const iam = currentUser.value;
@@ -181,10 +200,11 @@ export function processGameSocketMessage(logger: Logger) {
 					shots,
 					players: [localPlayer, remotePlayer],
 				});
-				lastReceivedGameUpdate.value = receivedMessage.serverUpdateTime;
 				return;
 			}
-			case "game-state-updated-by-player": {
+			case "game-state-updated-by-guest": {
+				if (lastStateVersion >= receivedMessage.version) return;
+				lastStateVersion = receivedMessage.version;
 				const state = receivedMessage.state as CurrentState;
 				const prevState = currentState.value;
 				const iam = currentUser.value;
@@ -201,7 +221,6 @@ export function processGameSocketMessage(logger: Logger) {
 					shots,
 					players: [localPlayer, remotePlayer],
 				});
-				lastReceivedGameUpdate.value = receivedMessage.serverUpdateTime;
 				return;
 			}
 		}

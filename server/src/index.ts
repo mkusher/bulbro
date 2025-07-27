@@ -21,6 +21,7 @@ import {
 	playerUpdate,
 	startGame,
 } from "./game-controller";
+import { WebsocketGameController } from "./game-websocket-controller";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
@@ -172,10 +173,17 @@ const wsApp = app.get(
 		});
 		l.info("Establishing new websocket connection");
 		let connection: WebsocketConnection | null = null;
+		const controller = new WebsocketGameController(
+			l.child({
+				component: "websocket-game-controller",
+			}),
+		);
 		return {
 			onOpen(event, ws) {
 				l.info("New connection has been established");
-				connection = new WebsocketConnection(l, ws);
+				connection = new WebsocketConnection(l, ws, (message) =>
+					controller.routeMessage(message),
+				);
 			},
 			onMessage(event, ws) {
 				l.info({ data: event.data }, "Message received");

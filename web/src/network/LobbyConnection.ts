@@ -1,10 +1,7 @@
 import { wsUrl } from "./clientConfig";
-import { WebsocketConnection } from "./WebsocketConnection";
+import { WebsocketConnection } from "./websocket/WebsocketConnection";
 import { type Logger } from "@/logger";
-import {
-	NetworkGameConnection,
-	type ProcessMessage,
-} from "./NetworkGameConnection";
+import { NetworkGameConnection } from "./NetworkGameConnection";
 import {
 	parseMessage,
 	type Lobby,
@@ -13,6 +10,8 @@ import {
 } from "./LobbySocketMessages";
 import type { GameProcess } from "@/GameProcess";
 import { isLocalPlayerHost } from "./currentLobby";
+import { WebsocketInGameCommunicationChannel } from "./websocket/WebsocketInGameCommunicationChannel";
+import type { ProcessMessage } from "./InGameCommunicationChannel";
 
 export class LobbyConnection implements Lobby {
 	#logger: Logger;
@@ -27,12 +26,13 @@ export class LobbyConnection implements Lobby {
 		lobby: Lobby,
 		processMessage: (message: typeof WebsocketMessage.infer) => void,
 		connection?: WebsocketConnection,
+		unsubscribe = () => {},
 	) {
-		this.#logger = logger;
+		this.#logger = logger.child({ component: "lobby-connection" });
 		this.#userId = userId;
 		this.#lobby = lobby;
 		this.#processMessage = processMessage;
-		this.#unsubscribe = () => {};
+		this.#unsubscribe = unsubscribe;
 		if (connection) {
 			this.#connection = connection;
 		} else {
@@ -61,7 +61,7 @@ export class LobbyConnection implements Lobby {
 		this.#unsubscribe();
 		return new NetworkGameConnection(
 			this.#logger,
-			this.#connection,
+			new WebsocketInGameCommunicationChannel(this.#connection, this.#logger),
 			this.#lobby,
 			gameProcess,
 			processMessage,
@@ -105,6 +105,7 @@ export class LobbyConnection implements Lobby {
 			},
 			this.#processMessage,
 			this.#connection,
+			this.#unsubscribe,
 		);
 	}
 	hasPlayer(player: PlayerAttendee) {
@@ -123,6 +124,7 @@ export class LobbyConnection implements Lobby {
 			},
 			this.#processMessage,
 			this.#connection,
+			this.#unsubscribe,
 		);
 	}
 }

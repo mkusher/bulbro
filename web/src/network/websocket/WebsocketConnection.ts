@@ -47,7 +47,7 @@ export class WebsocketConnection {
 		return this.send(JSON.stringify(message));
 	}
 	send(message: string) {
-		if (this.#connectionEstablishmentResolvers) {
+		if (this.#connectionEstablishmentResolvers.resolve) {
 			this.#ws.addEventListener("open", () => {
 				this.#ws.send(message);
 			});
