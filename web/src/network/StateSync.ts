@@ -55,18 +55,19 @@ export class StateSync {
 		if (!this.#isStarted) {
 			return;
 		}
+		const currentVersion = this.#lastVersion ?? 0;
 		switch (message.type) {
 			case "game-state-updated-by-host":
 			case "game-state-updated-by-guest": {
-				if (this.#lastVersion ?? 0 >= message.version) {
+				if (currentVersion >= message.version) {
 					this.#logger.warn(
 						{
 							versionReceived: message.version,
-							lastVersion: this.#lastVersion,
+							lastVersion: currentVersion,
 						},
 						"Old version received",
 					);
-					this.#runPingPong(this.#lastVersion ?? 0 + 1);
+					this.#runPingPong(currentVersion + 1);
 					return;
 				}
 			}
@@ -76,13 +77,13 @@ export class StateSync {
 		switch (message.type) {
 			case "game-state-updated-by-host": {
 				if (this.#isHost) return;
-				this.#lastVersion = message.version ?? 0;
+				this.#lastVersion = message.version ?? currentVersion;
 				this.#runPingPong(this.#lastVersion + 1);
 				return;
 			}
 			case "game-state-updated-by-guest": {
 				if (!this.#isHost) return;
-				this.#lastVersion = message.version ?? 0;
+				this.#lastVersion = message.version ?? currentVersion;
 				this.#runPingPong(this.#lastVersion + 1);
 				return;
 			}
