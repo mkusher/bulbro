@@ -1,23 +1,28 @@
+import * as PIXI from "pixi.js";
 import { AnimatedSprite } from "./AnimatedSprite";
 import type { BulbroState } from "../bulbro";
 import type { EnemyState } from "../enemy";
 import { knockbackSpeed } from "../game-formulas";
 
-type Animations = {
-	walking: AnimatedSprite;
-	hurt: AnimatedSprite;
-	hurtALot?: AnimatedSprite;
-	idle?: AnimatedSprite;
-	dead?: AnimatedSprite;
+export type Sprite<R extends PIXI.TextureSource> =
+	| PIXI.Texture<R>
+	| PIXI.Container;
+
+type Animations<R extends Sprite<any>> = {
+	walking: AnimatedSprite<R>;
+	hurt: AnimatedSprite<R>;
+	hurtALot?: AnimatedSprite<R>;
+	idle?: AnimatedSprite<R>;
+	dead?: AnimatedSprite<R>;
 };
 
 /**
  * Manages a player sprite graphic.
  */
-export class CharacterSprites {
-	#animations: Animations;
+export class CharacterSprites<R extends Sprite<any> = PIXI.Texture> {
+	#animations: Animations<R>;
 
-	constructor(animations: Animations) {
+	constructor(animations: Animations<R>) {
 		this.#animations = animations;
 	}
 

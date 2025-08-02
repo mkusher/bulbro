@@ -5,7 +5,7 @@ import { baseStats } from "./base";
 export const babyEnemy: EnemyCharacter = {
 	id: "baby",
 	name: "Baby enemy",
-	sprite: "orc",
+	sprite: "potatoBeetleBaby",
 	stats: {
 		...baseStats,
 		maxHp: 2,

@@ -50,7 +50,7 @@ const shareMessage = computed(() => ({
 export function SetupOnlineGame() {
 	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
 		bulbro: wellRoundedBulbro,
-		sprite: "dark oracle",
+		sprite: "normal",
 	});
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
 	const [weaponsSetup, setWeaponsSetup] = useState<Weapon[]>([smg]);

@@ -146,10 +146,27 @@ export function processLobbySocketMessage(logger: Logger, toGame: () => void) {
 }
 
 export function processGameSocketMessage(logger: Logger) {
-	let lastStateVersion = 0;
 	let lastPositionVersion = 0;
+	let lastStateVersion = 0;
+	let lastUpdatedAt = Date.now();
 	return (receivedMessage: typeof GameWebsocketMessage.infer) => {
 		logger.debug({ receivedMessage }, "In game message received");
+		switch (receivedMessage.type) {
+			case "game-state-updated-by-guest":
+			case "game-state-updated-by-host": {
+				if (lastStateVersion >= receivedMessage.version) return;
+				lastStateVersion = receivedMessage.version;
+				const now = Date.now();
+				logger.info(
+					{
+						version: lastStateVersion,
+						latestUpdateDelay: now - lastUpdatedAt,
+					},
+					"Received a new remote state update",
+				);
+				lastUpdatedAt = now;
+			}
+		}
 		switch (receivedMessage.type) {
 			case "game-state-position-updated": {
 				if (lastPositionVersion >= receivedMessage.version) return;

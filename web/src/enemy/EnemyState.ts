@@ -13,8 +13,9 @@ import { ENEMY_SIZE } from "./index";
 import type { ShotState } from "../shot/ShotState";
 import { knockbackSpeed, knockbackTimeout } from "../game-formulas";
 import type { BulbroState } from "../bulbro";
+import type { EnemyType as BulbaEnemyType } from "./sprites/EnemiesFrames";
 
-export type EnemyType = "orc" | "slime";
+export type EnemyType = "orc" | "slime" | BulbaEnemyType;
 
 /**
  * Immutable runtime state of a single enemy.
@@ -53,6 +54,7 @@ export type EnemyStateProps = {
 	readonly lastHitAt: number;
 	readonly killedAt?: number;
 	readonly knockback?: Knockback;
+	readonly lastDirection?: Direction;
 };
 
 export class EnemyState implements EnemyStateProps {
@@ -87,6 +89,9 @@ export class EnemyState implements EnemyStateProps {
 	}
 	get knockback() {
 		return this.#props.knockback;
+	}
+	get lastDirection() {
+		return this.#props.lastDirection;
 	}
 
 	constructor(props: EnemyStateProps) {
@@ -155,11 +160,17 @@ export class EnemyState implements EnemyStateProps {
 			deltaTime,
 		);
 		if (isEqual(this.position, newPos)) return this;
+		return this.move(newPos, now);
+	}
+
+	move(newPos: Position, now: number) {
+		const lastDirection = direction(this.position, newPos);
 		return new EnemyState({
 			...this.#props,
 			position: newPos,
 			lastMovedAt: now,
 			knockback: undefined,
+			lastDirection,
 		});
 	}
 

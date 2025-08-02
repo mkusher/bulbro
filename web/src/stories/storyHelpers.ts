@@ -1,6 +1,6 @@
 import type { CurrentState } from "@/currentState";
 import { spawnBulbro } from "@/bulbro/BulbroState";
-import { spawnEnemy } from "@/enemy/EnemyState";
+import { type EnemyState } from "@/enemy/EnemyState";
 import { classicMapSize } from "@/game-canvas";
 import { BulbroState } from "@/bulbro";
 import type { ShotState } from "@/shot/ShotState";
@@ -51,19 +51,11 @@ export function createBulbroState(
 
 // Helper to create a game state with enemies
 export function createEnemyState(
-	enemies: Array<{
-		id: string;
-		position: { x: number; y: number };
-		character: any;
-	}>,
+	enemies: Array<EnemyState>,
 	overrides: Partial<CurrentState> = {},
 ): CurrentState {
-	const enemyStates = enemies.map((e) =>
-		spawnEnemy(e.id, e.position, e.character),
-	);
-
 	return createGameState({
-		enemies: enemyStates,
+		enemies,
 		...overrides,
 	});
 }

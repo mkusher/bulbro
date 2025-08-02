@@ -4,9 +4,11 @@ import * as PIXI from "pixi.js";
  * Provides a simple frame-based animation for a base texture.
  * Usage: create with number of frames, base texture, and a frame drawing function.
  */
-export class AnimatedSprite<R extends PIXI.TextureSource = PIXI.TextureSource> {
+export class AnimatedSprite<
+	R extends PIXI.Texture | PIXI.Sprite | PIXI.Container = PIXI.Texture,
+> {
 	#framesCount: number;
-	#drawFrame: (frameIdx: number) => PIXI.Texture<R> | Promise<PIXI.Texture<R>>;
+	#drawFrame: (frameIdx: number) => R | Promise<R>;
 	#frameIndex = 0;
 	#elapsed = 0;
 	#frameDuration: number;
@@ -19,7 +21,7 @@ export class AnimatedSprite<R extends PIXI.TextureSource = PIXI.TextureSource> {
 	 */
 	constructor(
 		framesCount: number,
-		drawFrame: (frameIdx: number) => PIXI.Texture<R> | Promise<PIXI.Texture<R>>,
+		drawFrame: (frameIdx: number) => R | Promise<R>,
 		frameDuration = 100,
 		cycle = true,
 	) {
@@ -32,7 +34,7 @@ export class AnimatedSprite<R extends PIXI.TextureSource = PIXI.TextureSource> {
 	/**
 	 * Returns the texture for the current frame, advancing based on deltaTime (seconds).
 	 */
-	async getSprite(deltaTime: number): Promise<PIXI.Texture<R>> {
+	async getSprite(deltaTime: number): Promise<R> {
 		this.#elapsed += deltaTime * 1000;
 		if (this.#elapsed >= this.#frameDuration) {
 			this.#frameIndex = this.#frameIndex + 1;

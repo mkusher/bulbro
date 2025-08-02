@@ -21,7 +21,7 @@ import { useRouter } from "@/ui/routing";
 export function SetupSinglePlayer() {
 	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
 		bulbro: wellRoundedBulbro,
-		sprite: "dark oracle",
+		sprite: "normal",
 	});
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
 	const [selectedWeapons, selectWeapons] = useState<Weapon[][]>([

@@ -2,6 +2,11 @@ import * as PIXI from "pixi.js";
 import type { EnemyState, EnemyType } from "./EnemyState";
 import { OrcSprite } from "./sprites/OrcSprite";
 import { SlimeSprite } from "./sprites/SlimeSprite";
+import { BulbaEnemySprite } from "./sprites/BulbaEnemySprite";
+import {
+	enemyTypes,
+	type EnemyType as BulbaEnemyType,
+} from "./sprites/EnemiesFrames";
 
 /**
  * Manages an enemy sprite graphic.
@@ -26,6 +31,9 @@ export function createEnemySprite(
 	type: EnemyType,
 	debug: boolean,
 ): EnemySprite {
+	if (enemyTypes.includes(type as BulbaEnemyType)) {
+		return new BulbaEnemySprite(type as BulbaEnemyType, debug);
+	}
 	if (type === "slime") {
 		return new SlimeSprite(debug);
 	}

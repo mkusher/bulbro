@@ -6,15 +6,9 @@ import { DarkOracleSprite } from "./sprites/DarkOracleSprite";
 import { NecromancerSprite } from "./sprites/NecromancerSprite";
 import { ValkyrieSprite } from "./sprites/ValkyrieSprite";
 import { SimpleBulbroSprite } from "./sprites/SimpleBulbroSprite";
+import { BulbaSprite, faceTypes, type FaceType } from "./sprites/BulbaSprite";
 
-export const bulbrosStyles = [
-	"soldier",
-	"shooter",
-	"dark oracle",
-	"necromancer",
-	"valkyrie",
-	"simple bulbro",
-] as const;
+export const bulbrosStyles = [...faceTypes] as const;
 export type SpriteType = (typeof bulbrosStyles)[number];
 
 /**
@@ -37,20 +31,8 @@ export interface BulbroSprite {
 }
 
 export function createBulbroSprite(type: SpriteType, debugPosition = false) {
-	if (type === "shooter") {
-		return new ShooterSprite(debugPosition);
-	}
-	if (type === "dark oracle") {
-		return new DarkOracleSprite(debugPosition);
-	}
-	if (type === "necromancer") {
-		return new NecromancerSprite(debugPosition);
-	}
-	if (type === "valkyrie") {
-		return new ValkyrieSprite(debugPosition);
-	}
-	if (type === "soldier") {
-		return new SoldierSprite(debugPosition);
+	if (faceTypes.includes(type)) {
+		return new BulbaSprite(type as FaceType, debugPosition);
 	}
 	return new SimpleBulbroSprite(debugPosition);
 }

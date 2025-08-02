@@ -20,11 +20,11 @@ import { useRouter } from "@/ui/routing";
 export function SetupLocalCoOp() {
 	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
 		bulbro: wellRoundedBulbro,
-		sprite: "dark oracle",
+		sprite: "normal",
 	});
 	const [secondBulbro, changeSecondBulbro] = useState<CharacterSetup>({
 		bulbro: wellRoundedBulbro,
-		sprite: "valkyrie",
+		sprite: "vampire",
 	});
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
 	const [weaponsSetup, setWeaponsSetup] = useState<Weapon[][]>([[smg], [smg]]);

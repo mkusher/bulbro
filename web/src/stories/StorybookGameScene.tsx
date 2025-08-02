@@ -127,7 +127,7 @@ export function StorybookGameScene({
 
 		return () => {
 			if (camera) {
-				camera.ticker.destroy();
+				camera.ticker?.destroy();
 			}
 		};
 	}, [state, backgroundColor, debug, tick, cameraX, cameraY]);
