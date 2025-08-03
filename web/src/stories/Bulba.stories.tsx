@@ -38,7 +38,7 @@ export const Idle = {
 	},
 };
 
-export const Walking = {
+export const WalkingInCircle = {
 	render: (args: any) => {
 		useEffect(() => {
 			currentState.value = createState(args.faceType);
@@ -53,6 +53,45 @@ export const Walking = {
 					const elapsed = (now % 3000) / 3000; // 3 second cycle
 					const x = 1000 + Math.sin(elapsed * Math.PI * 2) * 100;
 					const y = 750 + Math.cos(elapsed * Math.PI * 2) * 50;
+					const player = currentState.value.players[0]!;
+					return createGameState({
+						players: [player.move({ x, y }, now)],
+					});
+				}}
+				cameraX={classicMapSize.width / 2}
+				cameraY={classicMapSize.height / 2}
+				{...args}
+			/>
+		);
+	},
+	args: {
+		faceType: "normal",
+		debug: false,
+	},
+	argTypes: {
+		faceType: {
+			options: faceTypes,
+			control: { type: "radio" },
+		},
+		debug: { control: "boolean" },
+	},
+};
+
+export const WalkingAtTheSamePoint = {
+	render: (args: any) => {
+		useEffect(() => {
+			currentState.value = createState(args.faceType);
+		}, []);
+		return (
+			<StorybookGameScene
+				state={currentState.value}
+				debug={args.debug}
+				tick={(delta) => {
+					// Create walking movement by updating position
+					const now = Date.now();
+					const elapsed = (now % 3000) / 3000; // 3 second cycle
+					const x = 100 + Math.sin(elapsed * Math.PI * 2) * 10;
+					const y = 50 + Math.cos(elapsed * Math.PI * 2) * 5;
 					const player = currentState.value.players[0]!;
 					return createGameState({
 						players: [player.move({ x, y }, now)],

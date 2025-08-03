@@ -3,9 +3,8 @@ import * as PIXI from "pixi.js";
 
 export class PositionedContainer {
 	#container: PIXI.Container;
-	constructor(scale: number = 1) {
-		this.#container = new PIXI.Container();
-		this.#container.scale = scale;
+	constructor(container = new PIXI.Container()) {
+		this.#container = container;
 	}
 
 	get container() {

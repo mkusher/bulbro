@@ -3,33 +3,40 @@ import { useEffect } from "preact/hooks";
 import { StorybookGameScene } from "./StorybookGameScene";
 import { createEnemyState } from "./storyHelpers";
 import { babyEnemy } from "@/enemies-definitions/baby";
-import { type EnemyState, spawnEnemy } from "@/enemy/EnemyState";
+import { spawnEnemy } from "@/enemy/EnemyState";
+import { allEnemies } from "../enemies-definitions";
 
 export default {
 	title: "Enemies/BulbaEnemies",
 	component: StorybookGameScene,
 };
 
-const enemyId = "potato-beetle-baby";
-
+const enemies = allEnemies;
 export const Idle = {
 	render: (args: any) => (
 		<StorybookGameScene
 			state={createEnemyState([
-				spawnEnemy(enemyId, { x: 1000, y: 750 }, babyEnemy),
+				spawnEnemy(
+					args.enemyType,
+					{ x: 1000, y: 750 },
+					enemies.find((e) => e.id === args.enemyType),
+				),
 			])}
 			{...args}
 		/>
 	),
 	args: {
 		debug: false,
+		enemyType: babyEnemy.id,
 		cameraX: 1000,
 		cameraY: 750,
 	},
 	argTypes: {
+		enemyType: {
+			options: enemies.map((e) => e.id),
+			control: { type: "radio" },
+		},
 		debug: { control: "boolean" },
-		cameraX: { control: { type: "number", min: 0, max: 2000, step: 10 } },
-		cameraY: { control: { type: "number", min: 0, max: 1500, step: 10 } },
 	},
 };
 
@@ -37,7 +44,11 @@ export const Walking = {
 	render: (args: any) => {
 		useEffect(() => {
 			currentState.value = createEnemyState([
-				spawnEnemy(enemyId, { x: 1000, y: 750 }, babyEnemy),
+				spawnEnemy(
+					args.enemyType,
+					{ x: 1000, y: 750 },
+					enemies.find((e) => e.id === args.enemyType),
+				),
 			]);
 		}, []);
 		return (
@@ -58,12 +69,15 @@ export const Walking = {
 	},
 	args: {
 		debug: false,
+		enemyType: babyEnemy.id,
 		cameraX: 1000,
 		cameraY: 750,
 	},
 	argTypes: {
+		enemyType: {
+			options: enemies.map((e) => e.id),
+			control: { type: "radio" },
+		},
 		debug: { control: "boolean" },
-		cameraX: { control: { type: "number", min: 0, max: 2000, step: 10 } },
-		cameraY: { control: { type: "number", min: 0, max: 1500, step: 10 } },
 	},
 };

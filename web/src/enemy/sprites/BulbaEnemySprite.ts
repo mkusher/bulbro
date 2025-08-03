@@ -3,6 +3,7 @@ import type { Direction, Position, Size } from "@/geometry";
 import type { EnemyState } from "../EnemyState";
 import { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
+import { RotatingDisapperanceAnimation } from "@/graphics/RotatingDisappearanceAnimation";
 import { CharacterSprites } from "@/graphics/CharacterSprite";
 import { PositionedContainer } from "@/graphics/PositionedContainer";
 import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
@@ -30,10 +31,12 @@ export class BulbaEnemySprite {
 	#whenDangerouslyHit?: AnimatedSprite<PIXI.Container>;
 	#characterSprites?: CharacterSprites<PIXI.Container>;
 	#defaultFrame: PhysicalRectangle;
+	#frames: PhysicalRectangle[];
 
 	constructor(type: enemiesFrames.EnemyType, debug?: boolean) {
-		this.#positionedContainer = new PositionedContainer(0.2);
-		this.#defaultFrame = enemiesFrames[type][0];
+		this.#positionedContainer = new PositionedContainer(new PIXI.Container());
+		this.#frames = [...enemiesFrames[type]];
+		this.#defaultFrame = this.#frames[0]!;
 		const size = this.#defaultFrame.size;
 		if (debug) {
 			this.#debugSprite = new RectangleGfx(size, 0xff00ff, 0.9);
@@ -46,24 +49,27 @@ export class BulbaEnemySprite {
 	}
 
 	async init() {
-		this.#idle = this.#createSwingingAnimation([this.#defaultFrame], 30, 0.2);
+		this.#idle = this.#createSwingingAnimation([this.#defaultFrame], 30, 0.2, {
+			x: -0.8,
+			y: 1,
+		});
 		this.#movement = this.#createSwingingAnimation(
 			[this.#defaultFrame],
 			15,
 			0.3,
+			{ x: 0.6, y: 1 },
 		);
-		this.#whenHit = this.#createSwingingAnimation(
-			[this.#defaultFrame],
-			50,
-			0.4,
-		);
+		this.#whenHit = this.#createSwingingAnimation([this.#frames[1]!], 50, 0.4, {
+			x: 1,
+			y: -0.8,
+		});
 
 		this.#whenDangerouslyHit = this.#createSwingingAnimation(
-			[this.#defaultFrame],
+			[this.#frames[1]!],
 			60,
 			0.4,
 		);
-		this.#dead = this.#createSwingingAnimation([this.#defaultFrame], 100, 0);
+		this.#dead = this.#createDeathAnimation([this.#defaultFrame]);
 
 		this.#characterSprites = new CharacterSprites({
 			walking: this.#movement,
@@ -77,9 +83,6 @@ export class BulbaEnemySprite {
 		this.#positionedContainer.addChild(this.#sprite);
 		if (this.#debugSprite) {
 			this.#debugSprite.appendTo(this.#positionedContainer.container);
-			const fullSize = this.#defaultFrame.size;
-			this.#debugSprite.position.y = -fullSize.height;
-			this.#debugSprite.position.x = -fullSize.width / 2;
 		}
 	}
 
@@ -90,19 +93,30 @@ export class BulbaEnemySprite {
 		this.#positionedContainer.appendTo(parent, layer);
 	}
 
-	update(player: EnemyState, delta: number) {
-		this.#updatePosition(player.position, player.lastDirection);
+	update(enemy: EnemyState, delta: number) {
+		const shape = enemy.toMovableObject();
+		const rectangle =
+			shape.shape.type === "rectangle"
+				? shape.shape
+				: (() => {
+						throw new Error("Is not supported");
+					})();
+		this.#updatePosition(enemy.position, rectangle, enemy.lastDirection);
 
-		this.#characterSprites?.getSprite(player, delta).then((sprite) => {
+		if (this.#debugSprite) {
+			this.#debugSprite?.update(rectangle, 0xff00ff, 0.9);
+			this.#debugSprite.position.y = -rectangle.height;
+			this.#debugSprite.position.x = -rectangle.width / 2;
+		}
+
+		this.#characterSprites?.getSprite(enemy, delta).then((sprite) => {
 			if (sprite) {
 				if (this.#sprite) {
-					sprite.x = this.#sprite.x;
-					sprite.y = this.#sprite.y;
 					this.#sprite?.removeFromParent();
 				}
 				this.#sprite = sprite;
 				this.#positionedContainer.addChild(sprite);
-				this.#updatePosition(player.position, player.lastDirection);
+				this.#updatePosition(enemy.position, rectangle, enemy.lastDirection);
 			}
 		});
 	}
@@ -114,21 +128,19 @@ export class BulbaEnemySprite {
 		this.#positionedContainer.remove();
 	}
 
-	#updatePosition(pos: Position, lastDirection?: Direction): void {
+	#updatePosition(pos: Position, size: Size, lastDirection?: Direction): void {
 		this.#positionedContainer.update(pos, lastDirection);
 
 		if (!this.#sprite) {
 			return;
 		}
-
-		this.#sprite.y = -this.#defaultFrame.size.height;
-		this.#sprite.x = this.#defaultFrame.size.width / 2;
 	}
 
 	#createSwingingAnimation(
 		body: PhysicalRectangle[],
 		amplitude: number,
 		frameSpeed: number,
+		dimensions?: Position,
 	) {
 		const indexInArray = (
 			length: number,
@@ -136,12 +148,38 @@ export class BulbaEnemySprite {
 			changeEach: number = 1,
 		) => Math.floor(frame / changeEach) % length;
 		const swingingWalk = new SwingingAnimation(
-			(frame) =>
-				this.#cutRectangle(body[indexInArray(body.length, frame, 10)]!),
+			(frame) => this.#buildEnemy(body[indexInArray(body.length, frame, 10)]!),
 			amplitude,
 			frameSpeed,
+			dimensions,
 		);
 		return swingingWalk.createAnimatedSprite();
+	}
+
+	#createDeathAnimation(body: PhysicalRectangle[]) {
+		const indexInArray = (
+			length: number,
+			frame: number,
+			changeEach: number = 1,
+		) => Math.floor(frame / changeEach) % length;
+		const animation = new RotatingDisapperanceAnimation(
+			(frame) => this.#buildEnemy(body[indexInArray(body.length, frame, 10)]!),
+			20,
+			2,
+		);
+		return animation.createAnimatedSprite();
+	}
+
+	async #buildEnemy(rectangle: PhysicalRectangle) {
+		const container = new PIXI.Container();
+		const scaling = new PIXI.Container();
+		scaling.scale = 0.22;
+		scaling.addChild(await this.#cutRectangle(rectangle));
+
+		container.addChild(scaling);
+		scaling.y = -container.height;
+		scaling.x = container.width / 2;
+		return container;
 	}
 
 	async #cutRectangle(rectangle: PhysicalRectangle) {

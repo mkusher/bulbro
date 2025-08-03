@@ -58,6 +58,10 @@ export const faces = {
 			width: 176,
 			height: 72,
 		},
+		scale: {
+			x: 0.65,
+			y: 1,
+		},
 	},
 	king: {
 		position: {
@@ -86,7 +90,7 @@ export const legs = [
 		},
 		size: {
 			width: 120,
-			height: 74,
+			height: 70,
 		},
 	},
 	{
@@ -102,7 +106,7 @@ export const legs = [
 	{
 		position: {
 			x: 400,
-			y: 221,
+			y: 231,
 		},
 		size: {
 			width: 120,
@@ -111,22 +115,30 @@ export const legs = [
 	},
 	{
 		position: {
-			x: 585,
-			y: 221,
+			x: 580,
+			y: 230,
 		},
 		size: {
-			width: 120,
+			width: 140,
 			height: 74,
+		},
+		offset: {
+			x: -8,
+			y: 30,
 		},
 	},
 	{
 		position: {
-			x: 768,
+			x: 760,
 			y: 221,
 		},
 		size: {
-			width: 120,
+			width: 130,
 			height: 74,
+		},
+		offset: {
+			x: -8,
+			y: 30,
 		},
 	},
 	{
@@ -141,12 +153,16 @@ export const legs = [
 	},
 	{
 		position: {
-			x: 237,
+			x: 240,
 			y: 320,
 		},
 		size: {
-			width: 120,
+			width: 130,
 			height: 74,
+		},
+		offset: {
+			x: -2,
+			y: 37,
 		},
 	},
 	{
@@ -170,3 +186,5 @@ export const legs = [
 		},
 	},
 ] as const;
+
+export const walking = [legs[3], legs[4], legs[6], legs[4]] as const;

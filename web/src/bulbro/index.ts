@@ -5,4 +5,4 @@ export type { BulbroSprite } from "./Sprite";
 
 export type { Stats, Bulbro };
 export { BulbroState, spawnBulbro };
-export const BULBRO_SIZE: Size = { width: 18, height: 20 };
+export const BULBRO_SIZE: Size = { width: 30, height: 20 };

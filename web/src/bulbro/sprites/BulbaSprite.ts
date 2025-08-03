@@ -6,7 +6,7 @@ import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import { CharacterSprites } from "@/graphics/CharacterSprite";
 import { PositionedContainer } from "@/graphics/PositionedContainer";
 import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
-import { faces, legs, type FaceType } from "./BulbaBodyParts";
+import { faces, legs, walking, type FaceType } from "./BulbaBodyParts";
 
 export { type FaceType, faceTypes } from "./BulbaBodyParts";
 
@@ -16,6 +16,7 @@ type PhysicalRectangle = {
 	position: Position;
 	size: Size;
 	offset?: Position;
+	scale?: number | Position;
 };
 
 const fullSize = {
@@ -26,7 +27,10 @@ const fullSize = {
  * Manages a player sprite graphic.
  */
 export class BulbaSprite {
-	#positionedContainer: PositionedContainer;
+	#positionedContainer: PositionedContainer = new PositionedContainer(
+		new PIXI.Container(),
+	);
+	#spriteScaling = 0.2;
 	#sprite!: PIXI.Container;
 	#debugSprite?: RectangleGfx;
 	#movement?: AnimatedSprite<PIXI.Container>;
@@ -49,7 +53,6 @@ export class BulbaSprite {
 	#faceType: FaceType;
 
 	constructor(faceType: FaceType, debug?: boolean) {
-		this.#positionedContainer = new PositionedContainer(0.2);
 		this.#faceType = faceType;
 		if (debug) {
 			this.#debugSprite = new RectangleGfx(fullSize, 0x0000ff, 0.9);
@@ -68,10 +71,10 @@ export class BulbaSprite {
 		this.#idle = this.#createSwingingAnimation(body, idleLegs, face, 30, 0.1);
 		this.#movement = this.#createSwingingAnimation(
 			body,
-			[legs[3], legs[4], legs[6], legs[4]],
+			[...walking],
 			face,
-			15,
-			0.1,
+			20,
+			0.2,
 		);
 		this.#whenHit = this.#createSwingingAnimation(
 			body,
@@ -100,8 +103,6 @@ export class BulbaSprite {
 		this.#positionedContainer.addChild(this.#sprite);
 		if (this.#debugSprite) {
 			this.#debugSprite.appendTo(this.#positionedContainer.container);
-			this.#debugSprite.position.y = -fullSize.height;
-			this.#debugSprite.position.x = -fullSize.width / 2;
 		}
 	}
 
@@ -114,6 +115,20 @@ export class BulbaSprite {
 
 	update(player: BulbroState, delta: number) {
 		this.#updatePosition(player.position, player.lastDirection);
+
+		if (this.#debugSprite) {
+			const shape = player.toMovableObject();
+			const rectangle =
+				shape.shape.type === "rectangle"
+					? shape.shape
+					: (() => {
+							throw new Error("Shape is not supported");
+						})();
+
+			this.#debugSprite?.update(rectangle, 0xff00ff, 0.9);
+			this.#debugSprite.position.y = -rectangle.height;
+			this.#debugSprite.position.x = -rectangle.width / 2;
+		}
 
 		this.#characterSprites?.getSprite(player, delta).then((sprite) => {
 			if (sprite) {
@@ -142,10 +157,6 @@ export class BulbaSprite {
 		if (!this.#sprite) {
 			return;
 		}
-
-		this.#sprite.y = -210;
-
-		this.#sprite.x = -fullSize.width / 2;
 	}
 
 	#createSwingingAnimation(
@@ -169,6 +180,7 @@ export class BulbaSprite {
 				),
 			amplitude,
 			frameSpeed,
+			{ x: -0.8, y: 1 },
 		);
 		return swingingWalk.createAnimatedSprite();
 	}
@@ -179,10 +191,15 @@ export class BulbaSprite {
 	) {
 		const body = await this.#cutRectangle(bodyShape);
 		const legs = await this.#cutRectangle(legsShape);
-		legs.x = 10;
-		legs.y = bodyShape.size.height - legsShape.size.height * 0.4;
+
+		if (legsShape.offset) {
+			legs.x = legsShape.offset.x;
+			legs.y = bodyShape.size.height - legsShape.offset.y;
+		} else {
+			legs.x = 10;
+			legs.y = bodyShape.size.height - legsShape.size.height * 0.4;
+		}
 		const face = await this.#cutRectangle(faceShape);
-		face.scale = 0.85;
 		const faceOffset = faceShape.offset;
 		if (faceOffset) {
 			face.x = faceOffset.x;
@@ -191,10 +208,20 @@ export class BulbaSprite {
 			face.x = 5;
 			face.y = bodyShape.size.height * 0.4;
 		}
+		if (faceShape.scale) {
+			face.scale = faceShape.scale;
+		} else {
+			face.scale = 0.85;
+		}
 		const character = new PIXI.Container();
-		character.addChild(body);
-		character.addChild(legs);
-		character.addChild(face);
+		const scaling = new PIXI.Container();
+		scaling.scale = this.#spriteScaling;
+		character.addChild(scaling);
+		scaling.addChild(body);
+		scaling.addChild(legs);
+		scaling.addChild(face);
+		scaling.y = -character.height - 5;
+		scaling.x = -character.width / 2;
 		return character;
 	}
 

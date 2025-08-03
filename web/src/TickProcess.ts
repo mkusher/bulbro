@@ -177,12 +177,16 @@ export class TickProcess {
 						newState.enemies.filter((e) => !e.killedAt),
 					);
 					if (target && isInRange(player, target, weapon)) {
+						const shot = shoot(player, "player", weapon, target.position);
 						this.#logger.info(
-							{ playerId: player.id, weaponId: weapon.id, targetId: target.id },
+							{
+								playerId: player.id,
+								weaponId: weapon.id,
+								targetId: target.id,
+								shot,
+							},
 							"Player is attacking a target",
 						);
-
-						const shot = shoot(player, "player", weapon, target.position);
 						newState = updateState(newState, {
 							type: "shot",
 							deltaTime,

@@ -2,10 +2,10 @@ import type { EnemyCharacter } from "../enemy";
 import { orcFist } from "../weapons-definitions/orc-fist";
 import { baseStats } from "./base";
 
-export const chaserEnemy: EnemyCharacter = {
-	id: "chaser",
-	name: "Chaser Enemy",
-	sprite: "slime",
+export const aphidEnemy: EnemyCharacter = {
+	id: "aphid",
+	name: "Aphid Enemy",
+	sprite: "aphid",
 	stats: {
 		...baseStats,
 		maxHp: 1,

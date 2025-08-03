@@ -1,7 +1,8 @@
 import { babyEnemy } from "./baby";
-import { chaserEnemy } from "./chaser";
-import { spitterEnemy } from "./spitter";
+import { aphidEnemy } from "./aphid";
+import { beetleWarrior } from "./beetle-warrior";
 
-export { babyEnemy, chaserEnemy, spitterEnemy };
+export { babyEnemy, aphidEnemy, beetleWarrior };
 
-export const allEnemies = [babyEnemy, chaserEnemy, spitterEnemy];
+export const allEnemies = [babyEnemy, aphidEnemy, beetleWarrior] as const;
+export const allTypes = allEnemies.map((e) => e.id);

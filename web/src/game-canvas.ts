@@ -18,8 +18,8 @@ export const classicMapSize = {
 } as const;
 
 const minimalMapSize = {
-	width: 1000,
-	height: 750,
+	width: 1500,
+	height: 1125,
 };
 
 export type FitMode = "fit-width" | "fit-height";
