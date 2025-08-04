@@ -61,7 +61,6 @@ export class StateSync {
 			return;
 		}
 		const currentVersion = this.#lastVersion ?? 0;
-		const now = Date.now();
 		switch (message.type) {
 			case "game-state-updated-by-host":
 			case "game-state-updated-by-guest": {

@@ -121,7 +121,6 @@ export class BulbroState implements BulbroStateProperties {
 			return new BulbroState({
 				...this.#props,
 				position: round(position),
-				lastMovedAt: now,
 				lastDirection: zeroPoint(),
 			});
 		}
