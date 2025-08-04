@@ -1,4 +1,4 @@
-import { effect, type Signal } from "@preact/signals";
+import { computed, effect, type Signal } from "@preact/signals";
 import type {
 	InGameCommunicationChannel,
 	ProcessMessage,
@@ -9,6 +9,8 @@ import type { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import type { Logger } from "pino";
 import { zeroPoint } from "@/geometry";
 import type { PlayerControl } from "@/controls";
+import type { WaveProcess } from "@/WaveProcess";
+import { throttle } from "@/signals";
 
 export const defaultInterval = 5;
 export const persistDelay = 50;
@@ -26,21 +28,23 @@ export class StateSync {
 	#gameId: string;
 	#localPlayerId: string;
 	#localDispose?: () => void;
+	#waveProcess: WaveProcess;
 
 	constructor(
 		logger: Logger,
 		gameId: string,
-		playerId: string,
+		localPlayerId: string,
 		isHost: boolean,
 		inGameCommunicationChannel: InGameCommunicationChannel,
 		processMessage: ProcessMessage,
 		currentState: Signal<CurrentState>,
 		localPlayerControl: PlayerControl,
 		remoteControl: RemoteRepeatLastKnownDirectionControl,
+		waveProcess: WaveProcess,
 	) {
 		this.#logger = logger;
 		this.#gameId = gameId;
-		this.#localPlayerId = playerId;
+		this.#localPlayerId = localPlayerId;
 		this.#isHost = isHost;
 		this.#inGameCommunicationChannel = inGameCommunicationChannel;
 		this.#processMessage = processMessage;
@@ -49,6 +53,7 @@ export class StateSync {
 		this.#remotePlayerControl = remoteControl;
 
 		this.#inGameCommunicationChannel.onMessage(this.#onMessage);
+		this.#waveProcess = waveProcess;
 	}
 
 	#onMessage = (message: WebsocketMessage) => {
@@ -56,6 +61,7 @@ export class StateSync {
 			return;
 		}
 		const currentVersion = this.#lastVersion ?? 0;
+		const now = Date.now();
 		switch (message.type) {
 			case "game-state-updated-by-host":
 			case "game-state-updated-by-guest": {
@@ -78,12 +84,14 @@ export class StateSync {
 			case "game-state-updated-by-host": {
 				if (this.#isHost) return;
 				this.#lastVersion = message.version ?? currentVersion;
+				this.#waveProcess.tick();
 				this.#runPingPong(this.#lastVersion + 1);
 				return;
 			}
 			case "game-state-updated-by-guest": {
 				if (!this.#isHost) return;
 				this.#lastVersion = message.version ?? currentVersion;
+				this.#waveProcess.tick();
 				this.#runPingPong(this.#lastVersion + 1);
 				return;
 			}
@@ -99,26 +107,38 @@ export class StateSync {
 			this.#runPingPong((this.#lastVersion ?? 0) + 1);
 		}
 		let version = 0;
+		const playerId = this.#localPlayerId;
+		const playerPosition = throttle(
+			computed(() => {
+				const player = this.#currentState.value.players.find(
+					(p) => p.id === playerId,
+				);
+				const direction = this.#localPlayerControl.direction;
+				return {
+					position: player?.position ?? zeroPoint(),
+					direction,
+				};
+			}),
+			20,
+		);
 		this.#localDispose = effect(() => {
-			const playerId = this.#localPlayerId;
-			const direction = this.#localPlayerControl.direction;
-			const player = this.#currentState.value.players.find(
-				(p) => p.id === playerId,
-			);
+			const { position, direction } = playerPosition.value;
 			if (!this.#isStarted) return;
 
 			this.#inGameCommunicationChannel.send({
 				type: "game-state-position-updated",
 				gameId: this.#gameId,
 				playerId,
-				position: player?.position ?? zeroPoint(),
+				position,
 				direction,
 				version: version++,
+				sentAt: Date.now(),
 			});
 		});
 	}
 
 	async #runPingPong(version: number) {
+		this.#lastVersion = version;
 		await this.#inGameCommunicationChannel.send({
 			type: this.#isHost
 				? "game-state-updated-by-host"
@@ -126,6 +146,7 @@ export class StateSync {
 			state: this.#currentState.value,
 			gameId: this.#gameId,
 			version,
+			sentAt: Date.now(),
 		});
 	}
 

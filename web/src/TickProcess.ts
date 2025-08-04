@@ -21,6 +21,7 @@ import type { Logger } from "pino";
 import { allEnemies } from "./enemies-definitions";
 import { EnemyState, spawnEnemy } from "./enemy";
 import { v4 as uuidv4 } from "uuid";
+import type { PlayerControl } from "./controls";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -28,23 +29,28 @@ import { v4 as uuidv4 } from "uuid";
 export class TickProcess {
 	#scene: StageWithUi;
 	#logger = defaultLogger.child({ component: "TickProcess" });
+	#controls: PlayerControl[];
 
-	constructor(logger: Logger, scene: StageWithUi, debug: boolean) {
+	constructor(
+		logger: Logger,
+		scene: StageWithUi,
+		controls: PlayerControl[],
+		debug: boolean,
+	) {
 		this.#scene = scene;
 		this.#logger = logger.child({});
 		this.#logger.debug("TickProcess initialized");
+		this.#controls = controls;
 	}
 
 	/**
 	 * Run one tick: applies movement, enemy AI, spawning, and rendering.
 	 */
-	tick(
-		state: CurrentState,
-		deltaTime: number,
-		localPlayerDirections: Direction[],
-		now: number,
-	): CurrentState {
+	tick(state: CurrentState, deltaTime: number, now: number): CurrentState {
 		this.#logger.debug({ event: "tick", now, deltaTime }, "Tick start");
+		const localPlayerDirections: Direction[] = this.#controls.map(
+			(c) => c.direction,
+		);
 		let newState = state;
 		if (!state.round.isRunning || getTimeLeft(state.round) <= 0) {
 			this.#logger.debug("tick skipped; round not running");

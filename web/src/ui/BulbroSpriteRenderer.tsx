@@ -2,10 +2,9 @@ import { useEffect, useRef } from "preact/hooks";
 import * as PIXI from "pixi.js";
 import { createBulbroSprite } from "@/bulbro/Sprite";
 import { PlayingFieldTile } from "@/graphics/PlayingFieldTile";
-import { classicMapSize, type FitMode } from "@/game-canvas";
+import { classicMapSize, scale } from "@/game-canvas";
 import type { SpriteType } from "@/bulbro/Sprite";
-import type { Size } from "@/geometry";
-import { spawnBulbro, type Bulbro, type BulbroState } from "@/bulbro";
+import { spawnBulbro, type Bulbro } from "@/bulbro";
 import { logger } from "@/logger";
 
 export interface BulbroSpriteRendererProps {
@@ -17,37 +16,6 @@ export interface BulbroSpriteRendererProps {
 	debug?: boolean;
 	centerSprite?: boolean;
 	tick?: (deltaTime: number) => void;
-}
-
-// Replicate the game's zoom calculation logic
-function calculateGameScale(canvasSize: Size): number {
-	const minimalMapSize = {
-		width: 1000,
-		height: 750,
-	};
-
-	// Determine fit mode using the same logic as game-canvas.ts
-	let fitMode: FitMode;
-	if (canvasSize.width > 1400 && canvasSize.height > 1000) {
-		fitMode =
-			(canvasSize.height / classicMapSize.height) * canvasSize.width <
-			classicMapSize.width
-				? "fit-height"
-				: "fit-width";
-	} else {
-		fitMode =
-			canvasSize.width / classicMapSize.width <
-			canvasSize.height / classicMapSize.height
-				? "fit-height"
-				: "fit-width";
-	}
-
-	// Calculate scale using the same logic as autoScale
-	const fitWidth = fitMode === "fit-width";
-	return fitWidth
-		? Math.max(canvasSize.width, minimalMapSize.width) / classicMapSize.width
-		: Math.max(canvasSize.height, minimalMapSize.height) /
-				classicMapSize.height;
 }
 
 export function BulbroSpriteRenderer({
@@ -82,9 +50,7 @@ export function BulbroSpriteRenderer({
 			// Add canvas to container
 			canvas.appendChild(app.canvas as HTMLCanvasElement);
 
-			// Calculate real game scale using the same logic as the game
-			const canvasSize = { width, height };
-			const gameScale = calculateGameScale(canvasSize);
+			const gameScale = scale.value;
 
 			// Apply scale to the stage (like the real game does via camera.zoom())
 			app.stage.scale.set(gameScale);
@@ -97,7 +63,7 @@ export function BulbroSpriteRenderer({
 			const scaledMapWidth = classicMapSize.width * gameScale;
 			const scaledMapHeight = classicMapSize.height * gameScale;
 			app.stage.x = (width - scaledMapWidth) / 2;
-			app.stage.y = (height - scaledMapHeight) / 2;
+			app.stage.y = (height - scaledMapHeight + 40) / 2;
 
 			// Create sprite
 			sprite = createBulbroSprite(spriteType, debug);

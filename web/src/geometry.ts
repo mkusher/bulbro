@@ -47,11 +47,25 @@ export function distance(p1: Point, p2: Point) {
 	return Math.hypot(p1.x - p2.x, p1.y - p2.y);
 }
 
+export function subtraction(minuend: Point, subtrahend: Point) {
+	if (isEqual(minuend, subtrahend)) {
+		return zeroPoint();
+	}
+	return {
+		x: minuend.x - subtrahend.x,
+		y: minuend.y - subtrahend.y,
+	};
+}
+
+export function round(p: Point) {
+	return {
+		x: Math.floor(p.x),
+		y: Math.floor(p.y),
+	};
+}
+
 export function direction(from: Point, to: Point) {
-	return normalize({
-		x: to.x - from.x,
-		y: to.y - from.y,
-	});
+	return normalize(subtraction(to, from));
 }
 
 export function normalize(p: Point) {
@@ -71,7 +85,7 @@ export function scale(p: Point, s: number) {
 	};
 }
 
-const epsilon = 0.001;
+const epsilon = 0.1;
 export function isEqual(p1: Point, p2: Point) {
 	return distance(p1, p2) < epsilon;
 }

@@ -1,4 +1,12 @@
-import { type Direction, type Position } from "../geometry";
+import {
+	direction,
+	isEqual,
+	round,
+	subtraction,
+	zeroPoint,
+	type Direction,
+	type Position,
+} from "../geometry";
 import type { Material } from "../object";
 import type { WeaponState } from "../currentState";
 import type { Bulbro, Stats } from "./BulbroCharacter";
@@ -23,7 +31,7 @@ type BulbroStateProperties = {
 	readonly lastHitAt: number;
 	readonly healedByHpRegenerationAt: number;
 	readonly killedAt?: number;
-	readonly lastDirection?: Direction;
+	readonly lastDirection: Direction;
 };
 
 /**
@@ -102,12 +110,26 @@ export class BulbroState implements BulbroStateProperties {
 	move(position: Position, now: number): BulbroState {
 		return new BulbroState({
 			...this.#props,
-			position,
+			position: round(position),
 			lastMovedAt: now,
-			lastDirection: {
-				x: position.x - this.position.x,
-				y: position.y - this.position.y,
-			},
+			lastDirection: direction(this.position, round(position)),
+		});
+	}
+
+	moveFromDirection(position: Position, direction: Direction, now: number) {
+		if (isEqual(direction, zeroPoint())) {
+			return new BulbroState({
+				...this.#props,
+				position: round(position),
+				lastMovedAt: now,
+				lastDirection: zeroPoint(),
+			});
+		}
+		return new BulbroState({
+			...this.#props,
+			position: round(position),
+			lastMovedAt: now,
+			lastDirection: direction,
 		});
 	}
 
@@ -126,7 +148,7 @@ export class BulbroState implements BulbroStateProperties {
 	beHit(damage: number, now: number): BulbroState {
 		return new BulbroState({
 			...this.#props,
-			healthPoints: this.healthPoints - damage,
+			healthPoints: Math.max(this.healthPoints - damage, 0),
 			lastHitAt: now,
 		});
 	}
@@ -201,5 +223,6 @@ export function spawnBulbro(
 		lastHitAt: 0,
 		healedByHpRegenerationAt: now,
 		materialsAvailable: 0,
+		lastDirection: zeroPoint(),
 	});
 }

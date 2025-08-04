@@ -9,12 +9,14 @@ export const HostStateUpdate = type({
 	gameId: "string",
 	version: "number",
 	state: "object",
+	sentAt: "number",
 });
 export const PlayerStateUpdate = type({
 	type: "'game-state-updated-by-guest'",
 	gameId: "string",
 	state: "object",
 	version: "number",
+	sentAt: "number",
 });
 export const PlayerPositionUpdated = type({
 	type: "'game-state-position-updated'",
@@ -23,6 +25,7 @@ export const PlayerPositionUpdated = type({
 	position: Point,
 	direction: Point,
 	version: "number",
+	sentAt: "number",
 });
 export const WebsocketMessage = HostStateUpdate.or(PlayerStateUpdate).or(
 	PlayerPositionUpdated,

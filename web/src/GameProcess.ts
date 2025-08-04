@@ -20,7 +20,7 @@ export type CharacterSetup = {
 };
 
 export type WavePromises = {
-	waveInitPromise: Promise<void>;
+	waveInitPromise: Promise<WaveProcess>;
 	wavePromise: Promise<"win" | "fail" | undefined>;
 };
 

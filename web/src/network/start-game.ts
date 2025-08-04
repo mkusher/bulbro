@@ -63,7 +63,7 @@ export async function sendGameStartedRequest(
 	return res.ok;
 }
 
-export async function startNetworkGameAsNonHost(
+export async function startNetworkGameAsGuest(
 	initialState: CurrentState,
 	toGame: () => void,
 ) {
@@ -72,14 +72,12 @@ export async function startNetworkGameAsNonHost(
 		throw new Error("Game hasn't started");
 	}
 	const iam = currentUser.value;
-	fromJSON(initialState);
-	const state = currentState.value;
-	const localPlayer = state.players.find((p) => p.id === iam.id)!;
-	const remotePlayer = state.players.find((p) => p.id !== iam.id)!;
-	currentState.value = {
-		...state,
+	const localPlayer = initialState.players.find((p) => p.id === iam.id)!;
+	const remotePlayer = initialState.players.find((p) => p.id !== iam.id)!;
+	fromJSON({
+		...initialState,
 		players: [localPlayer, remotePlayer],
-	};
+	});
 	try {
 		const { wavePromise, waveInitPromise } = game.startRemote();
 		await waveInitPromise;

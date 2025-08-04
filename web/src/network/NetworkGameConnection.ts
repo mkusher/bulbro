@@ -10,6 +10,7 @@ import type {
 	ProcessMessage,
 } from "./InGameCommunicationChannel";
 import { currentUser } from "./currentUser";
+import type { WaveProcess } from "@/WaveProcess";
 
 export class NetworkGameConnection {
 	#logger: Logger;
@@ -56,8 +57,8 @@ export class NetworkGameConnection {
 	}
 
 	onStart({ waveInitPromise, wavePromise }: WavePromises) {
-		waveInitPromise.then(() => {
-			this.#startStateSync(this.#isHost);
+		waveInitPromise.then((waveProcess) => {
+			this.#startStateSync(this.#isHost, waveProcess);
 		});
 
 		wavePromise.finally(() => {
@@ -70,12 +71,10 @@ export class NetworkGameConnection {
 			this.createControls(),
 		);
 
-		this.onStart({ waveInitPromise, wavePromise });
-
 		return { wavePromise, waveInitPromise };
 	}
 
-	#startStateSync(isHost: boolean) {
+	#startStateSync(isHost: boolean, waveProcess: WaveProcess) {
 		this.#stateSync = new StateSync(
 			this.#logger.child({ component: "state-sync" }),
 			this.#lobby.id,
@@ -86,6 +85,7 @@ export class NetworkGameConnection {
 			currentState,
 			this.#mainControl,
 			this.#remoteControl,
+			waveProcess,
 		);
 		this.#stateSync.start();
 	}

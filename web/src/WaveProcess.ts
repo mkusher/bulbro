@@ -45,25 +45,26 @@ export class WaveProcess {
 	async init() {
 		await this.#camera.init(canvasSize.value);
 		await this.#scene.init(currentState.value);
+		return this;
 	}
 
 	async start() {
 		await Promise.all(this.#playerControls.map((c) => c.start()));
-		this.#ticker.add(this.#tick);
+		this.#ticker.add(this.tick);
 		this.#ticker.start();
 		return this.#resolvers.promise;
 	}
 
 	async stop(type: "win" | "fail") {
 		this.#ticker.stop();
-		this.#ticker.remove(this.#tick);
+		this.#ticker.remove(this.tick);
 
 		this.#resolvers.resolve(type);
 		await Promise.all(this.#playerControls.map((c) => c.stop()));
 		return this.#resolvers.promise;
 	}
 
-	#tick = () => {
+	tick = () => {
 		const i = this.#tickIndex++;
 		const now = Date.now();
 		const delta = this.#ticker.deltaMS / 1000;
@@ -84,12 +85,12 @@ export class WaveProcess {
 			this.#logger.info({ state, i }, "Current state");
 		}
 		// Delegate per-tick updates to TickProcess
-		const tickProc = new TickProcess(this.#logger, this.#scene, this.#debug);
-		currentState.value = tickProc.tick(
-			state,
-			delta,
-			this.#playerControls.map((c) => c.direction),
-			now,
+		const tickProc = new TickProcess(
+			this.#logger,
+			this.#scene,
+			this.#playerControls,
+			this.#debug,
 		);
+		currentState.value = tickProc.tick(state, delta, now);
 	};
 }

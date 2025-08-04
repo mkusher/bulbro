@@ -8,8 +8,13 @@ import { SetupOnlineGame } from "./screens/start/SetupOnlineGame";
 import { GameGlobalSettings } from "./screens/start/GameGlobalSettings";
 import { InGame } from "./screens/Game";
 import { FindLobby } from "./screens/FindLobby";
+import { useEffect } from "preact/hooks";
+import { logger } from "./logger";
 
 export function Game() {
+	useEffect(() => {
+		logger.info("Starting application");
+	}, []);
 	return (
 		<LocationProvider>
 			<Router>
