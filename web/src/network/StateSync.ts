@@ -1,7 +1,6 @@
 import { computed, effect, type Signal } from "@preact/signals";
 import type {
 	InGameCommunicationChannel,
-	ProcessMessage,
 	WebsocketMessage,
 } from "./InGameCommunicationChannel";
 import type { CurrentState } from "@/currentState";
@@ -11,6 +10,8 @@ import { zeroPoint } from "@/geometry";
 import type { PlayerControl } from "@/controls";
 import type { WaveProcess } from "@/WaveProcess";
 import { throttle } from "@/signals";
+import type { GameEventQueue } from "@/game-events/GameEvents";
+import type { StateUpdater } from "./StateUpdater";
 
 export const defaultInterval = 5;
 export const persistDelay = 50;
@@ -19,7 +20,8 @@ export class StateSync {
 	#logger: Logger;
 	#isStarted = false;
 	#inGameCommunicationChannel: InGameCommunicationChannel;
-	#processMessage: ProcessMessage;
+	#stateUpdater: StateUpdater;
+	#gameEventQueue: GameEventQueue;
 	#currentState: Signal<CurrentState>;
 	#remotePlayerControl: RemoteRepeatLastKnownDirectionControl;
 	#localPlayerControl: PlayerControl;
@@ -30,27 +32,41 @@ export class StateSync {
 	#localDispose?: () => void;
 	#waveProcess: WaveProcess;
 
-	constructor(
-		logger: Logger,
-		gameId: string,
-		localPlayerId: string,
-		isHost: boolean,
-		inGameCommunicationChannel: InGameCommunicationChannel,
-		processMessage: ProcessMessage,
-		currentState: Signal<CurrentState>,
-		localPlayerControl: PlayerControl,
-		remoteControl: RemoteRepeatLastKnownDirectionControl,
-		waveProcess: WaveProcess,
-	) {
+	constructor({
+		logger,
+		gameId,
+		localPlayerId,
+		isHost,
+		inGameCommunicationChannel,
+		stateUpdater,
+		gameEventQueue,
+		currentState,
+		localPlayerControl,
+		remoteControl,
+		waveProcess,
+	}: {
+		logger: Logger;
+		gameId: string;
+		localPlayerId: string;
+		isHost: boolean;
+		inGameCommunicationChannel: InGameCommunicationChannel;
+		stateUpdater: StateUpdater;
+		gameEventQueue: GameEventQueue;
+		currentState: Signal<CurrentState>;
+		localPlayerControl: PlayerControl;
+		remoteControl: RemoteRepeatLastKnownDirectionControl;
+		waveProcess: WaveProcess;
+	}) {
 		this.#logger = logger;
 		this.#gameId = gameId;
 		this.#localPlayerId = localPlayerId;
 		this.#isHost = isHost;
 		this.#inGameCommunicationChannel = inGameCommunicationChannel;
-		this.#processMessage = processMessage;
-		this.#currentState = currentState;
+		this.#stateUpdater = stateUpdater;
 		this.#localPlayerControl = localPlayerControl;
 		this.#remotePlayerControl = remoteControl;
+		this.#gameEventQueue = gameEventQueue;
+		this.#currentState = currentState;
 
 		this.#inGameCommunicationChannel.onMessage(this.#onMessage);
 		this.#waveProcess = waveProcess;
@@ -77,7 +93,8 @@ export class StateSync {
 				}
 			}
 		}
-		this.#processMessage(message);
+		const localEvents = this.#gameEventQueue.flush();
+		this.#stateUpdater.processMessage(message, localEvents);
 		this.#remotePlayerControl.onMessage(message);
 		switch (message.type) {
 			case "game-state-updated-by-host": {
@@ -131,7 +148,7 @@ export class StateSync {
 				position,
 				direction,
 				version: version++,
-				sentAt: Date.now(),
+				sentAt: this.#waveProcess.now(),
 			});
 		});
 	}
@@ -142,7 +159,7 @@ export class StateSync {
 			type: this.#isHost
 				? "game-state-updated-by-host"
 				: "game-state-updated-by-guest",
-			state: this.#currentState.value,
+			events: this.#gameEventQueue.flush(),
 			gameId: this.#gameId,
 			version,
 			sentAt: Date.now(),

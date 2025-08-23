@@ -112,7 +112,7 @@ export function BulbroSpriteRenderer({
 					app.destroy();
 					app = null;
 				} catch (e) {
-					logger.error("Destroy failed", e);
+					logger.error({ error: e }, "Destroy failed");
 				}
 			}
 		};

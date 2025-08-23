@@ -47,6 +47,13 @@ export function distance(p1: Point, p2: Point) {
 	return Math.hypot(p1.x - p2.x, p1.y - p2.y);
 }
 
+export function addition(p1: Point, p2: Point) {
+	return {
+		x: p1.x + p2.x,
+		y: p1.y + p2.y,
+	};
+}
+
 export function subtraction(minuend: Point, subtrahend: Point) {
 	if (isEqual(minuend, subtrahend)) {
 		return zeroPoint();

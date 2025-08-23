@@ -14,6 +14,13 @@ import type { ShotState } from "../shot/ShotState";
 import { knockbackSpeed, knockbackTimeout } from "../game-formulas";
 import type { BulbroState } from "../bulbro";
 import type { EnemyType as BulbaEnemyType } from "./sprites/EnemiesFrames";
+import type {
+	EnemyMovedEvent,
+	EnemyAttackedEvent,
+	EnemyReceivedHitEvent,
+	EnemyDiedEvent,
+	GameEvent,
+} from "../game-events/GameEvents";
 
 export type EnemyType = "orc" | "slime" | BulbaEnemyType;
 
@@ -160,10 +167,11 @@ export class EnemyState implements EnemyStateProps {
 			deltaTime,
 		);
 		if (isEqual(this.position, newPos)) return this;
-		return this.move(newPos, now);
+		return this.#internalMove(newPos, now);
 	}
 
-	move(newPos: Position, now: number) {
+	/** Internal method for direct state movement (used by legacy methods). */
+	#internalMove(newPos: Position, now: number): EnemyState {
 		const lastDirection = direction(this.position, newPos);
 		return new EnemyState({
 			...this.#props,
@@ -174,32 +182,99 @@ export class EnemyState implements EnemyStateProps {
 		});
 	}
 
-	/** Returns a new state with updated weapon strike timestamp for a hit action. */
-	hit(weaponId: string, now: number): EnemyState {
-		const weapons = this.weapons.map((ws) =>
-			ws.id === weaponId ? { ...ws, lastStrikedAt: now } : ws,
-		);
-		return new EnemyState({
-			...this.#props,
-			weapons,
-		});
+	/** Returns a move event for the Enemy. */
+	move(newPos: Position, now: number): EnemyMovedEvent {
+		return {
+			type: "enemyMoved",
+			enemyId: this.id,
+			from: this.position,
+			to: newPos,
+			direction: direction(this.position, newPos),
+		};
 	}
 
-	/** Returns a new state after taking damage; may mark as killed. */
-	beHit(shot: ShotState, now: number): EnemyState {
-		const healthPoints = this.healthPoints - shot.damage;
-		const killedAt = healthPoints <= 0 && !this.killedAt ? now : this.killedAt;
-		return new EnemyState({
-			...this.#props,
-			healthPoints,
-			lastHitAt: now,
-			killedAt,
-			knockback: {
-				strength: shot.knockback,
-				startedAt: now,
-				direction: shot.direction,
-			},
-		});
+	/** Returns an attack event for the Enemy. */
+	hit(weaponId: string, targetId?: string, shot?: any): EnemyAttackedEvent {
+		return {
+			type: "enemyAttacked",
+			enemyId: this.id,
+			weaponId,
+			targetId,
+			shot,
+		};
+	}
+
+	/** Returns a received hit or death event for the Enemy. */
+	beHit(shot: ShotState, now: number): EnemyReceivedHitEvent | EnemyDiedEvent {
+		const newHealthPoints = this.healthPoints - shot.damage;
+
+		if (newHealthPoints <= 0 && this.healthPoints > 0) {
+			// Enemy dies
+			return {
+				type: "enemyDied",
+				enemyId: this.id,
+				position: { x: this.position.x, y: this.position.y },
+			};
+		}
+
+		// Enemy takes damage but survives
+		return {
+			type: "enemyReceivedHit",
+			enemyId: this.id,
+			damage: shot.damage,
+		};
+	}
+
+	/** Apply a single event to this Enemy state and return the new state. */
+	applyEvent(event: GameEvent): EnemyState {
+		switch (event.type) {
+			case "enemyMoved":
+				if (event.enemyId !== this.id) return this;
+				return new EnemyState({
+					...this.#props,
+					position: event.to,
+					lastMovedAt: Date.now(),
+					lastDirection: event.direction,
+					knockback: undefined,
+				});
+
+			case "enemyAttacked":
+				if (event.enemyId !== this.id) return this;
+				const weapons = this.weapons.map((ws) =>
+					ws.id === event.weaponId ? { ...ws, lastStrikedAt: Date.now() } : ws,
+				);
+				return new EnemyState({
+					...this.#props,
+					weapons,
+				});
+
+			case "enemyReceivedHit":
+				if (event.enemyId !== this.id) return this;
+				return new EnemyState({
+					...this.#props,
+					healthPoints: Math.max(this.healthPoints - event.damage, 0),
+					lastHitAt: Date.now(),
+				});
+
+			case "enemyDied":
+				if (event.enemyId !== this.id) return this;
+				return new EnemyState({
+					...this.#props,
+					healthPoints: 0,
+					killedAt: Date.now(),
+				});
+
+			default:
+				return this;
+		}
+	}
+
+	/** Apply multiple events to this Enemy state and return the new state. */
+	applyEvents(events: GameEvent[]): EnemyState {
+		return events.reduce(
+			(state: EnemyState, event) => state.applyEvent(event),
+			this,
+		);
 	}
 
 	toMaterial() {

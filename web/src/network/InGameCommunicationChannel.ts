@@ -8,13 +8,13 @@ export const HostStateUpdate = type({
 	type: "'game-state-updated-by-host'",
 	gameId: "string",
 	version: "number",
-	state: "object",
+	events: "object[]",
 	sentAt: "number",
 });
 export const PlayerStateUpdate = type({
 	type: "'game-state-updated-by-guest'",
 	gameId: "string",
-	state: "object",
+	events: "object[]",
 	version: "number",
 	sentAt: "number",
 });

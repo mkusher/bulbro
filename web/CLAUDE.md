@@ -25,6 +25,14 @@ Each weapon characteristics. Characteristics are a bonuses to the player's stats
 
 The build tool is bun. You should ALWAYS use bun instead of npm, yarn, pnpm and npx. All code should be in typescript
 
+Instead of npm use bun
+Instead of npx use bun
+Instead of yarn use bun
+Instead of pnpm use bun
+
+For tests use bun
+For typescript instead of tsc use tsgo
+
 # Project structure
 
 Project consists of

@@ -2,13 +2,11 @@ import type { Logger } from "@/logger";
 import { type Lobby } from "./LobbySocketMessages";
 import type { GameProcess, WavePromises } from "@/GameProcess";
 import { StateSync } from "./StateSync";
+import { StateUpdater } from "./StateUpdater";
 import { createMainControls, type PlayerControl } from "@/controls";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { currentState } from "@/currentState";
-import type {
-	InGameCommunicationChannel,
-	ProcessMessage,
-} from "./InGameCommunicationChannel";
+import type { InGameCommunicationChannel } from "./InGameCommunicationChannel";
 import { currentUser } from "./currentUser";
 import type { WaveProcess } from "@/WaveProcess";
 
@@ -22,7 +20,6 @@ export class NetworkGameConnection {
 	#remoteControl: RemoteRepeatLastKnownDirectionControl;
 	#mainControl: PlayerControl;
 	#remotePlayerId: string;
-	#processMessage: ProcessMessage;
 
 	get id() {
 		return this.#lobby.id;
@@ -33,7 +30,6 @@ export class NetworkGameConnection {
 		inGameCommunicationChannel: InGameCommunicationChannel,
 		lobby: Lobby,
 		gameProcess: GameProcess,
-		processMessage: ProcessMessage,
 		isHost: boolean,
 	) {
 		this.#logger = logger;
@@ -49,7 +45,6 @@ export class NetworkGameConnection {
 			this.#isHost,
 			this.#remotePlayerId,
 		);
-		this.#processMessage = processMessage;
 	}
 
 	createControls() {
@@ -75,18 +70,27 @@ export class NetworkGameConnection {
 	}
 
 	#startStateSync(isHost: boolean, waveProcess: WaveProcess) {
-		this.#stateSync = new StateSync(
-			this.#logger.child({ component: "state-sync" }),
-			this.#lobby.id,
-			currentUser.value.id,
-			isHost,
-			this.#inGameCommunicationChannel,
-			this.#processMessage,
+		const stateUpdater = new StateUpdater({
+			logger: this.#logger.child({ component: "state-updater" }),
 			currentState,
-			this.#mainControl,
-			this.#remoteControl,
+			currentUser,
 			waveProcess,
-		);
+			isHost,
+		});
+
+		this.#stateSync = new StateSync({
+			logger: this.#logger.child({ component: "state-sync" }),
+			gameId: this.#lobby.id,
+			localPlayerId: currentUser.value.id,
+			isHost,
+			inGameCommunicationChannel: this.#inGameCommunicationChannel,
+			stateUpdater,
+			currentState,
+			localPlayerControl: this.#mainControl,
+			remoteControl: this.#remoteControl,
+			waveProcess,
+			gameEventQueue: waveProcess.eventQueue,
+		});
 		this.#stateSync.start();
 	}
 }

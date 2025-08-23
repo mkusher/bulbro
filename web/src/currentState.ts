@@ -10,6 +10,7 @@ import {
 	isEqual,
 	direction,
 	rectsIntersect,
+	zeroPoint,
 } from "./geometry";
 import { movePosition } from "./physics";
 import { Movement } from "./movement/Movement";
@@ -23,6 +24,18 @@ import { findClosest, type Difficulty } from "./game-formulas";
 import { signal } from "@preact/signals";
 import type { ShotState } from "./shot/ShotState";
 import type { MapObject } from "./object";
+import type {
+	BulbroMovedEvent,
+	BulbroHealedEvent,
+	BulbroAttackedEvent,
+	EnemyAttackedEvent,
+	EnemyMovedEvent,
+	MaterialMovedEvent,
+	MaterialCollectedEvent,
+	GameEvent,
+	TickEvent,
+} from "./game-events/GameEvents";
+import { withEventMeta } from "./game-events/GameEvents";
 
 /**
  * Runtime state of a single weapon in play.
@@ -61,16 +74,26 @@ export interface CurrentState {
 	round: RoundState;
 }
 
+type Action = GameEvent | SelectWeaponAction;
+
 export const nextWave = (
 	currentState: CurrentState,
-	{ now }: Action,
+	{ occurredAt: now }: Extract<GameEvent, { type: "tick" }>,
 ): CurrentState => ({
 	...currentState,
 	shots: [],
 	objects: [],
 	enemies: [],
 	players: currentState.players.map((player, i) =>
-		player.move(startPosition(currentState.mapSize, i), now),
+		player.applyEvent({
+			...player.moveFromDirection(
+				startPosition(currentState.mapSize, i),
+				zeroPoint(),
+				now,
+			),
+			deltaTime: 0,
+			occurredAt: now,
+		}),
 	),
 	round: {
 		...currentState.round,
@@ -134,148 +157,140 @@ type SelectWeaponAction = {
 /**
  * Actions for updating game state.
  */
-export type Action =
-	| {
-			type: "move";
-			direction: Direction;
-			deltaTime: number;
-			now: number;
-			currentPlayerId: string;
-	  }
-	| { type: "tick"; deltaTime: number; now: number }
-	| { type: "heal"; deltaTime: number; now: number }
-	| {
-			type: "moveEnemies";
-			deltaTime: number;
-			now: number;
-	  }
-	| {
-			type: "spawnEnemy";
-			enemy: EnemyState;
-			deltaTime: number;
-			now: number;
-	  }
-	| {
-			type: "shot";
-			shot: ShotState;
-			deltaTime: number;
-			now: number;
-			weaponId: string;
-	  }
-	| {
-			type: "moveObjects";
-			deltaTime: number;
-			now: number;
-	  }
-	| {
-			type: "moveShot";
-			shotId: string;
-			direction: Direction;
-			deltaTime: number;
-			now: number;
-			chance: number;
-	  }
-	| {
-			type?: undefined;
-			deltaTime: number;
-			now: number;
-	  }
-	| SelectWeaponAction;
 
 // Individual state update functions for each action type
 export function movePlayer(
 	state: CurrentState,
-	action: Extract<Action, { type: "move" }>,
+	action: Extract<GameEvent, { type: "bulbroMoved" }>,
 ): CurrentState {
-	const { direction, deltaTime, now, currentPlayerId } = action;
-	// Movement handler: build obstacles from other players and alive enemies
-	const obstacles: MovableObject[] = [
-		...state.players
-			.filter((p2) => p2.id !== currentPlayerId && p2.isAlive())
-			.map((p2) => p2.toMovableObject()),
-		...state.enemies.filter((e) => !e.killedAt).map((e) => e.toMovableObject()),
-	];
 	return {
 		...state,
 		players: state.players.map((p) => {
-			if (p.id !== currentPlayerId) return p;
-			if (!p.isAlive()) {
-				return p;
-			}
-			const mover = new Movement(
-				{
-					position: p.position,
-					shape: {
-						type: "rectangle",
-						width: BULBRO_SIZE.width,
-						height: BULBRO_SIZE.height,
-					},
-				},
-				state.mapSize,
-				obstacles,
-			);
-			const newPos = mover.getPositionAfterMove(direction, p.speed, deltaTime);
-			if (isEqual(p.position, newPos)) return p;
-			return p.move(newPos, now);
+			if (p.id !== action.bulbroId) return p;
+			return p.applyEvent(action);
 		}),
 	};
 }
 
-export function moveEnemies(
+export function handleEnemyMoved(
 	state: CurrentState,
-	action: Extract<Action, { type: "moveEnemies" }>,
-) {
-	let newState = { ...state };
+	action: Extract<GameEvent, { type: "enemyMoved" }>,
+): CurrentState {
+	const { enemyId } = action;
+	return {
+		...state,
+		enemies: state.enemies.map((enemy) => {
+			if (enemy.id !== enemyId) return enemy;
+			return enemy.applyEvent(action);
+		}),
+	};
+}
+
+export function generateEnemyMovementEvents(
+	state: CurrentState,
+	deltaTime: number,
+): EnemyMovedEvent[] {
 	const players = state.players;
-	let enemies = [...state.enemies];
-	const { now, deltaTime } = action;
+	const enemies = [...state.enemies];
 	const alive = players.filter((p) => p.isAlive());
-	if (alive.length > 0) {
-		const mapSize = state.mapSize;
-		const playersObjects = alive.map((p2) => p2.toMovableObject());
-		newState.enemies = enemies.map((enemy) => {
-			const obstacles: MovableObject[] = [
-				...enemies
-					.filter((e2) => e2.id !== enemy.id && !e2.killedAt)
-					.map((e2) => e2.toMovableObject()),
-				...playersObjects,
-			];
-			return enemy.moveToClosestBulbro(
-				alive,
-				obstacles,
-				mapSize,
-				deltaTime,
-				now,
-			);
-		});
+
+	if (alive.length === 0) {
+		return [];
 	}
-	return newState;
+
+	const events: EnemyMovedEvent[] = [];
+	const mapSize = state.mapSize;
+	const playersObjects = alive.map((p2) => p2.toMovableObject());
+
+	for (const enemy of enemies) {
+		const obstacles: MovableObject[] = [
+			...enemies
+				.filter((e2) => e2.id !== enemy.id && !e2.killedAt)
+				.map((e2) => e2.toMovableObject()),
+			...playersObjects,
+		];
+
+		const newEnemy = enemy.moveToClosestBulbro(
+			alive,
+			obstacles,
+			mapSize,
+			deltaTime,
+			Date.now(),
+		);
+		if (
+			newEnemy.position.x !== enemy.position.x ||
+			newEnemy.position.y !== enemy.position.y
+		) {
+			events.push({
+				type: "enemyMoved",
+				enemyId: enemy.id,
+				from: enemy.position,
+				to: newEnemy.position,
+				direction: newEnemy.lastDirection || { x: 0, y: 0 },
+			});
+		}
+	}
+
+	return events;
+}
+
+export function handleMaterialMoved(
+	state: CurrentState,
+	action: Extract<GameEvent, { type: "materialMoved" }>,
+): CurrentState {
+	const { materialId, to } = action;
+	return {
+		...state,
+		objects: state.objects.map((object) => {
+			if (object.type === "material" && object.id === materialId) {
+				return {
+					...object,
+					position: to,
+				};
+			}
+			return object;
+		}),
+	};
+}
+
+export function handleMaterialCollected(
+	state: CurrentState,
+	action: Extract<GameEvent, { type: "materialCollected" }>,
+): CurrentState {
+	const { materialId } = action;
+	return {
+		...state,
+		objects: state.objects.filter(
+			(object) => !(object.type === "material" && object.id === materialId),
+		),
+		players: state.players.map((player) => player.applyEvent(action)),
+	};
 }
 
 const materialPickupSpeed = 600;
-export function moveMaterials(
+export function generateMaterialMovementEvents(
 	state: CurrentState,
-	action: Extract<Action, { type: "moveObjects" }>,
-) {
-	let objects = [];
-	let players = state.players;
+	deltaTime: number,
+): (MaterialMovedEvent | MaterialCollectedEvent)[] {
+	const events: (MaterialMovedEvent | MaterialCollectedEvent)[] = [];
+	const players = state.players;
+	const materialSize = { width: 16, height: 16 };
+
 	for (const object of state.objects) {
+		if (object.type !== "material") continue;
+
 		const player = findClosest(
 			object,
 			players.filter((p) => p.isAlive()),
 		);
-		let position = object.position;
 
 		if (
-			object.type === "material" &&
 			player &&
 			distance(player.position, object.position) <= player.stats.pickupRange
 		) {
-			const deltaTime = action.deltaTime;
 			const shape = {
 				type: "rectangle",
-				width: 16,
-				height: 16,
+				...materialSize,
 			} as const;
 			const mover = new Movement(
 				{
@@ -284,41 +299,54 @@ export function moveMaterials(
 				},
 				state.mapSize,
 			);
+
+			const directionToPlayer = direction(object.position, player.position);
+			const distanceToPlayer = distance(object.position, player.position);
+			const maxMovementDistance = (materialPickupSpeed * deltaTime) / 1000;
+
+			// Don't overshoot the player position
+			const actualMovementDistance = Math.min(
+				maxMovementDistance,
+				distanceToPlayer,
+			);
+			const adjustedSpeed = actualMovementDistance / (deltaTime / 1000);
+
 			const newPosition = mover.getPositionAfterMove(
-				direction(object.position, player.position),
-				materialPickupSpeed,
+				directionToPlayer,
+				adjustedSpeed,
 				deltaTime,
 			);
-			position = newPosition;
-			const playerObject = player.toMovableObject();
+
 			if (
-				rectsIntersect(
-					{
-						...shape,
-						...position,
-					},
-					{
-						...playerObject.position,
-						...playerObject.shape,
-					} as Rectangle,
-				)
+				newPosition.x !== object.position.x ||
+				newPosition.y !== object.position.y
 			) {
-				players = players.map((p) => p.takeMaterial(object));
-				continue;
+				// Check if material is very close to player center (within collection threshold)
+				const distanceToPlayer = distance(newPosition, player.position);
+				const collectionThreshold = 3; // Nearly touching player center
+
+				if (distanceToPlayer <= collectionThreshold) {
+					// Generate material collected event instead of movement
+					events.push({
+						type: "materialCollected",
+						materialId: object.id,
+						playerId: player.id,
+					});
+				} else {
+					// Generate movement event if position changed and no collision
+					events.push({
+						type: "materialMoved",
+						materialId: object.id,
+						from: object.position,
+						to: newPosition,
+						direction: direction(object.position, newPosition),
+					});
+				}
 			}
 		}
-
-		objects.push({
-			...object,
-			position,
-		});
 	}
 
-	return {
-		...state,
-		objects,
-		players,
-	};
+	return events;
 }
 
 const enemiesBodiesDisappearAfter = 2000;
@@ -326,7 +354,7 @@ export function moveShot(
 	state: CurrentState,
 	action: Extract<Action, { type: "moveShot" }>,
 ): CurrentState {
-	const { shotId, direction, deltaTime, now } = action;
+	const { shotId, direction, deltaTime, occurredAt: now } = action;
 	const bounds: Rectangle = {
 		x: 0,
 		y: 0,
@@ -360,7 +388,9 @@ export function moveShot(
 				const enemyRect = rectFromCenter(e.position, ENEMY_SIZE);
 				if (rectIntersectsLine(enemyRect, segment)) {
 					isHit = true;
-					return e.beHit(shot, now);
+					return e.applyEvent(
+						withEventMeta(e.beHit(shot, now), deltaTime, now),
+					);
 				}
 				return e;
 			});
@@ -379,13 +409,16 @@ export function moveShot(
 				const playerRect = rectFromCenter(p.position, BULBRO_SIZE);
 				if (rectIntersectsLine(playerRect, segment)) {
 					isHit = true;
-					return p.beHit(shot.damage, now);
+					return p.applyEvent(
+						withEventMeta(p.beHit(shot.damage, now), deltaTime, now),
+					);
 				}
 				return p;
 			});
 			if (isHit) continue;
 		}
-		newShots.push({ ...shot, position: nextPos });
+		const moveEvent = shot.move(nextPos);
+		newShots.push(shot.applyEvent(withEventMeta(moveEvent, deltaTime, now)));
 	}
 	newEnemies = newEnemies.filter(
 		(e) =>
@@ -412,7 +445,7 @@ export function spawnEnemy(
 	state: CurrentState,
 	action: Extract<Action, { type: "spawnEnemy" }>,
 ): CurrentState {
-	const { enemy, now } = action;
+	const { enemy, occurredAt: now } = action;
 	let objects = [];
 	let enemiesToSpawn = [];
 	for (let object of state.objects) {
@@ -448,20 +481,24 @@ export function addShot(
 	state: CurrentState,
 	action: Extract<Action, { type: "shot" }>,
 ): CurrentState {
-	const { shot, weaponId, now } = action;
+	const { shot, weaponId, occurredAt: now, deltaTime } = action;
 	const newPlayers =
 		shot.shooterType === "player"
 			? state.players.map((p) => {
 					if (p.id !== shot.shooterId) return p;
 					if (!p.isAlive()) return p;
-					return p.hit(weaponId, now);
+					return p.applyEvent(
+						withEventMeta(p.hit(weaponId, undefined, shot), deltaTime, now),
+					);
 				})
 			: state.players;
 	const newEnemies =
 		shot.shooterType === "enemy"
 			? state.enemies.map((e) => {
 					if (e.id !== shot.shooterId) return e;
-					return e.hit(weaponId, now);
+					return e.applyEvent(
+						withEventMeta(e.hit(weaponId, undefined, shot), deltaTime, now),
+					);
 				})
 			: state.enemies;
 	return {
@@ -472,8 +509,11 @@ export function addShot(
 	};
 }
 
-export function updateRound(round: RoundState, action: Action) {
-	const { now } = action;
+export function updateRound(
+	round: RoundState,
+	action: Extract<GameEvent, { type: "tick" }>,
+) {
+	const { occurredAt: now } = action;
 
 	const isRunning =
 		round.isRunning && getTimeLeft(round) <= 0 ? false : round.isRunning;
@@ -484,8 +524,11 @@ export function updateRound(round: RoundState, action: Action) {
 	};
 }
 
-export function healPlayers(state: CurrentState, action: Action) {
-	const { now } = action;
+export function healPlayers(
+	state: CurrentState,
+	action: Extract<GameEvent, { type: "tick" }>,
+) {
+	const { occurredAt: now } = action;
 	return {
 		...state,
 		players: state.players.map((player) =>
@@ -504,6 +547,48 @@ export function selectWeapons(state: CurrentState, action: SelectWeaponAction) {
 	};
 }
 
+export function handleBulbroHealed(
+	state: CurrentState,
+	action: Extract<GameEvent, { type: "bulbroHealed" }>,
+): CurrentState {
+	const { bulbroId, hp } = action;
+	return {
+		...state,
+		players: state.players.map((player) => {
+			if (player.id !== bulbroId) return player;
+			return player.applyEvent(action);
+		}),
+	};
+}
+
+export function handleBulbroAttacked(
+	state: CurrentState,
+	action: Extract<GameEvent, { type: "bulbroAttacked" }>,
+): CurrentState {
+	const { bulbroId } = action;
+	return {
+		...state,
+		players: state.players.map((player) => {
+			if (player.id !== bulbroId) return player;
+			return player.applyEvent(action);
+		}),
+	};
+}
+
+export function handleEnemyAttacked(
+	state: CurrentState,
+	action: Extract<GameEvent, { type: "enemyAttacked" }>,
+): CurrentState {
+	const { enemyId } = action;
+	return {
+		...state,
+		enemies: state.enemies.map((enemy) => {
+			if (enemy.id !== enemyId) return enemy;
+			return enemy.applyEvent(action);
+		}),
+	};
+}
+
 /**
  * Pure reducer: returns new state after applying an action.
  */
@@ -515,8 +600,26 @@ export function selectWeapons(state: CurrentState, action: SelectWeaponAction) {
  */
 export function updateState(state: CurrentState, action: Action): CurrentState {
 	switch (action.type) {
-		case "move": {
+		case "bulbroMoved": {
 			return movePlayer(state, action);
+		}
+		case "bulbroHealed": {
+			return handleBulbroHealed(state, action);
+		}
+		case "bulbroAttacked": {
+			return handleBulbroAttacked(state, action);
+		}
+		case "enemyAttacked": {
+			return handleEnemyAttacked(state, action);
+		}
+		case "enemyMoved": {
+			return handleEnemyMoved(state, action);
+		}
+		case "materialMoved": {
+			return handleMaterialMoved(state, action);
+		}
+		case "materialCollected": {
+			return handleMaterialCollected(state, action);
 		}
 		case "moveShot": {
 			const newState = moveShot(state, action);
@@ -531,13 +634,15 @@ export function updateState(state: CurrentState, action: Action): CurrentState {
 		case "shot": {
 			return addShot(state, action);
 		}
-		case "tick":
-		default:
+		case "tick": {
 			const round = updateRound(state.round, action);
 			return {
 				...state,
 				round,
 			};
+		}
+		default:
+			return state;
 	}
 }
 

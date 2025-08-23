@@ -11,11 +11,9 @@ import {
 } from "./LobbySocketMessages";
 import { LobbyConnection } from "./LobbyConnection";
 import { type NetworkGameConnection } from "./NetworkGameConnection";
-import type { WebsocketMessage as GameWebsocketMessage } from "./InGameCommunicationChannel";
 import { currentGameProcess } from "@/currentGameProcess";
-import { currentState, fromJSON, type CurrentState } from "@/currentState";
+import type { CurrentState } from "@/currentState";
 import { startNetworkGameAsGuest } from "./start-game";
-import type { ShotState } from "@/shot/ShotState";
 
 export async function createLobby(toGame: () => void) {
 	const url = new URL("game-lobby", apiUrl);
@@ -97,10 +95,7 @@ export async function markAsReady(id: string, player: Player) {
 export function startGame() {
 	const lobby = currentLobby.value;
 	if (!lobby) return;
-	const game = lobby.createGame(
-		currentGameProcess.value,
-		processGameSocketMessage(logger),
-	);
+	const game = lobby.createGame(currentGameProcess.value);
 	currentNetworkGame.value = game;
 
 	return game;
@@ -140,104 +135,6 @@ export function processLobbySocketMessage(logger: Logger, toGame: () => void) {
 				logger.info({ receivedMessage }, "game started");
 				const state = receivedMessage.initialState as CurrentState;
 				startNetworkGameAsGuest(state, toGame);
-			}
-		}
-	};
-}
-
-export function processGameSocketMessage(logger: Logger) {
-	let lastPositionVersion = 0;
-	let lastStateVersion = 0;
-	let lastUpdatedAt = Date.now();
-	let lastPositionUpdatedAt = Date.now();
-	return (receivedMessage: typeof GameWebsocketMessage.infer) => {
-		logger.debug({ receivedMessage }, "In game message received");
-		switch (receivedMessage.type) {
-			case "game-state-updated-by-guest":
-			case "game-state-updated-by-host": {
-				if (lastStateVersion >= receivedMessage.version) return;
-				lastStateVersion = receivedMessage.version;
-				const now = Date.now();
-				logger.info(
-					{
-						version: lastStateVersion,
-						latestUpdateDelay: now - lastUpdatedAt,
-					},
-					"Received a new remote state update",
-				);
-				lastUpdatedAt = now;
-			}
-		}
-
-		const shouldPositionBeUpdated =
-			lastPositionUpdatedAt < receivedMessage.sentAt;
-		if (shouldPositionBeUpdated) {
-			lastPositionUpdatedAt = receivedMessage.sentAt;
-		}
-
-		switch (receivedMessage.type) {
-			case "game-state-position-updated": {
-				if (
-					lastPositionVersion >= receivedMessage.version ||
-					!shouldPositionBeUpdated
-				)
-					return;
-				const affectedPlayerId = receivedMessage.playerId;
-				const prevState = currentState.value;
-				const iam = currentUser.value;
-				if (affectedPlayerId === iam.id) {
-					return;
-				}
-				lastPositionVersion = receivedMessage.version;
-				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
-				const remotePlayer = prevState.players.find((p) => p.id !== iam.id)!;
-				const now = Date.now();
-				const { position, direction } = receivedMessage;
-				fromJSON({
-					...prevState,
-					players: [
-						localPlayer,
-						remotePlayer.moveFromDirection(position, direction, now),
-					],
-				});
-				return;
-			}
-			case "game-state-updated-by-host":
-			case "game-state-updated-by-guest": {
-				if (lastStateVersion >= receivedMessage.version) return;
-				lastStateVersion = receivedMessage.version;
-				const receivedState = receivedMessage.state as CurrentState;
-				const prevState = currentState.value;
-				const iam = currentUser.value;
-				const localPlayer = prevState.players.find((p) => p.id === iam.id)!;
-				let remotePlayer = receivedState.players.find((p) => p.id !== iam.id)!;
-				if (!shouldPositionBeUpdated) {
-					const previousRemotePlayer = prevState.players.find(
-						(p) => p.id !== iam.id,
-					)!;
-					remotePlayer = remotePlayer.moveFromDirection(
-						previousRemotePlayer.position,
-						previousRemotePlayer.lastDirection,
-						Date.now(),
-					);
-				}
-
-				const isFromLocalPlayer = (shot: ShotState) =>
-					shot.shooterType === "player" && shot.shooterId === localPlayer.id;
-				const shots = [
-					...prevState.shots.filter(isFromLocalPlayer),
-					...receivedState.shots.filter((shot) => !isFromLocalPlayer(shot)),
-				];
-				fromJSON({
-					...prevState,
-					round: receivedState.round,
-					mapSize: receivedState.mapSize,
-					objects: receivedState.objects,
-					enemies: receivedState.enemies,
-					shots,
-					players: [localPlayer, remotePlayer],
-				});
-				return;
 			}
 		}
 	};

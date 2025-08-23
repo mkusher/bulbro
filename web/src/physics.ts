@@ -13,7 +13,7 @@ export function movePosition(
 	dir: Direction,
 	deltaTime: number,
 ): Position {
-	const dx = dir.x * speed * deltaTime;
-	const dy = dir.y * speed * deltaTime;
+	const dx = (dir.x * speed * deltaTime) / 1000;
+	const dy = (dir.y * speed * deltaTime) / 1000;
 	return { x: current.x + dx, y: current.y + dy };
 }

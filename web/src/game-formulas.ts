@@ -8,7 +8,7 @@ import type { BulbroState } from "./bulbro";
 import type { EnemyState } from "./enemy/EnemyState";
 import { v4 as uuidv4 } from "uuid";
 import { direction, distance, type Position, type Size } from "./geometry";
-import type { ShotState } from "./shot/ShotState";
+import { ShotState } from "./shot/ShotState";
 
 const minWeaponRange = 25;
 
@@ -122,7 +122,7 @@ export function shoot(
 	const weaponDamage = weapon.statsBonus.damage ?? 0;
 	const weaponRange = weapon.statsBonus.range ?? 0;
 	const knockback = player.stats.knockback + (weapon.statsBonus.knockback ?? 0);
-	return {
+	return new ShotState({
 		id,
 		shooterType,
 		shooterId: player.id,
@@ -133,7 +133,7 @@ export function shoot(
 		direction: direction(currentPosition, targetPosition),
 		speed: weapon.shotSpeed,
 		knockback,
-	};
+	});
 }
 
 export function isInRange(

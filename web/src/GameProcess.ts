@@ -13,6 +13,7 @@ import { WaveProcess } from "./WaveProcess";
 import type { SpriteType } from "./bulbro/Sprite";
 import { classicMapSize } from "./game-canvas";
 import type { PlayerControl } from "./controls";
+import { withEventMeta, type GameEvent } from "./game-events/GameEvents";
 
 export type CharacterSetup = {
 	bulbro: Bulbro;
@@ -85,7 +86,11 @@ export class GameProcess {
 			this.#logger.error("no state set to start next wave");
 			throw new Error("No state set for the game");
 		}
-		currentState.value = nextWave(state, { now: Date.now(), deltaTime: 0 });
+		const tickEvent = withEventMeta({ type: "tick" }, 0, Date.now());
+		currentState.value = nextWave(
+			state,
+			tickEvent as Extract<GameEvent, { type: "tick" }>,
+		);
 		this.#logger.info({ state: currentState.value }, "starting the next wave");
 		this.#waveProcess = new WaveProcess(
 			this.#logger,

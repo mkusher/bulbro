@@ -1,10 +1,5 @@
 import * as PIXI from "pixi.js";
 import type { BulbroState } from "./BulbroState";
-import { SoldierSprite } from "./sprites/SoldierSprite";
-import { ShooterSprite } from "./sprites/ShooterSprite";
-import { DarkOracleSprite } from "./sprites/DarkOracleSprite";
-import { NecromancerSprite } from "./sprites/NecromancerSprite";
-import { ValkyrieSprite } from "./sprites/ValkyrieSprite";
 import { SimpleBulbroSprite } from "./sprites/SimpleBulbroSprite";
 import { BulbaSprite, faceTypes, type FaceType } from "./sprites/BulbaSprite";
 

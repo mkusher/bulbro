@@ -9,7 +9,7 @@ const UserSchema = type({
 	"isGuest?": "boolean",
 });
 
-type User = typeof UserSchema.infer;
+export type User = typeof UserSchema.infer;
 
 export async function createUser() {
 	const url = new URL("users", apiUrl);

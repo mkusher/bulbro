@@ -11,7 +11,6 @@ import {
 import type { GameProcess } from "@/GameProcess";
 import { isLocalPlayerHost } from "./currentLobby";
 import { WebsocketInGameCommunicationChannel } from "./websocket/WebsocketInGameCommunicationChannel";
-import type { ProcessMessage } from "./InGameCommunicationChannel";
 
 export class LobbyConnection implements Lobby {
 	#logger: Logger;
@@ -57,14 +56,13 @@ export class LobbyConnection implements Lobby {
 		return this.#connection;
 	}
 
-	createGame(gameProcess: GameProcess, processMessage: ProcessMessage) {
+	createGame(gameProcess: GameProcess) {
 		this.#unsubscribe();
 		return new NetworkGameConnection(
 			this.#logger,
 			new WebsocketInGameCommunicationChannel(this.#connection, this.#logger),
 			this.#lobby,
 			gameProcess,
-			processMessage,
 			isLocalPlayerHost.value,
 		);
 	}
