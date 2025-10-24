@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import type { DeltaTime } from "@/time";
 
 /**
  * Provides a simple frame-based animation for a base texture.
@@ -34,7 +35,7 @@ export class AnimatedSprite<
 	/**
 	 * Returns the texture for the current frame, advancing based on deltaTime (seconds).
 	 */
-	async getSprite(deltaTime: number): Promise<R> {
+	async getSprite(deltaTime: DeltaTime): Promise<R> {
 		this.#elapsed += deltaTime * 1000;
 		if (this.#elapsed >= this.#frameDuration) {
 			this.#frameIndex = this.#frameIndex + 1;

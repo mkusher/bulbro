@@ -1,8 +1,5 @@
-import { BulbroSpriteRenderer } from "@/ui/BulbroSpriteRenderer";
+import { BulbroCard } from "../bulbro/BulbroDisplay";
 import type { Bulbro } from "../bulbro";
-import type { SpriteType } from "../bulbro/Sprite";
-import { Card, CardContent } from "./shadcn/card";
-import { wellRoundedBulbro } from "@/characters-definitions";
 import { WithContainerWidth } from "./WithContainerWidth";
 
 export type OptionProps<V> = {
@@ -11,25 +8,27 @@ export type OptionProps<V> = {
 	selected: boolean;
 };
 
+export type BulbroStyleOptionProps = OptionProps<Bulbro> & {
+	showDetails?: boolean;
+};
+
 export function BulbroStyleOption({
 	value,
 	selected,
-}: OptionProps<SpriteType>) {
+	showDetails = false,
+}: BulbroStyleOptionProps) {
 	return (
-		<Card>
-			<CardContent>
-				<WithContainerWidth>
-					{({ width, height }) => (
-						<BulbroSpriteRenderer
-							spriteType={value}
-							bulbro={wellRoundedBulbro}
-							width={width}
-							height={Math.max(height, 150)}
-						/>
-					)}
-				</WithContainerWidth>
-			</CardContent>
-		</Card>
+		<WithContainerWidth>
+			{({ width, height }) => (
+				<BulbroCard
+					bulbro={value}
+					showDetails={showDetails}
+					displayWidth={width}
+					displayHeight={Math.max(height, 50)}
+					className={selected ? "ring-2 ring-primary" : ""}
+				/>
+			)}
+		</WithContainerWidth>
 	);
 }
 

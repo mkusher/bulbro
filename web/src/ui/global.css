@@ -133,7 +133,6 @@ body {
 	margin: 0 auto;
 	background-color: #fff;
 	user-select: none;
-	overflow: hidden;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 }

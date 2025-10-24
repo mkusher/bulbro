@@ -17,13 +17,16 @@ export const Weapon = type({
 export const Bulbro = type({
 	id: "string",
 	name: "string",
-	baseStats: "Record<string, string | number | boolean>",
+	statBonuses: "Record<string, string | number | boolean>",
+	style: type({
+		faceType: "string",
+		wearingItems: "unknown[]",
+	}),
 	weapons: Weapon.array(),
 });
 
 export const ReadyPlayer = type({
 	id: "string",
-	sprite: "string",
 	bulbro: Bulbro,
 });
 

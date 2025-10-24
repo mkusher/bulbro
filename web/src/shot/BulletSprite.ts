@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import type { ShotState } from "./ShotState";
 import { rotation } from "../geometry";
+import type { DeltaTime } from "@/time";
 
 const width = 8;
 const height = 16;
@@ -21,12 +22,12 @@ export class BulletSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer?: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer?: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer?.attach(this.#gfx);
 	}
 
-	update(deltaTime: number, shot: ShotState) {
+	update(deltaTime: DeltaTime, shot: ShotState) {
 		this.#gfx.rotation = rotation(shot.direction);
 	}
 

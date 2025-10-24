@@ -8,6 +8,11 @@ export interface Point {
 export type Position = Point;
 export type Direction = Point;
 
+export interface Range {
+	from: number;
+	to: number;
+}
+
 export const zeroPoint = () => ({ x: 0, y: 0 });
 
 /**
@@ -195,8 +200,19 @@ export function rectFromCenter(center: Point, size: Size): Rectangle {
 
 export function rotation(direction: Direction) {
 	if (direction.y === 0) {
-		return Math.PI / 2;
+		if (direction.x > 0) {
+			return Math.PI / 2;
+		}
+		if (direction.x < 0) {
+			return (3 / 2) * Math.PI;
+		}
+
+		return 0;
 	}
 	const r = Math.atan(direction.x / direction.y);
+	if (direction.y < 0) {
+		return r + Math.PI;
+	}
+
 	return r;
 }

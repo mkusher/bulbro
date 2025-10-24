@@ -1,4 +1,4 @@
-import { currentState } from "@/currentState";
+import { waveState } from "@/waveState";
 import { useEffect } from "preact/hooks";
 import { StorybookGameScene } from "./StorybookGameScene";
 import { createEnemyState } from "./storyHelpers";
@@ -15,10 +15,10 @@ const enemies = allEnemies;
 export const Idle = {
 	render: (args: any) => (
 		<StorybookGameScene
-			state={createEnemyState([
+			initialState={createEnemyState([
 				spawnEnemy(
 					args.enemyType,
-					{ x: 1000, y: 750 },
+					{ x: 400, y: 350 },
 					enemies.find((e) => e.id === args.enemyType),
 				),
 			])}
@@ -28,8 +28,6 @@ export const Idle = {
 	args: {
 		debug: false,
 		enemyType: babyEnemy.id,
-		cameraX: 1000,
-		cameraY: 750,
 	},
 	argTypes: {
 		enemyType: {
@@ -42,24 +40,21 @@ export const Idle = {
 
 export const Walking = {
 	render: (args: any) => {
-		useEffect(() => {
-			currentState.value = createEnemyState([
-				spawnEnemy(
-					args.enemyType,
-					{ x: 1000, y: 750 },
-					enemies.find((e) => e.id === args.enemyType),
-				),
-			]);
-		}, []);
 		return (
 			<StorybookGameScene
-				state={currentState.value}
-				tick={(delta) => {
+				initialState={createEnemyState([
+					spawnEnemy(
+						args.enemyType,
+						{ x: 400, y: 350 },
+						enemies.find((e) => e.id === args.enemyType),
+					),
+				])}
+				tick={(state) => {
 					const now = Date.now();
 					const elapsed = (now % 3000) / 3000; // 3 second cycle
 					const x = 1000 + Math.sin(elapsed * Math.PI * 2) * 100;
 					const y = 750 + Math.cos(elapsed * Math.PI * 2) * 50;
-					const enemy = currentState.value.enemies[0]!;
+					const enemy = waveState.value.enemies[0]!;
 
 					return createEnemyState([enemy.move({ x, y }, now)]);
 				}}
@@ -70,8 +65,6 @@ export const Walking = {
 	args: {
 		debug: false,
 		enemyType: babyEnemy.id,
-		cameraX: 1000,
-		cameraY: 750,
 	},
 	argTypes: {
 		enemyType: {

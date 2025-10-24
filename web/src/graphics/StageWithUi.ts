@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import type { CurrentState } from "../currentState";
+import type { WaveState } from "../waveState";
 import type { Logger } from "pino";
 import { TimerSprite } from "./TimerSprite";
 import { WaveSprite } from "./WaveSprite";
@@ -7,6 +7,8 @@ import { InWaveStats } from "../bulbro/sprites/InWaveStats";
 import { canvasSize } from "../game-canvas";
 import { Scene } from "./Scene";
 import type { AutoCenterOnPlayerCamera } from "./AutoCenterOnPlayerCamera";
+import type { DeltaTime, NowTime } from "@/time";
+import { deltaTime, nowTime } from "@/time";
 
 /**
  * Decorator that adds UI elements (timer, wave number, health bars) to a Scene.
@@ -16,7 +18,7 @@ export class StageWithUi {
 	#timerSprite!: TimerSprite;
 	#waveSprite!: WaveSprite;
 	#inWaveStats: Map<string, InWaveStats> = new Map();
-	#uiLayer: PIXI.IRenderLayer;
+	#uiLayer: PIXI.RenderLayer;
 	#camera: AutoCenterOnPlayerCamera;
 	#logger: Logger;
 
@@ -44,7 +46,7 @@ export class StageWithUi {
 	/**
 	 * Initializes both scene and UI elements.
 	 */
-	async init(state: CurrentState) {
+	async init(state: WaveState) {
 		this.#logger.info(
 			{
 				canvasSize: canvasSize.value,
@@ -53,15 +55,15 @@ export class StageWithUi {
 			"StageWithUi init",
 		);
 		await this.#scene.init(state);
-		this.update(0, state);
+		this.update(deltaTime(0), nowTime(0), state);
 	}
 
 	/**
 	 * Updates both scene and UI elements each frame.
 	 */
-	update(deltaTime: number, state: CurrentState): void {
+	update(deltaTime: DeltaTime, now: NowTime, state: WaveState): void {
 		// Update scene (players, enemies, shots, objects)
-		this.#scene.update(deltaTime, state);
+		this.#scene.update(deltaTime, now, state);
 
 		// Update UI elements
 		this.#timerSprite.update(state.round, canvasSize.value.width);
@@ -86,7 +88,7 @@ export class StageWithUi {
 		return this.#scene.camera;
 	}
 
-	#updatePlayerStats(deltaTime: number, state: CurrentState) {
+	#updatePlayerStats(deltaTime: DeltaTime, state: WaveState) {
 		state.players.forEach((player, i) => {
 			if (!this.#inWaveStats.get(player.id)) {
 				const sprite = new InWaveStats(canvasSize.value, i);

@@ -8,7 +8,7 @@ export const baseStats = {
 	meleeDamage: 0,
 	rangedDamage: 0,
 	elementalDamage: 0,
-	attackSpeed: 0,
+	attackSpeed: 1,
 	critChance: 0,
 	range: 0,
 	armor: 0,

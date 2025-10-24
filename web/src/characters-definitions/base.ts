@@ -1,24 +1,16 @@
-import type { Stats } from "../bulbro";
+export { baseStats } from "@/game-formulas";
+import type { Bulbro } from "@/bulbro";
+import { weapons } from "@/weapons-definitions";
 
-export const baseMaxHp = 10;
-export const baseSpeed = 450;
-export const baseHarvesting = 0;
-export const baseStats: Stats = {
-	maxHp: baseMaxHp,
-	speed: baseSpeed,
-	harvesting: baseHarvesting,
-	hpRegeneration: 0,
-	damage: 0,
-	meleeDamage: 0,
-	rangedDamage: 0,
-	elementalDamage: 0,
-	attackSpeed: 0,
-	critChance: 0,
-	engineering: 0,
-	range: 0,
-	armor: 0,
-	dodge: 0,
-	luck: 0,
-	pickupRange: 100,
-	knockback: 0,
+export const baseBulbro: Bulbro = {
+	id: "base" as any,
+	name: " Base",
+	statBonuses: {},
+	weapons: [],
+	style: {
+		faceType: "normal",
+		wearingItems: [],
+	},
+	defaultWeapons: [],
+	availableWeapons: [...weapons],
 };

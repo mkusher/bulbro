@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { getTimeLeft, type RoundState } from "../currentState";
+import { getTimeLeft, type RoundState } from "../waveState";
 
 export class TimerSprite {
 	#gfx: PIXI.Text;
@@ -16,7 +16,7 @@ export class TimerSprite {
 		this.#gfx = new PIXI.Text("", style);
 		this.#gfx.y = 30;
 	}
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer.attach(this.#gfx);
 	}

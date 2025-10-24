@@ -1,23 +1,36 @@
 import { computed, signal } from "@preact/signals";
 import type { Size } from "@/geometry";
 
-export const currentWindowSize = (): Size => ({
-	width: window.innerWidth,
-	height: window.innerHeight,
-});
+export const currentWindowSize = (): Size => {
+	// Check if we're in a browser environment
+	if (typeof window !== "undefined") {
+		return {
+			width: window.innerWidth,
+			height: window.innerHeight,
+		};
+	}
+	// Fallback for test environments
+	return {
+		width: 800,
+		height: 600,
+	};
+};
 
 export const canvasSize = signal(currentWindowSize());
 
-window.addEventListener("resize", () => {
-	canvasSize.value = currentWindowSize();
-});
+// Only set up resize listener in browser environment
+if (typeof window !== "undefined") {
+	window.addEventListener("resize", () => {
+		canvasSize.value = currentWindowSize();
+	});
+}
 
 export const classicMapSize = {
 	width: 2000,
 	height: 1500,
 } as const;
 
-const minimalMapSize = {
+const minimalCameraSize = {
 	width: 1500,
 	height: 1125,
 };
@@ -46,8 +59,8 @@ export const autoScale = computed(() => {
 	const canvas = canvasSize.value;
 
 	return fitWidth
-		? Math.max(canvas.width, minimalMapSize.width) / classicMapSize.width
-		: Math.max(canvas.height, minimalMapSize.height) / classicMapSize.height;
+		? Math.max(canvas.width, minimalCameraSize.width) / classicMapSize.width
+		: Math.max(canvas.height, minimalCameraSize.height) / classicMapSize.height;
 });
 
 export const manualScale = signal<number | null>(null);

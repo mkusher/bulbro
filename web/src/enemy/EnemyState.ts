@@ -1,28 +1,25 @@
-import {
-	direction,
-	distance,
-	isEqual,
-	type Direction,
-	type Position,
-	type Size,
-} from "../geometry";
+import { type Direction, type Position } from "../geometry";
 import type { EnemyCharacter } from "./EnemyCharacter";
-import type { WeaponState } from "../currentState";
-import { Movement, type MovableObject, type Shape } from "../movement/Movement";
+import type { WaveState, WeaponState } from "../waveState";
 import { ENEMY_SIZE } from "./index";
 import type { ShotState } from "../shot/ShotState";
-import { knockbackSpeed, knockbackTimeout } from "../game-formulas";
-import type { BulbroState } from "../bulbro";
-import type { EnemyType as BulbaEnemyType } from "./sprites/EnemiesFrames";
+import type { EnemyType } from "./sprites/EnemiesFrames";
 import type {
-	EnemyMovedEvent,
-	EnemyAttackedEvent,
 	EnemyReceivedHitEvent,
 	EnemyDiedEvent,
 	GameEvent,
+	EnemyEvent,
 } from "../game-events/GameEvents";
+import { toWeaponState } from "@/weapon";
+import type { EnemyBehaviors } from "./EnemyBehaviors";
+import { DefaultEnemyBehaviors } from "./DefaultEnemyBehaviors";
+import { getBehaviors } from "./BehaviorsMap";
+import type { DeltaTime, NowTime } from "@/time";
 
-export type EnemyType = "orc" | "slime" | BulbaEnemyType;
+export type { EnemyType };
+
+export const RAGE_STARTING_DURATION = 500;
+export const RAGE_TOTAL_DURATION = 1500;
 
 /**
  * Immutable runtime state of a single enemy.
@@ -62,6 +59,9 @@ export type EnemyStateProps = {
 	readonly killedAt?: number;
 	readonly knockback?: Knockback;
 	readonly lastDirection?: Direction;
+	readonly behaviors?: EnemyBehaviors;
+	readonly ragingStartedAt?: number;
+	readonly ragingDirection?: Direction;
 };
 
 export class EnemyState implements EnemyStateProps {
@@ -100,9 +100,21 @@ export class EnemyState implements EnemyStateProps {
 	get lastDirection() {
 		return this.#props.lastDirection;
 	}
+	get behaviors(): EnemyBehaviors {
+		return this.#props.behaviors!;
+	}
+	get ragingStartedAt() {
+		return this.#props.ragingStartedAt;
+	}
+	get ragingDirection() {
+		return this.#props.ragingDirection;
+	}
 
 	constructor(props: EnemyStateProps) {
-		this.#props = props;
+		this.#props = {
+			...props,
+			behaviors: props.behaviors ?? new DefaultEnemyBehaviors(),
+		};
 	}
 
 	toJSON() {
@@ -121,91 +133,26 @@ export class EnemyState implements EnemyStateProps {
 		} as const;
 	}
 
-	/** Returns a new state with the enemy moved to a new position. */
-	moveToClosestBulbro(
-		bulbros: BulbroState[],
-		obstacles: MovableObject[],
-		mapSize: Size,
-		deltaTime: number,
-		now: number,
-	): EnemyState {
-		const mover = new Movement(this.toMovableObject(), mapSize, obstacles);
-		const knockback = this.knockback;
-		if (knockback && now - knockback.startedAt <= knockbackTimeout) {
-			const newPos = mover.getPositionAfterMove(
-				knockback.direction,
-				knockback.strength * knockbackSpeed,
-				deltaTime,
-			);
-			if (isEqual(this.position, newPos)) return this;
-			return new EnemyState({
-				...this.#props,
-				position: newPos,
-				lastMovedAt: now,
-			});
-		}
-		if (this.killedAt) {
-			return this;
-		}
-		// pick first as baseline
-		let minDist = Infinity;
-		let closest: BulbroState | undefined = bulbros[0];
-		bulbros.forEach((p) => {
-			const dist = distance(this.position, p.position);
-			if (dist < minDist) {
-				minDist = dist;
-				closest = p;
-			}
-		});
-		if (!closest) {
-			return this;
-		}
-		const closestBulbroDirection = direction(this.position, closest.position);
-		const newPos = mover.getPositionAfterMove(
-			closestBulbroDirection,
-			this.stats.speed,
-			deltaTime,
-		);
-		if (isEqual(this.position, newPos)) return this;
-		return this.#internalMove(newPos, now);
+	move(state: WaveState, now: NowTime, deltaTime: DeltaTime) {
+		return this.behaviors.move(this, state, now, deltaTime);
 	}
 
-	/** Internal method for direct state movement (used by legacy methods). */
-	#internalMove(newPos: Position, now: number): EnemyState {
-		const lastDirection = direction(this.position, newPos);
+	withSpeed(speed: number) {
 		return new EnemyState({
 			...this.#props,
-			position: newPos,
-			lastMovedAt: now,
-			knockback: undefined,
-			lastDirection,
+			stats: {
+				...this.#props.stats,
+				speed,
+			},
 		});
 	}
 
-	/** Returns a move event for the Enemy. */
-	move(newPos: Position, now: number): EnemyMovedEvent {
-		return {
-			type: "enemyMoved",
-			enemyId: this.id,
-			from: this.position,
-			to: newPos,
-			direction: direction(this.position, newPos),
-		};
-	}
-
-	/** Returns an attack event for the Enemy. */
-	hit(weaponId: string, targetId?: string, shot?: any): EnemyAttackedEvent {
-		return {
-			type: "enemyAttacked",
-			enemyId: this.id,
-			weaponId,
-			targetId,
-			shot,
-		};
+	attack(state: WaveState, now: NowTime, deltaTime: DeltaTime): EnemyEvent[] {
+		return this.behaviors.attack(this, state, now, deltaTime);
 	}
 
 	/** Returns a received hit or death event for the Enemy. */
-	beHit(shot: ShotState, now: number): EnemyReceivedHitEvent | EnemyDiedEvent {
+	beHit(shot: ShotState, now: NowTime): EnemyReceivedHitEvent | EnemyDiedEvent {
 		const newHealthPoints = this.healthPoints - shot.damage;
 
 		if (newHealthPoints <= 0 && this.healthPoints > 0) {
@@ -233,7 +180,7 @@ export class EnemyState implements EnemyStateProps {
 				return new EnemyState({
 					...this.#props,
 					position: event.to,
-					lastMovedAt: Date.now(),
+					lastMovedAt: event.occurredAt,
 					lastDirection: event.direction,
 					knockback: undefined,
 				});
@@ -241,11 +188,14 @@ export class EnemyState implements EnemyStateProps {
 			case "enemyAttacked":
 				if (event.enemyId !== this.id) return this;
 				const weapons = this.weapons.map((ws) =>
-					ws.id === event.weaponId ? { ...ws, lastStrikedAt: Date.now() } : ws,
+					ws.id === event.weaponId
+						? { ...ws, lastStrikedAt: event.occurredAt }
+						: ws,
 				);
 				return new EnemyState({
 					...this.#props,
 					weapons,
+					ragingStartedAt: undefined,
 				});
 
 			case "enemyReceivedHit":
@@ -253,7 +203,7 @@ export class EnemyState implements EnemyStateProps {
 				return new EnemyState({
 					...this.#props,
 					healthPoints: Math.max(this.healthPoints - event.damage, 0),
-					lastHitAt: Date.now(),
+					lastHitAt: event.occurredAt,
 				});
 
 			case "enemyDied":
@@ -261,7 +211,15 @@ export class EnemyState implements EnemyStateProps {
 				return new EnemyState({
 					...this.#props,
 					healthPoints: 0,
-					killedAt: Date.now(),
+					killedAt: event.occurredAt,
+				});
+
+			case "enemyRagingStarted":
+				if (event.enemyId !== this.id) return this;
+				return new EnemyState({
+					...this.#props,
+					ragingStartedAt: event.occurredAt,
+					ragingDirection: event.direction,
 				});
 
 			default:
@@ -285,6 +243,17 @@ export class EnemyState implements EnemyStateProps {
 			value: this.stats.materialsDropped,
 		} as const;
 	}
+
+	isStartingRaging(now: NowTime): boolean {
+		if (!this.ragingStartedAt) return false;
+		return now - this.ragingStartedAt < RAGE_STARTING_DURATION;
+	}
+
+	isRaging(now: NowTime): boolean {
+		if (!this.ragingStartedAt) return false;
+		if (this.isStartingRaging(now)) return false;
+		return now - this.ragingStartedAt < RAGE_TOTAL_DURATION;
+	}
 }
 
 /**
@@ -295,12 +264,7 @@ export function spawnEnemy(
 	position: Position,
 	character: EnemyCharacter,
 ): EnemyState {
-	const weapons: WeaponState[] = character.weapons.map((w) => ({
-		id: w.id,
-		lastStrikedAt: 0,
-		statsBonus: w.statsBonus,
-		shotSpeed: w.shotSpeed,
-	}));
+	const weapons: WeaponState[] = character.weapons.map(toWeaponState);
 	return new EnemyState({
 		id,
 		type: character.sprite,
@@ -308,7 +272,8 @@ export function spawnEnemy(
 		healthPoints: character.stats.maxHp,
 		weapons,
 		stats: character.stats,
-		lastMovedAt: Date.now(),
+		lastMovedAt: 0,
 		lastHitAt: 0,
+		behaviors: getBehaviors(character.behaviors),
 	});
 }

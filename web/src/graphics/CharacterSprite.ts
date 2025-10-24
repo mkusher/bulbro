@@ -3,12 +3,13 @@ import { AnimatedSprite } from "./AnimatedSprite";
 import type { BulbroState } from "../bulbro";
 import type { EnemyState } from "../enemy";
 import { knockbackSpeed } from "../game-formulas";
+import type { DeltaTime, NowTime } from "@/time";
 
 export type Sprite<R extends PIXI.TextureSource> =
 	| PIXI.Texture<R>
 	| PIXI.Container;
 
-type Animations<R extends Sprite<any>> = {
+export type Animations<R extends Sprite<any>> = {
 	walking: AnimatedSprite<R>;
 	hurt: AnimatedSprite<R>;
 	hurtALot?: AnimatedSprite<R>;
@@ -26,8 +27,11 @@ export class CharacterSprites<R extends Sprite<any> = PIXI.Texture> {
 		this.#animations = animations;
 	}
 
-	async getSprite(character: BulbroState | EnemyState, delta: number) {
-		const now = Date.now();
+	async getSprite(
+		character: BulbroState | EnemyState,
+		delta: DeltaTime,
+		now: NowTime,
+	) {
 		const movingAnimationDelay = 100;
 		if (character.killedAt && this.#animations.dead) {
 			return this.#animations.dead?.getSprite(delta);

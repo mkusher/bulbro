@@ -1,24 +1,19 @@
 import type { Logger } from "pino";
 import { logger as defaultLogger } from "./logger";
-import type { Bulbro } from "./bulbro";
 import {
 	createInitialState,
-	currentState,
+	waveState,
 	nextWave,
-	type CurrentState,
-} from "./currentState";
+	type WaveState,
+} from "./waveState";
 import { type Player } from "./player";
 import { type Difficulty } from "./game-formulas";
 import { WaveProcess } from "./WaveProcess";
-import type { SpriteType } from "./bulbro/Sprite";
 import { classicMapSize } from "./game-canvas";
 import type { PlayerControl } from "./controls";
 import { withEventMeta, type GameEvent } from "./game-events/GameEvents";
-
-export type CharacterSetup = {
-	bulbro: Bulbro;
-	sprite: SpriteType;
-};
+import { deltaTime, nowTime } from "./time";
+import { currentGameCanvas } from "./currentGameProcess";
 
 export type WavePromises = {
 	waveInitPromise: Promise<WaveProcess>;
@@ -55,7 +50,7 @@ export class GameProcess {
 		this.#logger.info({ difficulty, players, duration }, "starting the game");
 
 		// Initial game state
-		currentState.value = createInitialState(
+		waveState.value = createInitialState(
 			players,
 			classicMapSize,
 			difficulty,
@@ -68,9 +63,28 @@ export class GameProcess {
 
 	startWave(playerControls: PlayerControl[]): WavePromises {
 		this.#playerControls = playerControls;
+		return this.#startWaveProcess();
+	}
+
+	async startNextWave(state: WaveState) {
+		if (!waveState.value) {
+			this.#logger.error("no state set to start next wave");
+			throw new Error("No state set for the game");
+		}
+		const tickEvent = withEventMeta({ type: "tick" }, deltaTime(0), nowTime(0));
+		waveState.value = nextWave(
+			state,
+			tickEvent as Extract<GameEvent, { type: "tick" }>,
+		);
+		this.#logger.info({ state: waveState.value }, "starting the next wave");
+		return this.#startWaveProcess();
+	}
+
+	#startWaveProcess() {
 		this.#waveProcess = new WaveProcess(
 			this.#logger,
 			this.#playerControls,
+			currentGameCanvas,
 			this.#debug,
 		);
 		const waveInitPromise = this.#waveProcess.init();
@@ -78,27 +92,6 @@ export class GameProcess {
 		return {
 			waveInitPromise,
 			wavePromise,
-		};
-	}
-
-	async startNextWave(state: CurrentState) {
-		if (!currentState.value) {
-			this.#logger.error("no state set to start next wave");
-			throw new Error("No state set for the game");
-		}
-		const tickEvent = withEventMeta({ type: "tick" }, 0, Date.now());
-		currentState.value = nextWave(
-			state,
-			tickEvent as Extract<GameEvent, { type: "tick" }>,
-		);
-		this.#logger.info({ state: currentState.value }, "starting the next wave");
-		this.#waveProcess = new WaveProcess(
-			this.#logger,
-			this.#playerControls,
-			this.#debug,
-		);
-		return {
-			wavePromise: this.#waveProcess.start(),
 		};
 	}
 

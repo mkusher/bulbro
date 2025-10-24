@@ -1,4 +1,6 @@
 import type { Weapon } from "../weapon";
+import type { FaceType } from "./sprites/FaceSprite";
+import type { StatBonus } from "../game-formulas";
 
 export interface SecondaryStats {
 	pickupRange: number;
@@ -7,6 +9,7 @@ export interface SecondaryStats {
 export interface MainStats {
 	maxHp: number;
 	hpRegeneration: number;
+	lifeSteal: number;
 	damage: number;
 	meleeDamage: number;
 	rangedDamage: number;
@@ -23,12 +26,22 @@ export interface MainStats {
 }
 export interface Stats extends MainStats, SecondaryStats {}
 
+export type WearingItem = "crown" | "medic";
+
+export interface BulbroStyle {
+	faceType: FaceType;
+	wearingItems: WearingItem[];
+}
+
 /**
  * Bulbro character model.
  */
 export interface Bulbro {
 	id: string;
 	name: string;
-	baseStats: Stats;
+	statBonuses: StatBonus;
 	weapons: Weapon[];
+	style: BulbroStyle;
+	defaultWeapons: Weapon[];
+	availableWeapons: Weapon[];
 }

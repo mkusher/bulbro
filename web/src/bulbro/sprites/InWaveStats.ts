@@ -34,7 +34,7 @@ export class InWaveStats {
 		this.#experienceIndicator.appendTo(this.#gfx);
 		this.#materialsIndicator.appendTo(this.#gfx);
 	}
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer.attach(this.#gfx);
 	}

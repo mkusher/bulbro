@@ -6,6 +6,7 @@
         "skipLibCheck": true,
         "jsx": "react-jsx",
         "jsxImportSource": "preact",
+        "lib": ["es2024", "dom", "dom.iterable"],
         "paths": {
             "@/*": ["src/*"],
             "react": ["../node_modules/preact/compat/"],
@@ -15,6 +16,6 @@
       }
     },
     "include": [
-        "src/*"
+        "src/**/*.ts"
     ]
 }

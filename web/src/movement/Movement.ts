@@ -6,6 +6,7 @@ import {
 } from "../geometry";
 import { movePosition } from "../physics";
 import type { Direction } from "../geometry";
+import type { DeltaTime } from "@/time";
 
 /**
  * Supported shapes for collision detection.
@@ -50,7 +51,7 @@ export class Movement {
 	getPositionAfterMove(
 		direction: Direction,
 		speed: number,
-		deltaTime: number,
+		deltaTime: DeltaTime,
 	): Position {
 		// Predict new position
 		let newPos = movePosition(this.obj.position, speed, direction, deltaTime);

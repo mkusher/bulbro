@@ -9,9 +9,9 @@ export const pistol: Weapon = {
 	classes: ["gun", "precise"],
 	shotSpeed: 1500,
 	statsBonus: {
-		damage: 12,
+		damage: 4,
 		range: 400,
-		attackSpeed: 1.2,
-		knockback: 15,
+		attackSpeed: 0.8,
+		knockback: 5,
 	},
 };

@@ -1,18 +1,19 @@
+import { orcFist } from "@/weapons-definitions/orc-fist";
 import type { EnemyCharacter } from "../enemy";
-import { orcSlowGun } from "../weapons-definitions/orc-gun";
 import { baseStats } from "./base";
 
-export const beetleWarrior = {
+export const beetleWarrior: EnemyCharacter = {
 	id: "potatoBeetleWarrior",
 	name: "Beetle Warrior",
 	sprite: "potatoBeetleWarrior",
 	stats: {
 		...baseStats,
-		maxHp: 12,
-		speed: 100,
-		damage: 1,
-		range: 1,
-		attackSpeed: 1,
+		maxHp: 36,
+		speed: 150,
+		damage: 3,
+		range: 80,
+		attackSpeed: 2,
 	},
-	weapons: [orcSlowGun],
-} as const satisfies EnemyCharacter;
+	weapons: [orcFist],
+	behaviors: "rage-running",
+};

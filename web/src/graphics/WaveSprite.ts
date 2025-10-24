@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { type RoundState } from "../currentState";
+import { type RoundState } from "../waveState";
 
 export class WaveSprite {
 	#gfx: PIXI.Text;
@@ -16,7 +16,7 @@ export class WaveSprite {
 		this.#gfx = new PIXI.Text("", style);
 		this.#gfx.y = 10;
 	}
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer.attach(this.#gfx);
 	}

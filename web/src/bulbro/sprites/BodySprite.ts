@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-const assetUrl = "/game-assets/bulbro-heroes.png";
+import { Assets } from "@/Assets";
 
 export class BodySprite {
 	#bodyPosition = {
@@ -17,7 +17,7 @@ export class BodySprite {
 		return this.#bodySize;
 	}
 	async init() {
-		const fullTexture = await PIXI.Assets.load(assetUrl);
+		const fullTexture = await Assets.get("bulbroHeroes");
 		const bodyTexture = new PIXI.Texture({
 			source: fullTexture,
 			frame: new PIXI.Rectangle(
@@ -27,12 +27,12 @@ export class BodySprite {
 				this.#bodySize.height,
 			),
 		});
+		bodyTexture.source.scaleMode = "nearest";
 
 		this.#gfx.texture = bodyTexture;
 	}
 
 	appendTo(container: PIXI.Container) {
-		this.remove();
 		container.addChild(this.#gfx);
 	}
 

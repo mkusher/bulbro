@@ -5,7 +5,7 @@ import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
 import { createMainControls, type PlayerControl } from "@/controls";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
-import { currentState } from "@/currentState";
+import { waveState } from "@/waveState";
 import type { InGameCommunicationChannel } from "./InGameCommunicationChannel";
 import { currentUser } from "./currentUser";
 import type { WaveProcess } from "@/WaveProcess";
@@ -72,7 +72,7 @@ export class NetworkGameConnection {
 	#startStateSync(isHost: boolean, waveProcess: WaveProcess) {
 		const stateUpdater = new StateUpdater({
 			logger: this.#logger.child({ component: "state-updater" }),
-			currentState,
+			currentState: waveState,
 			currentUser,
 			waveProcess,
 			isHost,
@@ -85,7 +85,7 @@ export class NetworkGameConnection {
 			isHost,
 			inGameCommunicationChannel: this.#inGameCommunicationChannel,
 			stateUpdater,
-			currentState,
+			currentState: waveState,
 			localPlayerControl: this.#mainControl,
 			remoteControl: this.#remoteControl,
 			waveProcess,

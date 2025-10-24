@@ -1,7 +1,14 @@
 import * as PIXI from "pixi.js";
-import type { Size } from "@/geometry";
+import { zeroPoint, type Point, type Position, type Size } from "@/geometry";
+import { Assets } from "@/Assets";
 
-const assetUrl = "/game-assets/bulbro-heroes.png";
+type FaceDefinition = {
+	position: Position;
+	size: Size;
+	offset?: Position;
+	rotation?: number;
+	scale?: number | Point;
+};
 
 export const faces = {
 	normal: {
@@ -14,79 +21,86 @@ export const faces = {
 			height: 65,
 		},
 		offset: {
-			x: 18,
-			y: 36,
+			x: 25,
+			y: 40,
 		},
+		scale: 0.9,
 	},
 	evil: {
 		position: {
-			x: 190,
-			y: 483,
+			x: 240,
+			y: 93,
 		},
 		size: {
-			width: 131,
-			height: 72,
+			width: 50,
+			height: 50,
+		},
+		offset: {
+			x: 35,
+			y: 40,
 		},
 	},
 	vampire: {
 		position: {
-			x: 345,
-			y: 483,
+			x: 314,
+			y: 86,
 		},
 		size: {
-			width: 131,
-			height: 72,
+			width: 84,
+			height: 90,
 		},
+		offset: {
+			x: 25,
+			y: 20,
+		},
+		scale: 0.85,
 	},
 	old: {
 		position: {
-			x: 535,
-			y: 483,
+			x: 418,
+			y: 73,
 		},
 		size: {
-			width: 131,
-			height: 122,
+			width: 151,
+			height: 110,
 		},
+		offset: {
+			x: -10,
+			y: 30,
+		},
+		scale: 0.75,
 	},
 	crazy: {
 		position: {
-			x: 700,
-			y: 483,
+			x: 395,
+			y: 198,
 		},
 		size: {
-			width: 131,
-			height: 122,
+			width: 188,
+			height: 132,
 		},
+		offset: {
+			x: -30,
+			y: 25,
+		},
+		scale: 0.7,
 	},
 	cyborg: {
 		position: {
-			x: 900,
-			y: 483,
+			x: 430,
+			y: 350,
 		},
 		size: {
-			width: 176,
-			height: 72,
-		},
-		scale: {
-			x: 0.65,
-			y: 1,
-		},
-	},
-	king: {
-		position: {
-			x: 1140,
-			y: 382,
-		},
-		size: {
-			width: 131,
-			height: 240,
+			width: 135,
+			height: 75,
 		},
 		offset: {
-			x: 0,
-			y: -40,
+			x: -15,
+			y: 35,
 		},
+		scale: 0.75,
 	},
-} as const;
+} as const satisfies Record<string, FaceDefinition>;
 
 export type FaceType = keyof typeof faces;
 export const faceTypes = Object.keys(faces) as FaceType[];
@@ -99,7 +113,7 @@ export class FaceSprite {
 		this.#faceType = faceType;
 	}
 	async init() {
-		const fullTexture = await PIXI.Assets.load(assetUrl);
+		const fullTexture = await Assets.get("bulbroHeroes");
 		const face = new PIXI.Texture({
 			source: fullTexture,
 			frame: new PIXI.Rectangle(
@@ -109,17 +123,22 @@ export class FaceSprite {
 				this.#faceConfiguration.size.height,
 			),
 		});
+		face.source.scaleMode = "linear";
 		this.#gfx.texture = face;
 	}
 
 	get #faceConfiguration() {
-		return faces.normal;
+		return faces[this.#faceType];
 	}
 
 	appendTo(container: PIXI.Container, bodySize: Size) {
-		this.#gfx.parent?.removeChild(this.#gfx);
 		container.addChild(this.#gfx);
-		this.#gfx.position.x = this.#faceConfiguration.offset.x;
-		this.#gfx.position.y = this.#faceConfiguration.offset.y;
+		const config = this.#faceConfiguration as FaceDefinition;
+		const offset = config.offset || zeroPoint();
+		this.#gfx.position.x = offset.x;
+		this.#gfx.position.y = offset.y;
+		if (config.scale) {
+			this.#gfx.scale = config.scale;
+		}
 	}
 }

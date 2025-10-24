@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js";
 import { type Size } from "../geometry";
-import type { CurrentState } from "../currentState";
+import type { WaveState } from "../waveState";
+import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
+import type { DeltaTime } from "@/time";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -8,6 +10,7 @@ import type { CurrentState } from "../currentState";
 export class PlayingFieldTile {
 	#sprite: PIXI.Graphics;
 	#container: PIXI.Container;
+	#backgroundPattern: BackgroundPatternSprite;
 
 	constructor(size: Size) {
 		this.#sprite = new PIXI.Graphics()
@@ -15,19 +18,25 @@ export class PlayingFieldTile {
 			.fill(0x475b46);
 		this.#container = new PIXI.Container();
 		this.#container.addChild(this.#sprite);
+		this.#backgroundPattern = new BackgroundPatternSprite(size);
 	}
 
 	/**
 	 * Initializes sprites and UI elements.
 	 */
-	async init(parent: PIXI.Container, layer?: PIXI.IRenderLayer) {
+	async init(
+		parent: PIXI.Container,
+		layer?: PIXI.RenderLayer,
+		groundLayer?: PIXI.RenderLayer,
+	) {
 		parent.addChild(this.#container);
 		layer?.attach(this.#container);
+		await this.#backgroundPattern.init(this.#container, groundLayer);
 	}
 
 	get container() {
 		return this.#container;
 	}
 
-	update(deltaTime: number, state: CurrentState): void {}
+	update(deltaTime: DeltaTime, state: WaveState): void {}
 }

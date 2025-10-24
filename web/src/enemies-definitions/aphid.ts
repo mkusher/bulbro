@@ -1,6 +1,14 @@
 import type { EnemyCharacter } from "../enemy";
-import { orcFist } from "../weapons-definitions/orc-fist";
 import { baseStats } from "./base";
+import type { Weapon } from "../weapon";
+
+const gun: Weapon = {
+	id: "enemyGun",
+	name: "Ranged Enemy Gun",
+	classes: ["gun"],
+	shotSpeed: 250,
+	statsBonus: {},
+};
 
 export const aphidEnemy: EnemyCharacter = {
 	id: "aphid",
@@ -8,11 +16,11 @@ export const aphidEnemy: EnemyCharacter = {
 	sprite: "aphid",
 	stats: {
 		...baseStats,
-		maxHp: 1,
-		speed: 380,
-		damage: 1,
-		range: 0,
-		attackSpeed: 0,
+		maxHp: 2,
+		speed: 150,
+		damage: 2,
+		range: 2000,
 	},
-	weapons: [orcFist],
+	weapons: [gun],
+	behaviors: "keeping-distance",
 };

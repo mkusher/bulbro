@@ -1,15 +1,15 @@
 import { useState, type FormEvent } from "preact/compat";
-import { WeaponsSelect } from "@/ui/WeaponsSelect";
-import type { CurrentState } from "@/currentState";
-import { selectWeapons as selectWeaponsInState } from "@/currentState";
-import { fromWeaponState, toWeaponState } from "@/weapon";
+import { WeaponSelector } from "@/ui/WeaponSelector";
+import type { WaveState } from "@/waveState";
+import { selectWeapons as selectWeaponsInState } from "@/waveState";
+import { fromWeaponState, toWeaponState, type Weapon } from "@/weapon";
 import { CentralCard } from "@/ui/Layout";
 import { Card, CardContent, CardFooter, CardHeader } from "@/ui/shadcn/card";
 import { Button } from "@/ui/shadcn/button";
 import { startWave } from "@/currentGameProcess";
 
 type Props = {
-	state: CurrentState;
+	state: WaveState;
 };
 
 export function PreRound({ state }: Props) {
@@ -31,18 +31,26 @@ export function PreRound({ state }: Props) {
 								<div key={p.id} class="character">
 									<h3>{p.type}</h3>
 									<p>Materials: {p.materialsAvailable}</p>
-									<WeaponsSelect
-										selectedWeapons={p.weapons.map(fromWeaponState)}
-										selectWeapons={(weapons) =>
-											setCurrentState(
-												selectWeaponsInState(currentState, {
-													type: "select-weapons",
-													playerId: p.id,
-													weapons: weapons.map(toWeaponState),
-													now: Date.now(),
-												}),
-											)
+									<WeaponSelector
+										selectedWeapon={
+											p.weapons.length > 0 && p.weapons[0]
+												? fromWeaponState(p.weapons[0])
+												: null
 										}
+										availableWeapons={[]}
+										onChange={(weapon: Weapon | null) => {
+											if (weapon) {
+												setCurrentState(
+													selectWeaponsInState(currentState, {
+														type: "select-weapons",
+														playerId: p.id,
+														weapons: [toWeaponState(weapon)],
+														now: Date.now(),
+													}),
+												);
+											}
+										}}
+										allowDeselect={false}
 									/>
 								</div>
 							))}

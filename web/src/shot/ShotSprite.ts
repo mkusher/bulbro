@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import type { ShotState } from "./ShotState";
 import { BulletSprite } from "./BulletSprite";
 import { EnemyProjectileSprite } from "./EnemyProjectileSprite";
+import type { DeltaTime } from "@/time";
 
 export class ShotSprite {
 	#gfx: PIXI.Graphics;
@@ -19,7 +20,7 @@ export class ShotSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer?: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer?: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer?.attach(this.#gfx);
 	}
@@ -27,7 +28,7 @@ export class ShotSprite {
 	/**
 	 * Updates sprite position.
 	 */
-	update(deltaTime: number, shot: ShotState) {
+	update(deltaTime: DeltaTime, shot: ShotState) {
 		this.#gfx.x = shot.position.x;
 		this.#gfx.y = shot.position.y;
 		this.#sprite.update(deltaTime, shot);

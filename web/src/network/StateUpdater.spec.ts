@@ -1,14 +1,17 @@
 import { describe, it, expect, beforeEach, mock } from "bun:test";
 import { signal, type Signal } from "@preact/signals";
 import { StateUpdater } from "./StateUpdater";
-import type { CurrentState } from "@/currentState";
+import type { WaveState } from "@/waveState";
 import type { User } from "./currentUser";
 import type { Logger } from "@/logger";
 import type { WaveProcess } from "@/WaveProcess";
 import type { GameEvent } from "@/game-events/GameEvents";
 import { BulbroState } from "@/bulbro/BulbroState";
-import type { WeaponState } from "@/currentState";
+import { ShotState } from "@/shot/ShotState";
+import { nowTime, deltaTime } from "@/time";
+import type { WeaponState } from "@/waveState";
 import { direction, zeroPoint } from "@/geometry";
+import { baseStats } from "@/characters-definitions/base";
 
 // Test utilities
 function createMockLogger(): Logger {
@@ -30,7 +33,7 @@ function createMockWaveProcess(currentTime = 1000): WaveProcess {
 function createTestBulbro(id: string, x = 0, y = 0): BulbroState {
 	return new BulbroState({
 		id,
-		type: "bulbro-1",
+		type: "normal",
 		position: { x, y },
 		speed: 100,
 		level: 1,
@@ -38,21 +41,13 @@ function createTestBulbro(id: string, x = 0, y = 0): BulbroState {
 		materialsAvailable: 0,
 		healthPoints: 100,
 		stats: {
+			...baseStats,
 			maxHp: 100,
 			hpRegeneration: 1,
 			damage: 10,
-			meleeDamage: 0,
-			rangedDamage: 0,
-			elementalDamage: 0,
-			attackSpeed: 1,
-			critChance: 0,
-			engineering: 0,
 			range: 100,
-			armor: 0,
-			dodge: 0,
 			speed: 100,
-			luck: 0,
-			harvesting: 0,
+			pickupRange: 20,
 		},
 		weapons: [] as WeaponState[],
 		lastMovedAt: 0,
@@ -65,7 +60,7 @@ function createTestBulbro(id: string, x = 0, y = 0): BulbroState {
 function createTestState(
 	localPlayerId: string,
 	remotePlayerId: string,
-): CurrentState {
+): WaveState {
 	return {
 		round: {
 			isRunning: true,
@@ -86,7 +81,7 @@ function createTestState(
 
 describe("StateUpdater", () => {
 	let stateUpdater: StateUpdater;
-	let currentState: Signal<CurrentState>;
+	let currentState: Signal<WaveState>;
 	let currentUser: Signal<User>;
 	let mockLogger: Logger;
 	let mockWaveProcess: WaveProcess;
@@ -114,7 +109,7 @@ describe("StateUpdater", () => {
 
 		it("should process remote player position update correctly", () => {
 			// Initial state: remote player at (200, 200)
-			expect(currentState.value.players[1].position).toEqual({
+			expect(currentState.value.players[1]?.position).toEqual({
 				x: 200,
 				y: 200,
 			});
@@ -210,6 +205,8 @@ describe("StateUpdater", () => {
 					from: { x: 100, y: 100 },
 					to: { x: 150, y: 100 }, // Local player moves right
 					direction: direction({ x: 100, y: 100 }, { x: 150, y: 100 }), // calculated direction vector
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1000),
 				},
 			];
 
@@ -268,33 +265,36 @@ describe("StateUpdater", () => {
 				// Should keep: local player shot
 				{
 					type: "shot",
-					shot: {
+					shot: new ShotState({
 						id: "shot-1",
 						shooterId: LOCAL_PLAYER_ID,
 						shooterType: "player",
 						position: { x: 100, y: 100 },
-						direction: "right",
+						direction: { x: 1, y: 0 },
 						damage: 10,
 						speed: 200,
 						range: 300,
-						createdAt: 1000,
-					},
+						startPosition: { x: 100, y: 100 },
+						knockback: 0,
+					}),
 					weaponId: "weapon-1",
-					deltaTime: 16,
-					now: 1000,
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1000),
 				},
 				// Should filter out: enemy spawn
 				{
 					type: "spawnEnemy",
 					enemy: {} as any, // Mock enemy
-					deltaTime: 16,
-					now: 1000,
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1000),
 				},
 				// Should filter out: material collected by remote
 				{
 					type: "materialCollected",
 					materialId: "material-1",
 					playerId: REMOTE_PLAYER_ID,
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1000),
 				},
 			];
 
@@ -310,7 +310,7 @@ describe("StateUpdater", () => {
 						enemyId: "enemy-1",
 						from: { x: 500, y: 500 },
 						to: { x: 510, y: 500 },
-						direction: "right",
+						direction: { x: 1, y: 0 },
 					},
 				],
 			};
@@ -327,13 +327,17 @@ describe("StateUpdater", () => {
 					enemyId: "enemy-1",
 					position: { x: 400, y: 400 },
 					enemyType: "basic",
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1000),
 				},
 				{
 					type: "bulbroMoved",
 					bulbroId: REMOTE_PLAYER_ID,
 					from: { x: 200, y: 200 },
 					to: { x: 250, y: 200 },
-					direction: "right",
+					direction: { x: 1, y: 0 },
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1000),
 				},
 			];
 
@@ -366,21 +370,21 @@ describe("StateUpdater", () => {
 			const localEvents: GameEvent[] = [
 				{
 					type: "tick",
-					deltaTime: 16,
-					now: 1020, // Later event
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1020), // Later event
 				},
 				{
 					type: "tick",
-					deltaTime: 16,
-					now: 1010, // Earlier event
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1010), // Earlier event
 				},
 			];
 
 			const remoteEvents: GameEvent[] = [
 				{
 					type: "tick",
-					deltaTime: 16,
-					now: 1015, // Middle event
+					deltaTime: deltaTime(16),
+					occurredAt: nowTime(1015), // Middle event
 				},
 			];
 

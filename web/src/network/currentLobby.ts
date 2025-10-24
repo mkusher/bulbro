@@ -12,7 +12,7 @@ import {
 import { LobbyConnection } from "./LobbyConnection";
 import { type NetworkGameConnection } from "./NetworkGameConnection";
 import { currentGameProcess } from "@/currentGameProcess";
-import type { CurrentState } from "@/currentState";
+import type { WaveState } from "@/waveState";
 import { startNetworkGameAsGuest } from "./start-game";
 
 export async function createLobby(toGame: () => void) {
@@ -133,7 +133,7 @@ export function processLobbySocketMessage(logger: Logger, toGame: () => void) {
 			}
 			case "game-started": {
 				logger.info({ receivedMessage }, "game started");
-				const state = receivedMessage.initialState as CurrentState;
+				const state = receivedMessage.initialState as WaveState;
 				startNetworkGameAsGuest(state, toGame);
 			}
 		}

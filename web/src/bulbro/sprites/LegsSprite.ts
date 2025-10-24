@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import type { Position, Size } from "@/geometry";
-const assetUrl = "/game-assets/bulbro-heroes.png";
+import { Assets } from "@/Assets";
 
 export type LegState = "normal" | "wide-l" | "wide-r" | "normal-r";
 
@@ -27,7 +27,7 @@ export class LegsSprite {
 
 	constructor() {}
 	async init() {
-		const fullTexture = await PIXI.Assets.load(assetUrl);
+		const fullTexture = await Assets.get("bulbroHeroes");
 		const leftLeg = this.#createLeg(
 			fullTexture,
 			this.#leftLegPosition,
@@ -45,7 +45,7 @@ export class LegsSprite {
 	}
 
 	#createLeg = (source: PIXI.TextureSource, position: Position, size: Size) => {
-		return new PIXI.Texture({
+		const texture = new PIXI.Texture({
 			source,
 			frame: new PIXI.Rectangle(
 				position.x,
@@ -54,6 +54,8 @@ export class LegsSprite {
 				size.height,
 			),
 		});
+		texture.source.scaleMode = "linear";
+		return texture;
 	};
 
 	appendTo(
@@ -61,7 +63,6 @@ export class LegsSprite {
 		bodySize: Size,
 		legState: LegState = "normal",
 	) {
-		this.#gfx.parent?.removeChild(this.#gfx);
 		container.addChild(this.#gfx);
 		this.#gfx.position.y = bodySize.height * 0.9;
 		this.#leftLeg.position.x = bodySize.width * 0.6;

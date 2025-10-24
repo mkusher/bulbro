@@ -1,33 +1,22 @@
-import type { CurrentState } from "./currentState";
+import type { WaveState } from "./waveState";
 import {
 	getTimeLeft,
 	updateState,
-	generateEnemyMovementEvents,
 	generateMaterialMovementEvents,
-} from "./currentState";
+} from "./waveState";
 import type { StageWithUi } from "./graphics/StageWithUi";
 import { logger as defaultLogger } from "./logger";
-import {
-	shouldSpawnEnemy,
-	isWeaponReadyToShoot,
-	findClosestEnemyInRange,
-	shoot,
-	isInRange,
-	findClosestPlayerInRange,
-} from "./game-formulas";
-import { addition, zeroPoint, type Direction } from "./geometry";
+import { zeroPoint, type Direction } from "./geometry";
 import type { Logger } from "pino";
-import { allEnemies } from "./enemies-definitions";
-import { EnemyState, spawnEnemy } from "./enemy";
-import { v4 as uuidv4 } from "uuid";
 import type { PlayerControl } from "./controls";
 import type {
 	GameEvent,
 	GameEventQueue,
 	GameEventInternal,
-	BulbroHealedEvent,
 } from "./game-events/GameEvents";
 import { withEventMeta, withEventMetaMultiple } from "./game-events/GameEvents";
+import { EnemySpawner } from "./enemy/EnemySpawner";
+import type { DeltaTime, NowTime } from "@/time";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -37,6 +26,7 @@ export class TickProcess {
 	#logger = defaultLogger.child({ component: "TickProcess" });
 	#controls: PlayerControl[];
 	#eventQueue: GameEventQueue;
+	#enemySpawner: EnemySpawner;
 
 	constructor(
 		logger: Logger,
@@ -50,12 +40,13 @@ export class TickProcess {
 		this.#logger.debug("TickProcess initialized");
 		this.#controls = controls;
 		this.#eventQueue = eventQueue;
+		this.#enemySpawner = new EnemySpawner(this.#logger);
 	}
 
 	/**
 	 * Run one tick: produces events for movement, enemy AI, spawning, and rendering.
 	 */
-	tick(state: CurrentState, deltaTime: number, now: number): CurrentState {
+	tick(state: WaveState, deltaTime: DeltaTime, now: NowTime): WaveState {
 		this.#logger.debug(
 			{ event: "tick", occurredAt: now, deltaTime },
 			"Tick start",
@@ -68,10 +59,11 @@ export class TickProcess {
 		this.#addEventsToQueue(events);
 
 		// Phase 3: Apply events to state to get new state
-		const newState = this.#applyEventsToState(state, events);
+		let newState = this.#applyEventsToState(state, events);
+		newState = this.#aim(newState);
 
 		// Phase 4: Update rendering
-		this.#scene.update(deltaTime, newState);
+		this.#scene.update(deltaTime, now, newState);
 
 		return newState;
 	}
@@ -80,9 +72,9 @@ export class TickProcess {
 	 * Generate all events for this tick without applying them to state
 	 */
 	#generateTickEvents(
-		state: CurrentState,
-		deltaTime: number,
-		now: number,
+		state: WaveState,
+		deltaTime: DeltaTime,
+		now: NowTime,
 	): GameEvent[] {
 		// Collect all base events without EventMeta
 		const baseEvents: GameEventInternal[] = [];
@@ -127,8 +119,13 @@ export class TickProcess {
 		});
 
 		// Generate individual enemy movement events
-		const enemyMoveEvents = generateEnemyMovementEvents(state, deltaTime);
-		baseEvents.push(...enemyMoveEvents);
+		state.enemies.forEach((enemy) => {
+			if (enemy.killedAt) {
+				return;
+			}
+			baseEvents.push(...enemy.move(state, now, deltaTime));
+			baseEvents.push(...enemy.attack(state, now, deltaTime));
+		});
 
 		// Generate individual material movement events
 		const materialMoveEvents = generateMaterialMovementEvents(state, deltaTime);
@@ -139,9 +136,6 @@ export class TickProcess {
 
 		// Generate player weapon shooting events
 		this.#generatePlayerWeaponEvents(state, deltaTime, now, baseEvents);
-
-		// Generate enemy weapon shooting events
-		this.#generateEnemyWeaponEvents(state, deltaTime, now, baseEvents);
 
 		// Generate shot movement events
 		this.#generateShotMovementEvents(state, now, deltaTime, baseEvents);
@@ -155,144 +149,29 @@ export class TickProcess {
 	}
 
 	#generateEnemySpawnEvents(
-		state: CurrentState,
-		deltaTime: number,
-		now: number,
+		state: WaveState,
+		deltaTime: DeltaTime,
+		now: NowTime,
 		baseEvents: GameEventInternal[],
 	): void {
-		if (shouldSpawnEnemy(now, state)) {
-			const id = uuidv4();
-			const position = {
-				x: Math.random() * state.mapSize.width,
-				y: Math.random() * state.mapSize.height,
-			};
-			const enemiesToSpawn = allEnemies;
-			const randomEnemy =
-				enemiesToSpawn[Math.floor(enemiesToSpawn.length * Math.random())]!;
-			const enemy: EnemyState = spawnEnemy(id, position, randomEnemy);
-
-			this.#logger.debug(
-				{ event: "spawnEnemy", id, position, enemy },
-				"spawning enemy",
-			);
-
-			const spawnEvent = {
-				type: "spawnEnemy" as const,
-				enemy,
-			};
-			baseEvents.push(spawnEvent);
-		}
+		baseEvents.push(...this.#enemySpawner.tick(state, deltaTime, now));
 	}
 
 	#generatePlayerWeaponEvents(
-		state: CurrentState,
-		deltaTime: number,
-		now: number,
+		state: WaveState,
+		deltaTime: DeltaTime,
+		now: NowTime,
 		baseEvents: GameEventInternal[],
 	): void {
 		state.players.forEach((player) => {
-			if (!player.isAlive()) return;
-			player.weapons.forEach((weapon) => {
-				const reloadTime = weapon.statsBonus.attackSpeed ?? 0;
-				const attackSpeed = player.stats.attackSpeed;
-				if (
-					isWeaponReadyToShoot(
-						weapon.lastStrikedAt,
-						reloadTime,
-						attackSpeed,
-						now,
-					)
-				) {
-					this.#logger.debug(
-						{ weapon, player: player },
-						"Weapon is ready to shoot",
-					);
-					const target = findClosestEnemyInRange(
-						player,
-						weapon,
-						state.enemies.filter((e) => !e.killedAt),
-					);
-					if (target && isInRange(player, target, weapon)) {
-						const shot = shoot(player, "player", weapon, target.position);
-						this.#logger.info(
-							{
-								playerId: player.id,
-								weaponId: weapon.id,
-								targetId: target.id,
-								shot,
-							},
-							"Player is attacking a target",
-						);
-
-						// Generate attack event using player's hit method
-						const attackEvent = player.hit(weapon.id, target.id, shot);
-						baseEvents.push(attackEvent);
-
-						// Generate shot fired event
-						const shotEvent = {
-							type: "shot" as const,
-							shot,
-							weaponId: weapon.id,
-						};
-						baseEvents.push(shotEvent);
-					}
-				}
-			});
-		});
-	}
-
-	#generateEnemyWeaponEvents(
-		state: CurrentState,
-		deltaTime: number,
-		now: number,
-		baseEvents: GameEventInternal[],
-	): void {
-		state.enemies.forEach((enemy) => {
-			if (enemy.killedAt) {
-				return;
-			}
-			enemy.weapons.forEach((weapon) => {
-				const reloadTime = weapon.statsBonus?.attackSpeed ?? 1;
-				const attackSpeed = enemy.stats.attackSpeed ?? 0;
-				if (
-					isWeaponReadyToShoot(
-						weapon.lastStrikedAt,
-						reloadTime,
-						attackSpeed,
-						now,
-					)
-				) {
-					this.#logger.debug({ weapon, enemy }, "Weapon is ready to shoot");
-					const target = findClosestPlayerInRange(enemy, weapon, state.players);
-					if (target && isInRange(enemy, target, weapon)) {
-						this.#logger.debug(
-							{ enemy, target, weapon },
-							"Enemy is attacking a target",
-						);
-
-						const shot = shoot(enemy, "enemy", weapon, target.position);
-
-						// Generate attack event using enemy's hit method
-						const attackEvent = enemy.hit(weapon.id, target.id, shot);
-						baseEvents.push(attackEvent);
-
-						// Generate shot fired event
-						const shotEvent = {
-							type: "shot" as const,
-							shot,
-							weaponId: weapon.id,
-						};
-						baseEvents.push(shotEvent);
-					}
-				}
-			});
+			baseEvents.push(...player.attack(state.enemies, deltaTime, now));
 		});
 	}
 
 	#generateShotMovementEvents(
-		state: CurrentState,
-		now: number,
-		deltaTime: number,
+		state: WaveState,
+		now: NowTime,
+		deltaTime: DeltaTime,
 		baseEvents: GameEventInternal[],
 	): void {
 		state.shots.forEach((shot) => {
@@ -312,10 +191,17 @@ export class TickProcess {
 		events.forEach((event) => this.#eventQueue.addEvent(event));
 	}
 
-	#applyEventsToState(state: CurrentState, events: GameEvent[]): CurrentState {
+	#applyEventsToState(state: WaveState, events: GameEvent[]): WaveState {
 		return events.reduce(
 			(currentState, event) => updateState(currentState, event),
 			state,
 		);
+	}
+
+	#aim(state: WaveState) {
+		return {
+			...state,
+			players: state.players.map((p) => p.aim(state.enemies)),
+		};
 	}
 }

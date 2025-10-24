@@ -2,7 +2,7 @@ import type { Difficulty } from "@/game-formulas";
 import { readyPlayers } from "./currentLobby";
 import { startGame as startGameFromLobby } from "./currentLobby";
 import { apiUrl } from "./clientConfig";
-import { currentState, fromJSON, type CurrentState } from "@/currentState";
+import { waveState, fromJSON, type WaveState } from "@/waveState";
 import {
 	currentGameProcess,
 	isLoading,
@@ -38,7 +38,7 @@ export async function startNetworkGameAsHost(
 			selectedDuration,
 		);
 		await waveInitPromise;
-		await sendGameStartedRequest(game.id, currentState.value);
+		await sendGameStartedRequest(game.id, waveState.value);
 		game.onStart({ waveInitPromise, wavePromise });
 		markAsRunningWave();
 		const result = await wavePromise;
@@ -48,10 +48,7 @@ export async function startNetworkGameAsHost(
 	}
 }
 
-export async function sendGameStartedRequest(
-	gameId: string,
-	state: CurrentState,
-) {
+export async function sendGameStartedRequest(gameId: string, state: WaveState) {
 	const url = new URL(`game/${gameId}/start`, apiUrl);
 	const res = await fetch(url, {
 		method: "POST",
@@ -64,7 +61,7 @@ export async function sendGameStartedRequest(
 }
 
 export async function startNetworkGameAsGuest(
-	initialState: CurrentState,
+	initialState: WaveState,
 	toGame: () => void,
 ) {
 	const game = startGameFromLobby();

@@ -4,13 +4,16 @@ import type { EnemyState } from "../EnemyState";
 import { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import { RotatingDisapperanceAnimation } from "@/graphics/RotatingDisappearanceAnimation";
-import { CharacterSprites } from "@/graphics/CharacterSprite";
+import { EnemySprites } from "../EnemySprites";
 import { PositionedContainer } from "@/graphics/PositionedContainer";
 import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
+import { ConvolutionFilter } from "pixi-filters/convolution";
+import { ColorOverlayFilter } from "pixi-filters";
 
 import * as enemiesFrames from "./EnemiesFrames";
-
-const bodyFramesUrl = "/game-assets/enemies/all-enemies.png";
+import type { DeltaTime, NowTime } from "@/time";
+import { deltaTime } from "@/time";
+import { Assets } from "@/Assets";
 
 type PhysicalRectangle = {
 	position: Position;
@@ -29,14 +32,13 @@ export class BulbaEnemySprite {
 	#dead?: AnimatedSprite<PIXI.Container>;
 	#whenHit?: AnimatedSprite<PIXI.Container>;
 	#whenDangerouslyHit?: AnimatedSprite<PIXI.Container>;
-	#characterSprites?: CharacterSprites<PIXI.Container>;
+	#raging?: AnimatedSprite<PIXI.Container>;
+	#enemySprites?: EnemySprites<PIXI.Container>;
 	#defaultFrame: PhysicalRectangle;
-	#frames: PhysicalRectangle[];
 
 	constructor(type: enemiesFrames.EnemyType, debug?: boolean) {
 		this.#positionedContainer = new PositionedContainer(new PIXI.Container());
-		this.#frames = [...enemiesFrames[type]];
-		this.#defaultFrame = this.#frames[0]!;
+		this.#defaultFrame = enemiesFrames[type];
 		const size = this.#defaultFrame.size;
 		if (debug) {
 			this.#debugSprite = new RectangleGfx(size, 0xff00ff, 0.9);
@@ -45,7 +47,7 @@ export class BulbaEnemySprite {
 	}
 
 	#fullTexture() {
-		return PIXI.Assets.load(bodyFramesUrl);
+		return Assets.get("allEnemies");
 	}
 
 	async init() {
@@ -59,27 +61,31 @@ export class BulbaEnemySprite {
 			0.3,
 			{ x: 0.6, y: 1 },
 		);
-		this.#whenHit = this.#createSwingingAnimation([this.#frames[1]!], 50, 0.4, {
-			x: 1,
-			y: -0.8,
+		this.#whenHit = this.#createHitSprite(50, 0.4, {
+			x: 0.6,
+			y: 1,
 		});
 
 		this.#whenDangerouslyHit = this.#createSwingingAnimation(
-			[this.#frames[1]!],
+			[this.#defaultFrame],
 			60,
 			0.4,
 		);
 		this.#dead = this.#createDeathAnimation([this.#defaultFrame]);
+		this.#raging = this.#createRagingAnimation();
 
-		this.#characterSprites = new CharacterSprites({
-			walking: this.#movement,
-			hurt: this.#whenHit,
-			hurtALot: this.#whenDangerouslyHit,
-			idle: this.#idle,
-			dead: this.#dead,
-		});
+		this.#enemySprites = new EnemySprites(
+			{
+				walking: this.#movement,
+				hurt: this.#whenHit,
+				hurtALot: this.#whenDangerouslyHit,
+				idle: this.#idle,
+				dead: this.#dead,
+			},
+			this.#raging,
+		);
 
-		this.#sprite = await this.#idle.getSprite(0);
+		this.#sprite = await this.#idle.getSprite(deltaTime(0));
 		this.#positionedContainer.addChild(this.#sprite);
 		if (this.#debugSprite) {
 			this.#debugSprite.appendTo(this.#positionedContainer.container);
@@ -89,11 +95,11 @@ export class BulbaEnemySprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void {
 		this.#positionedContainer.appendTo(parent, layer);
 	}
 
-	update(enemy: EnemyState, delta: number) {
+	update(enemy: EnemyState, delta: DeltaTime, now: NowTime) {
 		const shape = enemy.toMovableObject();
 		const rectangle =
 			shape.shape.type === "rectangle"
@@ -109,7 +115,7 @@ export class BulbaEnemySprite {
 			this.#debugSprite.position.x = -rectangle.width / 2;
 		}
 
-		this.#characterSprites?.getSprite(enemy, delta).then((sprite) => {
+		this.#enemySprites?.getSprite(enemy, delta, now).then((sprite) => {
 			if (sprite) {
 				if (this.#sprite) {
 					this.#sprite?.removeFromParent();
@@ -170,10 +176,49 @@ export class BulbaEnemySprite {
 		return animation.createAnimatedSprite();
 	}
 
+	#createHitSprite(
+		amplitude: number,
+		frameSpeed: number,
+		dimensions?: Position,
+	) {
+		const swingingWalk = new SwingingAnimation(
+			async (frame) => {
+				const sprite = await this.#buildEnemy(this.#defaultFrame);
+				const factor = 0.5 + frame * 0.1;
+				const matrix = [0, factor, 0, factor, 1, factor, 0, factor, 0];
+				const conv = new ConvolutionFilter(matrix);
+				sprite.filters = [conv];
+				return sprite;
+			},
+			amplitude,
+			frameSpeed,
+			dimensions,
+		);
+		return swingingWalk.createAnimatedSprite();
+	}
+
+	#createRagingAnimation() {
+		const swingingWalk = new SwingingAnimation(
+			async (frame) => {
+				const sprite = await this.#buildEnemy(this.#defaultFrame);
+				const shouldShowOverlay = frame % 2 === 0;
+				if (shouldShowOverlay) {
+					const colorOverlay = new ColorOverlayFilter(0xff0000, 0.85);
+					sprite.filters = [colorOverlay];
+				}
+				return sprite;
+			},
+			750,
+			0.3,
+			{ x: -0.8, y: 1 },
+		);
+		return swingingWalk.createAnimatedSprite();
+	}
+
 	async #buildEnemy(rectangle: PhysicalRectangle) {
 		const container = new PIXI.Container();
 		const scaling = new PIXI.Container();
-		scaling.scale = 0.22;
+		scaling.scale = 0.25;
 		scaling.addChild(await this.#cutRectangle(rectangle));
 
 		container.addChild(scaling);

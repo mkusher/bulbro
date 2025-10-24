@@ -3,7 +3,7 @@ import type {
 	InGameCommunicationChannel,
 	WebsocketMessage,
 } from "./InGameCommunicationChannel";
-import type { CurrentState } from "@/currentState";
+import type { WaveState } from "@/waveState";
 import type { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import type { Logger } from "pino";
 import { zeroPoint } from "@/geometry";
@@ -22,7 +22,7 @@ export class StateSync {
 	#inGameCommunicationChannel: InGameCommunicationChannel;
 	#stateUpdater: StateUpdater;
 	#gameEventQueue: GameEventQueue;
-	#currentState: Signal<CurrentState>;
+	#currentState: Signal<WaveState>;
 	#remotePlayerControl: RemoteRepeatLastKnownDirectionControl;
 	#localPlayerControl: PlayerControl;
 	#isHost: boolean;
@@ -52,7 +52,7 @@ export class StateSync {
 		inGameCommunicationChannel: InGameCommunicationChannel;
 		stateUpdater: StateUpdater;
 		gameEventQueue: GameEventQueue;
-		currentState: Signal<CurrentState>;
+		currentState: Signal<WaveState>;
 		localPlayerControl: PlayerControl;
 		remoteControl: RemoteRepeatLastKnownDirectionControl;
 		waveProcess: WaveProcess;

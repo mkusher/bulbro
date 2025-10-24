@@ -2,20 +2,19 @@ import { useRef, useEffect } from "preact/hooks";
 import { Loader } from "@/ui/Loading";
 import { Failed } from "@/screens/Failed";
 import { PreRound } from "@/screens/PreRound";
-import { currentState } from "@/currentState";
+import { waveState } from "@/waveState";
 import { TouchscreenJoystick } from "@/controls/TouchscreenJoystick";
 import { SplashBanner } from "@/ui/Splash";
 import { MainContainer } from "@/ui/Layout";
 import {
-	currentGameProcess,
 	isRound as isRoundSignal,
 	isLoading as isLoadingSignal,
 	waveResult,
+	currentGameCanvas,
 } from "@/currentGameProcess";
-import type { GameProcess } from "@/GameProcess";
 
 export function InGame() {
-	const gameProcess = currentGameProcess.value;
+	const gameCanvas = currentGameCanvas.value;
 	const finishedResult = waveResult.value;
 	const isRound = isRoundSignal.value;
 	const isLoading = isLoadingSignal.value;
@@ -52,7 +51,7 @@ export function InGame() {
 		return (
 			<SplashBanner>
 				<MainContainer noPadding top>
-					<PreRound state={currentState.value} />
+					<PreRound state={waveState.value} />
 				</MainContainer>
 			</SplashBanner>
 		);
@@ -61,22 +60,27 @@ export function InGame() {
 	return (
 		<MainContainer noPadding>
 			<TouchscreenJoystick />
-			<ShowRound gameProcess={gameProcess} />
+			<ShowRound canvas={gameCanvas} />
 		</MainContainer>
 	);
 }
 
 type Props = {
-	gameProcess: GameProcess;
+	canvas: HTMLCanvasElement | undefined;
 };
 
-export function ShowRound({ gameProcess }: Props) {
+export function ShowRound({ canvas }: Props) {
 	const rootEl = useRef<HTMLDivElement | null>(null);
 	useEffect(() => {
-		if (rootEl.current && gameProcess.gameCanvas) {
-			rootEl.current.appendChild(gameProcess.gameCanvas);
+		if (rootEl.current && canvas) {
+			rootEl.current.innerHTML = "";
+			rootEl.current.appendChild(canvas);
 		}
-	}, [gameProcess.gameCanvas]);
+	}, [canvas, rootEl.current]);
 
-	return <div className="full-viewport" ref={rootEl} />;
+	return (
+		<div className="full-viewport" ref={rootEl}>
+			Loading...
+		</div>
+	);
 }

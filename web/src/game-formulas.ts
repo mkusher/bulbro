@@ -1,16 +1,85 @@
 import {
-	type CurrentState,
+	type WaveState,
 	type WeaponState,
 	type RoundState,
 	getTimeLeft,
-} from "./currentState";
+} from "./waveState";
 import type { BulbroState } from "./bulbro";
 import type { EnemyState } from "./enemy/EnemyState";
 import { v4 as uuidv4 } from "uuid";
-import { direction, distance, type Position, type Size } from "./geometry";
+import type { NowTime } from "./time";
+import {
+	addition,
+	direction,
+	distance,
+	type Position,
+	type Size,
+} from "./geometry";
 import { ShotState } from "./shot/ShotState";
+import type { Stats } from "./bulbro";
 
-const minWeaponRange = 25;
+export const minWeaponRange = 25;
+
+// Base stats for all Bulbros
+export const baseStats: Stats = {
+	maxHp: 10,
+	hpRegeneration: 0,
+	lifeSteal: 0,
+	speed: 450,
+	harvesting: 0,
+	damage: 0,
+	meleeDamage: 0,
+	rangedDamage: 0,
+	elementalDamage: 0,
+	attackSpeed: 0,
+	critChance: 0,
+	engineering: 0,
+	range: 0,
+	armor: 0,
+	dodge: 0,
+	luck: 0,
+	pickupRange: 100,
+	knockback: 0,
+};
+
+// Stat bonus types - plain numeric values
+export type StatBonus = {
+	[K in keyof Stats]?: number;
+};
+
+// Define which stats use percentage bonuses vs absolute values
+const percentageStats: Set<keyof Stats> = new Set<keyof Stats>([
+	"speed",
+	"damage",
+	"meleeDamage",
+	"rangedDamage",
+	"elementalDamage",
+	"attackSpeed",
+	"critChance",
+	"engineering",
+	"luck",
+	"pickupRange",
+]);
+
+// Helper function to calculate final stats from base stats and bonuses
+export function calculateStats(bonuses: StatBonus): Stats {
+	const finalStats = { ...baseStats };
+
+	for (const [key, bonus] of Object.entries(bonuses)) {
+		if (typeof bonus === "number") {
+			const statKey = key as keyof Stats;
+			const baseValue = baseStats[statKey];
+
+			if (percentageStats.has(statKey)) {
+				finalStats[statKey] = baseValue * (1 + bonus / 100);
+			} else {
+				finalStats[statKey] = baseValue + bonus;
+			}
+		}
+	}
+
+	return finalStats;
+}
 
 export type Difficulty = 0 | 1 | 2 | 3 | 4 | 5;
 export const isDifficulty = (
@@ -24,7 +93,7 @@ export const spawnIntervalForRound = (round: RoundState) => {
 
 	return 2000 / wave / difficulty;
 };
-export const shouldSpawnEnemy = (now: number, state: CurrentState) => {
+export const shouldSpawnEnemy = (now: NowTime, state: WaveState) => {
 	const spawnInterval = spawnIntervalForRound(state.round);
 	const timeSinceLastSpawn = now - (state.lastSpawnAt ?? 0);
 	const timeLeftInRound = getTimeLeft(state.round);
@@ -42,7 +111,7 @@ export function isWeaponReadyToShoot(
 	lastStrikedAt: number,
 	reloadTime: number,
 	attackSpeed: number,
-	now: number,
+	now: NowTime,
 ): boolean {
 	const elapsed = now - lastStrikedAt;
 	const chanceForReloaded = elapsed / reloadTime / 1000;
@@ -116,7 +185,12 @@ export function shoot(
 	targetPosition: Position,
 ): ShotState {
 	const id = uuidv4();
-	const currentPosition = { ...player.position };
+	const weaponPosition = calculateWeaponPosition(
+		weapon,
+		player.weapons.findIndex((w) => w.id === weapon.id)!,
+		player.weapons.length,
+	);
+	const currentPosition = addition(player.position, weaponPosition);
 	const playerDamage = player.stats.damage ?? 0;
 	const playerRange = player.stats.range ?? 0;
 	const weaponDamage = weapon.statsBonus.damage ?? 0;
@@ -152,3 +226,25 @@ export const getHpRegenerationPerSecond = (hpRegeneration: number) =>
 
 export const knockbackSpeed = 25;
 export const knockbackTimeout = 200;
+
+export function calculateWeaponPosition(
+	weapon: WeaponState,
+	index: number,
+	totalWeapons: number,
+) {
+	// Calculate position around the bulbro character
+	const radius = 28; // Distance from center
+	const angleStep = (2 * Math.PI) / Math.max(totalWeapons, 1);
+	const angle = angleStep * index;
+
+	// Base position around the character
+	const baseX = Math.cos(angle) * radius;
+	const baseY = Math.sin(angle) * radius;
+
+	// Apply aiming direction offset
+	const aimingInfluence = 0.3; // How much the aiming direction affects position
+	const aimingX = weapon.aimingDirection.x * aimingInfluence * radius;
+	const aimingY = weapon.aimingDirection.y * aimingInfluence * radius;
+
+	return { x: baseX + aimingX, y: baseY + aimingY };
+}

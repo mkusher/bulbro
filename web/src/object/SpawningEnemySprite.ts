@@ -1,5 +1,7 @@
 import * as PIXI from "pixi.js";
 import type { SpawningEnemy } from "./SpawningEnemyState";
+import type { DeltaTime } from "@/time";
+import { Assets } from "@/Assets";
 
 /**
  * Manages an enemy sprite graphic.
@@ -9,13 +11,13 @@ export class SpawningEnemySprite {
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
 	#size = 16;
-	#width = 83;
-	#height = 72;
+	#width = 140;
+	#height = 140;
 
 	constructor(debug?: boolean) {
 		this.#container = new PIXI.Container();
 		this.#sprite = new PIXI.Sprite();
-		this.#sprite.scale.set(0.5);
+		this.#sprite.scale.set(0.2);
 		this.#sprite.x = -this.#width / 2;
 		this.#sprite.y = -this.#height / 2;
 		this.#container.addChild(this.#sprite);
@@ -30,26 +32,22 @@ export class SpawningEnemySprite {
 	}
 
 	async init() {
-		const texture = await PIXI.Assets.load(
-			"/game-assets/craftpix-net-266622-free-top-down-pixel-art-cave-objects/PNG/Cave_objects_source.png",
-		);
-		const top = 590;
-		const left = 230;
+		const texture = await Assets.get("objects");
 		this.#sprite.texture = new PIXI.Texture({
 			source: texture,
-			frame: new PIXI.Rectangle(left, top, this.#width, this.#height),
+			frame: new PIXI.Rectangle(45, 630, this.#width, this.#height),
 		});
 	}
 
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer?: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer?: PIXI.RenderLayer): void {
 		parent.addChild(this.#container);
 		layer?.attach(this.#container);
 	}
 
-	update(spawningEnemy: SpawningEnemy, deltaTime: number) {
+	update(spawningEnemy: SpawningEnemy, deltaTime: DeltaTime) {
 		this.#container.x = spawningEnemy.position.x;
 		this.#container.y = spawningEnemy.position.y;
 		this.#sprite.alpha = Math.sin(

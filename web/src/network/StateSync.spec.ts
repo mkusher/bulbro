@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach, mock } from "bun:test";
-import { signal } from "@preact/signals";
+import { signal, type Signal } from "@preact/signals";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
-import type { CurrentState } from "@/currentState";
+import type { WaveState } from "@/waveState";
 import type { User } from "./currentUser";
 import type { Logger } from "@/logger";
 import type { WaveProcess } from "@/WaveProcess";
 import type { GameEvent, GameEventQueue } from "@/game-events/GameEvents";
+import { nowTime, deltaTime } from "@/time";
 import type {
 	InGameCommunicationChannel,
 	WebsocketMessage,
@@ -14,8 +15,9 @@ import type {
 import type { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import type { PlayerControl } from "@/controls";
 import { BulbroState } from "@/bulbro/BulbroState";
-import type { WeaponState } from "@/currentState";
+import type { WeaponState } from "@/waveState";
 import { direction } from "@/geometry";
+import { baseStats } from "@/characters-definitions/base";
 
 // Test utilities
 function createMockLogger(): Logger {
@@ -79,7 +81,7 @@ function createMockPlayerControl(): PlayerControl {
 function createTestBulbro(id: string, x = 0, y = 0): BulbroState {
 	return new BulbroState({
 		id,
-		type: "bulbro-1",
+		type: "normal",
 		position: { x, y },
 		speed: 100,
 		level: 1,
@@ -87,21 +89,10 @@ function createTestBulbro(id: string, x = 0, y = 0): BulbroState {
 		materialsAvailable: 0,
 		healthPoints: 100,
 		stats: {
+			...baseStats,
 			maxHp: 100,
 			hpRegeneration: 1,
 			damage: 10,
-			meleeDamage: 0,
-			rangedDamage: 0,
-			elementalDamage: 0,
-			attackSpeed: 1,
-			critChance: 0,
-			engineering: 0,
-			range: 100,
-			armor: 0,
-			dodge: 0,
-			speed: 100,
-			luck: 0,
-			harvesting: 0,
 		},
 		weapons: [] as WeaponState[],
 		lastMovedAt: 0,
@@ -114,7 +105,7 @@ function createTestBulbro(id: string, x = 0, y = 0): BulbroState {
 function createTestState(
 	localPlayerId: string,
 	remotePlayerId: string,
-): CurrentState {
+): WaveState {
 	return {
 		round: {
 			isRunning: true,
@@ -135,7 +126,7 @@ function createTestState(
 
 describe("StateSync", () => {
 	let stateSync: StateSync;
-	let currentState: Signal<CurrentState>;
+	let currentState: Signal<WaveState>;
 	let currentUser: Signal<User>;
 	let mockLogger: Logger;
 	let mockWaveProcess: WaveProcess;
@@ -214,6 +205,8 @@ describe("StateSync", () => {
 				from: { x: 100, y: 100 },
 				to: { x: 120, y: 100 },
 				direction: direction({ x: 100, y: 100 }, { x: 120, y: 100 }),
+				deltaTime: deltaTime(16),
+				occurredAt: nowTime(1000),
 			});
 
 			// Simulate receiving the message

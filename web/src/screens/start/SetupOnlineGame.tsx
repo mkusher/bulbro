@@ -3,8 +3,7 @@ import { wellRoundedBulbro } from "@/characters-definitions";
 import { type Difficulty } from "@/game-formulas";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
-import { BulbroConfig } from "@/ui/BulbroConfig";
-import type { CharacterSetup } from "@/GameProcess";
+import { BulbroSelector } from "@/ui/BulbroSelector";
 import { CentralCard, MainContainer } from "@/ui/Layout";
 import {
 	Card,
@@ -18,6 +17,7 @@ import { Button } from "@/ui/shadcn/button";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/ui/shadcn/input";
 import { DifficultySelector } from "@/ui/DifficultySelector";
+import { WeaponSelector } from "@/ui/WeaponSelector";
 import {
 	currentLobby,
 	markAsReady,
@@ -25,7 +25,6 @@ import {
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
 import { createPlayer } from "@/player";
-import { BulbroConfigView } from "@/ui/BulbroConfigView";
 import { startNetworkGameAsHost } from "@/network/start-game";
 import { getJoinLobbyUrl, getTgJoinLobbyUrl, useRouter } from "@/ui/routing";
 import { SplashBanner } from "@/ui/Splash";
@@ -33,6 +32,8 @@ import { ShareIcon } from "lucide-react";
 import { logger } from "@/logger";
 import { computed } from "@preact/signals";
 import { isTgApp } from "@/tg-app";
+import { BulbroCard } from "@/bulbro/BulbroCard";
+import type { Bulbro } from "@/bulbro";
 
 function getShareUrl() {
 	const lobby = currentLobby.value;
@@ -48,12 +49,9 @@ const shareMessage = computed(() => ({
 }));
 
 export function SetupOnlineGame() {
-	const [firstBulbro, changeFirstBulbro] = useState<CharacterSetup>({
-		bulbro: wellRoundedBulbro,
-		sprite: "normal",
-	});
+	const [firstBulbro, changeFirstBulbro] = useState<Bulbro>(wellRoundedBulbro);
 	const [selectedDifficulty, selectDifficulty] = useState<Difficulty>(0);
-	const [weaponsSetup, setWeaponsSetup] = useState<Weapon[]>([smg]);
+	const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(smg);
 	const [selectedDuration, setDuration] = useState<number>(60);
 	const lobby = currentLobby.value ?? {
 		id: "",
@@ -73,12 +71,7 @@ export function SetupOnlineGame() {
 		e.preventDefault();
 		markAsReady(
 			lobby.id,
-			createPlayer(
-				iam.id,
-				firstBulbro.bulbro,
-				firstBulbro.sprite,
-				weaponsSetup,
-			),
+			createPlayer(iam.id, firstBulbro, selectedWeapon ? [selectedWeapon] : []),
 		);
 	};
 	const onStart = (e: Event) => {
@@ -149,27 +142,25 @@ export function SetupOnlineGame() {
 							<div className="flex flex-col xl:flex-row gap-3 flex-wrap">
 								{!isLocalReady ? (
 									<form onSubmit={onReady} className="flex flex-col gap-3">
-										<BulbroConfig
-											selectBulbro={(bulbro) =>
-												changeFirstBulbro({ ...firstBulbro, bulbro })
-											}
-											selectedBulbro={firstBulbro.bulbro}
-											selectBulbroStyle={(sprite) =>
-												changeFirstBulbro({ ...firstBulbro, sprite })
-											}
-											selectedBulbroStyle={firstBulbro.sprite}
-											selectedWeapons={weaponsSetup ?? []}
-											selectWeapons={setWeaponsSetup}
+										<BulbroSelector
+											selectedBulbro={firstBulbro}
+											onChange={(bulbro) => changeFirstBulbro(bulbro)}
+										/>
+										<WeaponSelector
+											selectedWeapon={selectedWeapon}
+											availableWeapons={firstBulbro.availableWeapons}
+											onChange={setSelectedWeapon}
 										/>
 										<div className="grid">
 											<Button type="submit">Ready</Button>
 										</div>
 									</form>
 								) : (
-									<BulbroConfigView
-										selectedBulbro={firstBulbro.bulbro}
-										selectedBulbroStyle={firstBulbro.sprite}
-										selectedWeapons={weaponsSetup}
+									<BulbroCard
+										bulbro={{
+											...firstBulbro,
+											weapons: selectedWeapon ? [selectedWeapon] : [],
+										}}
 									/>
 								)}
 								<div className="flex flex-col gap-6 my-3">
@@ -178,11 +169,7 @@ export function SetupOnlineGame() {
 										anotherPlayerBulbro ? (
 											<>
 												<p>Ready</p>
-												<BulbroConfigView
-													selectedBulbro={anotherPlayerBulbro.bulbro}
-													selectedBulbroStyle={anotherPlayerBulbro.sprite}
-													selectedWeapons={anotherPlayerBulbro.bulbro.weapons}
-												/>
+												<BulbroCard bulbro={anotherPlayerBulbro.bulbro} />
 											</>
 										) : (
 											<p>Not Ready</p>

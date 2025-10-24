@@ -9,10 +9,9 @@ export const babyEnemy: EnemyCharacter = {
 	stats: {
 		...baseStats,
 		maxHp: 2,
-		speed: 100,
+		speed: 150,
 		damage: 1,
-		range: 0,
-		attackSpeed: 0,
+		range: 80,
 		materialsDropped: 1,
 	},
 	weapons: [orcFist],

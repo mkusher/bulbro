@@ -4,7 +4,7 @@ import type { Weapon } from "../weapon";
  * A high-tech gun that fires energy beams.
  */
 export const laserGun: Weapon = {
-	id: "laser-gun",
+	id: "laserGun",
 	name: "Laser Gun",
 	classes: ["gun"],
 	shotSpeed: 1500,

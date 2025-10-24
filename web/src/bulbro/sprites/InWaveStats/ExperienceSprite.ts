@@ -40,7 +40,7 @@ export class ExperienceSprite {
 		this.#greenExperienceRectangle = greenExperienceRectangle;
 		this.#gfx.addChild(this.#blackBorderRectangle);
 	}
-	appendTo(parent: PIXI.Container, layer?: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer?: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer?.attach(this.#gfx);
 	}

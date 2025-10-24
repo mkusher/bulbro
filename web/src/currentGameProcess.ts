@@ -3,10 +3,13 @@ import { GameProcess } from "./GameProcess";
 import type { Player } from "./player";
 import type { PlayerControl } from "./controls";
 import type { Difficulty } from "./game-formulas";
-import type { CurrentState } from "./currentState";
+import type { WaveState } from "./waveState";
 
 export const currentGameProcess = signal<GameProcess>(
 	new GameProcess(localStorage.getItem("__enable_debug") === "1"),
+);
+export const currentGameCanvas = signal<HTMLCanvasElement | undefined>(
+	undefined,
 );
 
 export const isLoading = signal<boolean>(false);
@@ -53,7 +56,7 @@ export async function startLocalGame(
 	}
 }
 
-export async function startWave(state: CurrentState) {
+export async function startWave(state: WaveState) {
 	markAsLoading();
 	const gameProcess = currentGameProcess.value;
 	if (!gameProcess) {

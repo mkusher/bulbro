@@ -1,8 +1,6 @@
 import type { Bulbro } from "../bulbro";
-import { bulbrosStyles, type SpriteType } from "../bulbro/Sprite";
 import { bulbros } from "../characters-definitions";
-import type { Weapon } from "../weapon";
-import { BulbroOption, BulbroStyleOption } from "./Options";
+import { BulbroStyleOption } from "./Options";
 import {
 	Carousel,
 	CarouselContent,
@@ -11,29 +9,17 @@ import {
 	CarouselPrevious,
 	type CarouselApi,
 } from "./shadcn/carousel";
-import { Label } from "./shadcn/label";
-import { WeaponsSelect } from "./WeaponsSelect";
 import { useEffect, useState } from "preact/compat";
 
-type BulbroProps = {
+type BulbroConfigProps = {
 	selectedBulbro: Bulbro;
-	selectBulbro: (b: Bulbro) => void;
-	selectedBulbroStyle: SpriteType;
-	selectBulbroStyle: (s: SpriteType) => void;
-	selectedWeapons: Weapon[];
-	selectWeapons: (w: Weapon[]) => void;
+	onChange: (bulbro: Bulbro) => void;
 };
-export function BulbroConfig({
-	selectedBulbro,
-	selectBulbro,
-	selectedBulbroStyle,
-	selectBulbroStyle,
-	selectedWeapons,
-	selectWeapons,
-}: BulbroProps) {
+
+export function BulbroConfig({ selectedBulbro, onChange }: BulbroConfigProps) {
 	const [api, setApi] = useState<CarouselApi>();
 	const current =
-		bulbrosStyles.findIndex((style) => style === selectedBulbroStyle) ?? 0;
+		bulbros.findIndex((bulbro) => bulbro.id === selectedBulbro.id) ?? 0;
 
 	useEffect(() => {
 		if (!api) {
@@ -43,44 +29,28 @@ export function BulbroConfig({
 		api.scrollTo(current);
 
 		api.on("select", () => {
-			selectBulbroStyle(bulbrosStyles[api.selectedScrollSnap()]!);
+			const selectedBulbro = bulbros[api.selectedScrollSnap()];
+			if (selectedBulbro) {
+				onChange(selectedBulbro);
+			}
 		});
-	}, [api, selectBulbroStyle]);
+	}, [api, onChange]);
+
 	return (
 		<div className="flex flex-col gap-3">
 			<div id="bulbro-select">
-				<Label>BulBro Class:</Label>
-				<select
-					name="bulbro"
-					value={selectedBulbro.id}
-					onChange={(e) => {
-						const found = bulbros.find((b) => b.id === e.currentTarget.value);
-						if (found) {
-							selectBulbro(found);
-						}
-					}}
-				>
-					{bulbros.map((bulbro) => (
-						<BulbroOption
-							value={bulbro}
-							selected={bulbro.id === selectedBulbro.id}
-						/>
-					))}
-				</select>
-			</div>
-			<div id="bulbro-style-select">
 				<Carousel
-					className="box-border w-60 align-center m-auto md:w-100 sm:w-80"
+					className="box-border w-72 sm:w-96 md:w-[32rem] lg:w-[40rem] xl:w-[44rem] 2xl:w-[48rem] mx-auto"
 					setApi={setApi}
 				>
 					<CarouselContent>
-						{bulbrosStyles.map((bulbro) => (
-							<CarouselItem>
-								<div className="p-1">
+						{bulbros.map((bulbro) => (
+							<CarouselItem key={bulbro.id} className="flex justify-center">
+								<div className="p-2 sm:p-3 md:p-4 lg:p-5 w-full max-w-[240px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] xl:max-w-[520px]">
 									<BulbroStyleOption
-										key={bulbro}
 										value={bulbro}
-										selected={bulbro === selectedBulbroStyle}
+										selected={bulbro.id === selectedBulbro.id}
+										showDetails={true}
 									/>
 								</div>
 							</CarouselItem>
@@ -89,12 +59,6 @@ export function BulbroConfig({
 					<CarouselPrevious type="button" />
 					<CarouselNext type="button" />
 				</Carousel>
-			</div>
-			<div id="weapons-select">
-				<WeaponsSelect
-					selectedWeapons={selectedWeapons}
-					selectWeapons={selectWeapons}
-				/>
 			</div>
 		</div>
 	);

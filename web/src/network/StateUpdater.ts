@@ -1,12 +1,13 @@
 import type { Signal } from "@preact/signals";
 import type { Logger } from "@/logger";
-import type { CurrentState } from "@/currentState";
-import { updateState } from "@/currentState";
+import type { WaveState } from "@/waveState";
+import { updateState } from "@/waveState";
 import type { User } from "./currentUser";
 import type { WebsocketMessage } from "./InGameCommunicationChannel";
 import type { ShotState } from "@/shot/ShotState";
 import type { GameEvent } from "@/game-events/GameEvents";
 import type { WaveProcess } from "@/WaveProcess";
+import { deltaTime } from "@/time";
 
 /**
  * Handles state updates for multiplayer games with event filtering based on host/guest role.
@@ -14,10 +15,10 @@ import type { WaveProcess } from "@/WaveProcess";
  */
 export class StateUpdater {
 	#logger: Logger;
-	#currentState: Signal<CurrentState>;
+	#currentState: Signal<WaveState>;
 	#currentUser: Signal<User>;
 	#waveProcess: WaveProcess;
-	#lastSyncedState: CurrentState;
+	#lastSyncedState: WaveState;
 	#isHost: boolean;
 	#lastPositionVersion = 0;
 	#lastStateVersion = 0;
@@ -32,7 +33,7 @@ export class StateUpdater {
 		isHost,
 	}: {
 		logger: Logger;
-		currentState: Signal<CurrentState>;
+		currentState: Signal<WaveState>;
 		currentUser: Signal<User>;
 		waveProcess: WaveProcess;
 		isHost: boolean;
@@ -131,7 +132,7 @@ export class StateUpdater {
 				localPlayer,
 				remotePlayer.applyEvent({
 					...remotePlayer.moveFromDirection(position, direction, now),
-					deltaTime: 16,
+					deltaTime: deltaTime(16),
 					occurredAt: now,
 				}),
 			],
@@ -179,7 +180,7 @@ export class StateUpdater {
 			);
 			remotePlayer = remotePlayer.applyEvent({
 				...moveEvent,
-				deltaTime: 16,
+				deltaTime: deltaTime(16),
 				occurredAt: this.#waveProcess.now(),
 			});
 		}
@@ -422,7 +423,7 @@ export class StateUpdater {
 	/**
 	 * Get the last synced state
 	 */
-	getLastSyncedState(): CurrentState {
+	getLastSyncedState(): WaveState {
 		return this.#lastSyncedState;
 	}
 

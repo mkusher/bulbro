@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js";
 import type { Material } from "./MaterialState";
 import type { Position } from "../geometry";
+import type { DeltaTime } from "@/time";
+import { Assets } from "@/Assets";
 
 const size = {
 	width: 50,
@@ -33,23 +35,21 @@ export class MaterialSprite {
 	async init(
 		material: Material,
 		parent: PIXI.Container,
-		layer: PIXI.IRenderLayer,
+		layer: PIXI.RenderLayer,
 	) {
-		const source = await PIXI.Assets.load(
-			"/game-assets/craftpix-net-106469-top-down-crystals-pixel-art/PNG/Assets_source.png",
-		);
+		const source = await Assets.get("objects");
 		const texture = new PIXI.Texture({
 			source,
-			frame: new PIXI.Rectangle(269, 6, 50, 50),
+			frame: new PIXI.Rectangle(763, 33, 200, 265),
 		});
 		this.#sprite.texture = texture;
-		this.#sprite.scale.set(0.5);
+		this.#sprite.scale.set(0.1);
 		this.#updatePosition(material.position);
 		parent.addChild(this.#container);
 		layer.attach(this.#container);
 	}
 
-	update(material: Material, deltaTime: number): void {
+	update(material: Material, deltaTime: DeltaTime): void {
 		this.#updatePosition(material.position);
 	}
 

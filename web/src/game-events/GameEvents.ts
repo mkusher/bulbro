@@ -1,27 +1,36 @@
 import type { EnemyState } from "@/enemy";
 import { type Direction, type Position } from "@/geometry";
 import type { ShotState } from "@/shot/ShotState";
+import type { DeltaTime, NowTime } from "@/time";
 
 // Base events without EventMeta
-export type GameEventInternal =
+
+export type BulbroEvent =
+	| ShotEvent
 	| BulbroAttackedEvent
 	| BulbroCollectedMaterialEvent
 	| BulbroDiedEvent
 	| BulbroHealedEvent
 	| BulbroMovedEvent
 	| BulbroReceivedHitEvent
+	| BulbroInitializedForWaveEvent
+	| HealEvent
+	| MaterialCollectedEvent;
+export type EnemyEvent =
+	| ShotEvent
 	| EnemyAttackedEvent
 	| EnemyDiedEvent
 	| EnemyMovedEvent
 	| EnemyReceivedHitEvent
 	| EnemySpawnedEvent
 	| EnemySpawningStartedEvent
-	| HealEvent
-	| MaterialCollectedEvent
+	| EnemyRagingStartedEvent;
+export type GameEventInternal =
+	| BulbroEvent
+	| EnemyEvent
 	| MaterialMovedEvent
 	| MaterialSpawnedEvent
 	| MoveShotEvent
-	| ShotEvent
 	| ShotMovedEvent
 	| ShotExpiredEvent
 	| TickEvent
@@ -39,8 +48,8 @@ export type MoveDescription = {
 };
 
 export type EventMeta = {
-	deltaTime: number;
-	occurredAt: number;
+	deltaTime: DeltaTime;
+	occurredAt: NowTime;
 };
 
 export type AttackDescription = {
@@ -83,6 +92,13 @@ export type BulbroReceivedHitEvent = {
 	damage: number;
 };
 
+export type BulbroInitializedForWaveEvent = {
+	type: "bulbroInitializedForWave";
+	bulbroId: string;
+	position: Position;
+	direction: Direction;
+};
+
 export type EnemyAttackedEvent = {
 	type: "enemyAttacked";
 	enemyId: string;
@@ -115,6 +131,12 @@ export type EnemySpawningStartedEvent = {
 	enemyId: string;
 	position: { x: number; y: number };
 	enemyType: string;
+};
+
+export type EnemyRagingStartedEvent = {
+	type: "enemyRagingStarted";
+	enemyId: string;
+	direction: Direction;
 };
 
 export type MaterialCollectedEvent = {
@@ -173,8 +195,8 @@ export type ShotEvent = {
 // Helper function to add EventMeta to base events
 export function withEventMeta(
 	baseEvent: GameEventInternal,
-	deltaTime: number,
-	occurredAt: number,
+	deltaTime: DeltaTime,
+	occurredAt: NowTime,
 ): GameEvent {
 	return {
 		...baseEvent,
@@ -186,8 +208,8 @@ export function withEventMeta(
 // Helper function to add EventMeta to multiple events
 export function withEventMetaMultiple(
 	baseEvents: GameEventInternal[],
-	deltaTime: number,
-	occurredAt: number,
+	deltaTime: DeltaTime,
+	occurredAt: NowTime,
 ): GameEvent[] {
 	return baseEvents.map((event) => withEventMeta(event, deltaTime, occurredAt));
 }

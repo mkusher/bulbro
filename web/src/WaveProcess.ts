@@ -1,11 +1,14 @@
 import type { Logger } from "pino";
-import { currentState } from "./currentState";
+import { waveState } from "./waveState";
 import { StageWithUi } from "./graphics/StageWithUi";
 import { TickProcess } from "./TickProcess";
 import { type PlayerControl } from "./controls";
 import { canvasSize, scale } from "./game-canvas";
 import { AutoCenterOnPlayerCamera } from "./graphics/AutoCenterOnPlayerCamera";
 import { InMemoryGameEventQueue } from "./game-events/GameEventQueue";
+import { DurationTracker } from "./DurationTracker";
+import { deltaTime } from "./time";
+import type { Signal } from "@preact/signals";
 
 export class WaveProcess {
 	#logger: Logger;
@@ -17,17 +20,20 @@ export class WaveProcess {
 	#camera: AutoCenterOnPlayerCamera;
 	#eventQueue: InMemoryGameEventQueue;
 	#tickProcess: TickProcess;
-	#startedAt: number = 0;
+	#durationTracker = new DurationTracker();
+	#gameCanvasSignal: Signal<HTMLCanvasElement | undefined>;
 
 	constructor(
 		baseLogger: Logger,
 		playerControls: PlayerControl[],
+		gameCanvasSignal: Signal<HTMLCanvasElement | undefined>,
 		debug: boolean,
 	) {
 		this.#logger = baseLogger.child({
 			component: "WaveProcess",
 		});
 		this.#debug = debug;
+		this.#gameCanvasSignal = gameCanvasSignal;
 		this.#camera = new AutoCenterOnPlayerCamera();
 		this.#scene = new StageWithUi(
 			this.#logger,
@@ -47,7 +53,7 @@ export class WaveProcess {
 	}
 
 	get gameCanvas() {
-		return this.#camera.canvas;
+		return this.#gameCanvasSignal.value;
 	}
 
 	get #ticker() {
@@ -56,7 +62,8 @@ export class WaveProcess {
 
 	async init() {
 		await this.#camera.init(canvasSize.value);
-		await this.#scene.init(currentState.value);
+		await this.#scene.init(waveState.value);
+		this.#gameCanvasSignal.value = this.#camera.canvas;
 		return this;
 	}
 
@@ -64,12 +71,12 @@ export class WaveProcess {
 		await Promise.all(this.#playerControls.map((c) => c.start()));
 		this.#ticker.add(this.tick);
 		this.#ticker.start();
-		this.#startedAt = performance.now();
+		this.#durationTracker.start();
 		return this.#resolvers.promise;
 	}
 
 	now() {
-		return performance.now() - this.#startedAt;
+		return this.#durationTracker.length();
 	}
 
 	async stop(type: "win" | "fail") {
@@ -84,8 +91,8 @@ export class WaveProcess {
 	tick = () => {
 		const i = this.#tickIndex++;
 		const now = this.now();
-		const delta = this.#ticker.deltaMS;
-		const state = currentState.value;
+		const delta = deltaTime(this.#ticker.deltaMS);
+		const state = waveState.value;
 		if (!state) {
 			this.#logger.warn({ i }, "No current state set");
 			return;
@@ -102,7 +109,7 @@ export class WaveProcess {
 			this.#logger.info({ state, i }, "Current state");
 		}
 		// Delegate per-tick updates to TickProcess and get events for network sync
-		currentState.value = this.#tickProcess.tick(state, delta, now);
+		waveState.value = this.#tickProcess.tick(state, delta, now);
 	};
 
 	get eventQueue() {

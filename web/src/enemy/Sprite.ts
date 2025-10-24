@@ -5,6 +5,7 @@ import {
 	enemyTypes,
 	type EnemyType as BulbaEnemyType,
 } from "./sprites/EnemiesFrames";
+import type { DeltaTime, NowTime } from "@/time";
 
 /**
  * Manages an enemy sprite graphic.
@@ -15,9 +16,9 @@ export interface EnemySprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void;
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void;
 
-	update(enemy: EnemyState, delta: number): void;
+	update(enemy: EnemyState, delta: DeltaTime, now: NowTime): void;
 
 	/**
 	 * Removes this sprite from its parent container.

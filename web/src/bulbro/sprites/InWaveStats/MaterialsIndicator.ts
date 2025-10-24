@@ -32,7 +32,7 @@ export class MaterialsIndicator {
 
 		this.#gfx.addChild(this.#materialsText);
 	}
-	appendTo(parent: PIXI.Container, layer?: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer?: PIXI.RenderLayer): void {
 		parent.addChild(this.#gfx);
 		layer?.attach(this.#gfx);
 	}

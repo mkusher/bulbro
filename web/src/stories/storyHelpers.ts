@@ -1,20 +1,17 @@
-import type { CurrentState } from "@/currentState";
+import type { WaveState } from "@/waveState";
 import { spawnBulbro } from "@/bulbro/BulbroState";
 import { type EnemyState } from "@/enemy/EnemyState";
 import { classicMapSize } from "@/game-canvas";
-import { BulbroState } from "@/bulbro";
-import type { ShotState } from "@/shot/ShotState";
+import { BulbroState, type Bulbro } from "@/bulbro";
+import { ShotState } from "@/shot/ShotState";
 import { baseStats } from "@/characters-definitions/base";
-import type { SpriteType } from "@/bulbro/Sprite";
 
 // Helper to create a minimal game state
-export function createGameState(
-	overrides: Partial<CurrentState> = {},
-): CurrentState {
+export function createGameState(overrides: Partial<WaveState> = {}): WaveState {
 	return {
 		mapSize: {
-			width: classicMapSize.width * 0.25,
-			height: classicMapSize.height * 0.25,
+			width: classicMapSize.width,
+			height: classicMapSize.height,
 		},
 		players: [],
 		enemies: [],
@@ -34,14 +31,13 @@ export function createGameState(
 // Helper to create a game state with a single bulbro
 export function createBulbroState(
 	id: string,
-	sprite: SpriteType,
 	position = { x: 1000, y: 750 },
-	bulbro = undefined as any,
-	overrides: Partial<CurrentState> = {},
-): CurrentState {
+	bulbro: Bulbro | undefined = undefined,
+	overrides: Partial<WaveState> = {},
+): WaveState {
 	const player = bulbro
-		? spawnBulbro(id, sprite, position, 0, 0, bulbro)
-		: createMockBulbro(id, sprite, position);
+		? spawnBulbro(id, bulbro.style.faceType, position, 0, 0, bulbro)
+		: createMockBulbro(id, "normal", position);
 
 	return createGameState({
 		players: [player],
@@ -52,8 +48,8 @@ export function createBulbroState(
 // Helper to create a game state with enemies
 export function createEnemyState(
 	enemies: Array<EnemyState>,
-	overrides: Partial<CurrentState> = {},
-): CurrentState {
+	overrides: Partial<WaveState> = {},
+): WaveState {
 	return createGameState({
 		enemies,
 		...overrides,
@@ -63,21 +59,24 @@ export function createEnemyState(
 // Helper to create a game state with shots
 export function createShotState(
 	shots: Array<Partial<ShotState>>,
-	overrides: Partial<CurrentState> = {},
-): CurrentState {
-	const shotStates: ShotState[] = shots.map((shot, i) => ({
-		id: `shot-${i}`,
-		shooterId: "player-1",
-		shooterType: "player" as const,
-		damage: 10,
-		speed: 200,
-		range: 500,
-		position: { x: 1000, y: 750 },
-		startPosition: { x: 1000, y: 750 },
-		direction: { x: 1, y: 0 },
-		knockback: 5,
-		...shot,
-	}));
+	overrides: Partial<WaveState> = {},
+): WaveState {
+	const shotStates: ShotState[] = shots.map(
+		(shot, i) =>
+			new ShotState({
+				id: `shot-${i}`,
+				shooterId: "player-1",
+				shooterType: "player" as const,
+				damage: 10,
+				speed: 200,
+				range: 500,
+				position: { x: 1000, y: 750 },
+				startPosition: { x: 1000, y: 750 },
+				direction: { x: 1, y: 0 },
+				knockback: 5,
+				...shot,
+			}),
+	);
 
 	return createGameState({
 		shots: shotStates,

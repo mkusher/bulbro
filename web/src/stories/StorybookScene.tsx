@@ -5,7 +5,7 @@ import { PlayingFieldTile } from "@/graphics/PlayingFieldTile";
 
 export interface StorybookSprite<S> {
 	init(): Promise<void>;
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void;
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void;
 	update(state: S, delta: number): void;
 	remove(): void;
 }

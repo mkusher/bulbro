@@ -27,7 +27,7 @@ export class PositionedContainer {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void {
 		parent.addChild(this.#container);
 		layer.attach(this.#container);
 	}

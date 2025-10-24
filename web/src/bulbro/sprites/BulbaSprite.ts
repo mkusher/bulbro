@@ -9,8 +9,10 @@ import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
 import { BodySprite } from "./BodySprite.ts";
 import { LegsSprite } from "./LegsSprite.ts";
 import { FaceSprite, type FaceType } from "./FaceSprite.ts";
-
-const sleep = (delay: number) => new Promise((res) => setTimeout(res, delay));
+import { WeaponsSprite } from "@/weapon/sprites/WeaponsSprite.ts";
+import { OutlineFilter } from "pixi-filters/outline";
+import type { DeltaTime, NowTime } from "@/time";
+import { deltaTime, nowTime } from "@/time";
 
 export { faces, faceTypes, type FaceType } from "./FaceSprite.ts";
 
@@ -25,35 +27,27 @@ export class BulbaSprite {
 	#positionedContainer: PositionedContainer = new PositionedContainer(
 		new PIXI.Container(),
 	);
-	#spriteScaling = 0.26;
 	#sprite!: PIXI.Container;
 	#debugSprite?: RectangleGfx;
+	#characterScaling = 0.25;
+	#weaponsSprite = new WeaponsSprite();
 	#movement?: AnimatedSprite<PIXI.Container>;
 	#idle?: AnimatedSprite<PIXI.Container>;
 	#whenHit?: AnimatedSprite<PIXI.Container>;
 	#whenDangerouslyHit?: AnimatedSprite<PIXI.Container>;
 	#characterSprites?: CharacterSprites<PIXI.Container>;
-
-	#bodySprite: BodySprite = new BodySprite();
-	#legsSprite = new LegsSprite();
-	#faceSprite: FaceSprite;
+	#faceType: FaceType;
 
 	constructor(faceType: FaceType, debug?: boolean) {
-		this.#faceSprite = new FaceSprite(faceType);
+		this.#faceType = faceType;
 		if (debug) {
 			this.#debugSprite = new RectangleGfx(fullSize, 0x0000ff, 0.9);
 		}
-		this.init();
 	}
 
-	async init() {
-		await Promise.all([
-			this.#bodySprite.init(),
-			this.#legsSprite.init(),
-			this.#faceSprite.init(),
-		]);
-		this.#idle = this.#createSwingingAnimation(40, 0.1);
-		this.#movement = this.#createSwingingAnimation(20, 0.2);
+	async init(bulbro: BulbroState) {
+		this.#idle = this.#createSwingingAnimation(80, 0.1);
+		this.#movement = this.#createSwingingAnimation(40, 0.2);
 		this.#whenHit = this.#createSwingingAnimation(50, 0.25);
 
 		this.#whenDangerouslyHit = this.#createSwingingAnimation(60, 0.3);
@@ -65,21 +59,22 @@ export class BulbaSprite {
 			idle: this.#idle,
 		});
 
-		this.#sprite = await this.#idle.getSprite(0);
+		this.#sprite = await this.#idle.getSprite(deltaTime(0));
 		this.#positionedContainer.addChild(this.#sprite);
 		if (this.#debugSprite) {
 			this.#debugSprite.appendTo(this.#positionedContainer.container);
 		}
+		this.update(bulbro, deltaTime(0), nowTime(0));
 	}
 
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer: PIXI.IRenderLayer): void {
+	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void {
 		this.#positionedContainer.appendTo(parent, layer);
 	}
 
-	update(player: BulbroState, delta: number) {
+	update(player: BulbroState, delta: DeltaTime, now: NowTime) {
 		this.#updatePosition(player.position, player.lastDirection);
 
 		if (this.#debugSprite) {
@@ -95,25 +90,32 @@ export class BulbaSprite {
 			this.#debugSprite.position.y = -rectangle.height;
 			this.#debugSprite.position.x = -rectangle.width / 2;
 		}
+		this.#weaponsSprite.update(player);
 
-		this.#characterSprites?.getSprite(player, delta).then((sprite) => {
+		this.#characterSprites?.getSprite(player, delta, now).then((sprite) => {
 			if (sprite) {
-				if (this.#sprite) {
-					sprite.x = this.#sprite.x;
-					sprite.y = this.#sprite.y;
-					this.#sprite?.removeFromParent();
-				}
-				this.#sprite = sprite;
-				this.#positionedContainer.addChild(sprite);
-				this.#updatePosition(player.position, player.lastDirection);
+				this.#renderCharacterSprite(player, sprite);
 			}
 		});
 	}
+
+	#renderCharacterSprite = (player: BulbroState, sprite: PIXI.Container) => {
+		if (this.#sprite) {
+			sprite.x = this.#sprite.x;
+			sprite.y = this.#sprite.y;
+			this.#sprite?.removeFromParent();
+		} else {
+		}
+		this.#sprite = sprite;
+		this.#positionedContainer.addChild(sprite);
+		this.#updatePosition(player.position, player.lastDirection);
+	};
 
 	/**
 	 * Removes this sprite from its parent container.
 	 */
 	remove(): void {
+		this.#weaponsSprite.remove();
 		this.#positionedContainer.remove();
 	}
 
@@ -126,27 +128,42 @@ export class BulbaSprite {
 	}
 
 	#createSwingingAnimation(frameSpeed: number, amplitude: number) {
-		const swingingWalk = new SwingingAnimation(
+		const swinging = new SwingingAnimation(
 			(frame) => this.#buildCharacter(frame),
 			frameSpeed,
 			amplitude,
 			{ x: -0.8, y: 1 },
 		);
-		return swingingWalk.createAnimatedSprite();
+		return swinging.createAnimatedSprite();
 	}
 
 	async #buildCharacter(frame: number) {
-		await sleep(1);
-		const bodySize = this.#bodySprite.size;
+		const bodySprite = new BodySprite();
+		const legsSprite = new LegsSprite();
+
+		const faceSprite = new FaceSprite(this.#faceType);
+		await Promise.all([
+			bodySprite.init(),
+			legsSprite.init(),
+			faceSprite.init(),
+		]);
+		const bodySize = bodySprite.size;
 		const character = new PIXI.Container();
+		const weaponsContainer = new PIXI.Container();
 		const scaling = new PIXI.Container();
-		scaling.scale = this.#spriteScaling;
-		character.addChild(scaling);
-		this.#bodySprite.appendTo(scaling);
-		this.#legsSprite.appendTo(scaling, bodySize);
-		this.#faceSprite.appendTo(scaling, bodySize);
-		scaling.y = -character.height - 5;
-		scaling.x = -character.width / 2;
+		scaling.scale = this.#characterScaling;
+		weaponsContainer.addChild(scaling);
+		character.addChild(weaponsContainer);
+		bodySprite.appendTo(scaling);
+		legsSprite.appendTo(scaling, bodySize);
+		faceSprite.appendTo(scaling, bodySize);
+		scaling.filters = [new OutlineFilter(2, 0x000000, 1.0)];
+
+		// Add weapons sprite on top of body
+		this.#weaponsSprite.appendTo(weaponsContainer);
+
+		weaponsContainer.y = -character.height - 5;
+		weaponsContainer.x = -character.width / 2;
 		return character;
 	}
 }
