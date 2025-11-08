@@ -33,6 +33,8 @@ export class TouchscreenControl implements PlayerControl {
 		window.removeEventListener("touchend", this.#handleEnd);
 		window.removeEventListener("touchcancel", this.#handleCancel);
 		window.removeEventListener("touchmove", this.#handleMove);
+    this.#direction.value = zeroPoint()
+    this.#startPoint.value = zeroPoint()
 	}
 
 	getDirection() {

@@ -32,6 +32,8 @@ export class KeyboardControl implements PlayerControl {
 	async stop() {
 		window.removeEventListener("keydown", this.#onKeyDown);
 		window.removeEventListener("keyup", this.#onKeyUp);
+    this.#signal.value = zeroPoint()
+    this.#keys = {}
 	}
 
 	get direction() {
