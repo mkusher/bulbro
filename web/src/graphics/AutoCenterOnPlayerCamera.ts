@@ -1,5 +1,11 @@
-import type { Position, Size } from "@/geometry";
-import { canvasSize, computedMapSizeForWindow } from "@/game-canvas";
+import {
+	canvasSize,
+	computedMapSizeForWindow,
+} from "@/game-canvas";
+import type {
+	Position,
+	Size,
+} from "@/geometry";
 import { Camera } from "./Camera";
 
 /**
@@ -10,38 +16,83 @@ export class AutoCenterOnPlayerCamera extends Camera {
 	/**
 	 * Updates camera position to center on player.
 	 */
-	update(playerPosition: Position) {
-		this.#moveCamera(playerPosition);
+	update(
+		playerPosition: Position,
+	) {
+		this.#moveCamera(
+			playerPosition,
+		);
 	}
 
-	#moveCamera(playerPosition: Position) {
+	#moveCamera(
+		playerPosition: Position,
+	) {
 		if (
-			!this.#isSmallScreen(computedMapSizeForWindow.value, canvasSize.value)
+			!this.#isSmallScreen(
+				computedMapSizeForWindow.value,
+				canvasSize.value,
+			)
 		) {
 			this.#moveToCenter();
 			return;
 		}
-		const scale = this.stage.scale.x;
-		const position = {
-			x: playerPosition.x * scale,
-			y: playerPosition.y * scale,
-		};
+		const scale =
+			this
+				.stage
+				.scale
+				.x;
+		const position =
+			{
+				x:
+					playerPosition.x *
+					scale,
+				y:
+					playerPosition.y *
+					scale,
+			};
 
-		this.stage.x = -position.x + canvasSize.value.width / 2;
-		this.stage.y = -position.y + canvasSize.value.height / 2;
+		this.stage.x =
+			-position.x +
+			canvasSize
+				.value
+				.width /
+				2;
+		this.stage.y =
+			-position.y +
+			canvasSize
+				.value
+				.height /
+				2;
 	}
 
-	#isSmallScreen(playingFieldSize: Size, canvasSize: Size) {
+	#isSmallScreen(
+		playingFieldSize: Size,
+		canvasSize: Size,
+	) {
 		return (
-			playingFieldSize.width > canvasSize.width ||
-			playingFieldSize.height > canvasSize.height
+			playingFieldSize.width >
+				canvasSize.width ||
+			playingFieldSize.height >
+				canvasSize.height
 		);
 	}
 
 	#moveToCenter() {
 		this.stage.x =
-			(canvasSize.value.width - computedMapSizeForWindow.value.width) / 2;
+			(canvasSize
+				.value
+				.width -
+				computedMapSizeForWindow
+					.value
+					.width) /
+			2;
 		this.stage.y =
-			(canvasSize.value.height - computedMapSizeForWindow.value.height) / 2;
+			(canvasSize
+				.value
+				.height -
+				computedMapSizeForWindow
+					.value
+					.height) /
+			2;
 	}
 }

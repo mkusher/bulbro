@@ -1,21 +1,25 @@
-import { useEffect, useRef } from "preact/hooks";
 import * as PIXI from "pixi.js";
+import {
+	useEffect,
+	useRef,
+} from "preact/hooks";
 import { Assets } from "@/Assets";
 
-export type PixiAppProps = {
-	width?: number;
-	height?: number;
-	minWidth?: number;
-	minHeight?: number;
-	backgroundColor?: number;
-	className?: string;
-	style?: React.CSSProperties;
-	onInit?: (
-		app: PIXI.Application,
-		canvas: HTMLDivElement,
-	) => Promise<void> | void;
-	dependencies?: any[];
-};
+export type PixiAppProps =
+	{
+		width?: number;
+		height?: number;
+		minWidth?: number;
+		minHeight?: number;
+		backgroundColor?: number;
+		className?: string;
+		style?: React.CSSProperties;
+		onInit?: (
+			app: PIXI.Application,
+			canvas: HTMLDivElement,
+		) => Promise<void> | void;
+		dependencies?: any[];
+	};
 
 export function PixiApp({
 	width,
@@ -28,61 +32,120 @@ export function PixiApp({
 	onInit,
 	dependencies = [],
 }: PixiAppProps) {
-	const divRef = useRef<HTMLDivElement>(null);
+	const divRef =
+		useRef<HTMLDivElement>(
+			null,
+		);
 
 	useEffect(() => {
-		const container = divRef.current;
-		if (!container) return;
+		const container =
+			divRef.current;
+		if (
+			!container
+		)
+			return;
 
-		let app: PIXI.Application | null = null;
+		let app: PIXI.Application | null =
+			null;
 
-		const initPixi = async () => {
-			const rect = container.getBoundingClientRect();
-			const initialWidth =
-				width || Math.max(rect.width || minWidth || 100, minWidth || 100);
-			const initialHeight =
-				height || Math.max(rect.height || minHeight || 100, minHeight || 100);
+		const initPixi =
+			async () => {
+				const rect =
+					container.getBoundingClientRect();
+				const initialWidth =
+					width ||
+					Math.max(
+						rect.width ||
+							minWidth ||
+							100,
+						minWidth ||
+							100,
+					);
+				const initialHeight =
+					height ||
+					Math.max(
+						rect.height ||
+							minHeight ||
+							100,
+						minHeight ||
+							100,
+					);
 
-			app = new PIXI.Application();
-			await app.init({
-				width: initialWidth,
-				height: initialHeight,
-				backgroundColor,
-			});
+				app =
+					new PIXI.Application();
+				await app.init(
+					{
+						width:
+							initialWidth,
+						height:
+							initialHeight,
+						backgroundColor,
+					},
+				);
 
-			if (onInit) {
-				await onInit(app, container);
-			}
+				if (
+					onInit
+				) {
+					await onInit(
+						app,
+						container,
+					);
+				}
 
-			await Assets.preloadAll();
+				await Assets.preloadAll();
 
-			await new Promise((resolve) => setTimeout(resolve, 100));
+				await new Promise(
+					(
+						resolve,
+					) =>
+						setTimeout(
+							resolve,
+							100,
+						),
+				);
 
-			const dataUrl = app.canvas.toDataURL();
+				const dataUrl =
+					app.canvas.toDataURL();
 
-			const img = document.createElement("img");
-			img.src = dataUrl;
-			img.style.width = "100%";
-			img.style.height = "100%";
+				const img =
+					document.createElement(
+						"img",
+					);
+				img.src =
+					dataUrl;
+				img.style.width =
+					"100%";
+				img.style.height =
+					"100%";
 
-			container.appendChild(img);
+				container.appendChild(
+					img,
+				);
 
-			app.ticker?.stop();
-			app.destroy();
-			app = null;
-		};
+				app.ticker?.stop();
+				app.destroy();
+				app =
+					null;
+			};
 
-		const initPromise = initPixi();
+		const initPromise =
+			initPixi();
 
 		return async () => {
 			await initPromise;
-			if (app) {
+			if (
+				app
+			) {
 				try {
 					app.ticker?.stop();
 					app.destroy();
-					app = null;
+					app =
+						null;
 				} catch (e) {
-					console.error("PixiApp cleanup failed", e);
+					console.error(
+						"PixiApp cleanup failed",
+						e,
+					);
 				}
 			}
 		};
@@ -98,13 +161,29 @@ export function PixiApp({
 
 	return (
 		<div
-			ref={divRef}
-			className={className}
+			ref={
+				divRef
+			}
+			className={
+				className
+			}
 			style={{
-				width: width ? `${width}px` : "100%",
-				height: height ? `${height}px` : "100%",
-				minWidth: minWidth ? `${minWidth}px` : undefined,
-				minHeight: minHeight ? `${minHeight}px` : undefined,
+				width:
+					width
+						? `${width}px`
+						: "100%",
+				height:
+					height
+						? `${height}px`
+						: "100%",
+				minWidth:
+					minWidth
+						? `${minWidth}px`
+						: undefined,
+				minHeight:
+					minHeight
+						? `${minHeight}px`
+						: undefined,
 				...style,
 			}}
 		/>

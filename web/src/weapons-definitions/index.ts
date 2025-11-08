@@ -22,15 +22,16 @@ export {
 	sword,
 };
 
-export const weapons = [
-	ak47,
-	brick,
-	doubleBarrelShotgun,
-	fist,
-	hand,
-	knife,
-	laserGun,
-	pistol,
-	smg,
-	sword,
-] as const;
+export const weapons =
+	[
+		ak47,
+		brick,
+		doubleBarrelShotgun,
+		fist,
+		hand,
+		knife,
+		laserGun,
+		pistol,
+		smg,
+		sword,
+	] as const;

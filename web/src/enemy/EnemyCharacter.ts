@@ -1,11 +1,12 @@
+import { type } from "arktype";
 import type { EnemyStats } from "../enemy";
 import type { Weapon } from "../weapon";
 import type { EnemyType } from "./EnemyState";
-import { type } from "arktype";
 
-export const EnemyBehaviorsType = type(
-	"'default' | 'keeping-distance' | 'rage-running'",
-);
+export const EnemyBehaviorsType =
+	type(
+		"'default' | 'keeping-distance' | 'rage-running'",
+	);
 /**
  * Character model for an enemy.
  */

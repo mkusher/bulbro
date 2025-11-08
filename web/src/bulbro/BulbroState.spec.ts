@@ -1,18 +1,30 @@
-import { describe, it, expect } from "bun:test";
-import { BulbroState, spawnBulbro } from "./BulbroState";
-import { wellRoundedBulbro } from "../characters-definitions/";
+import {
+	describe,
+	expect,
+	it,
+} from "bun:test";
 import { zeroPoint } from "@/geometry";
+import { wellRoundedBulbro } from "../characters-definitions/";
+import {
+	BulbroState,
+	spawnBulbro,
+} from "./BulbroState";
 
 describe("BulbroState", () => {
 	it("should instantiate without errors", () => {
-		const state = spawnBulbro(
-			"test",
-			"normal",
-			zeroPoint(),
-			0,
-			0,
-			wellRoundedBulbro,
+		const state =
+			spawnBulbro(
+				"test",
+				"normal",
+				zeroPoint(),
+				0,
+				0,
+				wellRoundedBulbro,
+			);
+		expect(
+			state,
+		).toBeInstanceOf(
+			BulbroState,
 		);
-		expect(state).toBeInstanceOf(BulbroState);
 	});
 });

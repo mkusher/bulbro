@@ -1,24 +1,35 @@
 import type { Logger } from "pino";
+import type { PlayerControl } from "./controls";
+import { currentGameCanvas } from "./currentGameProcess";
+import { classicMapSize } from "./game-canvas";
+import {
+	type GameEvent,
+	withEventMeta,
+} from "./game-events/GameEvents";
+import type { Difficulty } from "./game-formulas";
 import { logger as defaultLogger } from "./logger";
+import type { Player } from "./player";
+import {
+	deltaTime,
+	nowTime,
+} from "./time";
+import { WaveProcess } from "./WaveProcess";
 import {
 	createInitialState,
-	waveState,
 	nextWave,
 	type WaveState,
+	waveState,
 } from "./waveState";
-import { type Player } from "./player";
-import { type Difficulty } from "./game-formulas";
-import { WaveProcess } from "./WaveProcess";
-import { classicMapSize } from "./game-canvas";
-import type { PlayerControl } from "./controls";
-import { withEventMeta, type GameEvent } from "./game-events/GameEvents";
-import { deltaTime, nowTime } from "./time";
-import { currentGameCanvas } from "./currentGameProcess";
 
-export type WavePromises = {
-	waveInitPromise: Promise<WaveProcess>;
-	wavePromise: Promise<"win" | "fail" | undefined>;
-};
+export type WavePromises =
+	{
+		waveInitPromise: Promise<WaveProcess>;
+		wavePromise: Promise<
+			| "win"
+			| "fail"
+			| undefined
+		>;
+	};
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
@@ -27,14 +38,22 @@ export class GameProcess {
 	#logger: Logger;
 	#waveProcess?: WaveProcess;
 	#debug: boolean;
-	#playerControls: PlayerControl[] = [];
+	#playerControls: PlayerControl[] =
+		[];
 
-	constructor(debug: boolean) {
-		this.#debug = debug;
-		this.#logger = defaultLogger.child({
-			component: "GameProcess",
-			debug,
-		});
+	constructor(
+		debug: boolean,
+	) {
+		this.#debug =
+			debug;
+		this.#logger =
+			defaultLogger.child(
+				{
+					component:
+						"GameProcess",
+					debug,
+				},
+			);
 	}
 
 	/**
@@ -47,48 +66,101 @@ export class GameProcess {
 		difficulty: Difficulty,
 		duration: number,
 	) {
-		this.#logger.info({ difficulty, players, duration }, "starting the game");
-
-		// Initial game state
-		waveState.value = createInitialState(
-			players,
-			classicMapSize,
-			difficulty,
-			1,
-			duration,
+		this.#logger.info(
+			{
+				difficulty,
+				players,
+				duration,
+			},
+			"starting the game",
 		);
 
-		return this.startWave(playerControls);
+		// Initial game state
+		waveState.value =
+			createInitialState(
+				players,
+				classicMapSize,
+				difficulty,
+				1,
+				duration,
+			);
+
+		return this.startWave(
+			playerControls,
+		);
 	}
 
-	startWave(playerControls: PlayerControl[]): WavePromises {
-		this.#playerControls = playerControls;
+	startWave(
+		playerControls: PlayerControl[],
+	): WavePromises {
+		this.#playerControls =
+			playerControls;
 		return this.#startWaveProcess();
 	}
 
-	async startNextWave(state: WaveState) {
-		if (!waveState.value) {
-			this.#logger.error("no state set to start next wave");
-			throw new Error("No state set for the game");
+	async startNextWave(
+		state: WaveState,
+	) {
+		if (
+			!waveState.value
+		) {
+			this.#logger.error(
+				"no state set to start next wave",
+			);
+			throw new Error(
+				"No state set for the game",
+			);
 		}
-		const tickEvent = withEventMeta({ type: "tick" }, deltaTime(0), nowTime(0));
-		waveState.value = nextWave(
-			state,
-			tickEvent as Extract<GameEvent, { type: "tick" }>,
+		const tickEvent =
+			withEventMeta(
+				{
+					type: "tick",
+				},
+				deltaTime(
+					0,
+				),
+				nowTime(
+					0,
+				),
+			);
+		waveState.value =
+			nextWave(
+				state,
+				tickEvent as Extract<
+					GameEvent,
+					{
+						type: "tick";
+					}
+				>,
+			);
+		this.#logger.info(
+			{
+				state:
+					waveState.value,
+			},
+			"starting the next wave",
 		);
-		this.#logger.info({ state: waveState.value }, "starting the next wave");
 		return this.#startWaveProcess();
 	}
 
 	#startWaveProcess() {
-		this.#waveProcess = new WaveProcess(
-			this.#logger,
-			this.#playerControls,
-			currentGameCanvas,
-			this.#debug,
-		);
-		const waveInitPromise = this.#waveProcess.init();
-		const wavePromise = waveInitPromise.then(() => this.#waveProcess?.start());
+		this.#waveProcess =
+			new WaveProcess(
+				this
+					.#logger,
+				this
+					.#playerControls,
+				currentGameCanvas,
+				this
+					.#debug,
+			);
+		const waveInitPromise =
+			this.#waveProcess.init();
+		const wavePromise =
+			waveInitPromise.then(
+				() =>
+					this.#waveProcess?.start(),
+			);
 		return {
 			waveInitPromise,
 			wavePromise,
@@ -96,6 +168,8 @@ export class GameProcess {
 	}
 
 	get gameCanvas() {
-		return this.#waveProcess?.gameCanvas;
+		return this
+			.#waveProcess
+			?.gameCanvas;
 	}
 }

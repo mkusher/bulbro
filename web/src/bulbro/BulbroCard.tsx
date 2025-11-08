@@ -1,65 +1,128 @@
+import {
+	Card,
+	CardContent,
+	CardHeader,
+} from "@/ui/shadcn/card";
+import type { StatBonus } from "../game-formulas";
 import type { Bulbro } from "./BulbroCharacter";
 import { BulbroDisplay } from "./BulbroDisplay";
 import { BulbroTitle } from "./BulbroTitle";
-import { Card, CardContent, CardHeader } from "@/ui/shadcn/card";
-import type { StatBonus } from "../game-formulas";
 
-export type BulbroCardProps = {
-	bulbro: Bulbro;
-	className?: string;
-	onClick?: () => void;
-	showDetails?: boolean;
-	displayWidth?: number;
-	displayHeight?: number;
-	responsive?: boolean;
-};
+export type BulbroCardProps =
+	{
+		bulbro: Bulbro;
+		className?: string;
+		onClick?: () => void;
+		showDetails?: boolean;
+		displayWidth?: number;
+		displayHeight?: number;
+		responsive?: boolean;
+	};
 
 // Helper component to display stat bonuses with colors
-function StatBonusDisplay({ bonuses }: { bonuses: StatBonus }) {
-	const percentageStats = new Set([
-		"speed",
-		"damage",
-		"meleeDamage",
-		"rangedDamage",
-		"elementalDamage",
-		"attackSpeed",
-		"critChance",
-		"engineering",
-		"luck",
-		"pickupRange",
-	]);
+function StatBonusDisplay({
+	bonuses,
+}: {
+	bonuses: StatBonus;
+}) {
+	const percentageStats =
+		new Set(
+			[
+				"speed",
+				"damage",
+				"meleeDamage",
+				"rangedDamage",
+				"elementalDamage",
+				"attackSpeed",
+				"critChance",
+				"engineering",
+				"luck",
+				"pickupRange",
+			],
+		);
 
-	const statEntries = Object.entries(bonuses).filter(
-		([_, value]) => value !== 0,
-	);
+	const statEntries =
+		Object.entries(
+			bonuses,
+		).filter(
+			([
+				_,
+				value,
+			]) =>
+				value !==
+				0,
+		);
 
-	if (statEntries.length === 0) {
+	if (
+		statEntries.length ===
+		0
+	) {
 		return null;
 	}
 
 	return (
 		<div className="space-y-0.5">
-			<strong className="text-[9px]">Bonuses:</strong>
-			{statEntries.map(([key, value]) => {
-				const isPositive = value > 0;
-				const isPercentage = percentageStats.has(key);
-				const colorClass = isPositive
-					? "text-green-600 dark:text-green-400"
-					: "text-red-600 dark:text-red-400";
-				const sign = isPositive ? "+" : "";
-				const suffix = isPercentage ? "%" : "";
+			<strong className="text-[9px]">
+				Bonuses:
+			</strong>
+			{statEntries.map(
+				([
+					key,
+					value,
+				]) => {
+					const isPositive =
+						value >
+						0;
+					const isPercentage =
+						percentageStats.has(
+							key,
+						);
+					const colorClass =
+						isPositive
+							? "text-green-600 dark:text-green-400"
+							: "text-red-600 dark:text-red-400";
+					const sign =
+						isPositive
+							? "+"
+							: "";
+					const suffix =
+						isPercentage
+							? "%"
+							: "";
 
-				// Convert camelCase to readable format
-				const readableKey = key.replace(/([A-Z])/g, " $1").toLowerCase();
+					// Convert camelCase to readable format
+					const readableKey =
+						key
+							.replace(
+								/([A-Z])/g,
+								" $1",
+							)
+							.toLowerCase();
 
-				return (
-					<div key={key} className={`text-[8px] ${colorClass}`}>
-						{readableKey}: {sign}
-						{value}
-						{suffix}
-					</div>
-				);
-			})}
+					return (
+						<div
+							key={
+								key
+							}
+							className={`text-[8px] ${colorClass}`}
+						>
+							{
+								readableKey
+							}
+							:{" "}
+							{
+								sign
+							}
+							{
+								value
+							}
+							{
+								suffix
+							}
+						</div>
+					);
+				},
+			)}
 		</div>
 	);
 }
@@ -74,23 +137,41 @@ export function BulbroCard({
 	responsive = true,
 }: BulbroCardProps) {
 	// Calculate responsive dimensions
-	const getResponsiveDimensions = () => {
-		if (!responsive) {
+	const getResponsiveDimensions =
+		() => {
+			if (
+				!responsive
+			) {
+				return {
+					width:
+						Math.max(
+							displayWidth,
+							80,
+						),
+					height:
+						Math.max(
+							displayHeight,
+							80,
+						),
+				};
+			}
+
+			// Responsive sizing based on screen breakpoints
+			// iPhone Mini: 375px, iPhone Max: 428px, iPad Mini: 768px, iPad 10: 820px, iPad 13: 1024px
 			return {
-				width: Math.max(displayWidth, 80),
-				height: Math.max(displayHeight, 80),
+				width:
+					displayWidth,
+				height:
+					displayHeight,
 			};
-		}
-
-		// Responsive sizing based on screen breakpoints
-		// iPhone Mini: 375px, iPhone Max: 428px, iPad Mini: 768px, iPad 10: 820px, iPad 13: 1024px
-		return {
-			width: displayWidth,
-			height: displayHeight,
 		};
-	};
 
-	const { width: actualWidth, height: actualHeight } =
+	const {
+		width:
+			actualWidth,
+		height:
+			actualHeight,
+	} =
 		getResponsiveDimensions();
 
 	return (
@@ -100,10 +181,16 @@ export function BulbroCard({
 					? "w-full max-w-[220px] sm:max-w-[300px] md:max-w-[380px] lg:max-w-[460px] xl:max-w-[500px]"
 					: ""
 			} ${className}`}
-			onClick={onClick}
+			onClick={
+				onClick
+			}
 		>
 			<CardHeader className="pb-1 px-2 pt-2">
-				<BulbroTitle bulbro={bulbro} />
+				<BulbroTitle
+					bulbro={
+						bulbro
+					}
+				/>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-1 px-2 pb-2">
 				<div
@@ -121,14 +208,31 @@ export function BulbroCard({
 							: undefined
 					}
 				>
-					<BulbroDisplay bulbro={bulbro} />
+					<BulbroDisplay
+						bulbro={
+							bulbro
+						}
+					/>
 				</div>
 				{showDetails && (
 					<div className="text-[8px] text-muted-foreground space-y-0.5">
-						<StatBonusDisplay bonuses={bulbro.statBonuses} />
-						{bulbro.style.wearingItems.length > 0 && (
+						<StatBonusDisplay
+							bonuses={
+								bulbro.statBonuses
+							}
+						/>
+						{bulbro
+							.style
+							.wearingItems
+							.length >
+							0 && (
 							<div className="truncate">
-								<strong className="text-[9px]">Items:</strong> {bulbro.style.wearingItems.join(", ")}
+								<strong className="text-[9px]">
+									Items:
+								</strong>{" "}
+								{bulbro.style.wearingItems.join(
+									", ",
+								)}
 							</div>
 						)}
 					</div>

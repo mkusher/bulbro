@@ -1,12 +1,22 @@
 import { MainKeyboardControl } from "./MainKeyboardControl";
-import { touchscreenControl } from "./TouchscreenJoystick";
 import { MultipleControl } from "./MultipleControl";
+import { touchscreenControl } from "./TouchscreenJoystick";
+
 export { MainKeyboardControl } from "./MainKeyboardControl";
-export { TouchscreenControl } from "./TouchscreenControl";
 export { MultipleControl } from "./MultipleControl";
 export type { PlayerControl } from "./PlayerControl";
-export { TouchscreenJoystick, touchscreenControl } from "./TouchscreenJoystick";
 export { SecondaryKeyboardControl } from "./SecondaryKeyboardControl";
+export { TouchscreenControl } from "./TouchscreenControl";
+export {
+	TouchscreenJoystick,
+	touchscreenControl,
+} from "./TouchscreenJoystick";
 
-export const createMainControls = () =>
-	new MultipleControl([new MainKeyboardControl(), touchscreenControl]);
+export const createMainControls =
+	() =>
+		new MultipleControl(
+			[
+				new MainKeyboardControl(),
+				touchscreenControl,
+			],
+		);

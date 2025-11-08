@@ -1,128 +1,239 @@
-import { wsUrl } from "./clientConfig";
-import { WebsocketConnection } from "./websocket/WebsocketConnection";
-import { type Logger } from "@/logger";
-import { NetworkGameConnection } from "./NetworkGameConnection";
-import {
-	parseMessage,
-	type Lobby,
-	type WebsocketMessage,
-	type PlayerAttendee,
-} from "./LobbySocketMessages";
 import type { GameProcess } from "@/GameProcess";
+import type { Logger } from "@/logger";
+import { wsUrl } from "./clientConfig";
 import { isLocalPlayerHost } from "./currentLobby";
+import {
+	type Lobby,
+	type PlayerAttendee,
+	parseMessage,
+	type WebsocketMessage,
+} from "./LobbySocketMessages";
+import { NetworkGameConnection } from "./NetworkGameConnection";
+import { WebsocketConnection } from "./websocket/WebsocketConnection";
 import { WebsocketInGameCommunicationChannel } from "./websocket/WebsocketInGameCommunicationChannel";
 
-export class LobbyConnection implements Lobby {
+export class LobbyConnection
+	implements
+		Lobby
+{
 	#logger: Logger;
 	#lobby: Lobby;
 	#connection!: WebsocketConnection;
 	#unsubscribe!: () => void;
 	#userId: string;
-	#processMessage: (message: typeof WebsocketMessage.infer) => void;
+	#processMessage: (
+		message: typeof WebsocketMessage.infer,
+	) => void;
 	constructor(
 		logger: Logger,
 		userId: string,
 		lobby: Lobby,
-		processMessage: (message: typeof WebsocketMessage.infer) => void,
+		processMessage: (
+			message: typeof WebsocketMessage.infer,
+		) => void,
 		connection?: WebsocketConnection,
 		unsubscribe = () => {},
 	) {
-		this.#logger = logger.child({ component: "lobby-connection" });
-		this.#userId = userId;
-		this.#lobby = lobby;
-		this.#processMessage = processMessage;
-		this.#unsubscribe = unsubscribe;
-		if (connection) {
-			this.#connection = connection;
+		this.#logger =
+			logger.child(
+				{
+					component:
+						"lobby-connection",
+				},
+			);
+		this.#userId =
+			userId;
+		this.#lobby =
+			lobby;
+		this.#processMessage =
+			processMessage;
+		this.#unsubscribe =
+			unsubscribe;
+		if (
+			connection
+		) {
+			this.#connection =
+				connection;
 		} else {
 			this.#startLobbyWebsocket();
 		}
 	}
 
 	async #startLobbyWebsocket() {
-		this.#connection = new WebsocketConnection(
-			wsUrl,
-			this.#logger.child({
-				component: "websocket-connection",
-			}),
+		this.#connection =
+			new WebsocketConnection(
+				wsUrl,
+				this.#logger.child(
+					{
+						component:
+							"websocket-connection",
+					},
+				),
+			);
+		this.#unsubscribe =
+			this.#connection.onMessage(
+				(
+					e,
+				) => {
+					const message =
+						parseMessage(
+							e.data,
+						);
+					return this.#processMessage(
+						message,
+					);
+				},
+			);
+
+		this.#connection.sendObject(
+			{
+				userId:
+					this
+						.#userId,
+				type: "auth",
+			},
 		);
-		this.#unsubscribe = this.#connection.onMessage((e) => {
-			const message = parseMessage(e.data);
-			return this.#processMessage(message);
-		});
 
-		this.#connection.sendObject({ userId: this.#userId, type: "auth" });
-
-		return this.#connection;
+		return this
+			.#connection;
 	}
 
-	createGame(gameProcess: GameProcess) {
+	createGame(
+		gameProcess: GameProcess,
+	) {
 		this.#unsubscribe();
 		return new NetworkGameConnection(
-			this.#logger,
-			new WebsocketInGameCommunicationChannel(this.#connection, this.#logger),
-			this.#lobby,
+			this
+				.#logger,
+			new WebsocketInGameCommunicationChannel(
+				this
+					.#connection,
+				this
+					.#logger,
+			),
+			this
+				.#lobby,
 			gameProcess,
 			isLocalPlayerHost.value,
 		);
 	}
 
 	get id() {
-		return this.#lobby.id;
+		return this
+			.#lobby
+			.id;
 	}
 
 	get createdAt() {
-		return this.#lobby.createdAt;
+		return this
+			.#lobby
+			.createdAt;
 	}
 
 	get hostId() {
-		return this.#lobby.hostId;
+		return this
+			.#lobby
+			.hostId;
 	}
 
 	get players() {
-		return this.#lobby.players;
+		return this
+			.#lobby
+			.players;
 	}
 
-	addPlayers(players: PlayerAttendee[]) {
+	addPlayers(
+		players: PlayerAttendee[],
+	) {
 		return players.reduce(
-			(lobby: LobbyConnection, player: PlayerAttendee) =>
-				lobby.addPlayer(player),
+			(
+				lobby: LobbyConnection,
+				player: PlayerAttendee,
+			) =>
+				lobby.addPlayer(
+					player,
+				),
 			this,
 		);
 	}
-	addPlayer(player: PlayerAttendee) {
-		if (this.hasPlayer(player)) {
+	addPlayer(
+		player: PlayerAttendee,
+	) {
+		if (
+			this.hasPlayer(
+				player,
+			)
+		) {
 			return this;
 		}
 		return new LobbyConnection(
-			this.#logger,
-			this.#userId,
+			this
+				.#logger,
+			this
+				.#userId,
 			{
-				...this.#lobby,
-				players: [...this.#lobby.players, player],
+				...this
+					.#lobby,
+				players:
+					[
+						...this
+							.#lobby
+							.players,
+						player,
+					],
 			},
-			this.#processMessage,
-			this.#connection,
-			this.#unsubscribe,
+			this
+				.#processMessage,
+			this
+				.#connection,
+			this
+				.#unsubscribe,
 		);
 	}
-	hasPlayer(player: PlayerAttendee) {
-		return this.#lobby.players.find((p) => p.id === player.id);
+	hasPlayer(
+		player: PlayerAttendee,
+	) {
+		return this.#lobby.players.find(
+			(
+				p,
+			) =>
+				p.id ===
+				player.id,
+		);
 	}
-	removePlayer(player: PlayerAttendee) {
-		if (!this.hasPlayer(player)) {
+	removePlayer(
+		player: PlayerAttendee,
+	) {
+		if (
+			!this.hasPlayer(
+				player,
+			)
+		) {
 			return this;
 		}
 		return new LobbyConnection(
-			this.#logger,
-			this.#userId,
+			this
+				.#logger,
+			this
+				.#userId,
 			{
-				...this.#lobby,
-				players: this.players.filter((p) => p.id !== player.id),
+				...this
+					.#lobby,
+				players:
+					this.players.filter(
+						(
+							p,
+						) =>
+							p.id !==
+							player.id,
+					),
 			},
-			this.#processMessage,
-			this.#connection,
-			this.#unsubscribe,
+			this
+				.#processMessage,
+			this
+				.#connection,
+			this
+				.#unsubscribe,
 		);
 	}
 }

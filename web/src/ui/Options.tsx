@@ -1,16 +1,22 @@
-import { BulbroCard } from "../bulbro/BulbroDisplay";
 import type { Bulbro } from "../bulbro";
+import { BulbroCard } from "../bulbro/BulbroDisplay";
 import { WithContainerWidth } from "./WithContainerWidth";
 
-export type OptionProps<V> = {
-	value: V;
-	onSelect?: (value: V) => void;
-	selected: boolean;
-};
+export type OptionProps<
+	V,
+> =
+	{
+		value: V;
+		onSelect?: (
+			value: V,
+		) => void;
+		selected: boolean;
+	};
 
-export type BulbroStyleOptionProps = OptionProps<Bulbro> & {
-	showDetails?: boolean;
-};
+export type BulbroStyleOptionProps =
+	OptionProps<Bulbro> & {
+		showDetails?: boolean;
+	};
 
 export function BulbroStyleOption({
 	value,
@@ -19,13 +25,29 @@ export function BulbroStyleOption({
 }: BulbroStyleOptionProps) {
 	return (
 		<WithContainerWidth>
-			{({ width, height }) => (
+			{({
+				width,
+				height,
+			}) => (
 				<BulbroCard
-					bulbro={value}
-					showDetails={showDetails}
-					displayWidth={width}
-					displayHeight={Math.max(height, 50)}
-					className={selected ? "ring-2 ring-primary" : ""}
+					bulbro={
+						value
+					}
+					showDetails={
+						showDetails
+					}
+					displayWidth={
+						width
+					}
+					displayHeight={Math.max(
+						height,
+						50,
+					)}
+					className={
+						selected
+							? "ring-2 ring-primary"
+							: ""
+					}
 				/>
 			)}
 		</WithContainerWidth>
@@ -39,13 +61,23 @@ export function BulbroOption({
 }: OptionProps<Bulbro>) {
 	return (
 		<option
-			selected={selected}
-			value={value.id}
-			onSelect={(e) => {
-				onSelect?.(value);
+			selected={
+				selected
+			}
+			value={
+				value.id
+			}
+			onSelect={(
+				e,
+			) => {
+				onSelect?.(
+					value,
+				);
 			}}
 		>
-			{value.name}
+			{
+				value.name
+			}
 		</option>
 	);
 }

@@ -1,7 +1,10 @@
 import type { EnemyEvent } from "@/game-events/GameEvents";
-import type { EnemyState } from "./EnemyState";
+import type {
+	DeltaTime,
+	NowTime,
+} from "@/time";
 import type { WaveState } from "@/waveState";
-import type { DeltaTime, NowTime } from "@/time";
+import type { EnemyState } from "./EnemyState";
 
 export interface EnemyBehaviors {
 	/**

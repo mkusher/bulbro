@@ -1,8 +1,8 @@
 import * as PIXI from "pixi.js";
-import { type Size } from "../geometry";
-import type { WaveState } from "../waveState";
-import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
 import type { DeltaTime } from "@/time";
+import type { Size } from "../geometry";
+import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
+import type { WaveState } from "../waveState";
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -12,13 +12,30 @@ export class PlayingFieldTile {
 	#container: PIXI.Container;
 	#backgroundPattern: BackgroundPatternSprite;
 
-	constructor(size: Size) {
-		this.#sprite = new PIXI.Graphics()
-			.rect(0, 0, size.width, size.height)
-			.fill(0x475b46);
-		this.#container = new PIXI.Container();
-		this.#container.addChild(this.#sprite);
-		this.#backgroundPattern = new BackgroundPatternSprite(size);
+	constructor(
+		size: Size,
+	) {
+		this.#sprite =
+			new PIXI.Graphics()
+				.rect(
+					0,
+					0,
+					size.width,
+					size.height,
+				)
+				.fill(
+					0x475b46,
+				);
+		this.#container =
+			new PIXI.Container();
+		this.#container.addChild(
+			this
+				.#sprite,
+		);
+		this.#backgroundPattern =
+			new BackgroundPatternSprite(
+				size,
+			);
 	}
 
 	/**
@@ -29,14 +46,28 @@ export class PlayingFieldTile {
 		layer?: PIXI.RenderLayer,
 		groundLayer?: PIXI.RenderLayer,
 	) {
-		parent.addChild(this.#container);
-		layer?.attach(this.#container);
-		await this.#backgroundPattern.init(this.#container, groundLayer);
+		parent.addChild(
+			this
+				.#container,
+		);
+		layer?.attach(
+			this
+				.#container,
+		);
+		await this.#backgroundPattern.init(
+			this
+				.#container,
+			groundLayer,
+		);
 	}
 
 	get container() {
-		return this.#container;
+		return this
+			.#container;
 	}
 
-	update(deltaTime: DeltaTime, state: WaveState): void {}
+	update(
+		deltaTime: DeltaTime,
+		state: WaveState,
+	): void {}
 }

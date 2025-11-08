@@ -1,4 +1,8 @@
-import { Movement, type MovableObject } from "../movement/Movement";
+import type { EnemyEvent } from "@/game-events/GameEvents";
+import type {
+	DeltaTime,
+	NowTime,
+} from "@/time";
 import {
 	findClosest,
 	findClosestPlayerInRange,
@@ -6,50 +10,73 @@ import {
 	isWeaponReadyToShoot,
 	shoot,
 } from "../game-formulas";
-import { direction, isEqual, type Direction } from "../geometry";
-import type { EnemyBehaviors } from "./EnemyBehaviors";
-import { EnemyState } from "./EnemyState";
+import {
+	type Direction,
+	direction,
+	isEqual,
+} from "../geometry";
+import {
+	type MovableObject,
+	Movement,
+} from "../movement/Movement";
 import type { WaveState } from "../waveState";
-import type { EnemyEvent } from "@/game-events/GameEvents";
+import type { EnemyBehaviors } from "./EnemyBehaviors";
+import type { EnemyState } from "./EnemyState";
 import { KnockbackMovement } from "./KnockbackMovement";
-import type { DeltaTime, NowTime } from "@/time";
 
-export class DefaultEnemyBehaviors implements EnemyBehaviors {
+export class DefaultEnemyBehaviors
+	implements
+		EnemyBehaviors
+{
 	move(
 		currentEnemy: EnemyState,
 		waveState: WaveState,
 		now: NowTime,
 		deltaTime: DeltaTime,
 	): EnemyEvent[] {
-		const obstacles: MovableObject[] = [];
+		const obstacles: MovableObject[] =
+			[];
 
-		const knockbackMovement = new KnockbackMovement();
+		const knockbackMovement =
+			new KnockbackMovement();
 
-		const events = knockbackMovement.move(
-			currentEnemy,
-			waveState.mapSize,
-			obstacles,
-			now,
-			deltaTime,
-		);
+		const events =
+			knockbackMovement.move(
+				currentEnemy,
+				waveState.mapSize,
+				obstacles,
+				now,
+				deltaTime,
+			);
 
-		if (events) {
+		if (
+			events
+		) {
 			return events;
 		}
-		if (currentEnemy.killedAt) {
+		if (
+			currentEnemy.killedAt
+		) {
 			return [];
 		}
 
-		const closest = findClosest(currentEnemy, waveState.players);
+		const closest =
+			findClosest(
+				currentEnemy,
+				waveState.players,
+			);
 
-		if (!closest) {
+		if (
+			!closest
+		) {
 			return [];
 		}
 
-		const closestBulbroDirection = direction(
-			currentEnemy.position,
-			closest.position,
-		);
+		const closestBulbroDirection =
+			direction(
+				currentEnemy.position,
+				closest.position,
+			);
 
 		return this.moveToDirection(
 			currentEnemy,
@@ -67,27 +94,43 @@ export class DefaultEnemyBehaviors implements EnemyBehaviors {
 		moveDirection: Direction,
 		deltaTime: DeltaTime,
 	): EnemyEvent[] {
-		const mover = new Movement(
-			currentEnemy.toMovableObject(),
-			waveState.mapSize,
-			obstacles,
-		);
-		const newPos = mover.getPositionAfterMove(
-			moveDirection,
-			currentEnemy.stats.speed,
-			deltaTime,
-		);
+		const mover =
+			new Movement(
+				currentEnemy.toMovableObject(),
+				waveState.mapSize,
+				obstacles,
+			);
+		const newPos =
+			mover.getPositionAfterMove(
+				moveDirection,
+				currentEnemy
+					.stats
+					.speed,
+				deltaTime,
+			);
 
-		if (isEqual(currentEnemy.position, newPos)) return [];
+		if (
+			isEqual(
+				currentEnemy.position,
+				newPos,
+			)
+		)
+			return [];
 
-		const lastDirection = direction(currentEnemy.position, newPos);
+		const lastDirection =
+			direction(
+				currentEnemy.position,
+				newPos,
+			);
 		return [
 			{
 				type: "enemyMoved",
-				enemyId: currentEnemy.id,
+				enemyId:
+					currentEnemy.id,
 				from: currentEnemy.position,
 				to: newPos,
-				direction: lastDirection,
+				direction:
+					lastDirection,
 			},
 		];
 	}
@@ -98,41 +141,83 @@ export class DefaultEnemyBehaviors implements EnemyBehaviors {
 		now: NowTime,
 		deltaTime: DeltaTime,
 	): EnemyEvent[] {
-		const baseEvents: EnemyEvent[] = [];
-		enemy.weapons.forEach((weapon) => {
-			const reloadTime = weapon.statsBonus?.attackSpeed ?? 1;
-			const attackSpeed = enemy.stats.attackSpeed ?? 0;
-			if (
-				isWeaponReadyToShoot(weapon.lastStrikedAt, reloadTime, attackSpeed, now)
-			) {
-				const target = findClosestPlayerInRange(
-					enemy,
-					weapon,
-					waveState.players,
-				);
-				if (target && isInRange(enemy, target, weapon)) {
-					const shot = shoot(enemy, "enemy", weapon, target.position);
+		const baseEvents: EnemyEvent[] =
+			[];
+		enemy.weapons.forEach(
+			(
+				weapon,
+			) => {
+				const reloadTime =
+					weapon
+						.statsBonus
+						?.attackSpeed ??
+					1;
+				const attackSpeed =
+					enemy
+						.stats
+						.attackSpeed ??
+					0;
+				if (
+					isWeaponReadyToShoot(
+						weapon.lastStrikedAt,
+						reloadTime,
+						attackSpeed,
+						now,
+					)
+				) {
+					const target =
+						findClosestPlayerInRange(
+							enemy,
+							weapon,
+							waveState.players,
+						);
+					if (
+						target &&
+						isInRange(
+							enemy,
+							target,
+							weapon,
+						)
+					) {
+						const shot =
+							shoot(
+								enemy,
+								"enemy",
+								weapon,
+								target.position,
+							);
 
-					// Generate attack event
-					const attackEvent: EnemyEvent = {
-						type: "enemyAttacked",
-						enemyId: enemy.id,
-						weaponId: weapon.id,
-						targetId: target.id,
-						shot,
-					};
-					baseEvents.push(attackEvent);
+						// Generate attack event
+						const attackEvent: EnemyEvent =
+							{
+								type: "enemyAttacked",
+								enemyId:
+									enemy.id,
+								weaponId:
+									weapon.id,
+								targetId:
+									target.id,
+								shot,
+							};
+						baseEvents.push(
+							attackEvent,
+						);
 
-					// Generate shot fired event
-					const shotEvent: EnemyEvent = {
-						type: "shot",
-						shot,
-						weaponId: weapon.id,
-					};
-					baseEvents.push(shotEvent);
+						// Generate shot fired event
+						const shotEvent: EnemyEvent =
+							{
+								type: "shot",
+								shot,
+								weaponId:
+									weapon.id,
+							};
+						baseEvents.push(
+							shotEvent,
+						);
+					}
 				}
-			}
-		});
+			},
+		);
 		return baseEvents;
 	}
 }

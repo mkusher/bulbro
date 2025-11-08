@@ -1,11 +1,17 @@
-import * as PIXI from "pixi.js";
-import type { EnemyState, EnemyType } from "./EnemyState";
+import type * as PIXI from "pixi.js";
+import type {
+	DeltaTime,
+	NowTime,
+} from "@/time";
+import type {
+	EnemyState,
+	EnemyType,
+} from "./EnemyState";
 import { BulbaEnemySprite } from "./sprites/BulbaEnemySprite";
 import {
-	enemyTypes,
 	type EnemyType as BulbaEnemyType,
+	enemyTypes,
 } from "./sprites/EnemiesFrames";
-import type { DeltaTime, NowTime } from "@/time";
 
 /**
  * Manages an enemy sprite graphic.
@@ -16,9 +22,16 @@ export interface EnemySprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer: PIXI.RenderLayer): void;
+	appendTo(
+		parent: PIXI.Container,
+		layer: PIXI.RenderLayer,
+	): void;
 
-	update(enemy: EnemyState, delta: DeltaTime, now: NowTime): void;
+	update(
+		enemy: EnemyState,
+		delta: DeltaTime,
+		now: NowTime,
+	): void;
 
 	/**
 	 * Removes this sprite from its parent container.
@@ -30,8 +43,18 @@ export function createEnemySprite(
 	type: EnemyType,
 	debug: boolean,
 ): EnemySprite {
-	if (enemyTypes.includes(type as BulbaEnemyType)) {
-		return new BulbaEnemySprite(type as BulbaEnemyType, debug);
+	if (
+		enemyTypes.includes(
+			type as BulbaEnemyType,
+		)
+	) {
+		return new BulbaEnemySprite(
+			type as BulbaEnemyType,
+			debug,
+		);
 	}
-	return new BulbaEnemySprite("potatoBeetleBaby", debug);
+	return new BulbaEnemySprite(
+		"potatoBeetleBaby",
+		debug,
+	);
 }

@@ -8,10 +8,15 @@ export function createPlayer(
 ): Player {
 	return {
 		id,
-		bulbro: {
-			...bulbro,
-			weapons: [...bulbro.weapons, ...weapons],
-		},
+		bulbro:
+			{
+				...bulbro,
+				weapons:
+					[
+						...bulbro.weapons,
+						...weapons,
+					],
+			},
 	};
 }
 

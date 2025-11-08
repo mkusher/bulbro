@@ -2,7 +2,8 @@ import type { WeaponType } from "@/weapon";
 import type { Stats } from "../bulbro";
 import type { Direction } from "../geometry";
 
-export type StatsBonus = Partial<Stats>;
+export type StatsBonus =
+	Partial<Stats>;
 /**
  * Runtime state of a single weapon in play.
  */

@@ -5,5 +5,7 @@ export interface PlayerControl {
 	start(): Promise<void>;
 	stop(): Promise<void>;
 	direction: Readonly<Direction>;
-	signal: Readonly<Signal<Direction>>;
+	signal: Readonly<
+		Signal<Direction>
+	>;
 }

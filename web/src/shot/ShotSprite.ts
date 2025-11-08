@@ -1,37 +1,67 @@
 import * as PIXI from "pixi.js";
-import type { ShotState } from "./ShotState";
+import type { DeltaTime } from "@/time";
 import { BulletSprite } from "./BulletSprite";
 import { EnemyProjectileSprite } from "./EnemyProjectileSprite";
-import type { DeltaTime } from "@/time";
+import type { ShotState } from "./ShotState";
 
 export class ShotSprite {
 	#gfx: PIXI.Graphics;
-	#sprite: EnemyProjectileSprite | BulletSprite;
+	#sprite:
+		| EnemyProjectileSprite
+		| BulletSprite;
 
-	constructor(shot: ShotState) {
-		this.#gfx = new PIXI.Graphics();
+	constructor(
+		shot: ShotState,
+	) {
+		this.#gfx =
+			new PIXI.Graphics();
 		this.#sprite =
-			shot.shooterType === "player"
-				? new BulletSprite(shot)
-				: new EnemyProjectileSprite(shot);
-		this.#sprite.appendTo(this.#gfx);
+			shot.shooterType ===
+			"player"
+				? new BulletSprite(
+						shot,
+					)
+				: new EnemyProjectileSprite(
+						shot,
+					);
+		this.#sprite.appendTo(
+			this
+				.#gfx,
+		);
 	}
 
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(parent: PIXI.Container, layer?: PIXI.RenderLayer): void {
-		parent.addChild(this.#gfx);
-		layer?.attach(this.#gfx);
+	appendTo(
+		parent: PIXI.Container,
+		layer?: PIXI.RenderLayer,
+	): void {
+		parent.addChild(
+			this
+				.#gfx,
+		);
+		layer?.attach(
+			this
+				.#gfx,
+		);
 	}
 
 	/**
 	 * Updates sprite position.
 	 */
-	update(deltaTime: DeltaTime, shot: ShotState) {
-		this.#gfx.x = shot.position.x;
-		this.#gfx.y = shot.position.y;
-		this.#sprite.update(deltaTime, shot);
+	update(
+		deltaTime: DeltaTime,
+		shot: ShotState,
+	) {
+		this.#gfx.x =
+			shot.position.x;
+		this.#gfx.y =
+			shot.position.y;
+		this.#sprite.update(
+			deltaTime,
+			shot,
+		);
 	}
 
 	/**
@@ -39,6 +69,9 @@ export class ShotSprite {
 	 */
 	remove(): void {
 		this.#sprite.remove();
-		this.#gfx.parent?.removeChild(this.#gfx);
+		this.#gfx.parent?.removeChild(
+			this
+				.#gfx,
+		);
 	}
 }

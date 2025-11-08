@@ -1,14 +1,20 @@
+import {
+	createMainControls,
+	type PlayerControl,
+} from "@/controls";
+import type {
+	GameProcess,
+	WavePromises,
+} from "@/GameProcess";
 import type { Logger } from "@/logger";
-import { type Lobby } from "./LobbySocketMessages";
-import type { GameProcess, WavePromises } from "@/GameProcess";
+import type { WaveProcess } from "@/WaveProcess";
+import { waveState } from "@/waveState";
+import { currentUser } from "./currentUser";
+import type { InGameCommunicationChannel } from "./InGameCommunicationChannel";
+import type { Lobby } from "./LobbySocketMessages";
+import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
-import { createMainControls, type PlayerControl } from "@/controls";
-import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
-import { waveState } from "@/waveState";
-import type { InGameCommunicationChannel } from "./InGameCommunicationChannel";
-import { currentUser } from "./currentUser";
-import type { WaveProcess } from "@/WaveProcess";
 
 export class NetworkGameConnection {
 	#logger: Logger;
@@ -22,7 +28,9 @@ export class NetworkGameConnection {
 	#remotePlayerId: string;
 
 	get id() {
-		return this.#lobby.id;
+		return this
+			.#lobby
+			.id;
 	}
 
 	constructor(
@@ -32,65 +40,142 @@ export class NetworkGameConnection {
 		gameProcess: GameProcess,
 		isHost: boolean,
 	) {
-		this.#logger = logger;
-		this.#lobby = lobby;
-		this.#remotePlayerId = this.#lobby.players.find(
-			(p) => p.id !== this.#lobby.hostId,
-		)!.id;
-		this.#gameProcess = gameProcess;
-		this.#inGameCommunicationChannel = inGameCommunicationChannel;
-		this.#isHost = isHost;
-		this.#mainControl = createMainControls();
-		this.#remoteControl = new RemoteRepeatLastKnownDirectionControl(
-			this.#isHost,
-			this.#remotePlayerId,
-		);
+		this.#logger =
+			logger;
+		this.#lobby =
+			lobby;
+		this.#remotePlayerId =
+			this.#lobby.players.find(
+				(
+					p,
+				) =>
+					p.id !==
+					this
+						.#lobby
+						.hostId,
+			)!.id;
+		this.#gameProcess =
+			gameProcess;
+		this.#inGameCommunicationChannel =
+			inGameCommunicationChannel;
+		this.#isHost =
+			isHost;
+		this.#mainControl =
+			createMainControls();
+		this.#remoteControl =
+			new RemoteRepeatLastKnownDirectionControl(
+				this
+					.#isHost,
+				this
+					.#remotePlayerId,
+			);
 	}
 
 	createControls() {
-		return [this.#mainControl, this.#remoteControl];
+		return [
+			this
+				.#mainControl,
+			this
+				.#remoteControl,
+		];
 	}
 
-	onStart({ waveInitPromise, wavePromise }: WavePromises) {
-		waveInitPromise.then((waveProcess) => {
-			this.#startStateSync(this.#isHost, waveProcess);
-		});
+	onStart({
+		waveInitPromise,
+		wavePromise,
+	}: WavePromises) {
+		waveInitPromise.then(
+			(
+				waveProcess,
+			) => {
+				this.#startStateSync(
+					this
+						.#isHost,
+					waveProcess,
+				);
+			},
+		);
 
-		wavePromise.finally(() => {
-			this.#stateSync.stop();
-		});
+		wavePromise.finally(
+			() => {
+				this.#stateSync.stop();
+			},
+		);
 	}
 
 	startRemote() {
-		const { wavePromise, waveInitPromise } = this.#gameProcess.startWave(
-			this.createControls(),
-		);
+		const {
+			wavePromise,
+			waveInitPromise,
+		} =
+			this.#gameProcess.startWave(
+				this.createControls(),
+			);
 
-		return { wavePromise, waveInitPromise };
+		return {
+			wavePromise,
+			waveInitPromise,
+		};
 	}
 
-	#startStateSync(isHost: boolean, waveProcess: WaveProcess) {
-		const stateUpdater = new StateUpdater({
-			logger: this.#logger.child({ component: "state-updater" }),
-			currentState: waveState,
-			currentUser,
-			waveProcess,
-			isHost,
-		});
+	#startStateSync(
+		isHost: boolean,
+		waveProcess: WaveProcess,
+	) {
+		const stateUpdater =
+			new StateUpdater(
+				{
+					logger:
+						this.#logger.child(
+							{
+								component:
+									"state-updater",
+							},
+						),
+					currentState:
+						waveState,
+					currentUser,
+					waveProcess,
+					isHost,
+				},
+			);
 
-		this.#stateSync = new StateSync({
-			logger: this.#logger.child({ component: "state-sync" }),
-			gameId: this.#lobby.id,
-			localPlayerId: currentUser.value.id,
-			isHost,
-			inGameCommunicationChannel: this.#inGameCommunicationChannel,
-			stateUpdater,
-			currentState: waveState,
-			localPlayerControl: this.#mainControl,
-			remoteControl: this.#remoteControl,
-			waveProcess,
-			gameEventQueue: waveProcess.eventQueue,
-		});
+		this.#stateSync =
+			new StateSync(
+				{
+					logger:
+						this.#logger.child(
+							{
+								component:
+									"state-sync",
+							},
+						),
+					gameId:
+						this
+							.#lobby
+							.id,
+					localPlayerId:
+						currentUser
+							.value
+							.id,
+					isHost,
+					inGameCommunicationChannel:
+						this
+							.#inGameCommunicationChannel,
+					stateUpdater,
+					currentState:
+						waveState,
+					localPlayerControl:
+						this
+							.#mainControl,
+					remoteControl:
+						this
+							.#remoteControl,
+					waveProcess,
+					gameEventQueue:
+						waveProcess.eventQueue,
+				},
+			);
 		this.#stateSync.start();
 	}
 }

@@ -1,15 +1,41 @@
-import { type Player, ReadyPlayer, registry } from "./games-registry";
+import {
+	type Player,
+	type ReadyPlayer,
+	registry,
+} from "./games-registry";
 import { websocketConnections } from "./websocket-connections";
 
-export async function joinLobby(id: string, player: Player) {
-	const lobby = registry.addPlayer(id, player);
+export async function joinLobby(
+	id: string,
+	player: Player,
+) {
+	const lobby =
+		registry.addPlayer(
+			id,
+			player,
+		);
 
-	if (!lobby) {
+	if (
+		!lobby
+	) {
 		return;
 	}
 
 	await sendUpdatesToPlayers(
-		lobby.players.filter((p) => p.id !== player.id).map((p) => p.id),
+		lobby.players
+			.filter(
+				(
+					p,
+				) =>
+					p.id !==
+					player.id,
+			)
+			.map(
+				(
+					p,
+				) =>
+					p.id,
+			),
 		{
 			type: "player-joined",
 			lobby,
@@ -18,14 +44,36 @@ export async function joinLobby(id: string, player: Player) {
 	return lobby;
 }
 
-export async function markPlayerReady(id: string, readyPlayer: ReadyPlayer) {
-	const lobby = registry.markReady(id, readyPlayer);
+export async function markPlayerReady(
+	id: string,
+	readyPlayer: ReadyPlayer,
+) {
+	const lobby =
+		registry.markReady(
+			id,
+			readyPlayer,
+		);
 
-	if (!lobby) {
+	if (
+		!lobby
+	) {
 		return;
 	}
 	await sendUpdatesToPlayers(
-		lobby.players.filter((p) => p.id !== readyPlayer.id).map((p) => p.id),
+		lobby.players
+			.filter(
+				(
+					p,
+				) =>
+					p.id !==
+					readyPlayer.id,
+			)
+			.map(
+				(
+					p,
+				) =>
+					p.id,
+			),
 		{
 			type: "player-ready",
 			readyPlayer,
@@ -35,19 +83,50 @@ export async function markPlayerReady(id: string, readyPlayer: ReadyPlayer) {
 	return lobby;
 }
 
-export async function markAsDisconnected(playerId: string) {
-	const games = registry.findGamesForPlayer(playerId);
+export async function markAsDisconnected(
+	playerId: string,
+) {
+	const games =
+		registry.findGamesForPlayer(
+			playerId,
+		);
 	for (const id of games) {
-		const lobby = registry.markDisconnected(id, playerId);
+		const lobby =
+			registry.markDisconnected(
+				id,
+				playerId,
+			);
 
-		if (!lobby) {
+		if (
+			!lobby
+		) {
 			return;
 		}
 
-		const player = lobby.players.find((p) => p.id === playerId);
+		const player =
+			lobby.players.find(
+				(
+					p,
+				) =>
+					p.id ===
+					playerId,
+			);
 
 		await sendUpdatesToPlayers(
-			lobby.players.filter((p) => p.id !== playerId).map((p) => p.id),
+			lobby.players
+				.filter(
+					(
+						p,
+					) =>
+						p.id !==
+						playerId,
+				)
+				.map(
+					(
+						p,
+					) =>
+						p.id,
+				),
 			{
 				type: "player-disconnected",
 				player,
@@ -56,11 +135,27 @@ export async function markAsDisconnected(playerId: string) {
 	}
 }
 
-async function sendUpdatesToPlayers(players: string[], message: object) {
-	players.forEach((p) => {
-		const socket = websocketConnections.get(p);
-		if (socket) {
-			socket.send(JSON.stringify(message));
-		}
-	});
+async function sendUpdatesToPlayers(
+	players: string[],
+	message: object,
+) {
+	players.forEach(
+		(
+			p,
+		) => {
+			const socket =
+				websocketConnections.get(
+					p,
+				);
+			if (
+				socket
+			) {
+				socket.send(
+					JSON.stringify(
+						message,
+					),
+				);
+			}
+		},
+	);
 }

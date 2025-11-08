@@ -8,10 +8,15 @@ export class DurationTracker {
 	}
 
 	start() {
-		this.#startedAt = performance.now();
+		this.#startedAt =
+			performance.now();
 	}
 
 	length() {
-		return nowTime(performance.now() - this.#startedAt);
+		return nowTime(
+			performance.now() -
+				this
+					.#startedAt,
+		);
 	}
 }

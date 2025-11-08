@@ -1,8 +1,11 @@
 import type { Stats } from "./bulbro";
+import { zeroPoint } from "./geometry";
 import { uuid } from "./uuid";
 import type { WeaponState } from "./weapon/WeaponState";
-import { fist, weapons } from "./weapons-definitions";
-import { zeroPoint } from "./geometry";
+import {
+	fist,
+	weapons,
+} from "./weapons-definitions";
 
 export type WeaponType =
 	| "hand"
@@ -37,7 +40,8 @@ export type WeaponClass =
 /**
  * Partial stats bonuses that weapons can provide.
  */
-export type StatsBonus = Partial<Stats>;
+export type StatsBonus =
+	Partial<Stats>;
 
 /**
  * Weapon model.
@@ -50,14 +54,30 @@ export interface Weapon {
 	shotSpeed: number;
 }
 
-export const toWeaponState = (w: Weapon): WeaponState => ({
-	id: uuid(),
-	lastStrikedAt: 0,
-	statsBonus: w.statsBonus,
-	shotSpeed: w.shotSpeed,
-	type: w.id,
-	aimingDirection: zeroPoint(),
-});
+export const toWeaponState =
+	(
+		w: Weapon,
+	): WeaponState => ({
+		id: uuid(),
+		lastStrikedAt: 0,
+		statsBonus:
+			w.statsBonus,
+		shotSpeed:
+			w.shotSpeed,
+		type: w.id,
+		aimingDirection:
+			zeroPoint(),
+	});
 
-export const fromWeaponState = (state: WeaponState) =>
-	weapons.find((w) => w.id === state.type) ?? fist;
+export const fromWeaponState =
+	(
+		state: WeaponState,
+	) =>
+		weapons.find(
+			(
+				w,
+			) =>
+				w.id ===
+				state.type,
+		) ??
+		fist;

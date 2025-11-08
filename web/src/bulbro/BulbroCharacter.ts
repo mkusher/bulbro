@@ -1,6 +1,6 @@
+import type { StatBonus } from "../game-formulas";
 import type { Weapon } from "../weapon";
 import type { FaceType } from "./sprites/FaceSprite";
-import type { StatBonus } from "../game-formulas";
 
 export interface SecondaryStats {
 	pickupRange: number;
@@ -24,9 +24,13 @@ export interface MainStats {
 	luck: number;
 	harvesting: number;
 }
-export interface Stats extends MainStats, SecondaryStats {}
+export interface Stats
+	extends MainStats,
+		SecondaryStats {}
 
-export type WearingItem = "crown" | "medic";
+export type WearingItem =
+	| "crown"
+	| "medic";
 
 export interface BulbroStyle {
 	faceType: FaceType;

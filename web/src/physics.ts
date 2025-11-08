@@ -1,5 +1,8 @@
-import type { Position, Direction } from "./geometry";
 import type { DeltaTime } from "@/time";
+import type {
+	Direction,
+	Position,
+} from "./geometry";
 
 /**
  * Compute new position based on speed, direction vector, and elapsed time.
@@ -14,7 +17,22 @@ export function movePosition(
 	dir: Direction,
 	deltaTime: DeltaTime,
 ): Position {
-	const dx = (dir.x * speed * deltaTime) / 1000;
-	const dy = (dir.y * speed * deltaTime) / 1000;
-	return { x: current.x + dx, y: current.y + dy };
+	const dx =
+		(dir.x *
+			speed *
+			deltaTime) /
+		1000;
+	const dy =
+		(dir.y *
+			speed *
+			deltaTime) /
+		1000;
+	return {
+		x:
+			current.x +
+			dx,
+		y:
+			current.y +
+			dy,
+	};
 }
