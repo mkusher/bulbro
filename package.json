@@ -2,7 +2,8 @@
 	"name": "bulbro-game",
 	"workspaces": [
 		"web/",
-		"server/"
+		"server/",
+		"packages/*"
 	],
 	"scripts": {
 		"types": "tsgo --project web && tsgo --project server",
