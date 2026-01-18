@@ -35,6 +35,8 @@ var/
 .DS_Store
 
 .aider*
+.claude
+.opencode
 
 public
 dist
