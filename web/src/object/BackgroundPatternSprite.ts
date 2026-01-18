@@ -13,6 +13,9 @@ const ISLAND_SIZE = 120;
 const OBJECTS_PER_ISLAND = 16;
 const MIN_OBJECT_DISTANCE = 25;
 const MAX_PLACEMENT_ATTEMPTS = 50;
+// Margin to ensure sprites are fully within map bounds (not partially outside)
+// Based on max sprite visual extent (size 50 * scale 0.1 * safety factor)
+export const MAP_EDGE_MARGIN = 25;
 
 type SpriteWithType =
 	{
@@ -139,13 +142,15 @@ export class BackgroundPatternSprite {
 
 					if (
 						position.x <
-							0 ||
+							MAP_EDGE_MARGIN ||
 						position.x >
-							mapSize.width ||
+							mapSize.width -
+								MAP_EDGE_MARGIN ||
 						position.y <
-							0 ||
+							MAP_EDGE_MARGIN ||
 						position.y >
-							mapSize.height
+							mapSize.height -
+								MAP_EDGE_MARGIN
 					) {
 						continue;
 					}
@@ -181,6 +186,21 @@ export class BackgroundPatternSprite {
 				}
 			}
 		}
+	}
+
+	get spritePositions(): Position[] {
+		return this.#sprites.map(
+			({
+				sprite,
+			}) => ({
+				x: sprite
+					.container
+					.x,
+				y: sprite
+					.container
+					.y,
+			}),
+		);
 	}
 
 	async init(
