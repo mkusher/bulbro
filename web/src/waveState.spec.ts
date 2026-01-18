@@ -868,6 +868,131 @@ describe("currentState", () => {
 			);
 		});
 
+		it("should maintain consistent position through spawn lifecycle", () => {
+			// This test verifies there's no disconnect between:
+			// 1. The position in the spawnEnemy event
+			// 2. The position stored in the spawning-enemy object
+			// 3. The position of the enemy when it becomes active
+
+			const spawnPosition =
+				{
+					x: 500,
+					y: 600,
+				};
+			const newEnemy =
+				createTestEnemy(
+					"enemy-spawn-test",
+					spawnPosition.x,
+					spawnPosition.y,
+				);
+
+			// Step 1: Create spawn event
+			const startTime = 1000;
+			const spawnEvent =
+				{
+					type: "spawnEnemy" as const,
+					enemy:
+						newEnemy,
+					deltaTime:
+						deltaTime(
+							16,
+						),
+					occurredAt:
+						nowTime(
+							startTime,
+						),
+				};
+
+			// Step 2: Process spawn event - should create spawning-enemy object
+			const stateAfterSpawn =
+				updateState(
+					state,
+					spawnEvent,
+				);
+
+			// Verify spawning-enemy object has correct position
+			const spawningObject =
+				stateAfterSpawn.objects.find(
+					(
+						o,
+					) =>
+						o.type ===
+							"spawning-enemy" &&
+						o.id ===
+							"enemy-spawn-test",
+				);
+			expect(
+				spawningObject,
+			).toBeDefined();
+			expect(
+				spawningObject?.position,
+			).toEqual(
+				spawnPosition,
+			);
+
+			// Also verify the embedded enemy has the same position
+			if (
+				spawningObject?.type ===
+				"spawning-enemy"
+			) {
+				expect(
+					spawningObject
+						.enemy
+						.position,
+				).toEqual(
+					spawnPosition,
+				);
+			}
+
+			// Step 3: Process another spawn event after duration expires (1 second)
+			// The spawn duration is 1 second, so at startTime + 1000ms + 1ms, the enemy should spawn
+			const afterDurationEvent =
+				{
+					type: "spawnEnemy" as const,
+					enemy:
+						createTestEnemy(
+							"another-enemy",
+							100,
+							100,
+						), // Different enemy to trigger processing
+					deltaTime:
+						deltaTime(
+							16,
+						),
+					occurredAt:
+						nowTime(
+							startTime +
+								1001,
+						), // Just after 1 second duration
+				};
+
+			const stateAfterDuration =
+				updateState(
+					stateAfterSpawn,
+					afterDurationEvent,
+				);
+
+			// The original spawning-enemy should now be converted to an actual enemy
+			const spawnedEnemy =
+				stateAfterDuration.enemies.find(
+					(
+						e,
+					) =>
+						e.id ===
+						"enemy-spawn-test",
+				);
+			expect(
+				spawnedEnemy,
+			).toBeDefined();
+
+			// CRITICAL: The enemy position should match the original spawn position
+			expect(
+				spawnedEnemy?.position,
+			).toEqual(
+				spawnPosition,
+			);
+		});
+
 		it("should handle tick events", () => {
 			const tickEvent: GameEvent =
 				{

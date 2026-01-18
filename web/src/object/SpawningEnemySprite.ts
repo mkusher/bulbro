@@ -10,6 +10,19 @@ const spriteSize =
 		height: 140,
 	};
 
+const spriteScale = 0.2;
+
+// Scaled size for anchor offset calculation
+const scaledSpriteSize =
+	{
+		width:
+			spriteSize.width *
+			spriteScale,
+		height:
+			spriteSize.height *
+			spriteScale,
+	};
+
 /**
  * Manages a spawning enemy portal sprite.
  */
@@ -23,7 +36,7 @@ export class SpawningEnemySprite extends GameSprite {
 		super(
 			{
 				anchor:
-					"center",
+					"bottom-center",
 				direction:
 					{
 						type: "none",
@@ -33,13 +46,13 @@ export class SpawningEnemySprite extends GameSprite {
 		this.#sprite =
 			new PIXI.Sprite();
 		this.#sprite.scale.set(
-			0.2,
+			spriteScale,
 		);
 
-		// Apply anchor offset for visual centering
+		// Apply anchor offset using SCALED size for correct positioning
 		const offset =
 			this.calculateAnchorOffset(
-				spriteSize,
+				scaledSpriteSize,
 			);
 		this.#sprite.x =
 			offset.x;

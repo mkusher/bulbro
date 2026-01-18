@@ -57,7 +57,7 @@ it("skips source change if another happened during timeout", async () => {
 	const throttled =
 		throttle(
 			source,
-			5,
+			50,
 		);
 	source.value = 1;
 	expect(
@@ -66,7 +66,7 @@ it("skips source change if another happened during timeout", async () => {
 		0,
 	);
 	await sleep(
-		1,
+		10,
 	);
 	expect(
 		throttled.value,
@@ -75,7 +75,7 @@ it("skips source change if another happened during timeout", async () => {
 	);
 	source.value = 2;
 	await sleep(
-		1,
+		10,
 	);
 	expect(
 		throttled.value,
@@ -83,7 +83,7 @@ it("skips source change if another happened during timeout", async () => {
 		0,
 	);
 	await sleep(
-		4,
+		40,
 	);
 	expect(
 		throttled.value,

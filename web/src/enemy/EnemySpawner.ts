@@ -7,6 +7,7 @@ import {
 	type Point,
 	type Position,
 	type Range,
+	type Size,
 	zeroPoint,
 } from "@/geometry";
 import type {
@@ -20,6 +21,7 @@ import {
 	babyEnemy,
 } from "../enemies-definitions";
 import type { EnemyCharacter } from ".";
+import { ENEMY_SIZE } from ".";
 import {
 	type EnemyState,
 	spawnEnemy,
@@ -166,6 +168,7 @@ export class EnemySpawner {
 							4,
 				},
 				center,
+				waveState.mapSize,
 			);
 		} else if (
 			hasSecondPassed(
@@ -200,6 +203,7 @@ export class EnemySpawner {
 							2,
 				},
 				center,
+				waveState.mapSize,
 			);
 		} else if (
 			hasSecondPassed(
@@ -234,6 +238,7 @@ export class EnemySpawner {
 								2,
 					},
 					center,
+					waveState.mapSize,
 				),
 				...this.#spawnCluster(
 					[
@@ -252,6 +257,7 @@ export class EnemySpawner {
 								2,
 					},
 					center,
+					waveState.mapSize,
 				),
 			];
 		}
@@ -265,6 +271,7 @@ export class EnemySpawner {
 		radius: Range,
 		angle: Range,
 		center: Position,
+		mapSize: Size,
 	) {
 		return new Array(
 			amount,
@@ -279,6 +286,7 @@ export class EnemySpawner {
 							radius,
 							angle,
 							center,
+							mapSize,
 						);
 					return this.#spawnEnemy(
 						enemiesToSpawn,
@@ -339,6 +347,7 @@ export class EnemySpawner {
 		radius: Range,
 		angle: Range,
 		center: Point,
+		mapSize: Size,
 	) {
 		const r =
 			this.#randomInRange(
@@ -350,21 +359,47 @@ export class EnemySpawner {
 				angle.from,
 				angle.to,
 			);
-		return addition(
-			center,
-			{
-				x:
-					Math.cos(
-						a,
-					) *
-					r,
-				y:
-					Math.sin(
-						a,
-					) *
-					r,
-			},
-		);
+		const position =
+			addition(
+				center,
+				{
+					x:
+						Math.cos(
+							a,
+						) *
+						r,
+					y:
+						Math.sin(
+							a,
+						) *
+						r,
+				},
+			);
+		// Clamp to map boundaries (accounting for enemy hitbox)
+		const halfW =
+			ENEMY_SIZE.width /
+			2;
+		const halfH =
+			ENEMY_SIZE.height /
+			2;
+		return {
+			x: Math.max(
+				halfW,
+				Math.min(
+					mapSize.width -
+						halfW,
+					position.x,
+				),
+			),
+			y: Math.max(
+				halfH,
+				Math.min(
+					mapSize.height -
+						halfH,
+					position.y,
+				),
+			),
+		};
 	}
 
 	#randomInRange(
