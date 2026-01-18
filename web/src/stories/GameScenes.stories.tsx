@@ -31,6 +31,7 @@ const defaults =
 			showPlayerStats: true,
 			showGameStats: true,
 			showTouchControls: false,
+			showCoordinateGrid: false,
 			bulbroType:
 				"well-rounded",
 		},
@@ -93,6 +94,11 @@ const defaults =
 							"boolean",
 					},
 				showTouchControls:
+					{
+						control:
+							"boolean",
+					},
+				showCoordinateGrid:
 					{
 						control:
 							"boolean",
@@ -209,6 +215,9 @@ export const BulbroVsBaby =
 							showTouchControls={
 								args.showTouchControls
 							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
+							}
 						/>
 					</div>
 				);
@@ -311,6 +320,9 @@ export const BulbroVsAphid =
 							showTouchControls={
 								args.showTouchControls
 							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
+							}
 						/>
 					</div>
 				);
@@ -412,6 +424,9 @@ export const BulbroVsBeetleWarrior =
 							}
 							showTouchControls={
 								args.showTouchControls
+							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
 							}
 						/>
 					</div>
@@ -536,6 +551,9 @@ export const BulbroVsMultipleEnemies =
 							showTouchControls={
 								args.showTouchControls
 							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
+							}
 						/>
 					</div>
 				);
@@ -546,6 +564,7 @@ export const BulbroVsMultipleEnemies =
 			showPlayerStats: true,
 			showGameStats: true,
 			showTouchControls: false,
+			showCoordinateGrid: false,
 			bulbroType:
 				"well-rounded",
 		},
@@ -572,6 +591,11 @@ export const BulbroVsMultipleEnemies =
 							"boolean",
 					},
 				showTouchControls:
+					{
+						control:
+							"boolean",
+					},
+				showCoordinateGrid:
 					{
 						control:
 							"boolean",
@@ -698,6 +722,9 @@ export const FullyLoadedBulbro =
 							showTouchControls={
 								args.showTouchControls
 							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
+							}
 						/>
 					</div>
 				);
@@ -708,6 +735,7 @@ export const FullyLoadedBulbro =
 			showPlayerStats: true,
 			showGameStats: true,
 			showTouchControls: false,
+			showCoordinateGrid: false,
 			bulbroType:
 				"well-rounded",
 		},
@@ -734,6 +762,11 @@ export const FullyLoadedBulbro =
 							"boolean",
 					},
 				showTouchControls:
+					{
+						control:
+							"boolean",
+					},
+				showCoordinateGrid:
 					{
 						control:
 							"boolean",

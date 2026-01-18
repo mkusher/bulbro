@@ -9,7 +9,11 @@ import {
 	nowTime,
 } from "@/time";
 import { InWaveStats } from "../bulbro/sprites/InWaveStats";
-import { canvasSize } from "../game-canvas";
+import {
+	canvasSize,
+	classicMapSize,
+} from "../game-canvas";
+import { CoordinateGridOverlay } from "../stories/CoordinateGridOverlay";
 import type { WaveState } from "../waveState";
 import type { AutoCenterOnPlayerCamera } from "./AutoCenterOnPlayerCamera";
 import { Scene } from "./Scene";
@@ -28,12 +32,15 @@ export class StorybookSceneWithUi {
 	#uiLayer: PIXI.RenderLayer;
 	#camera: AutoCenterOnPlayerCamera;
 	#logger: Logger;
+	#coordinateGrid: CoordinateGridOverlay | null =
+		null;
 
 	constructor(
 		logger: Logger,
 		debug: boolean,
 		camera: AutoCenterOnPlayerCamera,
 		scale: number,
+		showCoordinateGrid: boolean = false,
 	) {
 		this.#logger =
 			logger;
@@ -73,6 +80,15 @@ export class StorybookSceneWithUi {
 			this
 				.#uiLayer,
 		);
+
+		if (
+			showCoordinateGrid
+		) {
+			this.#coordinateGrid =
+				new CoordinateGridOverlay(
+					classicMapSize,
+				);
+		}
 	}
 
 	async init(
@@ -89,6 +105,18 @@ export class StorybookSceneWithUi {
 		await this.#scene.init(
 			state,
 		);
+
+		// Add coordinate grid overlay on top of playing field if enabled
+		if (
+			this
+				.#coordinateGrid
+		) {
+			this.#coordinateGrid.appendTo(
+				this
+					.playingFieldContainer,
+			);
+		}
+
 		this.update(
 			deltaTime(
 				0,

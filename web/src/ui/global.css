@@ -2,9 +2,9 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(
-	.dark
-		*
-));
+		.dark
+			*
+	));
 
 :root {
 	--radius: 0.65rem;

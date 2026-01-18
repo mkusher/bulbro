@@ -22,6 +22,7 @@ export type StorybookGameSceneProps =
 		showPlayerStats?: boolean;
 		showGameStats?: boolean;
 		showTouchControls?: boolean;
+		showCoordinateGrid?: boolean;
 	};
 
 export function StorybookGameScene({
@@ -35,6 +36,7 @@ export function StorybookGameScene({
 	showPlayerStats = false,
 	showGameStats = true,
 	showTouchControls = true,
+	showCoordinateGrid = false,
 }: StorybookGameSceneProps) {
 	const canvasRef =
 		useRef<HTMLDivElement>(
@@ -59,6 +61,7 @@ export function StorybookGameScene({
 							debug,
 							width,
 							height,
+							showCoordinateGrid,
 							onStateUpdate,
 						},
 					);
@@ -86,6 +89,7 @@ export function StorybookGameScene({
 		debug,
 		initialState,
 		onStateUpdate,
+		showCoordinateGrid,
 	]);
 
 	const currentState =

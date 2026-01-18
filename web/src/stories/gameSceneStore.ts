@@ -27,6 +27,7 @@ export interface GameSceneConfig {
 	debug?: boolean;
 	width?: number;
 	height?: number;
+	showCoordinateGrid?: boolean;
 	onStateUpdate?: (
 		state: WaveState,
 	) => WaveState;
@@ -222,6 +223,8 @@ export async function initialize(
 					false,
 				camera,
 				scale,
+				config.showCoordinateGrid ||
+					false,
 			);
 
 		await scene.init(
