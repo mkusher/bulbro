@@ -74,7 +74,7 @@ export class KeepkingDistanceBehaviors
 			currentEnemy
 				.stats
 				.range /
-			4;
+			8;
 
 		if (
 			currentEnemy.isStartingRaging(

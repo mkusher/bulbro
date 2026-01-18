@@ -142,7 +142,7 @@ describe("KeepingDistanceBehaviors", () => {
 				aphidEnemy
 					.stats
 					.range /
-				4;
+				8;
 			const tooCloseDistance =
 				actualRange *
 				0.5;
@@ -258,7 +258,7 @@ describe("KeepingDistanceBehaviors", () => {
 				aphidEnemy
 					.stats
 					.range /
-				4;
+				8;
 			const optimalDistance =
 				actualRange *
 				0.85;
@@ -313,7 +313,7 @@ describe("KeepingDistanceBehaviors", () => {
 				aphidEnemy
 					.stats
 					.range /
-				4;
+				8;
 			const farDistance =
 				actualRange *
 				1.5;
