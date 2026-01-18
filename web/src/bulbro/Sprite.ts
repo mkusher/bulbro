@@ -1,4 +1,5 @@
 import type * as PIXI from "pixi.js";
+import type { GameSpriteInterface } from "@/graphics/SpriteInterface";
 import type {
 	DeltaTime,
 	NowTime,
@@ -17,8 +18,10 @@ export {
 
 /**
  * Manages a player sprite graphic.
+ * Extends GameSpriteInterface for consistent sprite lifecycle.
  */
-export interface BulbroSprite {
+export interface BulbroSprite
+	extends GameSpriteInterface<BulbroState> {
 	init(
 		b: BulbroState,
 	): Promise<void>;

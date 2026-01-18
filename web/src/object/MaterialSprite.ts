@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Assets } from "@/Assets";
+import { GameSprite } from "@/graphics/GameSprite";
 import type { DeltaTime } from "@/time";
-import type { Position } from "../geometry";
 import type { Material } from "./MaterialState";
 
 const size =
@@ -10,28 +10,46 @@ const size =
 		height: 50,
 	};
 
-export class MaterialSprite {
+const textureSize =
+	{
+		width: 200,
+		height: 265,
+	};
+
+export class MaterialSprite extends GameSprite {
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
-	#container: PIXI.Container;
 
 	constructor(
 		debug: boolean,
 	) {
+		super(
+			{
+				anchor:
+					"center",
+				direction:
+					{
+						type: "none",
+					},
+			},
+		);
 		this.#sprite =
 			new PIXI.Sprite();
-		this.#container =
-			new PIXI.Container();
-		this.#container.addChild(
+		this.addChild(
 			this
 				.#sprite,
 		);
+
+		// Apply anchor offset for visual centering
+		const offset =
+			this.calculateAnchorOffset(
+				size,
+			);
 		this.#sprite.x =
-			-size.width /
-			4;
+			offset.x;
 		this.#sprite.y =
-			-size.height /
-			2;
+			offset.y;
+
 		this.#debugPosition =
 			new PIXI.Graphics();
 		if (
@@ -48,7 +66,7 @@ export class MaterialSprite {
 				10,
 			);
 			this.#debugPosition.endFill();
-			this.#container.addChild(
+			this.addChild(
 				this
 					.#debugPosition,
 			);
@@ -75,8 +93,8 @@ export class MaterialSprite {
 						new PIXI.Rectangle(
 							763,
 							33,
-							200,
-							265,
+							textureSize.width,
+							textureSize.height,
 						),
 				},
 			);
@@ -85,16 +103,16 @@ export class MaterialSprite {
 		this.#sprite.scale.set(
 			0.1,
 		);
-		this.#updatePosition(
+		this.updatePosition(
 			material.position,
 		);
 		parent.addChild(
 			this
-				.#container,
+				.container,
 		);
 		layer.attach(
 			this
-				.#container,
+				.container,
 		);
 	}
 
@@ -102,24 +120,8 @@ export class MaterialSprite {
 		material: Material,
 		deltaTime: DeltaTime,
 	): void {
-		this.#updatePosition(
+		this.updatePosition(
 			material.position,
 		);
-	}
-
-	remove() {
-		this.#container.parent?.removeChild(
-			this
-				.#container,
-		);
-	}
-
-	#updatePosition(
-		position: Position,
-	) {
-		this.#container.x =
-			position.x;
-		this.#container.y =
-			position.y;
 	}
 }

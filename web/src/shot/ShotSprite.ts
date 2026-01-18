@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
+import { GameSprite } from "@/graphics/GameSprite";
 import type { DeltaTime } from "@/time";
 import { BulletSprite } from "./BulletSprite";
 import { EnemyProjectileSprite } from "./EnemyProjectileSprite";
 import type { ShotState } from "./ShotState";
 
-export class ShotSprite {
-	#gfx: PIXI.Graphics;
+export class ShotSprite extends GameSprite {
 	#sprite:
 		| EnemyProjectileSprite
 		| BulletSprite;
@@ -13,8 +13,16 @@ export class ShotSprite {
 	constructor(
 		shot: ShotState,
 	) {
-		this.#gfx =
-			new PIXI.Graphics();
+		super(
+			{
+				anchor:
+					"center",
+				direction:
+					{
+						type: "none",
+					},
+			},
+		);
 		this.#sprite =
 			shot.shooterType ===
 			"player"
@@ -24,40 +32,27 @@ export class ShotSprite {
 				: new EnemyProjectileSprite(
 						shot,
 					);
+		// Create a graphics container for the child sprite
+		const gfx =
+			new PIXI.Graphics();
 		this.#sprite.appendTo(
-			this
-				.#gfx,
+			gfx,
+		);
+		this.addChild(
+			gfx,
 		);
 	}
 
 	/**
-	 * Adds this sprite to a PIXI container.
-	 */
-	appendTo(
-		parent: PIXI.Container,
-		layer?: PIXI.RenderLayer,
-	): void {
-		parent.addChild(
-			this
-				.#gfx,
-		);
-		layer?.attach(
-			this
-				.#gfx,
-		);
-	}
-
-	/**
-	 * Updates sprite position.
+	 * Updates sprite position and delegates to child for rotation.
 	 */
 	update(
 		deltaTime: DeltaTime,
 		shot: ShotState,
 	) {
-		this.#gfx.x =
-			shot.position.x;
-		this.#gfx.y =
-			shot.position.y;
+		this.updatePosition(
+			shot.position,
+		);
 		this.#sprite.update(
 			deltaTime,
 			shot,
@@ -67,11 +62,8 @@ export class ShotSprite {
 	/**
 	 * Removes this sprite from its parent container.
 	 */
-	remove(): void {
+	override remove(): void {
 		this.#sprite.remove();
-		this.#gfx.parent?.removeChild(
-			this
-				.#gfx,
-		);
+		super.remove();
 	}
 }

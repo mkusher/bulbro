@@ -8,7 +8,7 @@ import type {
 	Size,
 } from "@/geometry";
 import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
-import { PositionedContainer } from "@/graphics/PositionedContainer";
+import { GameSprite } from "@/graphics/GameSprite";
 import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
 import { RotatingDisapperanceAnimation } from "@/graphics/RotatingDisappearanceAnimation";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
@@ -27,11 +27,11 @@ type PhysicalRectangle =
 		size: Size;
 		offset?: Position;
 	};
+
 /**
- * Manages a player sprite graphic.
+ * Manages an enemy sprite graphic.
  */
-export class BulbaEnemySprite {
-	#positionedContainer: PositionedContainer;
+export class BulbaEnemySprite extends GameSprite {
 	#sprite!: PIXI.Container;
 	#debugSprite?: RectangleGfx;
 	#movement?: AnimatedSprite<PIXI.Container>;
@@ -47,10 +47,16 @@ export class BulbaEnemySprite {
 		type: enemiesFrames.EnemyType,
 		debug?: boolean,
 	) {
-		this.#positionedContainer =
-			new PositionedContainer(
-				new PIXI.Container(),
-			);
+		super(
+			{
+				anchor:
+					"bottom-center",
+				direction:
+					{
+						type: "flip",
+					},
+			},
+		);
 		this.#defaultFrame =
 			enemiesFrames[
 				type
@@ -161,7 +167,7 @@ export class BulbaEnemySprite {
 					0,
 				),
 			);
-		this.#positionedContainer.addChild(
+		this.addChild(
 			this
 				.#sprite,
 		);
@@ -171,7 +177,6 @@ export class BulbaEnemySprite {
 		) {
 			this.#debugSprite.appendTo(
 				this
-					.#positionedContainer
 					.container,
 			);
 		}
@@ -180,11 +185,11 @@ export class BulbaEnemySprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(
+	override appendTo(
 		parent: PIXI.Container,
 		layer: PIXI.RenderLayer,
 	): void {
-		this.#positionedContainer.appendTo(
+		super.appendTo(
 			parent,
 			layer,
 		);
@@ -208,7 +213,7 @@ export class BulbaEnemySprite {
 							"Is not supported",
 						);
 					})();
-		this.#updatePosition(
+		this.#updateSpritePosition(
 			enemy.position,
 			rectangle,
 			enemy.lastDirection,
@@ -251,10 +256,10 @@ export class BulbaEnemySprite {
 						}
 						this.#sprite =
 							sprite;
-						this.#positionedContainer.addChild(
+						this.addChild(
 							sprite,
 						);
-						this.#updatePosition(
+						this.#updateSpritePosition(
 							enemy.position,
 							rectangle,
 							enemy.lastDirection,
@@ -264,19 +269,12 @@ export class BulbaEnemySprite {
 			);
 	}
 
-	/**
-	 * Removes this sprite from its parent container.
-	 */
-	remove(): void {
-		this.#positionedContainer.remove();
-	}
-
-	#updatePosition(
+	#updateSpritePosition(
 		pos: Position,
 		size: Size,
 		lastDirection?: Direction,
 	): void {
-		this.#positionedContainer.update(
+		this.updatePosition(
 			pos,
 			lastDirection,
 		);

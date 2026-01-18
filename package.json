@@ -13,10 +13,10 @@
 		"start:server": "(cd server && bun start)"
 	},
 	"peerDependencies": {
-		"@typescript/native-preview": "^7.0.0-dev.20250705.1"
+		"@typescript/native-preview": "^7.0.0-dev.20260118.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.4",
+		"@biomejs/biome": "^2.3.11",
 		"@types/bun": "latest"
 	},
 	"dependencies": {

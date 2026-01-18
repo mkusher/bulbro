@@ -1,4 +1,5 @@
 import type * as PIXI from "pixi.js";
+import type { GameSpriteInterface } from "@/graphics/SpriteInterface";
 import type {
 	DeltaTime,
 	NowTime,
@@ -15,8 +16,10 @@ import {
 
 /**
  * Manages an enemy sprite graphic.
+ * Extends GameSpriteInterface for consistent sprite lifecycle.
  */
-export interface EnemySprite {
+export interface EnemySprite
+	extends GameSpriteInterface<EnemyState> {
 	init(): Promise<void>;
 
 	/**

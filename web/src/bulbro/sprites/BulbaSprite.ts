@@ -6,7 +6,7 @@ import type {
 } from "@/geometry";
 import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { CharacterSprites } from "@/graphics/CharacterSprite";
-import { PositionedContainer } from "@/graphics/PositionedContainer";
+import { GameSprite } from "@/graphics/GameSprite";
 import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import type {
@@ -37,14 +37,11 @@ const fullSize =
 		width: 190,
 		height: 280,
 	};
+
 /**
  * Manages a player sprite graphic.
  */
-export class BulbaSprite {
-	#positionedContainer: PositionedContainer =
-		new PositionedContainer(
-			new PIXI.Container(),
-		);
+export class BulbaSprite extends GameSprite {
 	#sprite!: PIXI.Container;
 	#debugSprite?: RectangleGfx;
 	#characterScaling = 0.25;
@@ -61,6 +58,16 @@ export class BulbaSprite {
 		faceType: FaceType,
 		debug?: boolean,
 	) {
+		super(
+			{
+				anchor:
+					"bottom-center",
+				direction:
+					{
+						type: "flip",
+					},
+			},
+		);
 		this.#faceType =
 			faceType;
 		if (
@@ -122,7 +129,7 @@ export class BulbaSprite {
 					0,
 				),
 			);
-		this.#positionedContainer.addChild(
+		this.addChild(
 			this
 				.#sprite,
 		);
@@ -132,7 +139,6 @@ export class BulbaSprite {
 		) {
 			this.#debugSprite.appendTo(
 				this
-					.#positionedContainer
 					.container,
 			);
 		}
@@ -150,11 +156,11 @@ export class BulbaSprite {
 	/**
 	 * Adds this sprite to a PIXI container.
 	 */
-	appendTo(
+	override appendTo(
 		parent: PIXI.Container,
 		layer: PIXI.RenderLayer,
 	): void {
-		this.#positionedContainer.appendTo(
+		super.appendTo(
 			parent,
 			layer,
 		);
@@ -165,7 +171,7 @@ export class BulbaSprite {
 		delta: DeltaTime,
 		now: NowTime,
 	) {
-		this.#updatePosition(
+		this.#updateSpritePosition(
 			player.position,
 			player.lastDirection,
 		);
@@ -239,32 +245,23 @@ export class BulbaSprite {
 				sprite.y =
 					this.#sprite.y;
 				this.#sprite?.removeFromParent();
-			} else {
 			}
 			this.#sprite =
 				sprite;
-			this.#positionedContainer.addChild(
+			this.addChild(
 				sprite,
 			);
-			this.#updatePosition(
+			this.#updateSpritePosition(
 				player.position,
 				player.lastDirection,
 			);
 		};
 
-	/**
-	 * Removes this sprite from its parent container.
-	 */
-	remove(): void {
-		this.#weaponsSprite.remove();
-		this.#positionedContainer.remove();
-	}
-
-	#updatePosition(
+	#updateSpritePosition(
 		pos: Position,
 		lastDirection?: Direction,
 	): void {
-		this.#positionedContainer.update(
+		this.updatePosition(
 			pos,
 			lastDirection,
 		);
@@ -275,6 +272,14 @@ export class BulbaSprite {
 		) {
 			return;
 		}
+	}
+
+	/**
+	 * Removes this sprite from its parent container.
+	 */
+	override remove(): void {
+		this.#weaponsSprite.remove();
+		super.remove();
 	}
 
 	#createSwingingAnimation(
@@ -361,11 +366,21 @@ export class BulbaSprite {
 			weaponsContainer,
 		);
 
+		// Use fixed body dimensions for offset calculation, not dynamic container bounds.
+		// Container bounds change when weapons rotate, causing unwanted character movement.
+		const scaledBodyHeight =
+			bodySize.height *
+			this
+				.#characterScaling;
+		const scaledBodyWidth =
+			bodySize.width *
+			this
+				.#characterScaling;
 		weaponsContainer.y =
-			-character.height -
+			-scaledBodyHeight -
 			5;
 		weaponsContainer.x =
-			-character.width /
+			-scaledBodyWidth /
 			2;
 		return character;
 	}

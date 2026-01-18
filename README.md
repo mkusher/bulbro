@@ -4,10 +4,9 @@ An opensource clone of brotato. A Pixi.js game using Bun.
 
 ## Scripts
 
-- `bun build`: bundle code (`public/main.js`)
-- `bun dev`: watch and bundle code on changes
-- `bun serve`: serve `public` folder
-- `bun start`: build and serve
+- `bun run build`: bundle code (`public/main.js`)
+- `bun types`: to run typescript tsgo compiler to check types
+- `bun start:server`: to start server
 - `bun test`: run tests
 - `bun format`: run tests
 
@@ -17,10 +16,4 @@ Install dependencies:
 
 ```bash
 bun install
-```
-
-Build and serve:
-
-```bash
-bun start
 ```

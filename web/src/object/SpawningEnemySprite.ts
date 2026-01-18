@@ -1,41 +1,56 @@
 import * as PIXI from "pixi.js";
 import { Assets } from "@/Assets";
+import { GameSprite } from "@/graphics/GameSprite";
 import type { DeltaTime } from "@/time";
 import type { SpawningEnemy } from "./SpawningEnemyState";
 
+const spriteSize =
+	{
+		width: 140,
+		height: 140,
+	};
+
 /**
- * Manages an enemy sprite graphic.
+ * Manages a spawning enemy portal sprite.
  */
-export class SpawningEnemySprite {
-	#container: PIXI.Container;
+export class SpawningEnemySprite extends GameSprite {
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
-	#size = 16;
-	#width = 140;
-	#height = 140;
 
 	constructor(
 		debug?: boolean,
 	) {
-		this.#container =
-			new PIXI.Container();
+		super(
+			{
+				anchor:
+					"center",
+				direction:
+					{
+						type: "none",
+					},
+			},
+		);
 		this.#sprite =
 			new PIXI.Sprite();
 		this.#sprite.scale.set(
 			0.2,
 		);
+
+		// Apply anchor offset for visual centering
+		const offset =
+			this.calculateAnchorOffset(
+				spriteSize,
+			);
 		this.#sprite.x =
-			-this
-				.#width /
-			2;
+			offset.x;
 		this.#sprite.y =
-			-this
-				.#height /
-			2;
-		this.#container.addChild(
+			offset.y;
+
+		this.addChild(
 			this
 				.#sprite,
 		);
+
 		this.#debugPosition =
 			new PIXI.Graphics();
 		if (
@@ -52,7 +67,7 @@ export class SpawningEnemySprite {
 				8,
 			);
 			this.#debugPosition.endFill();
-			this.#container.addChild(
+			this.addChild(
 				this
 					.#debugPosition,
 			);
@@ -74,40 +89,20 @@ export class SpawningEnemySprite {
 						new PIXI.Rectangle(
 							45,
 							630,
-							this
-								.#width,
-							this
-								.#height,
+							spriteSize.width,
+							spriteSize.height,
 						),
 				},
 			);
-	}
-
-	/**
-	 * Adds this sprite to a PIXI container.
-	 */
-	appendTo(
-		parent: PIXI.Container,
-		layer?: PIXI.RenderLayer,
-	): void {
-		parent.addChild(
-			this
-				.#container,
-		);
-		layer?.attach(
-			this
-				.#container,
-		);
 	}
 
 	update(
 		spawningEnemy: SpawningEnemy,
 		deltaTime: DeltaTime,
 	) {
-		this.#container.x =
-			spawningEnemy.position.x;
-		this.#container.y =
-			spawningEnemy.position.y;
+		this.updatePosition(
+			spawningEnemy.position,
+		);
 		this.#sprite.alpha =
 			Math.sin(
 				(((Date.now() -
@@ -116,15 +111,5 @@ export class SpawningEnemySprite {
 					Math.PI) /
 					8,
 			);
-	}
-
-	/**
-	 * Removes this sprite from its parent container.
-	 */
-	remove(): void {
-		this.#container.parent?.removeChild(
-			this
-				.#container,
-		);
 	}
 }

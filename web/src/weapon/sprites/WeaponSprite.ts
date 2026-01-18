@@ -20,6 +20,7 @@ type TextureConfig =
 			| number
 			| Point;
 	};
+
 const empty =
 	{
 		position:
@@ -32,6 +33,7 @@ const empty =
 			height: 0,
 		},
 	} as const;
+
 export const weapons: Record<
 	WeaponType,
 	TextureConfig
@@ -161,8 +163,21 @@ type Scaling =
 	| 0.25
 	| 0.5
 	| 1;
+
+/**
+ * Manages a weapon sprite graphic.
+ *
+ * Uses a two-container hierarchy to separate position and rotation:
+ * - #positionContainer: Handles position only (x, y)
+ * - #rotationContainer: Handles rotation only (rotation, scale.y for flip)
+ *
+ * This ensures that rotation doesn't affect the weapon's position,
+ * keeping the Bulbro's visual position stable during weapon aiming.
+ */
 export class WeaponSprite {
-	#gfx =
+	#positionContainer =
+		new PIXI.Container();
+	#rotationContainer =
 		new PIXI.Container();
 	#sprite =
 		new PIXI.Sprite();
@@ -175,12 +190,18 @@ export class WeaponSprite {
 	) {
 		this.#scaling =
 			scaling;
-		this.#gfx.addChild(
+		this.#weaponType =
+			weaponType;
+
+		// Build hierarchy: positionContainer → rotationContainer → sprite
+		this.#rotationContainer.addChild(
 			this
 				.#sprite,
 		);
-		this.#weaponType =
-			weaponType;
+		this.#positionContainer.addChild(
+			this
+				.#rotationContainer,
+		);
 	}
 
 	async init() {
@@ -272,7 +293,7 @@ export class WeaponSprite {
 		this.remove();
 		container.addChild(
 			this
-				.#gfx,
+				.#positionContainer,
 		);
 
 		const weaponConfig =
@@ -282,25 +303,34 @@ export class WeaponSprite {
 		if (
 			weaponConfig.scale
 		) {
-			this.#gfx.scale =
+			this.#positionContainer.scale =
 				weaponConfig.scale;
 		}
 	}
 
 	remove() {
-		this.#gfx.removeFromParent();
+		this.#positionContainer.removeFromParent();
 	}
 
+	/**
+	 * Updates the weapon's position.
+	 * Position is applied to the outer container only.
+	 */
 	updatePosition(
 		x: number,
 		y: number,
 	) {
-		this.#gfx.x =
+		this.#positionContainer.x =
 			x;
-		this.#gfx.y =
+		this.#positionContainer.y =
 			y;
 	}
 
+	/**
+	 * Rotates the weapon to aim in a direction.
+	 * Rotation is applied to the inner container only,
+	 * ensuring position remains stable.
+	 */
 	aim(
 		direction: Direction,
 	) {
@@ -310,19 +340,21 @@ export class WeaponSprite {
 				zeroPoint(),
 			)
 		) {
-			this.#gfx.rotation = 0;
+			this.#rotationContainer.rotation = 0;
 		} else {
-			this.#gfx.rotation =
+			this.#rotationContainer.rotation =
 				rotation(
 					direction,
 				) -
 				Math.PI /
 					2;
 		}
-		this.#gfx.scale.y =
+
+		// Handle horizontal flip based on aim direction
+		this.#rotationContainer.scale.y =
 			Math.abs(
 				this
-					.#gfx
+					.#rotationContainer
 					.scale
 					.y,
 			);
@@ -330,7 +362,7 @@ export class WeaponSprite {
 			direction.x <
 			0
 		) {
-			this.#gfx.scale.y *=
+			this.#rotationContainer.scale.y *=
 				-1;
 		}
 	}

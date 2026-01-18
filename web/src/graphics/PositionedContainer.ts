@@ -4,6 +4,15 @@ import type {
 	Position,
 } from "@/geometry";
 
+/**
+ * @deprecated Use GameSprite base class instead.
+ * This class has been superseded by GameSprite which provides:
+ * - Unified coordinate translation with configurable anchor points
+ * - Configurable direction handling (flip/rotate/none)
+ * - Consistent interface across all game sprites
+ *
+ * @see GameSprite
+ */
 export class PositionedContainer {
 	#container: PIXI.Container;
 	constructor(
