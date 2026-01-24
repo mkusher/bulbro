@@ -77,6 +77,11 @@ describe("KeepingDistanceBehaviors", () => {
 					},
 			};
 		};
+	const actualRange =
+		aphidEnemy
+			.stats
+			.range /
+		2;
 
 	describe("move", () => {
 		it("should not move during starting raging phase", () => {
@@ -138,11 +143,6 @@ describe("KeepingDistanceBehaviors", () => {
 				nowTime(
 					Date.now(),
 				);
-			const actualRange =
-				aphidEnemy
-					.stats
-					.range /
-				8;
 			const tooCloseDistance =
 				actualRange *
 				0.5;
@@ -254,11 +254,6 @@ describe("KeepingDistanceBehaviors", () => {
 				nowTime(
 					Date.now(),
 				);
-			const actualRange =
-				aphidEnemy
-					.stats
-					.range /
-				8;
 			const optimalDistance =
 				actualRange *
 				0.85;
@@ -309,11 +304,6 @@ describe("KeepingDistanceBehaviors", () => {
 				nowTime(
 					Date.now(),
 				);
-			const actualRange =
-				aphidEnemy
-					.stats
-					.range /
-				8;
 			const farDistance =
 				actualRange *
 				1.5;
@@ -377,11 +367,6 @@ describe("KeepingDistanceBehaviors", () => {
 				nowTime(
 					Date.now(),
 				);
-			const actualRange =
-				aphidEnemy
-					.stats
-					.range /
-				8;
 			const enemy =
 				createTestEnemy(
 					{
@@ -665,11 +650,6 @@ describe("KeepingDistanceBehaviors", () => {
 				nowTime(
 					Date.now(),
 				);
-			const actualRange =
-				aphidEnemy
-					.stats
-					.range /
-				8;
 			const enemy =
 				createTestEnemy(
 					{

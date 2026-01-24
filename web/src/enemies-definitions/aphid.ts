@@ -10,7 +10,7 @@ const gun: Weapon =
 			[
 				"gun",
 			],
-		shotSpeed: 250,
+		shotSpeed: 275,
 		statsBonus:
 			{},
 	};

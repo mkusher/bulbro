@@ -74,7 +74,7 @@ export class KeepkingDistanceBehaviors
 			currentEnemy
 				.stats
 				.range /
-			8;
+			2;
 
 		if (
 			currentEnemy.isStartingRaging(
@@ -144,6 +144,13 @@ export class KeepkingDistanceBehaviors
 		now: NowTime,
 		deltaTime: DeltaTime,
 	): EnemyEvent[] {
+		if (
+			currentEnemy.isStartingRaging(
+				now,
+			)
+		) {
+			return [];
+		}
 		const target =
 			findClosest(
 				currentEnemy,
@@ -165,15 +172,7 @@ export class KeepkingDistanceBehaviors
 			currentEnemy
 				.stats
 				.range /
-			8;
-
-		if (
-			currentEnemy.isStartingRaging(
-				now,
-			)
-		) {
-			return [];
-		}
+			2;
 
 		if (
 			!currentEnemy.ragingStartedAt &&
