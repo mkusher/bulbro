@@ -184,6 +184,29 @@ export class BulbroState
 		);
 	}
 
+	/**
+	 * Spends materials from this Bulbro.
+	 * Returns a new BulbroState with reduced materials.
+	 */
+	spendMaterials(
+		amount: number,
+	) {
+		return new BulbroState(
+			{
+				...this
+					.#props,
+				materialsAvailable:
+					Math.max(
+						0,
+						this
+							.#props
+							.materialsAvailable -
+							amount,
+					),
+			},
+		);
+	}
+
 	isAlive() {
 		return (
 			this

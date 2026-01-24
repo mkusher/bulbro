@@ -1033,6 +1033,32 @@ export function selectWeapons(
 	};
 }
 
+/**
+ * Spends materials for a player.
+ * Used when purchasing items in the shop.
+ */
+export function spendMaterials(
+	state: WaveState,
+	playerId: string,
+	amount: number,
+): WaveState {
+	return {
+		...state,
+		players:
+			state.players.map(
+				(
+					player,
+				) =>
+					player.id ===
+					playerId
+						? player.spendMaterials(
+								amount,
+							)
+						: player,
+			),
+	};
+}
+
 export function handleBulbroHealed(
 	state: WaveState,
 	action: Extract<

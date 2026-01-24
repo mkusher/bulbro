@@ -1,23 +1,17 @@
 import { useState } from "preact/hooks";
-import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
+import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import {
-	PrevWaveStats,
-	type WaveStats,
-} from "@/shop/PrevWaveStats";
-import {
-	Shop,
-	type ShopItem,
-} from "@/shop/Shop";
-import { WeaponSlots } from "@/shop/WeaponSlots";
-import { Button } from "@/ui/shadcn/button";
+	addWeaponToPlayer,
+	type PreRoundState,
+	purchaseWeapon,
+} from "@/shop/PreRoundState";
+import type { WaveStats } from "@/shop/PrevWaveStats";
+import type { ShopItem } from "@/shop/Shop";
+import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import type { Weapon } from "@/weapon";
 import {
-	ak47,
-	doubleBarrelShotgun,
 	fist,
-	knife,
-	laserGun,
 	pistol,
 	smg,
 	sword,
@@ -28,93 +22,98 @@ export default {
 		"Shop/PreRoundScreen",
 };
 
+// Helper to create initial state for stories using the generator
+function createInitialState(
+	weapons: Weapon[],
+	materials: number,
+	wave: number,
+	prevWaveStats?: WaveStats,
+	maxShopItems?: number,
+	level: number = 1,
+): PreRoundState {
+	// Generate shop items from the bulbro's available weapons, excluding owned weapons
+	const shopItems =
+		generateShopItems(
+			wellRoundedBulbro,
+			{
+				excludeOwned:
+					weapons,
+				maxItems:
+					maxShopItems,
+				wave,
+				level,
+			},
+		);
+
+	return {
+		currentWave:
+			wave,
+		players:
+			[
+				{
+					id: "player-1",
+					bulbro:
+						wellRoundedBulbro,
+					weapons,
+					materials,
+					level,
+				},
+			],
+		shopItems,
+		prevWaveStats,
+	};
+}
+
 // Complete pre-round screen with all components
 export const CompletePreRoundScreen =
 	{
 		render:
 			() => {
 				const [
-					weapons,
-					setWeapons,
+					state,
+					setState,
 				] =
-					useState<
-						Weapon[]
-					>(
-						[
-							pistol,
-							fist,
-						],
+					useState<PreRoundState>(
+						() =>
+							createInitialState(
+								[
+									pistol,
+									fist,
+								],
+								250,
+								1,
+								{
+									wave: 1,
+									enemiesKilled: 45,
+									damageDealt: 12450,
+									damageTaken: 320,
+									materialsCollected: 250,
+									survivalTime: 60,
+									accuracy: 68.5,
+								},
+								4,
+							),
 					);
-				const [
-					materials,
-					setMaterials,
-				] =
-					useState(
-						250,
-					);
-				const [
-					shopItems,
-				] =
-					useState<
-						ShopItem[]
-					>(
-						[
-							{
-								weapon:
-									smg,
-								price: 100,
-							},
-							{
-								weapon:
-									sword,
-								price: 75,
-							},
-							{
-								weapon:
-									doubleBarrelShotgun,
-								price: 150,
-							},
-							{
-								weapon:
-									ak47,
-								price: 200,
-							},
-						],
-					);
-				const [
-					stats,
-				] =
-					useState<WaveStats>(
-						{
-							wave: 1,
-							enemiesKilled: 45,
-							damageDealt: 12450,
-							damageTaken: 320,
-							materialsCollected: 250,
-							survivalTime: 60,
-							accuracy: 68.5,
-						},
-					);
+
+				const player =
+					state
+						.players[0];
 
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
-						if (
-							materials >=
-								item.price &&
-							weapons.length <
-								6
-						) {
-							setMaterials(
-								materials -
-									item.price,
+						const newState =
+							purchaseWeapon(
+								state,
+								player.id,
+								item,
 							);
-							setWeapons(
-								[
-									...weapons,
-									item.weapon,
-								],
+						if (
+							newState
+						) {
+							setState(
+								newState,
 							);
 						}
 					};
@@ -133,102 +132,35 @@ export const CompletePreRoundScreen =
 					};
 
 				return (
-					<div className="p-4 max-w-6xl mx-auto">
-						<div className="flex flex-col gap-3">
-							{/* Header */}
-							<div className="text-center">
-								<h1 className="text-2xl font-bold mb-1">
-									Prepare
-									for
-									Wave{" "}
-									{stats.wave +
-										1}
-								</h1>
-								<p className="text-sm text-muted-foreground">
-									Materials:{" "}
-									{
-										materials
-									}
-								</p>
-							</div>
-
-							{/* Previous Wave Stats */}
-							<PrevWaveStats
-								stats={
-									stats
-								}
-							/>
-
-							{/* Two column layout for Bulbro and Weapon Slots */}
-							<div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3">
-								{/* Bulbro Description */}
-								<div className="overflow-visible">
-									<BulbroCard
-										bulbro={
-											wellRoundedBulbro
-										}
-										showDetails={
-											true
-										}
-										displayWidth={
-											80
-										}
-										displayHeight={
-											80
-										}
-										responsive={
-											false
-										}
-									/>
-								</div>
-
-								{/* Weapon Slots */}
-								<div>
-									<WeaponSlots
-										weapons={
-											weapons
-										}
-										maxSlots={
-											6
-										}
-										onWeaponClick={
-											handleWeaponClick
-										}
-									/>
-								</div>
-							</div>
-
-							{/* Shop */}
-							<Shop
-								items={
-									shopItems
-								}
-								availableMaterials={
-									materials
-								}
-								onPurchase={
-									handlePurchase
-								}
-							/>
-
-							{/* Start Wave Button */}
-							<div className="flex justify-center">
-								<Button
-									className="w-full max-w-md"
-									onClick={() =>
-										console.log(
-											"Starting wave...",
-										)
-									}
-								>
-									Start
-									Wave{" "}
-									{stats.wave +
-										1}
-								</Button>
-							</div>
-						</div>
-					</div>
+					<PreRoundLayout
+						currentWave={
+							state.currentWave
+						}
+						player={{
+							bulbro:
+								player.bulbro,
+							weapons:
+								player.weapons,
+							materials:
+								player.materials,
+							onWeaponClick:
+								handleWeaponClick,
+						}}
+						shopItems={
+							state.shopItems
+						}
+						prevWaveStats={
+							state.prevWaveStats
+						}
+						onPurchase={
+							handlePurchase
+						}
+						onStartWave={() =>
+							console.log(
+								"Starting wave...",
+							)
+						}
+					/>
 				);
 			},
 	};
@@ -239,163 +171,81 @@ export const EarlyGame =
 		render:
 			() => {
 				const [
-					weapons,
-					setWeapons,
+					state,
+					setState,
 				] =
-					useState<
-						Weapon[]
-					>(
-						[
-							pistol,
-						],
+					useState<PreRoundState>(
+						() =>
+							createInitialState(
+								[
+									pistol,
+								],
+								50,
+								1,
+								{
+									wave: 1,
+									enemiesKilled: 20,
+									damageDealt: 5000,
+									damageTaken: 150,
+									materialsCollected: 50,
+									survivalTime: 60,
+									accuracy: 55.0,
+								},
+								4,
+							),
 					);
-				const [
-					materials,
-					setMaterials,
-				] =
-					useState(
-						50,
-					);
-				const [
-					shopItems,
-				] =
-					useState<
-						ShopItem[]
-					>(
-						[
-							{
-								weapon:
-									knife,
-								price: 25,
-							},
-							{
-								weapon:
-									fist,
-								price: 10,
-							},
-							{
-								weapon:
-									sword,
-								price: 75,
-							},
-							{
-								weapon:
-									smg,
-								price: 100,
-							},
-						],
-					);
-				const [
-					stats,
-				] =
-					useState<WaveStats>(
-						{
-							wave: 1,
-							enemiesKilled: 20,
-							damageDealt: 5000,
-							damageTaken: 150,
-							materialsCollected: 50,
-							survivalTime: 60,
-							accuracy: 55.0,
-						},
-					);
+
+				const player =
+					state
+						.players[0];
 
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
-						if (
-							materials >=
-								item.price &&
-							weapons.length <
-								6
-						) {
-							setMaterials(
-								materials -
-									item.price,
+						const newState =
+							purchaseWeapon(
+								state,
+								player.id,
+								item,
 							);
-							setWeapons(
-								[
-									...weapons,
-									item.weapon,
-								],
+						if (
+							newState
+						) {
+							setState(
+								newState,
 							);
 						}
 					};
 
 				return (
-					<div className="p-4 max-w-6xl mx-auto">
-						<div className="flex flex-col gap-3">
-							<div className="text-center">
-								<h1 className="text-2xl font-bold mb-1">
-									Prepare
-									for
-									Wave{" "}
-									{stats.wave +
-										1}
-								</h1>
-								<p className="text-sm text-muted-foreground">
-									Materials:{" "}
-									{
-										materials
-									}
-								</p>
-							</div>
-							<PrevWaveStats
-								stats={
-									stats
-								}
-							/>
-							<div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3">
-								<div className="overflow-visible">
-									<BulbroCard
-										bulbro={
-											wellRoundedBulbro
-										}
-										showDetails={
-											true
-										}
-										displayWidth={
-											80
-										}
-										displayHeight={
-											80
-										}
-										responsive={
-											false
-										}
-									/>
-								</div>
-								<WeaponSlots
-									weapons={
-										weapons
-									}
-									maxSlots={
-										6
-									}
-								/>
-							</div>
-							<Shop
-								items={
-									shopItems
-								}
-								availableMaterials={
-									materials
-								}
-								onPurchase={
-									handlePurchase
-								}
-							/>
-							<div className="flex justify-center">
-								<Button className="w-full max-w-md">
-									Start
-									Wave{" "}
-									{stats.wave +
-										1}
-								</Button>
-							</div>
-						</div>
-					</div>
+					<PreRoundLayout
+						currentWave={
+							state.currentWave
+						}
+						player={{
+							bulbro:
+								player.bulbro,
+							weapons:
+								player.weapons,
+							materials:
+								player.materials,
+						}}
+						shopItems={
+							state.shopItems
+						}
+						prevWaveStats={
+							state.prevWaveStats
+						}
+						onPurchase={
+							handlePurchase
+						}
+						onStartWave={() =>
+							console.log(
+								"Starting wave...",
+							)
+						}
+					/>
 				);
 			},
 	};
@@ -406,167 +256,83 @@ export const LateGame =
 		render:
 			() => {
 				const [
-					weapons,
-					setWeapons,
+					state,
+					setState,
 				] =
-					useState<
-						Weapon[]
-					>(
-						[
-							pistol,
-							smg,
-							sword,
-							ak47,
-							doubleBarrelShotgun,
-						],
-					);
-				const [
-					materials,
-					setMaterials,
-				] =
-					useState(
-						800,
-					);
-				const [
-					shopItems,
-				] =
-					useState<
-						ShopItem[]
-					>(
-						[
-							{
-								weapon:
-									laserGun,
-								price: 300,
-							},
-							{
-								weapon:
-									ak47,
-								price: 200,
-							},
-							{
-								weapon:
-									doubleBarrelShotgun,
-								price: 250,
-							},
-							{
-								weapon:
+					useState<PreRoundState>(
+						() =>
+							createInitialState(
+								[
+									pistol,
+									smg,
 									sword,
-								price: 150,
-							},
-						],
+								],
+								800,
+								10,
+								{
+									wave: 10,
+									enemiesKilled: 180,
+									damageDealt: 65000,
+									damageTaken: 1200,
+									materialsCollected: 800,
+									survivalTime: 60,
+									accuracy: 78.5,
+								},
+								4,
+							),
 					);
-				const [
-					stats,
-				] =
-					useState<WaveStats>(
-						{
-							wave: 10,
-							enemiesKilled: 180,
-							damageDealt: 65000,
-							damageTaken: 1200,
-							materialsCollected: 800,
-							survivalTime: 60,
-							accuracy: 78.5,
-						},
-					);
+
+				const player =
+					state
+						.players[0];
 
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
-						if (
-							materials >=
-								item.price &&
-							weapons.length <
-								6
-						) {
-							setMaterials(
-								materials -
-									item.price,
+						const newState =
+							purchaseWeapon(
+								state,
+								player.id,
+								item,
 							);
-							setWeapons(
-								[
-									...weapons,
-									item.weapon,
-								],
+						if (
+							newState
+						) {
+							setState(
+								newState,
 							);
 						}
 					};
 
 				return (
-					<div className="p-4 max-w-6xl mx-auto">
-						<div className="flex flex-col gap-3">
-							<div className="text-center">
-								<h1 className="text-2xl font-bold mb-1">
-									Prepare
-									for
-									Wave{" "}
-									{stats.wave +
-										1}
-								</h1>
-								<p className="text-sm text-muted-foreground">
-									Materials:{" "}
-									{
-										materials
-									}
-								</p>
-							</div>
-							<PrevWaveStats
-								stats={
-									stats
-								}
-							/>
-							<div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3">
-								<div className="overflow-visible">
-									<BulbroCard
-										bulbro={
-											wellRoundedBulbro
-										}
-										showDetails={
-											true
-										}
-										displayWidth={
-											80
-										}
-										displayHeight={
-											80
-										}
-										responsive={
-											false
-										}
-									/>
-								</div>
-								<WeaponSlots
-									weapons={
-										weapons
-									}
-									maxSlots={
-										6
-									}
-								/>
-							</div>
-							<Shop
-								items={
-									shopItems
-								}
-								availableMaterials={
-									materials
-								}
-								onPurchase={
-									handlePurchase
-								}
-							/>
-							<div className="flex justify-center">
-								<Button className="w-full max-w-md">
-									Start
-									Wave{" "}
-									{stats.wave +
-										1}
-								</Button>
-							</div>
-						</div>
-					</div>
+					<PreRoundLayout
+						currentWave={
+							state.currentWave
+						}
+						player={{
+							bulbro:
+								player.bulbro,
+							weapons:
+								player.weapons,
+							materials:
+								player.materials,
+						}}
+						shopItems={
+							state.shopItems
+						}
+						prevWaveStats={
+							state.prevWaveStats
+						}
+						onPurchase={
+							handlePurchase
+						}
+						onStartWave={() =>
+							console.log(
+								"Starting wave...",
+							)
+						}
+					/>
 				);
 			},
 	};
@@ -577,163 +343,449 @@ export const LowMaterialsScenario =
 		render:
 			() => {
 				const [
-					weapons,
-					setWeapons,
+					state,
+					setState,
 				] =
-					useState<
-						Weapon[]
-					>(
-						[
-							pistol,
-							fist,
-						],
+					useState<PreRoundState>(
+						() =>
+							createInitialState(
+								[
+									pistol,
+									fist,
+								],
+								30,
+								2,
+								{
+									wave: 2,
+									enemiesKilled: 25,
+									damageDealt: 6500,
+									damageTaken: 450,
+									materialsCollected: 30,
+									survivalTime: 48,
+									accuracy: 52.3,
+								},
+								4,
+							),
 					);
-				const [
-					materials,
-					setMaterials,
-				] =
-					useState(
-						30,
-					);
-				const [
-					shopItems,
-				] =
-					useState<
-						ShopItem[]
-					>(
-						[
-							{
-								weapon:
-									smg,
-								price: 100,
-							},
-							{
-								weapon:
-									sword,
-								price: 75,
-							},
-							{
-								weapon:
-									knife,
-								price: 25,
-							},
-							{
-								weapon:
-									ak47,
-								price: 200,
-							},
-						],
-					);
-				const [
-					stats,
-				] =
-					useState<WaveStats>(
-						{
-							wave: 2,
-							enemiesKilled: 25,
-							damageDealt: 6500,
-							damageTaken: 450,
-							materialsCollected: 30,
-							survivalTime: 48,
-							accuracy: 52.3,
-						},
-					);
+
+				const player =
+					state
+						.players[0];
 
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
-						if (
-							materials >=
-								item.price &&
-							weapons.length <
-								6
-						) {
-							setMaterials(
-								materials -
-									item.price,
+						const newState =
+							purchaseWeapon(
+								state,
+								player.id,
+								item,
 							);
-							setWeapons(
-								[
-									...weapons,
-									item.weapon,
-								],
+						if (
+							newState
+						) {
+							setState(
+								newState,
 							);
 						}
 					};
 
 				return (
-					<div className="p-4 max-w-6xl mx-auto">
-						<div className="flex flex-col gap-3">
-							<div className="text-center">
-								<h1 className="text-2xl font-bold mb-1">
-									Prepare
-									for
-									Wave{" "}
-									{stats.wave +
-										1}
-								</h1>
-								<p className="text-sm text-muted-foreground">
-									Materials:{" "}
+					<PreRoundLayout
+						currentWave={
+							state.currentWave
+						}
+						player={{
+							bulbro:
+								player.bulbro,
+							weapons:
+								player.weapons,
+							materials:
+								player.materials,
+						}}
+						shopItems={
+							state.shopItems
+						}
+						prevWaveStats={
+							state.prevWaveStats
+						}
+						onPurchase={
+							handlePurchase
+						}
+						onStartWave={() =>
+							console.log(
+								"Starting wave...",
+							)
+						}
+					/>
+				);
+			},
+	};
+
+// Story demonstrating addWeaponToPlayer function
+export const AddWeaponDemo =
+	{
+		render:
+			() => {
+				const [
+					state,
+					setState,
+				] =
+					useState<PreRoundState>(
+						() =>
+							createInitialState(
+								[
+									pistol,
+								],
+								500,
+								5,
+								{
+									wave: 5,
+									enemiesKilled: 100,
+									damageDealt: 30000,
+									damageTaken: 500,
+									materialsCollected: 500,
+									survivalTime: 60,
+									accuracy: 72.0,
+								},
+								4,
+							),
+					);
+
+				const player =
+					state
+						.players[0];
+
+				const handlePurchase =
+					(
+						item: ShopItem,
+					) => {
+						// Use addWeaponToPlayer directly (without deducting materials)
+						// to demonstrate the function
+						const newState =
+							addWeaponToPlayer(
+								state,
+								player.id,
+								item.weapon,
+							);
+						setState(
+							newState,
+						);
+					};
+
+				return (
+					<div>
+						<div className="p-2 mb-2 bg-yellow-100 dark:bg-yellow-900 text-sm rounded">
+							This
+							demo
+							uses{" "}
+							<code>
+								addWeaponToPlayer
+							</code>{" "}
+							-
+							weapons
+							are
+							added
+							without
+							deducting
+							materials.
+						</div>
+						<PreRoundLayout
+							currentWave={
+								state.currentWave
+							}
+							player={{
+								bulbro:
+									player.bulbro,
+								weapons:
+									player.weapons,
+								materials:
+									player.materials,
+							}}
+							shopItems={
+								state.shopItems
+							}
+							prevWaveStats={
+								state.prevWaveStats
+							}
+							onPurchase={
+								handlePurchase
+							}
+							onStartWave={() =>
+								console.log(
+									"Starting wave...",
+								)
+							}
+						/>
+					</div>
+				);
+			},
+	};
+
+// Story showing all available shop items with auto-generated prices
+export const AllShopItems =
+	{
+		render:
+			() => {
+				const [
+					state,
+					setState,
+				] =
+					useState<PreRoundState>(
+						() => {
+							// Generate all shop items without any exclusions
+							const shopItems =
+								generateShopItems(
+									wellRoundedBulbro,
 									{
-										materials
-									}
-								</p>
-							</div>
-							<PrevWaveStats
-								stats={
-									stats
+										wave: 1,
+										level: 1,
+									},
+								);
+							return {
+								currentWave: 1,
+								players:
+									[
+										{
+											id: "player-1",
+											bulbro:
+												wellRoundedBulbro,
+											weapons:
+												[],
+											materials: 1000,
+											level: 1,
+										},
+									],
+								shopItems,
+							};
+						},
+					);
+
+				const player =
+					state
+						.players[0];
+
+				const handlePurchase =
+					(
+						item: ShopItem,
+					) => {
+						const newState =
+							purchaseWeapon(
+								state,
+								player.id,
+								item,
+							);
+						if (
+							newState
+						) {
+							setState(
+								newState,
+							);
+						}
+					};
+
+				return (
+					<div>
+						<div className="p-2 mb-2 bg-blue-100 dark:bg-blue-900 text-sm rounded">
+							This
+							story
+							shows
+							all
+							weapons
+							available
+							for{" "}
+							<strong>
+								{
+									wellRoundedBulbro.name
 								}
-							/>
-							<div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3">
-								<div className="overflow-visible">
-									<BulbroCard
-										bulbro={
-											wellRoundedBulbro
+							</strong>{" "}
+							with
+							auto-calculated
+							prices
+							using{" "}
+							<code>
+								generateShopItems
+							</code>
+							.
+						</div>
+						<PreRoundLayout
+							currentWave={
+								state.currentWave
+							}
+							player={{
+								bulbro:
+									player.bulbro,
+								weapons:
+									player.weapons,
+								materials:
+									player.materials,
+							}}
+							shopItems={
+								state.shopItems
+							}
+							onPurchase={
+								handlePurchase
+							}
+							onStartWave={() =>
+								console.log(
+									"Starting wave...",
+								)
+							}
+						/>
+					</div>
+				);
+			},
+	};
+
+// Story demonstrating wave/level price scaling
+export const WaveLevelPriceScaling =
+	{
+		render:
+			() => {
+				const [
+					wave,
+					setWave,
+				] =
+					useState(
+						1,
+					);
+				const [
+					level,
+					setLevel,
+				] =
+					useState(
+						1,
+					);
+
+				const shopItems =
+					generateShopItems(
+						wellRoundedBulbro,
+						{
+							wave,
+							level,
+						},
+					);
+
+				return (
+					<div className="p-4 max-w-4xl mx-auto">
+						<div className="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded">
+							<h2 className="text-lg font-bold mb-2">
+								Wave/Level
+								Price
+								Scaling
+								Demo
+							</h2>
+							<p className="text-sm text-muted-foreground mb-4">
+								Adjust
+								wave
+								and
+								level
+								to
+								see
+								how
+								prices
+								scale.
+								Wave
+								1
+								prices
+								are
+								$10-$50,
+								growing
+								~15%
+								per
+								wave
+								and
+								~10%
+								per
+								level.
+							</p>
+							<div className="flex gap-4">
+								<label className="flex items-center gap-2">
+									<span>
+										Wave:
+									</span>
+									<input
+										type="range"
+										min="1"
+										max="20"
+										value={
+											wave
 										}
-										showDetails={
-											true
+										onChange={(
+											e,
+										) =>
+											setWave(
+												Number(
+													(
+														e.target as HTMLInputElement
+													)
+														.value,
+												),
+											)
 										}
-										displayWidth={
-											80
-										}
-										displayHeight={
-											80
-										}
-										responsive={
-											false
-										}
+										className="w-32"
 									/>
-								</div>
-								<WeaponSlots
-									weapons={
-										weapons
-									}
-									maxSlots={
-										6
-									}
-								/>
-							</div>
-							<Shop
-								items={
-									shopItems
-								}
-								availableMaterials={
-									materials
-								}
-								onPurchase={
-									handlePurchase
-								}
-							/>
-							<div className="flex justify-center">
-								<Button className="w-full max-w-md">
-									Start
-									Wave{" "}
-									{stats.wave +
-										1}
-								</Button>
+									<span className="w-8 text-center font-mono">
+										{
+											wave
+										}
+									</span>
+								</label>
+								<label className="flex items-center gap-2">
+									<span>
+										Level:
+									</span>
+									<input
+										type="range"
+										min="1"
+										max="10"
+										value={
+											level
+										}
+										onChange={(
+											e,
+										) =>
+											setLevel(
+												Number(
+													(
+														e.target as HTMLInputElement
+													)
+														.value,
+												),
+											)
+										}
+										className="w-32"
+									/>
+									<span className="w-8 text-center font-mono">
+										{
+											level
+										}
+									</span>
+								</label>
 							</div>
 						</div>
+						<PreRoundLayout
+							currentWave={
+								wave
+							}
+							player={{
+								bulbro:
+									wellRoundedBulbro,
+								weapons:
+									[],
+								materials: 10000,
+							}}
+							shopItems={
+								shopItems
+							}
+							onPurchase={() => {}}
+							onStartWave={() =>
+								console.log(
+									"Starting wave...",
+								)
+							}
+						/>
 					</div>
 				);
 			},

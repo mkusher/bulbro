@@ -168,7 +168,7 @@ export function Shop({
 												? "Owned"
 												: affordable
 													? `$${item.price}`
-													: "Locked"}
+													: `Locked $${item.price}`}
 										</Button>
 									</CardContent>
 								</Card>
