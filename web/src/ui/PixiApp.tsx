@@ -4,6 +4,7 @@ import {
 	useRef,
 } from "preact/hooks";
 import { Assets } from "@/Assets";
+import { createPixiInitOptions } from "@/graphics/PixiConfiguration";
 
 export type PixiAppProps =
 	{
@@ -74,13 +75,15 @@ export function PixiApp({
 				app =
 					new PIXI.Application();
 				await app.init(
-					{
-						width:
-							initialWidth,
-						height:
-							initialHeight,
-						backgroundColor,
-					},
+					createPixiInitOptions(
+						{
+							width:
+								initialWidth,
+							height:
+								initialHeight,
+							backgroundColor,
+						},
+					),
 				);
 
 				if (

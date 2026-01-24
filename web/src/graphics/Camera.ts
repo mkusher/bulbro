@@ -4,6 +4,7 @@ import type {
 	Position,
 	Size,
 } from "@/geometry";
+import { createPixiInitOptions } from "./PixiConfiguration";
 
 export class Camera {
 	#app: PIXI.Application;
@@ -25,14 +26,16 @@ export class Camera {
 		size: Size,
 	) {
 		await this.#app.init(
-			{
-				backgroundColor: 0x222222,
-				sharedTicker: true,
-				width:
-					size.width,
-				height:
-					size.height,
-			},
+			createPixiInitOptions(
+				{
+					backgroundColor: 0x222222,
+					sharedTicker: true,
+					width:
+						size.width,
+					height:
+						size.height,
+				},
+			),
 		);
 		this.#isInitialized = true;
 	}

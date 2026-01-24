@@ -27,6 +27,16 @@ export function InGame() {
 		isLoadingSignal.value;
 
 	if (
+		isLoading
+	) {
+		return (
+			<MainContainer>
+				<Loader />
+			</MainContainer>
+		);
+	}
+
+	if (
 		!isRound
 	) {
 		return (
@@ -38,16 +48,6 @@ export function InGame() {
 					<Failed />
 				</MainContainer>
 			</SplashBanner>
-		);
-	}
-
-	if (
-		isLoading
-	) {
-		return (
-			<MainContainer>
-				<Loader />
-			</MainContainer>
 		);
 	}
 
@@ -138,7 +138,7 @@ export function ShowRound({
 				rootEl
 			}
 		>
-			Loading...
+			Starting...
 		</div>
 	);
 }

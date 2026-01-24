@@ -43,6 +43,7 @@ export const waveResult =
 
 export function markAsLoading() {
 	isLoading.value = true;
+	isRound.value = false;
 	waveResult.value =
 		undefined;
 }

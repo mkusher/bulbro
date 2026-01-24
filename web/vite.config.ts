@@ -1,7 +1,7 @@
 import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import { defineConfig } from "rolldown-vite";
+import { defineConfig } from "vite";
 
 export default defineConfig(
 	{

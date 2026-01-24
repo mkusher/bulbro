@@ -3,6 +3,7 @@ import {
 	useEffect,
 	useRef,
 } from "preact/hooks";
+import { createPixiInitOptions } from "../graphics/PixiConfiguration";
 import { MaterialSprite } from "../object/MaterialSprite";
 import type { Material } from "../object/MaterialState";
 import { SpawningEnemySprite } from "../object/SpawningEnemySprite";
@@ -61,11 +62,13 @@ function ObjectRenderer({
 				app =
 					new PIXI.Application();
 				await app.init(
-					{
-						width,
-						height,
-						backgroundColor,
-					},
+					createPixiInitOptions(
+						{
+							width,
+							height,
+							backgroundColor,
+						},
+					),
 				);
 
 				// Add canvas to container

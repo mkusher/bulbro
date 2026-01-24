@@ -5,6 +5,7 @@ import {
 	useState,
 } from "preact/hooks";
 import { classicMapSize } from "@/game-canvas";
+import { createPixiInitOptions } from "@/graphics/PixiConfiguration";
 import { PlayingFieldTile } from "@/graphics/PlayingFieldTile";
 
 export interface StorybookSprite<
@@ -83,13 +84,15 @@ export function StorybookScene<
 					canvasScale;
 
 				await app.init(
-					{
-						width:
-							canvasWidth,
-						height:
-							canvasHeight,
-						backgroundColor,
-					},
+					createPixiInitOptions(
+						{
+							width:
+								canvasWidth,
+							height:
+								canvasHeight,
+							backgroundColor,
+						},
+					),
 				);
 
 				canvasRef.current?.appendChild(
