@@ -1353,6 +1353,8 @@ export const getTimeLeft =
 	(
 		round: RoundState,
 	) => {
+		const now =
+			Date.now();
 		const duration =
 			round.duration *
 			1000;
@@ -1361,9 +1363,10 @@ export const getTimeLeft =
 			? duration -
 					round.endedAt +
 					round.startedAt
-			: round.startedAt
+			: round.startedAt !=
+					null
 				? duration -
-					Date.now() +
+					now +
 					round.startedAt
 				: 0;
 	};

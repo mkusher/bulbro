@@ -1,9 +1,17 @@
 import { signal } from "@preact/signals";
 import type { PlayerControl } from "./controls";
+import {
+	finalizeWaveStats,
+	resetGameStats,
+	startWaveTracking,
+} from "./gameStats";
 import { GameProcess } from "./GameProcess";
 import type { Difficulty } from "./game-formulas";
 import type { Player } from "./player";
-import type { WaveState } from "./waveState";
+import {
+	waveState,
+	type WaveState,
+} from "./waveState";
 
 export const currentGameProcess =
 	signal<GameProcess>(
@@ -70,6 +78,10 @@ export async function startLocalGame(
 		);
 	}
 	markAsLoading();
+	resetGameStats();
+	startWaveTracking(
+		1,
+	);
 	try {
 		const {
 			wavePromise,
@@ -84,6 +96,32 @@ export async function startLocalGame(
 		markAsRunningWave();
 		const result =
 			await wavePromise;
+		const state =
+			waveState.value;
+		const survivalTimeMs =
+			state
+				.round
+				.endedAt &&
+			state
+				.round
+				.startedAt
+				? state
+						.round
+						.endedAt -
+					state
+						.round
+						.startedAt
+				: state
+							.round
+							.startedAt
+					? Date.now() -
+						state
+							.round
+							.startedAt
+					: 0;
+		finalizeWaveStats(
+			survivalTimeMs,
+		);
 		waveResult.value =
 			result;
 	} finally {
@@ -104,6 +142,14 @@ export async function startWave(
 			"No game process",
 		);
 	}
+	const nextWaveNumber =
+		state
+			.round
+			.wave +
+		1;
+	startWaveTracking(
+		nextWaveNumber,
+	);
 	try {
 		const {
 			wavePromise,
@@ -114,6 +160,32 @@ export async function startWave(
 		markAsRunningWave();
 		const result =
 			await wavePromise;
+		const currentState =
+			waveState.value;
+		const survivalTimeMs =
+			currentState
+				.round
+				.endedAt &&
+			currentState
+				.round
+				.startedAt
+				? currentState
+						.round
+						.endedAt -
+					currentState
+						.round
+						.startedAt
+				: currentState
+							.round
+							.startedAt
+					? Date.now() -
+						currentState
+							.round
+							.startedAt
+					: 0;
+		finalizeWaveStats(
+			survivalTimeMs,
+		);
 		waveResult.value =
 			result;
 	} finally {

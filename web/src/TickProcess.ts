@@ -14,6 +14,7 @@ import {
 	withEventMeta,
 	withEventMetaMultiple,
 } from "./game-events/GameEvents";
+import { updateStatsFromStateChange } from "./gameStats";
 import {
 	type Direction,
 	zeroPoint,
@@ -117,6 +118,12 @@ export class TickProcess {
 		// Phase 3.5: Handle audio events
 		audioController.handleEvents(
 			events,
+		);
+
+		// Phase 3.6: Handle stats by comparing state changes
+		updateStatsFromStateChange(
+			state,
+			newState,
 		);
 
 		// Phase 4: Update rendering
