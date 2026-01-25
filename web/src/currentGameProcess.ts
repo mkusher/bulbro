@@ -59,7 +59,6 @@ export async function startLocalGame(
 	players: Player[],
 	playerControls: PlayerControl[],
 	difficulty: Difficulty,
-	duration: number,
 ) {
 	const gameProcess =
 		currentGameProcess.value;
@@ -80,7 +79,6 @@ export async function startLocalGame(
 				players,
 				playerControls,
 				difficulty,
-				duration,
 			);
 		await waveInitPromise;
 		markAsRunningWave();

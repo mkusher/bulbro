@@ -40,6 +40,7 @@ import type { MapObject } from "./object";
 import { movePosition } from "./physics";
 import type { Player } from "./player";
 import type { ShotState } from "./shot/ShotState";
+import { getWaveDuration } from "./waveDuration";
 import type { WeaponState } from "./weapon/WeaponState";
 
 export type {
@@ -137,6 +138,13 @@ export const nextWave =
 						.round
 						.wave +
 					1,
+				duration:
+					getWaveDuration(
+						currentState
+							.round
+							.wave +
+							1,
+					),
 			},
 	});
 
@@ -168,7 +176,6 @@ export const createInitialState =
 		mapSize: Size,
 		difficulty: Difficulty,
 		wave = 1,
-		duration = 60,
 		level = 1,
 		experience = 0,
 	): WaveState => {
@@ -204,7 +211,10 @@ export const createInitialState =
 			round:
 				{
 					isRunning: true,
-					duration,
+					duration:
+						getWaveDuration(
+							wave,
+						),
 					difficulty,
 					wave,
 					startedAt:

@@ -20,7 +20,6 @@ import { currentUser } from "./currentUser";
 
 export async function startNetworkGameAsHost(
 	selectedDifficulty: Difficulty,
-	selectedDuration: number,
 ) {
 	const game =
 		startGameFromLobby();
@@ -57,7 +56,6 @@ export async function startNetworkGameAsHost(
 				players,
 				controls,
 				selectedDifficulty,
-				selectedDuration,
 			);
 		await waveInitPromise;
 		await sendGameStartedRequest(

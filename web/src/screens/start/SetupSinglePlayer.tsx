@@ -24,8 +24,7 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import { Input } from "@/ui/shadcn/input";
-import { Label } from "@/ui/shadcn/label";
+
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import {
@@ -54,13 +53,6 @@ export function SetupSinglePlayer() {
 	] =
 		useState<Weapon | null>(
 			null,
-		);
-	const [
-		selectedDuration,
-		setDuration,
-	] =
-		useState<number>(
-			60,
 		);
 	const router =
 		useRouter();
@@ -105,7 +97,6 @@ export function SetupSinglePlayer() {
 					createMainControls(),
 				],
 				selectedDifficulty,
-				selectedDuration,
 			);
 			router.toGame();
 		};
@@ -170,33 +161,6 @@ export function SetupSinglePlayer() {
 										selectedDifficulty={
 											selectedDifficulty
 										}
-									/>
-								</div>
-								<div
-									id="duration"
-									className="gap-3"
-								>
-									<Label htmlFor="wave-duration">
-										Wave
-										duration:
-									</Label>
-									<Input
-										type="number"
-										name="wave-duration"
-										value={
-											selectedDuration
-										}
-										onChange={(
-											e,
-										) => {
-											setDuration(
-												Number(
-													e
-														.currentTarget
-														.value,
-												),
-											);
-										}}
 									/>
 								</div>
 							</CardContent>

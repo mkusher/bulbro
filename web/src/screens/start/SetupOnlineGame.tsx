@@ -1,5 +1,4 @@
 import { computed } from "@preact/signals";
-import { Label } from "@radix-ui/react-label";
 import { ShareIcon } from "lucide-react";
 import {
 	useEffect,
@@ -40,7 +39,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/ui/shadcn/card";
-import { Input } from "@/ui/shadcn/input";
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
@@ -96,13 +94,6 @@ export function SetupOnlineGame() {
 	] =
 		useState<Weapon | null>(
 			smg,
-		);
-	const [
-		selectedDuration,
-		setDuration,
-	] =
-		useState<number>(
-			60,
 		);
 	const lobby =
 		currentLobby.value ?? {
@@ -185,7 +176,6 @@ export function SetupOnlineGame() {
 			);
 			startNetworkGameAsHost(
 				selectedDifficulty,
-				selectedDuration,
 			);
 			router.toGame();
 		};
@@ -408,29 +398,6 @@ export function SetupOnlineGame() {
 									selectedDifficulty={
 										selectedDifficulty
 									}
-								/>
-							</div>
-							<div id="duration">
-								<Label>
-									Wave
-									duration:
-								</Label>
-								<Input
-									type="number"
-									value={
-										selectedDuration
-									}
-									onChange={(
-										e,
-									) => {
-										setDuration(
-											Number(
-												e
-													.currentTarget
-													.value,
-											),
-										);
-									}}
 								/>
 							</div>
 						</CardContent>

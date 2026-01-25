@@ -29,6 +29,17 @@ export const soundUrls =
 				import.meta
 					.url,
 			).toString(),
+		scream:
+			new URL(
+				"../sounds/scream.mp3",
+				import.meta
+					.url,
+			).toString(),
+		ouch: new URL(
+			"../sounds/ouch.mp3",
+			import.meta
+				.url,
+		).toString(),
 		bgm: new URL(
 			"../sounds/bgm.mp3",
 			import.meta

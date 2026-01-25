@@ -15,6 +15,7 @@ import { MainContainer } from "@/ui/Layout";
 import { Loader } from "@/ui/Loading";
 import { SplashBanner } from "@/ui/Splash";
 import { waveState } from "@/waveState";
+import { StartScreen } from "./StartScreen";
 
 export function InGame() {
 	const gameCanvas =
@@ -40,14 +41,7 @@ export function InGame() {
 		!isRound
 	) {
 		return (
-			<SplashBanner>
-				<MainContainer
-					noPadding
-					top
-				>
-					<Failed />
-				</MainContainer>
-			</SplashBanner>
+			<StartScreen />
 		);
 	}
 

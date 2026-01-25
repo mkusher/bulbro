@@ -1,6 +1,8 @@
 import type {
 	BulbroAttackedEvent,
+	BulbroReceivedHitEvent,
 	EnemyAttackedEvent,
+	EnemyDiedEvent,
 	GameEvent,
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
@@ -49,6 +51,16 @@ class AudioController {
 					event,
 				);
 				break;
+			case "enemyDied":
+				this.#handleEnemyDied(
+					event,
+				);
+				break;
+			case "bulbroReceivedHit":
+				this.#handleBulbroReceivedHit(
+					event,
+				);
+				break;
 		}
 	}
 
@@ -60,6 +72,28 @@ class AudioController {
 	): void {
 		audioEngine.playEffect(
 			"collectCoins",
+		);
+	}
+
+	/**
+	 * Handle enemy died sound
+	 */
+	#handleEnemyDied(
+		_event: EnemyDiedEvent,
+	): void {
+		audioEngine.playEffect(
+			"scream",
+		);
+	}
+
+	/**
+	 * Handle bulbro received hit sound
+	 */
+	#handleBulbroReceivedHit(
+		_event: BulbroReceivedHitEvent,
+	): void {
+		audioEngine.playEffect(
+			"ouch",
 		);
 	}
 

@@ -64,13 +64,11 @@ export class GameProcess {
 		players: Player[],
 		playerControls: PlayerControl[],
 		difficulty: Difficulty,
-		duration: number,
 	) {
 		this.#logger.info(
 			{
 				difficulty,
 				players,
-				duration,
 			},
 			"starting the game",
 		);
@@ -82,7 +80,6 @@ export class GameProcess {
 				classicMapSize,
 				difficulty,
 				1,
-				duration,
 			);
 
 		return this.startWave(

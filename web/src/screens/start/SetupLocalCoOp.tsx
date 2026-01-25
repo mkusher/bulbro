@@ -1,4 +1,3 @@
-import { Label } from "@radix-ui/react-label";
 import {
 	useEffect,
 	useState,
@@ -24,7 +23,7 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import { Input } from "@/ui/shadcn/input";
+
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
@@ -68,13 +67,6 @@ export function SetupLocalCoOp() {
 	] =
 		useState<Weapon | null>(
 			smg,
-		);
-	const [
-		selectedDuration,
-		setDuration,
-	] =
-		useState<number>(
-			60,
 		);
 	const router =
 		useRouter();
@@ -125,7 +117,6 @@ export function SetupLocalCoOp() {
 					new SecondaryKeyboardControl(),
 				],
 				selectedDifficulty,
-				selectedDuration,
 			);
 			router.toGame();
 		};
@@ -210,29 +201,6 @@ export function SetupLocalCoOp() {
 								selectedDifficulty={
 									selectedDifficulty
 								}
-							/>
-						</div>
-						<div id="duration">
-							<Label>
-								Wave
-								duration:
-							</Label>
-							<Input
-								type="number"
-								value={
-									selectedDuration
-								}
-								onChange={(
-									e,
-								) => {
-									setDuration(
-										Number(
-											e
-												.currentTarget
-												.value,
-										),
-									);
-								}}
 							/>
 						</div>
 					</form>

@@ -2568,7 +2568,6 @@ describe("currentState", () => {
 					mapSize,
 					1,
 					1,
-					60,
 					1,
 					0,
 				);
@@ -2612,7 +2611,7 @@ describe("currentState", () => {
 					.round
 					.duration,
 			).toBe(
-				60,
+				25,
 			);
 			expect(
 				initialState.mapSize,
