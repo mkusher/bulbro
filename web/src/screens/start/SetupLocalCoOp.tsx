@@ -1,5 +1,8 @@
 import { Label } from "@radix-ui/react-label";
-import { useState } from "preact/hooks";
+import {
+	useEffect,
+	useState,
+} from "preact/hooks";
 import { v4 } from "uuid";
 import type { Bulbro } from "@/bulbro";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -25,6 +28,10 @@ import { Input } from "@/ui/shadcn/input";
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
+import {
+	audioEngine,
+	bgmEnabled,
+} from "@/audio";
 
 export function SetupLocalCoOp() {
 	const [
@@ -71,6 +78,22 @@ export function SetupLocalCoOp() {
 		);
 	const router =
 		useRouter();
+
+	// Start BGM when component mounts
+	useEffect(() => {
+		const initAudio =
+			async () => {
+				await audioEngine.init();
+				await audioEngine.resume();
+				if (
+					bgmEnabled.value
+				) {
+					audioEngine.playBgm();
+				}
+			};
+		initAudio();
+	}, []);
+
 	const onSubmit =
 		(
 			e: SubmitEvent,

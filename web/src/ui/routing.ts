@@ -25,6 +25,11 @@ export function useRouter() {
 				location.route(
 					"/setup-online-game",
 				),
+		toMainMenu:
+			() =>
+				location.route(
+					"/",
+				),
 	};
 }
 

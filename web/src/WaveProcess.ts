@@ -12,6 +12,10 @@ import { StageWithUi } from "./graphics/StageWithUi";
 import { TickProcess } from "./TickProcess";
 import { deltaTime } from "./time";
 import { waveState } from "./waveState";
+import {
+	audioEngine,
+	bgmEnabled,
+} from "./audio";
 
 export class WaveProcess {
 	#logger: Logger;
@@ -110,6 +114,17 @@ export class WaveProcess {
 	}
 
 	async start() {
+		// Initialize audio engine
+		await audioEngine.init();
+		await audioEngine.resume();
+
+		// Start BGM if enabled
+		if (
+			bgmEnabled.value
+		) {
+			audioEngine.playBgm();
+		}
+
 		await Promise.all(
 			this.#playerControls.map(
 				(
@@ -138,6 +153,9 @@ export class WaveProcess {
 			| "win"
 			| "fail",
 	) {
+		// Stop background music
+		audioEngine.stopBgm();
+
 		this.#ticker.stop();
 		this.#ticker.remove(
 			this

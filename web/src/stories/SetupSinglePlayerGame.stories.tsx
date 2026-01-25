@@ -3,7 +3,6 @@ import {
 	bulbros,
 	wellRoundedBulbro,
 } from "@/characters-definitions";
-import type { CharacterSetup } from "@/GameProcess";
 import type { Difficulty } from "@/game-formulas";
 import { BulbroSelector } from "@/ui/BulbroSelector";
 import { DifficultySelector } from "@/ui/DifficultySelector";
@@ -26,6 +25,12 @@ import {
 	smg,
 } from "@/weapons-definitions";
 import { SetupSinglePlayer } from "../screens/start/SetupSinglePlayer";
+
+type CharacterSetup =
+	{
+		bulbro: typeof wellRoundedBulbro;
+		sprite: string;
+	};
 
 export default {
 	title:
@@ -419,18 +424,22 @@ export const CharacterSelection =
 								Character
 								Preview
 							</h2>
-							<BulbroSelectorView
+							<BulbroSelector
 								selectedBulbro={
 									character.bulbro
 								}
-								selectedBulbroStyle={
-									character
-										.bulbro
-										.style
-										.faceType
-								}
-								selectedWeapons={
-									weapons
+								onChange={(
+									bulbro,
+								) =>
+									setCharacter(
+										{
+											bulbro,
+											sprite:
+												bulbro
+													.style
+													.faceType,
+										},
+									)
 								}
 							/>
 						</div>

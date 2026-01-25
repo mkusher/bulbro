@@ -40,7 +40,6 @@ const mockHostPlayer =
 	createPlayer(
 		"host-123",
 		wellRoundedBulbro,
-		"dark oracle",
 		[
 			smg,
 		],
@@ -49,7 +48,6 @@ const mockGuestPlayer =
 	createPlayer(
 		"guest-456",
 		wellRoundedBulbro,
-		"soldier",
 		[
 			smg,
 		],

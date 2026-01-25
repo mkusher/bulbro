@@ -10,6 +10,7 @@
 		// Bundler mode
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
 		"verbatimModuleSyntax": true,
 		"noEmit": true,
 

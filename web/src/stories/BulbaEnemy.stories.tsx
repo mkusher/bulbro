@@ -1,6 +1,7 @@
 import { useEffect } from "preact/hooks";
 import { babyEnemy } from "@/enemies-definitions/baby";
 import { spawnEnemy } from "@/enemy/EnemyState";
+import type { WaveState } from "@/waveState";
 import { waveState } from "@/waveState";
 import { allEnemies } from "../enemies-definitions";
 import { StorybookGameScene } from "./StorybookGameScene";
@@ -36,7 +37,7 @@ export const Idle =
 									) =>
 										e.id ===
 										args.enemyType,
-								),
+								)!,
 							),
 						],
 					)}
@@ -94,52 +95,10 @@ export const Walking =
 										) =>
 											e.id ===
 											args.enemyType,
-									),
+									)!,
 								),
 							],
 						)}
-						tick={(
-							state,
-						) => {
-							const now =
-								Date.now();
-							const elapsed =
-								(now %
-									3000) /
-								3000; // 3 second cycle
-							const x =
-								1000 +
-								Math.sin(
-									elapsed *
-										Math.PI *
-										2,
-								) *
-									100;
-							const y =
-								750 +
-								Math.cos(
-									elapsed *
-										Math.PI *
-										2,
-								) *
-									50;
-							const enemy =
-								waveState
-									.value
-									.enemies[0]!;
-
-							return createEnemyState(
-								[
-									enemy.move(
-										{
-											x,
-											y,
-										},
-										now,
-									),
-								],
-							);
-						}}
 						{...args}
 					/>
 				);

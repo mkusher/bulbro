@@ -4,6 +4,10 @@ import {
 } from "../characters-definitions";
 import type { WeaponType } from "../weapon";
 import { weapons } from "../weapons-definitions";
+import {
+	nowTime,
+	deltaTime,
+} from "../time";
 import { StorybookGameScene } from "./StorybookGameScene";
 import {
 	createBulbroState,
@@ -172,11 +176,23 @@ export const WalkingInCircle =
 													2,
 											),
 										},
-										now,
+										nowTime(
+											now,
+										),
 									);
 								const updatedPlayer =
 									player.applyEvent(
-										event,
+										{
+											...event,
+											deltaTime:
+												deltaTime(
+													0,
+												),
+											occurredAt:
+												nowTime(
+													now,
+												),
+										},
 									);
 								newState.players =
 									[
@@ -286,11 +302,23 @@ export const WalkingAtTheSamePoint =
 													2,
 											),
 										},
-										now,
+										nowTime(
+											now,
+										),
 									);
 								const updatedPlayer =
 									player.applyEvent(
-										event,
+										{
+											...event,
+											deltaTime:
+												deltaTime(
+													0,
+												),
+											occurredAt:
+												nowTime(
+													now,
+												),
+										},
 									);
 								newState.players =
 									[
@@ -481,11 +509,23 @@ export const HeavyWeaponsShowcase =
 											y,
 										},
 										direction,
-										now,
+										nowTime(
+											now,
+										),
 									);
 								const updatedPlayer =
 									player.applyEvent(
-										event,
+										{
+											...event,
+											deltaTime:
+												deltaTime(
+													0,
+												),
+											occurredAt:
+												nowTime(
+													now,
+												),
+										},
 									);
 								newState.players =
 									[
@@ -610,11 +650,23 @@ export const MeleeWeaponsShowcase =
 												y,
 											},
 											direction,
-											now,
+											nowTime(
+												now,
+											),
 										);
 									const updatedPlayer =
 										player.applyEvent(
-											event,
+											{
+												...event,
+												deltaTime:
+													deltaTime(
+														0,
+													),
+												occurredAt:
+													nowTime(
+														now,
+													),
+											},
 										);
 									newState.players =
 										[
@@ -746,11 +798,23 @@ export const AllWeaponsShowcase =
 											y,
 										},
 										direction,
-										now,
+										nowTime(
+											now,
+										),
 									);
 								const updatedPlayer =
 									player.applyEvent(
-										event,
+										{
+											...event,
+											deltaTime:
+												deltaTime(
+													0,
+												),
+											occurredAt:
+												nowTime(
+													now,
+												),
+										},
 									);
 								newState.players =
 									[

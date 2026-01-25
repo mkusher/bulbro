@@ -30,7 +30,7 @@ export interface GameSceneConfig {
 	showCoordinateGrid?: boolean;
 	onStateUpdate?: (
 		state: WaveState,
-	) => WaveState;
+	) => void;
 }
 
 // Exported signals for reactive state
@@ -386,10 +386,9 @@ export function step(
 		if (
 			config?.onStateUpdate
 		) {
-			gameState.value =
-				config.onStateUpdate(
-					gameState.value,
-				);
+			config.onStateUpdate(
+				gameState.value,
+			);
 		} else {
 			const newState =
 				tickProcess.tick(

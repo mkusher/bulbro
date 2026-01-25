@@ -1,4 +1,7 @@
-import { useState } from "preact/hooks";
+import {
+	useEffect,
+	useState,
+} from "preact/hooks";
 import { v4 } from "uuid";
 import type { Bulbro } from "@/bulbro";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -25,6 +28,10 @@ import { Input } from "@/ui/shadcn/input";
 import { Label } from "@/ui/shadcn/label";
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
+import {
+	audioEngine,
+	bgmEnabled,
+} from "@/audio";
 
 export function SetupSinglePlayer() {
 	const [
@@ -57,6 +64,21 @@ export function SetupSinglePlayer() {
 		);
 	const router =
 		useRouter();
+
+	// Start BGM when component mounts
+	useEffect(() => {
+		const initAudio =
+			async () => {
+				await audioEngine.init();
+				await audioEngine.resume();
+				if (
+					bgmEnabled.value
+				) {
+					audioEngine.playBgm();
+				}
+			};
+		initAudio();
+	}, []);
 	const onSubmit =
 		(
 			e: SubmitEvent,

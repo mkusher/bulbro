@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { audioEngine } from "@/audio/AudioEngine";
 
 const assetDefinitions =
 	{
@@ -48,15 +49,21 @@ export class Assets {
 			Object.values(
 				assetDefinitions,
 			);
+
 		await Promise.all(
-			assets.map(
-				(
-					asset,
-				) =>
-					PIXI.Assets.load(
-						asset.path,
-					),
-			),
+			[
+				// Preload image assets
+				...assets.map(
+					(
+						asset,
+					) =>
+						PIXI.Assets.load(
+							asset.path,
+						),
+				),
+				// Preload audio assets
+				audioEngine.init(),
+			],
 		);
 	}
 

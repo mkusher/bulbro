@@ -691,8 +691,10 @@ export const WeaponSelectorShowcase =
 					);
 
 				// Filter weapons based on args
-				let availableWeapons =
-					weaponDefinitions;
+				let availableWeapons: Weapon[] =
+					[
+						...weaponDefinitions,
+					];
 
 				if (
 					args.onlyWithSprites

@@ -124,7 +124,7 @@ function ObjectRenderer({
 						);
 					const spawningEnemy: SpawningEnemy =
 						{
-							type: "spawningEnemy",
+							type: "spawning-enemy",
 							id: "demo-spawner",
 							position:
 								centerObject
@@ -140,15 +140,24 @@ function ObjectRenderer({
 											x: 50,
 											y: 50,
 										},
-							enemyType:
-								"babyEnemy",
-							spawnCooldown: 5000,
-							lastSpawnedAt: 0,
+							startedAt:
+								Date.now(),
+							duration: 3000,
+							enemy:
+								null as any, // TODO: Create proper enemy state
 						};
-					await objectSprite.init(
-						spawningEnemy,
-						app.stage,
-						layer,
+					await objectSprite.init();
+					app.stage.addChild(
+						(
+							objectSprite as any
+						)
+							.container,
+					);
+					layer.attach(
+						(
+							objectSprite as any
+						)
+							.container,
 					);
 				}
 
@@ -230,7 +239,7 @@ function ObjectRenderer({
 	);
 }
 
-export const Material =
+export const MaterialStory =
 	{
 		render:
 			(
@@ -285,7 +294,7 @@ export const Material =
 			},
 	};
 
-export const SpawningEnemy =
+export const SpawningEnemyStory =
 	{
 		render:
 			(

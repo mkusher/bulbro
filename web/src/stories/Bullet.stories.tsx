@@ -29,7 +29,7 @@ export const Controllable =
 				...args
 			}: BulletStoryProps) => (
 				<StorybookGameScene
-					state={createShotState(
+					initialState={createShotState(
 						[
 							{
 								id: "bullet-1",

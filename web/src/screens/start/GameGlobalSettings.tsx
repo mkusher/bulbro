@@ -1,5 +1,6 @@
-import { soundUrls } from "@/AudioAssets";
+import { AudioSettings } from "@/audio/AudioSettings";
 import { CentralCard } from "@/ui/Layout";
+import { useRouter } from "@/ui/routing";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -29,86 +30,71 @@ const toggleFullscreen =
 			}
 		}
 	};
+export function GameGlobalSettings() {
+	const router =
+		useRouter();
+	return (
+		<GameGlobalSettingsLayout
+			goBack={
+				router.toMainMenu
+			}
+		/>
+	);
+}
 
-export function GameGlobalSettings({
+export function GameGlobalSettingsLayout({
 	goBack,
 }: Props) {
 	return (
 		<CentralCard>
 			<Card>
 				<CardHeader>
-					<h2>
+					<h2 className="text-xl font-bold">
 						Settings
 					</h2>
 				</CardHeader>
 				<CardContent className="grid gap-6">
-					<form className="flex flex-col gap-3">
+					<form className="flex flex-col gap-6">
+						<AudioSettings />
+
 						<fieldset className="grid gap-3">
-							<legend>
-								Audio
+							<legend className="text-lg font-semibold mb-2">
+								Display
 							</legend>
-							{Object.entries(
-								soundUrls,
-							).map(
-								([
-									name,
-									url,
-								]) => (
-									<div
-										key={
-											name
-										}
-										className="grid gap-1"
-									>
-										<div className="text-sm font-medium">
-											{
-												name
-											}
-										</div>
-										<audio
-											controls
-											preload="auto"
-											src={
-												url
-											}
-											data-sound={
-												name
-											}
-										/>
-									</div>
-								),
-							)}
+							<div className="flex items-center gap-3">
+								<Checkbox
+									id="full-screen"
+									onChange={
+										toggleFullscreen
+									}
+									checked={
+										!!document.fullscreenElement
+									}
+								/>
+								<Label htmlFor="full-screen">
+									Full
+									screen
+								</Label>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="size-mode">
+									Size
+									game
+									for:
+								</Label>
+								<select
+									id="size-mode"
+									className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
+								>
+									<option>
+										Landscape
+									</option>
+									<option>
+										Portrait
+									</option>
+								</select>
+							</div>
 						</fieldset>
-						<div className="gap-3">
-							<Label htmlFor="full-screen">
-								Full
-								screen
-							</Label>
-							<Checkbox
-								name="full-screen"
-								onChange={
-									toggleFullscreen
-								}
-								checked={
-									!!document.fullscreenElement
-								}
-							/>
-						</div>
-						<div className="gap-3">
-							<Label>
-								Size
-								game
-								for:
-							</Label>
-							<select>
-								<option>
-									Landscape
-								</option>
-								<option>
-									Portrait
-								</option>
-							</select>
-						</div>
 					</form>
 				</CardContent>
 				<CardFooter className="flex">

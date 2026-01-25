@@ -1,7 +1,10 @@
 import { computed } from "@preact/signals";
 import { Label } from "@radix-ui/react-label";
 import { ShareIcon } from "lucide-react";
-import { useState } from "preact/hooks";
+import {
+	useEffect,
+	useState,
+} from "preact/hooks";
 import type { Bulbro } from "@/bulbro";
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -41,6 +44,10 @@ import { Input } from "@/ui/shadcn/input";
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
+import {
+	audioEngine,
+	bgmEnabled,
+} from "@/audio";
 
 function getShareUrl() {
 	const lobby =
@@ -118,6 +125,21 @@ export function SetupOnlineGame() {
 		useRouter();
 	const share: ShareData =
 		shareMessage.value;
+
+	// Start BGM when component mounts
+	useEffect(() => {
+		const initAudio =
+			async () => {
+				await audioEngine.init();
+				await audioEngine.resume();
+				if (
+					bgmEnabled.value
+				) {
+					audioEngine.playBgm();
+				}
+			};
+		initAudio();
+	}, []);
 	const canShare =
 		window
 			.navigator

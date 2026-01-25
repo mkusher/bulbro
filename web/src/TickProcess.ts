@@ -26,6 +26,7 @@ import {
 	getTimeLeft,
 	updateState,
 } from "./waveState";
+import { audioController } from "./audio/AudioController";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -112,6 +113,11 @@ export class TickProcess {
 			this.#aim(
 				newState,
 			);
+
+		// Phase 3.5: Handle audio events
+		audioController.handleEvents(
+			events,
+		);
 
 		// Phase 4: Update rendering
 		this.#scene.update(
