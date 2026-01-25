@@ -1,10 +1,32 @@
-import * as PIXI from "pixi.js";
+import type * as PIXI from "pixi.js";
 import {
 	useEffect,
 	useRef,
+	useState,
 } from "preact/hooks";
 import { Assets } from "@/Assets";
 import { createPixiInitOptions } from "@/graphics/PixiConfiguration";
+import { PixiAppSemaphore } from "./PixiAppSemaphore";
+
+const pixiAppSemaphore =
+	new PixiAppSemaphore(
+		2,
+	);
+
+const sleep =
+	(
+		delay: number,
+	) =>
+		new Promise(
+			(
+				res,
+			) => {
+				setTimeout(
+					res,
+					delay,
+				);
+			},
+		);
 
 export type PixiAppProps =
 	{
@@ -37,6 +59,16 @@ export function PixiApp({
 		useRef<HTMLDivElement>(
 			null,
 		);
+	const [
+		imageDataUrl,
+		setImageDataUrl,
+	] =
+		useState<
+			| string
+			| null
+		>(
+			null,
+		);
 
 	useEffect(() => {
 		const container =
@@ -45,9 +77,6 @@ export function PixiApp({
 			!container
 		)
 			return;
-
-		let app: PIXI.Application | null =
-			null;
 
 		const initPixi =
 			async () => {
@@ -72,86 +101,50 @@ export function PixiApp({
 							100,
 					);
 
-				app =
-					new PIXI.Application();
-				await app.init(
-					createPixiInitOptions(
-						{
-							width:
-								initialWidth,
-							height:
-								initialHeight,
-							backgroundColor,
-						},
-					),
-				);
-
-				if (
-					onInit
-				) {
-					await onInit(
-						app,
-						container,
-					);
-				}
-
-				await Assets.preloadAll();
-
-				await new Promise(
-					(
-						resolve,
-					) =>
-						setTimeout(
-							resolve,
-							100,
-						),
-				);
-
-				const dataUrl =
-					app.canvas.toDataURL();
-
-				const img =
-					document.createElement(
-						"img",
-					);
-				img.src =
-					dataUrl;
-				img.style.width =
-					"100%";
-				img.style.height =
-					"100%";
-
-				container.appendChild(
-					img,
-				);
-
-				app.ticker?.stop();
-				app.destroy();
-				app =
-					null;
-			};
-
-		const initPromise =
-			initPixi();
-
-		return async () => {
-			await initPromise;
-			if (
-				app
-			) {
+				const app =
+					await pixiAppSemaphore.take();
 				try {
+					await Assets.preloadAll();
+					await app.init(
+						createPixiInitOptions(
+							{
+								width:
+									initialWidth,
+								height:
+									initialHeight,
+								backgroundColor,
+							},
+						),
+					);
+
+					if (
+						onInit
+					) {
+						await onInit(
+							app,
+							container,
+						);
+					}
+
+					await sleep(
+						100,
+					);
+
+					const dataUrl =
+						app.canvas.toDataURL();
+					setImageDataUrl(
+						dataUrl,
+					);
+				} finally {
 					app.ticker?.stop();
 					app.destroy();
-					app =
-						null;
-				} catch (e) {
-					console.error(
-						"PixiApp cleanup failed",
-						e,
-					);
+					pixiAppSemaphore.release();
 				}
-			}
-		};
+			};
+
+		initPixi();
+
+		return () => {};
 	}, [
 		width,
 		height,
@@ -189,6 +182,21 @@ export function PixiApp({
 						: undefined,
 				...style,
 			}}
-		/>
+		>
+			{imageDataUrl && (
+				<img
+					src={
+						imageDataUrl
+					}
+					style={{
+						width:
+							"100%",
+						height:
+							"100%",
+					}}
+					alt=""
+				/>
+			)}
+		</div>
 	);
 }

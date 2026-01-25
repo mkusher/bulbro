@@ -4,6 +4,8 @@ import type { Size } from "../geometry";
 import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
 import type { WaveState } from "../waveState";
 
+export const FIELD_BACKGROUND_COLOR = 0x475b46;
+
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
  */
@@ -24,7 +26,7 @@ export class PlayingFieldTile {
 					size.height,
 				)
 				.fill(
-					0x475b46,
+					FIELD_BACKGROUND_COLOR,
 				);
 		this.#container =
 			new PIXI.Container();

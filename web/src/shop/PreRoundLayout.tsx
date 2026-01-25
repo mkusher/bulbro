@@ -10,6 +10,7 @@ import {
 } from "@/shop/Shop";
 import { WeaponSlots } from "@/shop/WeaponSlots";
 import { Button } from "@/ui/shadcn/button";
+import { Card } from "@/ui/shadcn/card";
 import type { Weapon } from "@/weapon";
 
 /**
@@ -68,22 +69,24 @@ export function PreRoundLayout({
 		<div className="p-4 max-w-6xl mx-auto">
 			<div className="flex flex-col gap-3">
 				{/* Header */}
-				<div className="text-center">
-					<h1 className="text-2xl font-bold mb-1">
-						Prepare
-						for
-						Wave{" "}
-						{
-							nextWave
-						}
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						Materials:{" "}
-						{
-							player.materials
-						}
-					</p>
-				</div>
+				<Card className="bg-white border p-4">
+					<div className="text-center">
+						<h1 className="text-2xl font-bold mb-1">
+							Prepare
+							for
+							Wave{" "}
+							{
+								nextWave
+							}
+						</h1>
+						<p className="text-sm text-muted-foreground">
+							Materials:{" "}
+							{
+								player.materials
+							}
+						</p>
+					</div>
+				</Card>
 
 				{/* Previous Wave Stats */}
 				{prevWaveStats && (

@@ -97,7 +97,7 @@ export const CompletePreRoundScreen =
 
 				const player =
 					state
-						.players[0];
+						.players[0]!;
 
 				const handlePurchase =
 					(
@@ -197,7 +197,7 @@ export const EarlyGame =
 
 				const player =
 					state
-						.players[0];
+						.players[0]!;
 
 				const handlePurchase =
 					(
@@ -284,7 +284,7 @@ export const LateGame =
 
 				const player =
 					state
-						.players[0];
+						.players[0]!;
 
 				const handlePurchase =
 					(
@@ -370,7 +370,7 @@ export const LowMaterialsScenario =
 
 				const player =
 					state
-						.players[0];
+						.players[0]!;
 
 				const handlePurchase =
 					(
@@ -455,7 +455,7 @@ export const AddWeaponDemo =
 
 				const player =
 					state
-						.players[0];
+						.players[0]!;
 
 				const handlePurchase =
 					(
@@ -564,7 +564,7 @@ export const AllShopItems =
 
 				const player =
 					state
-						.players[0];
+						.players[0]!;
 
 				const handlePurchase =
 					(

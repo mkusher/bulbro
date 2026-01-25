@@ -56,7 +56,7 @@ export function WeaponSlots({
 				</div>
 			</CardHeader>
 			<CardContent className="pt-0">
-				<div className="grid grid-cols-6 gap-1">
+				<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1">
 					{slots.map(
 						(
 							weapon,

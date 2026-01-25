@@ -1,3 +1,4 @@
+import { soundUrls } from "@/AudioAssets";
 import { CentralCard } from "@/ui/Layout";
 import { Button } from "@/ui/shadcn/button";
 import {
@@ -42,6 +43,42 @@ export function GameGlobalSettings({
 				</CardHeader>
 				<CardContent className="grid gap-6">
 					<form className="flex flex-col gap-3">
+						<fieldset className="grid gap-3">
+							<legend>
+								Audio
+							</legend>
+							{Object.entries(
+								soundUrls,
+							).map(
+								([
+									name,
+									url,
+								]) => (
+									<div
+										key={
+											name
+										}
+										className="grid gap-1"
+									>
+										<div className="text-sm font-medium">
+											{
+												name
+											}
+										</div>
+										<audio
+											controls
+											preload="auto"
+											src={
+												url
+											}
+											data-sound={
+												name
+											}
+										/>
+									</div>
+								),
+							)}
+						</fieldset>
 						<div className="gap-3">
 							<Label htmlFor="full-screen">
 								Full

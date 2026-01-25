@@ -16,10 +16,10 @@ export class PixiAppSemaphore {
 				.#available <
 			1
 		) {
-			this
-				.#available--;
 			await this.waitForAvailability();
 		}
+		this
+			.#available--;
 		return new PIXI.Application();
 	}
 	waitForAvailability() {

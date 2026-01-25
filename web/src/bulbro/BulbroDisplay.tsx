@@ -1,9 +1,5 @@
 import * as PIXI from "pixi.js";
-import { PlayingFieldTile } from "../graphics/PlayingFieldTile";
-import {
-	deltaTime,
-	nowTime,
-} from "../time";
+import { FIELD_BACKGROUND_COLOR } from "../graphics/PlayingFieldTile";
 import { PixiApp } from "../ui/PixiApp";
 import type { Bulbro } from "./BulbroCharacter";
 import type { BulbroState } from "./BulbroState";
@@ -32,154 +28,71 @@ export function BulbroDisplay({
 			app: PIXI.Application,
 			container: HTMLDivElement,
 		) => {
-			let sprite: ReturnType<
-				typeof createBulbroSprite
-			>;
-			let playingField: PlayingFieldTile | null =
-				null;
+			if (
+				!app ||
+				!app.stage
+			)
+				return;
 
-			const updateLayout =
-				() => {
-					if (
-						!app ||
-						!app.stage
-					)
-						return;
+			const rect =
+				container.getBoundingClientRect();
+			const currentWidth =
+				Math.max(
+					rect.width ||
+						minWidth *
+							1.5,
+					minWidth,
+				);
+			const currentHeight =
+				Math.max(
+					rect.height ||
+						Math.floor(
+							minHeight *
+								1.2,
+						),
+					minHeight,
+				);
 
-					const rect =
-						container.getBoundingClientRect();
-					const currentWidth =
-						Math.max(
-							rect.width ||
-								minWidth *
-									1.5,
-							minWidth,
-						);
-					const currentHeight =
-						Math.max(
-							rect.height ||
-								Math.floor(
-									minHeight *
-										1.2,
-								),
-							minHeight,
-						);
+			const sprite =
+				createBulbroSprite(
+					bulbro
+						.style
+						.faceType,
+					false,
+				);
+			const bulbroState =
+				spawnBulbro(
+					"demo",
+					bulbro
+						.style
+						.faceType,
+					{
+						x:
+							currentWidth /
+							2,
+						y:
+							currentHeight /
+							2,
+					},
+					1,
+					0,
+					bulbro,
+				);
 
-					// Create playing field that covers the entire canvas
-					const fieldSize =
-						{
-							width:
-								currentWidth,
-							height:
-								currentHeight,
-						};
+			sprite.init(
+				bulbroState,
+			);
 
-					// Remove old playing field if it exists
-					if (
-						playingField
-					) {
-						playingField.container.removeFromParent();
-					}
+			const layer =
+				new PIXI.RenderLayer();
+			app.stage.addChild(
+				layer,
+			);
 
-					// Create new playing field that covers the canvas
-					playingField =
-						new PlayingFieldTile(
-							fieldSize,
-						);
-					playingField.init(
-						app.stage,
-					);
-
-					// Create sprite if it doesn't exist
-					if (
-						!sprite
-					) {
-						sprite =
-							createBulbroSprite(
-								bulbro
-									.style
-									.faceType,
-								false,
-							);
-						const bulbroState =
-							spawnBulbro(
-								"demo",
-								bulbro
-									.style
-									.faceType,
-								{
-									x:
-										fieldSize.width /
-										2,
-									y:
-										fieldSize.height /
-										2,
-								}, // Centered
-								1,
-								0,
-								bulbro,
-							);
-
-						sprite.init(
-							bulbroState,
-						); // Create layer for sprite
-						const layer =
-							new PIXI.RenderLayer();
-						playingField!.container.addChild(
-							layer,
-						);
-
-						// Add sprite to playing field
-						sprite.appendTo(
-							playingField!
-								.container,
-							layer,
-						);
-					} else {
-						// Move existing sprite to new playing field
-						const layer =
-							new PIXI.RenderLayer();
-						playingField.container.addChild(
-							layer,
-						);
-						sprite.appendTo(
-							playingField.container,
-							layer,
-						);
-
-						// Update sprite position to new center
-						const demoState =
-							spawnBulbro(
-								"demo",
-								bulbro
-									.style
-									.faceType,
-								{
-									x:
-										fieldSize.width /
-										2,
-									y:
-										fieldSize.height /
-										2,
-								}, // Centered
-								1,
-								0,
-								bulbro,
-							);
-						sprite.update(
-							demoState,
-							deltaTime(
-								0,
-							),
-							nowTime(
-								0,
-							),
-						);
-					}
-				};
-
-			// Initial layout
-			updateLayout();
+			sprite.appendTo(
+				app.stage,
+				layer,
+			);
 		};
 
 	return (
@@ -191,7 +104,7 @@ export function BulbroDisplay({
 				minHeight
 			}
 			backgroundColor={
-				0x000000
+				FIELD_BACKGROUND_COLOR
 			}
 			className={`rounded-lg overflow-hidden ${className || ""}`}
 			style={{
@@ -239,153 +152,71 @@ export function BulbroStateDisplay({
 			app: PIXI.Application,
 			canvas: HTMLDivElement,
 		) => {
-			let sprite: ReturnType<
-				typeof createBulbroSprite
-			>;
-			let playingField: PlayingFieldTile | null =
-				null;
+			if (
+				!app
+			)
+				return;
 
-			const updateLayout =
-				() => {
-					if (
-						!app
-					)
-						return;
+			const rect =
+				canvas.getBoundingClientRect();
+			const currentWidth =
+				Math.max(
+					rect.width ||
+						minWidth *
+							1.5,
+					minWidth,
+				);
+			const currentHeight =
+				Math.max(
+					rect.height ||
+						Math.floor(
+							minHeight *
+								1.2,
+						),
+					minHeight,
+				);
 
-					const rect =
-						canvas.getBoundingClientRect();
-					const currentWidth =
-						Math.max(
-							rect.width ||
-								minWidth *
-									1.5,
-							minWidth,
-						);
-					const currentHeight =
-						Math.max(
-							rect.height ||
-								Math.floor(
-									minHeight *
-										1.2,
-								),
-							minHeight,
-						);
+			const sprite =
+				createBulbroSprite(
+					bulbro
+						.style
+						.faceType,
+					false,
+				);
 
-					// Create playing field that covers the entire canvas
-					const fieldSize =
-						{
-							width:
-								currentWidth,
-							height:
-								currentHeight,
-						};
+			// Position sprite at field center with the actual state
+			const centeredState =
+				new (
+					bulbroState.constructor as any
+				)(
+					{
+						...bulbroState.toJSON(),
+						position:
+							{
+								x:
+									currentWidth /
+									2,
+								y:
+									currentHeight /
+									2,
+							},
+					},
+				);
 
-					// Remove old playing field if it exists
-					if (
-						playingField
-					) {
-						playingField.container.removeFromParent();
-					}
+			sprite.init(
+				centeredState,
+			);
 
-					// Create new playing field that covers the canvas
-					playingField =
-						new PlayingFieldTile(
-							fieldSize,
-						);
-					playingField.init(
-						app.stage,
-					);
+			const layer =
+				new PIXI.RenderLayer();
+			app.stage.addChild(
+				layer,
+			);
 
-					// Create sprite if it doesn't exist
-					if (
-						!sprite
-					) {
-						sprite =
-							createBulbroSprite(
-								bulbro
-									.style
-									.faceType,
-								false,
-							);
-
-						// Position sprite at field center with the actual state
-						const centeredState =
-							new (
-								bulbroState.constructor as any
-							)(
-								{
-									...bulbroState.toJSON(),
-									position:
-										{
-											x:
-												fieldSize.width /
-												2,
-											y:
-												fieldSize.height /
-												2,
-										}, // Centered
-								},
-							);
-						sprite.init(
-							centeredState,
-						);
-						// Create layer for sprite
-						const layer =
-							new PIXI.RenderLayer();
-						playingField!.container.addChild(
-							layer,
-						);
-
-						// Add sprite to playing field
-						sprite.appendTo(
-							playingField!
-								.container,
-							layer,
-						);
-					} else {
-						// Move existing sprite to new playing field
-						const layer =
-							new PIXI.RenderLayer();
-						playingField.container.addChild(
-							layer,
-						);
-						sprite.appendTo(
-							playingField.container,
-							layer,
-						);
-
-						// Update sprite position to new center
-						const centeredState =
-							new (
-								bulbroState.constructor as any
-							)(
-								{
-									...bulbroState.toJSON(),
-									position:
-										{
-											x:
-												fieldSize.width /
-												2,
-											y:
-												fieldSize.height /
-												2,
-										}, // Centered
-								},
-							);
-						sprite.update(
-							centeredState,
-							deltaTime(
-								0,
-							),
-							nowTime(
-								0,
-							),
-						);
-					}
-				};
-
-			// Initial layout
-			updateLayout();
+			sprite.appendTo(
+				app.stage,
+				layer,
+			);
 		};
 
 	return (
@@ -397,7 +228,7 @@ export function BulbroStateDisplay({
 				minHeight
 			}
 			backgroundColor={
-				0x000000
+				FIELD_BACKGROUND_COLOR
 			}
 			className={`rounded-lg overflow-hidden ${className || ""}`}
 			style={{
