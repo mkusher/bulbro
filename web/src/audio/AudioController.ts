@@ -2,6 +2,7 @@ import type {
 	BulbroAttackedEvent,
 	EnemyAttackedEvent,
 	GameEvent,
+	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
 import { audioEngine } from "./AudioEngine";
 import { fromWeaponState } from "@/weapon";
@@ -43,7 +44,23 @@ class AudioController {
 					event,
 				);
 				break;
+			case "materialCollected":
+				this.#handleMaterialCollected(
+					event,
+				);
+				break;
 		}
+	}
+
+	/**
+	 * Handle material collected sound
+	 */
+	#handleMaterialCollected(
+		_event: MaterialCollectedEvent,
+	): void {
+		audioEngine.playEffect(
+			"collectCoins",
+		);
 	}
 
 	/**

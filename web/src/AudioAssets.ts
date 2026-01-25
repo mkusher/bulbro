@@ -23,6 +23,12 @@ export const soundUrls =
 				import.meta
 					.url,
 			).toString(),
+		collectCoins:
+			new URL(
+				"../sounds/collect-coins.mp3",
+				import.meta
+					.url,
+			).toString(),
 		bgm: new URL(
 			"../sounds/bgm.mp3",
 			import.meta
