@@ -24,7 +24,10 @@ import {
 	FaceSprite,
 	type FaceType,
 } from "./FaceSprite.ts";
-import { LegsSprite } from "./LegsSprite.ts";
+import {
+	type LegState,
+	LegsSprite,
+} from "./LegsSprite.ts";
 
 export {
 	type FaceType,
@@ -91,7 +94,7 @@ export class BulbaSprite extends GameSprite {
 				0.1,
 			);
 		this.#movement =
-			this.#createSwingingAnimation(
+			this.#createWalkingAnimation(
 				40,
 				0.2,
 			);
@@ -293,6 +296,7 @@ export class BulbaSprite extends GameSprite {
 				) =>
 					this.#buildCharacter(
 						frame,
+						"normal",
 					),
 				frameSpeed,
 				amplitude,
@@ -305,8 +309,65 @@ export class BulbaSprite extends GameSprite {
 		return swinging.createAnimatedSprite();
 	}
 
+	#createWalkingAnimation(
+		frameSpeed: number,
+		amplitude: number,
+	) {
+		const cycleLength = 20;
+		const swinging =
+			new SwingingAnimation(
+				(
+					frame,
+				) =>
+					this.#buildCharacter(
+						frame,
+						this.#getLegStateForFrame(
+							frame,
+							cycleLength,
+						),
+					),
+				frameSpeed,
+				amplitude,
+				{
+					x:
+						-0.8,
+					y: 1,
+				},
+			);
+		return swinging.createAnimatedSprite();
+	}
+
+	#getLegStateForFrame(
+		frame: number,
+		cycleLength: number,
+	): LegState {
+		// Divide the cycle into 4 phases for walking animation
+		const phase =
+			Math.floor(
+				(frame /
+					cycleLength) *
+					4,
+			) %
+			4;
+		switch (
+			phase
+		) {
+			case 0:
+				return "wide-l";
+			case 1:
+				return "normal-r";
+			case 2:
+				return "wide-r";
+			case 3:
+				return "normal";
+			default:
+				return "normal";
+		}
+	}
+
 	async #buildCharacter(
 		frame: number,
+		legState: LegState = "normal",
 	) {
 		const bodySprite =
 			new BodySprite();
@@ -347,6 +408,7 @@ export class BulbaSprite extends GameSprite {
 		legsSprite.appendTo(
 			scaling,
 			bodySize,
+			legState,
 		);
 		faceSprite.appendTo(
 			scaling,

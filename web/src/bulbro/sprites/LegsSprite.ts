@@ -111,11 +111,63 @@ export class LegsSprite {
 		this.#gfx.position.y =
 			bodySize.height *
 			0.9;
-		this.#leftLeg.position.x =
+
+		// Base positions (for normal/idle state)
+		const leftBaseX =
 			bodySize.width *
 			0.6;
-		this.#rightLeg.position.x =
+		const rightBaseX =
 			bodySize.width *
 			0.05;
+
+		switch (
+			legState
+		) {
+			case "wide-l":
+				// Left leg forward, right leg back
+				this.#leftLeg.position.x =
+					leftBaseX +
+					15;
+				this.#leftLeg.position.y =
+					-5;
+				this.#rightLeg.position.x =
+					rightBaseX -
+					10;
+				this.#rightLeg.position.y = 3;
+				break;
+			case "wide-r":
+				// Right leg forward, left leg back
+				this.#leftLeg.position.x =
+					leftBaseX -
+					10;
+				this.#leftLeg.position.y = 3;
+				this.#rightLeg.position.x =
+					rightBaseX +
+					15;
+				this.#rightLeg.position.y =
+					-5;
+				break;
+			case "normal-r":
+				// Transitional state - slightly offset
+				this.#leftLeg.position.x =
+					leftBaseX +
+					5;
+				this.#leftLeg.position.y = 0;
+				this.#rightLeg.position.x =
+					rightBaseX +
+					5;
+				this.#rightLeg.position.y = 0;
+				break;
+			case "normal":
+			default:
+				// Default idle position
+				this.#leftLeg.position.x =
+					leftBaseX;
+				this.#leftLeg.position.y = 0;
+				this.#rightLeg.position.x =
+					rightBaseX;
+				this.#rightLeg.position.y = 0;
+				break;
+		}
 	}
 }
