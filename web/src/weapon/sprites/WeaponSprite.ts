@@ -147,7 +147,7 @@ export const weapons: Record<
 			empty,
 		orcGun:
 			empty,
-		enemyGun:
+		aphidGun:
 			empty,
 		enemyFist:
 			empty,

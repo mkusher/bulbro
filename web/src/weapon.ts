@@ -20,7 +20,7 @@ export type WeaponType =
 	| "brick"
 	| "orcGun"
 	| "enemyFist"
-	| "enemyGun";
+	| "aphidGun";
 
 /**
  * Weapon classes.

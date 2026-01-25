@@ -1,19 +1,7 @@
+import { aphidGun } from "@/weapons-definitions/aphid-gun";
 import type { EnemyCharacter } from "../enemy";
 import type { Weapon } from "../weapon";
 import { baseStats } from "./base";
-
-const gun: Weapon =
-	{
-		id: "enemyGun",
-		name: "Ranged Enemy Gun",
-		classes:
-			[
-				"gun",
-			],
-		shotSpeed: 275,
-		statsBonus:
-			{},
-	};
 
 export const aphidEnemy: EnemyCharacter =
 	{
@@ -31,7 +19,7 @@ export const aphidEnemy: EnemyCharacter =
 			},
 		weapons:
 			[
-				gun,
+				aphidGun,
 			],
 		behaviors:
 			"keeping-distance",

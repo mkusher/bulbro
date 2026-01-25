@@ -18,11 +18,11 @@ export const bgmEnabled =
 // Volume controls (0.0 - 1.0)
 export const effectsVolume =
 	signal(
-		0.7,
+		0.5,
 	);
 export const bgmVolume =
 	signal(
-		0.5,
+		0.35,
 	);
 
 // Engine state signals

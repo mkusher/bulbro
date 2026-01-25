@@ -1,4 +1,5 @@
 import { ak47 } from "./ak47";
+import { aphidGun } from "./aphid-gun";
 import { brick } from "./brick";
 import { doubleBarrelShotgun } from "./double-barrel-shotgun";
 import { fist } from "./fist";
@@ -34,4 +35,5 @@ export const weapons =
 		pistol,
 		smg,
 		sword,
+		aphidGun,
 	] as const;
