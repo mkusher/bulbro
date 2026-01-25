@@ -15,6 +15,8 @@ import { waveState } from "./waveState";
 import {
 	audioEngine,
 	bgmEnabled,
+	setFullBgmVolume,
+	setQuietBgmVolume,
 } from "./audio";
 
 export class WaveProcess {
@@ -114,9 +116,8 @@ export class WaveProcess {
 	}
 
 	async start() {
-		// Initialize audio engine
-		await audioEngine.init();
-		await audioEngine.resume();
+		// Set full volume for in-game
+		setFullBgmVolume();
 
 		// Start BGM if enabled
 		if (
@@ -153,8 +154,8 @@ export class WaveProcess {
 			| "win"
 			| "fail",
 	) {
-		// Stop background music
-		audioEngine.stopBgm();
+		// Reduce BGM volume for menus (BGM continues playing)
+		setQuietBgmVolume();
 
 		this.#ticker.stop();
 		this.#ticker.remove(

@@ -31,6 +31,7 @@ import {
 	audioEngine,
 	bgmEnabled,
 } from "@/audio";
+import { useStartBgm } from "@/audio/useStartBgm";
 
 export function SetupLocalCoOp() {
 	const [
@@ -72,19 +73,7 @@ export function SetupLocalCoOp() {
 		useRouter();
 
 	// Start BGM when component mounts
-	useEffect(() => {
-		const initAudio =
-			async () => {
-				await audioEngine.init();
-				await audioEngine.resume();
-				if (
-					bgmEnabled.value
-				) {
-					audioEngine.playBgm();
-				}
-			};
-		initAudio();
-	}, []);
+	useStartBgm();
 
 	const onSubmit =
 		(

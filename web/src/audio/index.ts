@@ -12,4 +12,7 @@ export {
 	effectsVolume,
 	isAudioEngineInitialized,
 	isBgmPlaying,
+	setFullBgmVolume,
+	setQuietBgmVolume,
 } from "./audioState";
+export { useStartBgm } from "./useStartBgm";

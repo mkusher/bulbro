@@ -30,6 +30,7 @@ import type { Weapon } from "@/weapon";
 import {
 	audioEngine,
 	bgmEnabled,
+	useStartBgm,
 } from "@/audio";
 
 export function SetupSinglePlayer() {
@@ -58,19 +59,7 @@ export function SetupSinglePlayer() {
 		useRouter();
 
 	// Start BGM when component mounts
-	useEffect(() => {
-		const initAudio =
-			async () => {
-				await audioEngine.init();
-				await audioEngine.resume();
-				if (
-					bgmEnabled.value
-				) {
-					audioEngine.playBgm();
-				}
-			};
-		initAudio();
-	}, []);
+	useStartBgm();
 	const onSubmit =
 		(
 			e: SubmitEvent,

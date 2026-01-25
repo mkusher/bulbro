@@ -56,8 +56,13 @@ class AudioEngine {
 
 		this.#initPromise =
 			this.#doInit();
-		return this
-			.#initPromise;
+		try {
+			return this
+				.#initPromise;
+		} finally {
+			this.#initPromise =
+				null;
+		}
 	}
 
 	async #doInit(): Promise<void> {
@@ -82,21 +87,20 @@ class AudioEngine {
 				.destination,
 		);
 
-		// Set initial volumes from signals
-		this.#effectsGain.gain.value =
-			effectiveEffectsVolume.value;
-		this.#bgmGain.gain.value =
-			effectiveBgmVolume.value;
-
-		// Setup reactive volume control
-		this.#setupVolumeReactivity();
-
 		// Preload all audio files
 		this.#buffers =
 			await preloadAllAudio(
 				this
 					.#context,
 			);
+
+		// Setup reactive volume control
+		this.#setupVolumeReactivity();
+		// Set initial volumes from signals
+		this.#effectsGain.gain.value =
+			effectiveEffectsVolume.value;
+		this.#bgmGain.gain.value =
+			effectiveBgmVolume.value;
 
 		isAudioEngineInitialized.value = true;
 	}
@@ -107,24 +111,28 @@ class AudioEngine {
 	#setupVolumeReactivity(): void {
 		effect(
 			() => {
+				const value =
+					effectiveEffectsVolume.value;
 				if (
 					this
 						.#effectsGain
 				) {
 					this.#effectsGain.gain.value =
-						effectiveEffectsVolume.value;
+						value;
 				}
 			},
 		);
 
 		effect(
 			() => {
+				const value =
+					effectiveBgmVolume.value;
 				if (
 					this
 						.#bgmGain
 				) {
 					this.#bgmGain.gain.value =
-						effectiveBgmVolume.value;
+						value;
 				}
 			},
 		);
@@ -195,7 +203,15 @@ class AudioEngine {
 	/**
 	 * Start playing background music (loops continuously)
 	 */
-	playBgm(): void {
+	async playBgm(): Promise<void> {
+		if (
+			!this
+				.#context ||
+			!this
+				.#bgmGain
+		)
+			await this.init();
+
 		if (
 			!this
 				.#context ||
@@ -204,8 +220,10 @@ class AudioEngine {
 		)
 			return;
 
-		// Stop existing BGM if playing
-		this.stopBgm();
+		if (
+			isBgmPlaying.value
+		)
+			return;
 
 		const buffer =
 			this.#buffers.get(

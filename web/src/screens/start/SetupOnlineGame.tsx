@@ -46,6 +46,7 @@ import {
 	audioEngine,
 	bgmEnabled,
 } from "@/audio";
+import { useStartBgm } from "@/audio/useStartBgm";
 
 function getShareUrl() {
 	const lobby =
@@ -118,19 +119,8 @@ export function SetupOnlineGame() {
 		shareMessage.value;
 
 	// Start BGM when component mounts
-	useEffect(() => {
-		const initAudio =
-			async () => {
-				await audioEngine.init();
-				await audioEngine.resume();
-				if (
-					bgmEnabled.value
-				) {
-					audioEngine.playBgm();
-				}
-			};
-		initAudio();
-	}, []);
+	useStartBgm();
+
 	const canShare =
 		window
 			.navigator

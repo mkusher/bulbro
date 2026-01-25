@@ -18,6 +18,7 @@ import {
 	toWeaponState,
 	type Weapon,
 } from "@/weapon";
+import { useStartBgm } from "@/audio";
 
 /**
  * Converts WaveState to PreRoundState for use with the layout.
@@ -115,6 +116,8 @@ export function PreRound({
 					state,
 				),
 		);
+
+	useStartBgm();
 
 	const handlePurchase =
 		(
