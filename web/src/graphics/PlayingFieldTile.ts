@@ -5,6 +5,9 @@ import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
 import type { WaveState } from "../waveState";
 
 export const FIELD_BACKGROUND_COLOR = 0x475b46;
+const GRASS_DARKER = 0x3d4a37;
+const GRASS_LIGHTER = 0x5a6e52;
+const DITHER_PATTERN_SIZE = 8;
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -34,6 +37,54 @@ export class PlayingFieldTile {
 			this
 				.#sprite,
 		);
+
+		// Add dithering pattern for grass variation
+		const ditherPattern =
+			new PIXI.Graphics();
+		for (
+			let x = 0;
+			x <
+			size.width;
+			x +=
+				DITHER_PATTERN_SIZE *
+				2
+		) {
+			for (
+				let y = 0;
+				y <
+				size.height;
+				y +=
+					DITHER_PATTERN_SIZE *
+					2
+			) {
+				ditherPattern
+					.rect(
+						x,
+						y,
+						DITHER_PATTERN_SIZE,
+						DITHER_PATTERN_SIZE,
+					)
+					.fill(
+						GRASS_DARKER,
+					);
+				ditherPattern
+					.rect(
+						x +
+							DITHER_PATTERN_SIZE,
+						y +
+							DITHER_PATTERN_SIZE,
+						DITHER_PATTERN_SIZE,
+						DITHER_PATTERN_SIZE,
+					)
+					.fill(
+						GRASS_LIGHTER,
+					);
+			}
+		}
+		this.#container.addChild(
+			ditherPattern,
+		);
+
 		this.#backgroundPattern =
 			new BackgroundPatternSprite(
 				size,

@@ -603,6 +603,8 @@ describe("StateUpdater", () => {
 										y: 100,
 									},
 								knockback: 0,
+								weaponType:
+									"pistol",
 							},
 						),
 						weaponId:

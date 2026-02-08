@@ -3,6 +3,7 @@ import { zeroPoint } from "./geometry";
 import { uuid } from "./uuid";
 import type { WeaponState } from "./weapon/WeaponState";
 import {
+	enemyWeapons,
 	fist,
 	weapons,
 } from "./weapons-definitions";
@@ -80,4 +81,41 @@ export const fromWeaponState =
 				w.id ===
 				state.type,
 		) ??
+		enemyWeapons.find(
+			(
+				w,
+			) =>
+				w.id ===
+				state.type,
+		) ??
 		fist;
+
+export const getWeaponByType =
+	(
+		type: WeaponType,
+	): Weapon =>
+		weapons.find(
+			(
+				w,
+			) =>
+				w.id ===
+				type,
+		) ??
+		enemyWeapons.find(
+			(
+				w,
+			) =>
+				w.id ===
+				type,
+		) ??
+		fist;
+
+export const isUnarmedWeapon =
+	(
+		type: WeaponType,
+	): boolean =>
+		getWeaponByType(
+			type,
+		).classes.includes(
+			"unarmed",
+		);

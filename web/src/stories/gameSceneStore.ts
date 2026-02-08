@@ -118,6 +118,7 @@ const tickerCallback =
 					controls,
 				],
 				eventQueue,
+				gameState,
 				config?.debug ||
 					false,
 			);
@@ -379,6 +380,7 @@ export function step(
 					controls,
 				],
 				eventQueue,
+				gameState,
 				config?.debug ||
 					false,
 			);

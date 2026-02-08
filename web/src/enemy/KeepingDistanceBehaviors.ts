@@ -206,12 +206,12 @@ export class KeepkingDistanceBehaviors
 				(
 					weapon,
 				) => {
-					const reloadTime =
+					const weaponTime =
 						weapon
 							.statsBonus
 							?.attackSpeed ??
 						1;
-					const attackSpeed =
+					const entityAttackSpeed =
 						currentEnemy
 							.stats
 							.attackSpeed ??
@@ -219,8 +219,8 @@ export class KeepkingDistanceBehaviors
 					if (
 						isWeaponReadyToShoot(
 							weapon.lastStrikedAt,
-							reloadTime,
-							attackSpeed,
+							weaponTime,
+							entityAttackSpeed,
 							now,
 						)
 					) {

@@ -153,6 +153,18 @@ export const weapons: Record<
 			empty,
 	} as const;
 
+/**
+ * Get the weapon size for a weapon type (in original texture pixels).
+ */
+export function getWeaponSize(
+	weaponType: WeaponType,
+): Size {
+	return weapons[
+		weaponType
+	]
+		.size;
+}
+
 export const weaponTypes =
 	Object.keys(
 		weapons,
@@ -342,6 +354,8 @@ export class WeaponSprite {
 		) {
 			this.#rotationContainer.rotation = 0;
 		} else {
+			// rotation() returns angle for sprites pointing UP at 0°
+			// Weapon sprites point RIGHT at 0°, so subtract PI/2 (90°) to adjust
 			this.#rotationContainer.rotation =
 				rotation(
 					direction,

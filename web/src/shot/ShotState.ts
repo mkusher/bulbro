@@ -7,6 +7,7 @@ import type {
 	Direction,
 	Position,
 } from "../geometry";
+import type { WeaponType } from "../weapon";
 
 type ShotStateProperties =
 	{
@@ -30,6 +31,8 @@ type ShotStateProperties =
 		/** Direction vector */
 		readonly direction: Direction;
 		readonly knockback: number;
+		/** Type of weapon that fired this shot */
+		readonly weaponType: WeaponType;
 	};
 
 /**
@@ -90,6 +93,11 @@ export class ShotState
 		return this
 			.#props
 			.knockback;
+	}
+	get weaponType() {
+		return this
+			.#props
+			.weaponType;
 	}
 
 	constructor(
@@ -210,4 +218,6 @@ export interface ShotStateInterface {
 	/** Direction vector */
 	direction: Direction;
 	knockback: number;
+	/** Type of weapon that fired this shot */
+	weaponType: WeaponType;
 }

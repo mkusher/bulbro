@@ -6,6 +6,8 @@ import { fist } from "./fist";
 import { hand } from "./hand";
 import { knife } from "./knife";
 import { laserGun } from "./laser-gun";
+import { orcFist } from "./orc-fist";
+import { orcSlowGun } from "./orc-gun";
 import { pistol } from "./pistol";
 import { smg } from "./smg";
 import { sword } from "./sword";
@@ -21,6 +23,10 @@ export {
 	pistol,
 	smg,
 	sword,
+	// Enemy weapons
+	aphidGun,
+	orcFist,
+	orcSlowGun,
 };
 
 export const weapons =
@@ -35,5 +41,11 @@ export const weapons =
 		pistol,
 		smg,
 		sword,
+	] as const;
+
+export const enemyWeapons =
+	[
 		aphidGun,
+		orcFist,
+		orcSlowGun,
 	] as const;

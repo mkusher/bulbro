@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { GameSprite } from "@/graphics/GameSprite";
 import type { DeltaTime } from "@/time";
+import { isUnarmedWeapon } from "@/weapon";
 import { BulletSprite } from "./BulletSprite";
 import { EnemyProjectileSprite } from "./EnemyProjectileSprite";
 import type { ShotState } from "./ShotState";
@@ -8,7 +9,8 @@ import type { ShotState } from "./ShotState";
 export class ShotSprite extends GameSprite {
 	#sprite:
 		| EnemyProjectileSprite
-		| BulletSprite;
+		| BulletSprite
+		| null;
 
 	constructor(
 		shot: ShotState,
@@ -23,6 +25,16 @@ export class ShotSprite extends GameSprite {
 					},
 			},
 		);
+		// Don't create visible sprite for unarmed weapons
+		if (
+			isUnarmedWeapon(
+				shot.weaponType,
+			)
+		) {
+			this.#sprite =
+				null;
+			return;
+		}
 		this.#sprite =
 			shot.shooterType ===
 			"player"
@@ -53,7 +65,7 @@ export class ShotSprite extends GameSprite {
 		this.updatePosition(
 			shot.position,
 		);
-		this.#sprite.update(
+		this.#sprite?.update(
 			deltaTime,
 			shot,
 		);
@@ -63,7 +75,7 @@ export class ShotSprite extends GameSprite {
 	 * Removes this sprite from its parent container.
 	 */
 	override remove(): void {
-		this.#sprite.remove();
+		this.#sprite?.remove();
 		super.remove();
 	}
 }

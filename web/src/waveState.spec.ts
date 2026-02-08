@@ -41,7 +41,6 @@ import {
 	handleBulbroHealed,
 	handleEnemyAttacked,
 	movePlayer,
-	moveShot,
 	updateState,
 	type WaveState,
 	type WeaponState,
@@ -203,6 +202,8 @@ function createTestShot(
 			damage: 10,
 			range: 300,
 			knockback: 0,
+			weaponType:
+				"pistol",
 		},
 	);
 }
@@ -274,7 +275,7 @@ function createTestWeaponDefinition(
 	};
 }
 
-describe("currentState", () => {
+describe("waveState", () => {
 	let state: WaveState;
 	let player1: BulbroState;
 	let player2: BulbroState;
@@ -769,7 +770,7 @@ describe("currentState", () => {
 			);
 		});
 
-		it("should handle moveShot events", () => {
+		it("should handle shotMoved events", () => {
 			const shot =
 				createTestShot(
 					"shot1",
@@ -783,11 +784,19 @@ describe("currentState", () => {
 					shot,
 				];
 
-			const moveShotEvent: GameEvent =
+			const shotMovedEvent: GameEvent =
 				{
-					type: "moveShot",
+					type: "shotMoved",
 					shotId:
 						"shot1",
+					from: {
+						x: 50,
+						y: 50,
+					},
+					to: {
+						x: 70,
+						y: 50,
+					},
 					direction:
 						{
 							x: 1,
@@ -801,29 +810,29 @@ describe("currentState", () => {
 						nowTime(
 							Date.now(),
 						),
-					chance: 0.5,
 				};
 
 			const newState =
 				updateState(
 					state,
-					moveShotEvent,
+					shotMovedEvent,
 				);
-			// Shot should move or be removed depending on collision/bounds
+			// Shot should be updated with new position
+			const updatedShot =
+				newState.shots.find(
+					(
+						s,
+					) =>
+						s.id ===
+						"shot1",
+				);
 			expect(
-				newState
-					.shots
-					.length,
-			).toBeLessThanOrEqual(
-				1,
-			);
-			// The shot system should process the movement correctly
-			expect(
-				newState
-					.shots
-					.length,
-			).toBeGreaterThanOrEqual(
-				0,
+				updatedShot?.position,
+			).toEqual(
+				{
+					x: 70,
+					y: 50,
+				},
 			);
 		});
 
@@ -1133,278 +1142,6 @@ describe("currentState", () => {
 					x: 200,
 					y: 200,
 				},
-			);
-		});
-	});
-
-	describe("moveShot", () => {
-		it("should move shots without hitting distant enemies", () => {
-			// Position shot far from enemy (enemy is at 400,400)
-			const shot =
-				createTestShot(
-					"shot1",
-					"player1",
-					"player",
-					100,
-					200,
-				);
-			state.shots =
-				[
-					shot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 0,
-							y: 1,
-						}, // Move downward, away from enemy
-					deltaTime:
-						deltaTime(
-							20,
-						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-
-			// Shot should move without collision since it's far from enemy
-			const remainingShots =
-				newState.shots.filter(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				);
-			const enemy =
-				newState.enemies.find(
-					(
-						e,
-					) =>
-						e.id ===
-						"enemy1",
-				);
-
-			expect(
-				remainingShots.length,
-			).toBeLessThanOrEqual(
-				1,
-			);
-			expect(
-				enemy?.healthPoints,
-			).toBe(
-				50,
-			); // Enemy should be undamaged
-		});
-
-		it("should process shot movement near enemies", () => {
-			// Position shot close to enemy but test the movement behavior
-			const shot =
-				createTestShot(
-					"shot1",
-					"player1",
-					"player",
-					380,
-					400,
-				);
-			state.shots =
-				[
-					shot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						},
-					deltaTime:
-						deltaTime(
-							20,
-						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-
-			// Test that the shot system processes the movement correctly
-			// Either the shot moves or gets removed due to collision
-			const remainingShots =
-				newState.shots.filter(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				);
-			expect(
-				remainingShots.length,
-			).toBeLessThanOrEqual(
-				1,
-			);
-
-			// Enemy health should remain the same or decrease
-			const enemy =
-				newState.enemies.find(
-					(
-						e,
-					) =>
-						e.id ===
-						"enemy1",
-				);
-			expect(
-				enemy?.healthPoints,
-			).toBeLessThanOrEqual(
-				50,
-			);
-		});
-
-		it("should remove shots that go out of bounds", () => {
-			const shot =
-				createTestShot(
-					"shot1",
-					"player1",
-					"player",
-					790,
-					300,
-				);
-			state.shots =
-				[
-					shot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						},
-					deltaTime:
-						deltaTime(
-							100,
-						), // Large delta to move shot out of bounds
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-			expect(
-				newState.shots.find(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				),
-			).toBeUndefined();
-		});
-
-		it("should handle enemy shots moving towards players", () => {
-			const shot =
-				createTestShot(
-					"shot1",
-					"enemy1",
-					"enemy",
-					150,
-					100,
-				);
-			state.shots =
-				[
-					shot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x:
-								-1,
-							y: 0,
-						},
-					deltaTime:
-						deltaTime(
-							30,
-						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-
-			// Test that the shot system processes enemy shots correctly
-			const remainingShots =
-				newState.shots.filter(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				);
-			expect(
-				remainingShots.length,
-			).toBeLessThanOrEqual(
-				1,
-			);
-
-			// Player health should remain the same or decrease
-			const player =
-				newState.players.find(
-					(
-						p,
-					) =>
-						p.id ===
-						"player1",
-				);
-			expect(
-				player?.healthPoints,
-			).toBeLessThanOrEqual(
-				80,
 			);
 		});
 	});
@@ -2051,573 +1788,161 @@ describe("currentState", () => {
 			);
 		});
 
-		it("should handle player shots hitting enemies", () => {
-			// Position enemy directly in shot path
-			const targetEnemy =
-				createTestEnemy(
-					"enemy1",
-					150,
-					100,
-				);
-			state.enemies =
-				[
-					targetEnemy,
-				];
-
-			// Create shot moving towards enemy
-			const shot =
-				createTestShot(
-					"shot1",
-					"player1",
-					"player",
-					120,
-					100,
-				);
-			state.shots =
-				[
-					shot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						}, // Moving right towards enemy
-					deltaTime:
-						deltaTime(
-							100,
-						), // Large delta to ensure collision
-					occurredAt:
+		describe("round state", () => {
+			it("should end round when all players die", () => {
+				// Create dead players by applying fatal damage
+				const deathEvent1 =
+					player1.beHit(
+						player1.healthPoints,
 						nowTime(
 							Date.now(),
 						),
-					chance: 0.5,
-				};
+					);
+				const deathEvent2 =
+					player2.beHit(
+						player2.healthPoints,
+						nowTime(
+							Date.now(),
+						),
+					);
+				const deadPlayer1 =
+					player1.applyEvent(
+						withEventMeta(
+							deathEvent1,
+							deltaTime(
+								16,
+							),
+							nowTime(
+								Date.now(),
+							),
+						),
+					);
+				const deadPlayer2 =
+					player2.applyEvent(
+						withEventMeta(
+							deathEvent2,
+							deltaTime(
+								16,
+							),
+							nowTime(
+								Date.now(),
+							),
+						),
+					);
+				state.players =
+					[
+						deadPlayer1,
+						deadPlayer2,
+					];
 
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
+				// Just trigger a tick event to update the round state
+				const tickEvent: GameEvent =
+					{
+						type: "tick",
+						deltaTime:
+							deltaTime(
+								16,
+							),
+						occurredAt:
+							nowTime(
+								Date.now(),
+							),
+					};
 
-			// Shot should be removed due to collision
-			expect(
-				newState.shots.find(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				),
-			).toBeUndefined();
-
-			// Enemy should be damaged
-			const hitEnemy =
-				newState.enemies.find(
-					(
-						e,
-					) =>
-						e.id ===
-						"enemy1",
-				);
-			expect(
-				hitEnemy?.healthPoints,
-			).toBeLessThan(
-				50,
-			);
-
-			// If enemy died, should create material
-			if (
-				hitEnemy?.healthPoints ===
-				0
-			) {
-				const materialObjects =
-					newState.objects.filter(
-						(
-							o,
-						) =>
-							o.type ===
-							"material",
+				const newState =
+					updateState(
+						state,
+						tickEvent,
 					);
 				expect(
-					materialObjects.length,
-				).toBeGreaterThan(
-					0,
+					newState
+						.round
+						.isRunning,
+				).toBe(
+					false,
 				);
-			}
+				expect(
+					newState
+						.round
+						.endedAt,
+				).toBeDefined();
+			});
 		});
 
-		it("should handle enemy shots hitting players", () => {
-			// Position player in shot path
-			const targetPosition =
-				{
-					x: 120,
-					y: 100,
-				};
-			const playerInPath =
-				new BulbroState(
-					{
-						...player1.toJSON(),
-						position:
-							targetPosition,
-					},
-				);
-			state.players =
-				[
-					playerInPath,
-					player2,
-				];
-
-			// Create enemy shot moving towards player
-			const enemyShot =
-				createTestShot(
-					"shot1",
-					"enemy1",
-					"enemy",
-					100,
-					100,
-				);
-			state.shots =
-				[
-					enemyShot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						}, // Moving right towards player
-					deltaTime:
-						deltaTime(
-							100,
-						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-
-			// Shot should be removed due to collision
-			expect(
-				newState.shots.find(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				),
-			).toBeUndefined();
-
-			// Player should be damaged
-			const hitPlayer =
-				newState.players.find(
-					(
-						p,
-					) =>
-						p.id ===
-						"player1",
-				);
-			expect(
-				hitPlayer?.healthPoints,
-			).toBeLessThan(
-				80,
-			);
-		});
-
-		it("should remove shots that exceed their range", () => {
-			// Create shot with limited range
-			const shortRangeShot =
-				new ShotState(
-					{
-						id: "shot1",
-						shooterId:
+		describe("createInitialState", () => {
+			it("should create valid initial state", () => {
+				const players =
+					[
+						createTestPlayer(
 							"player1",
-						shooterType:
-							"player",
-						startPosition:
-							{
-								x: 100,
-								y: 100,
-							},
-						position:
-							{
-								x: 100,
-								y: 100,
-							},
-						direction:
-							{
-								x: 1,
-								y: 0,
-							},
-						speed: 200,
-						damage: 10,
-						range: 50, // Short range
-						knockback: 0,
-					},
-				);
-			state.shots =
-				[
-					shortRangeShot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						},
-					deltaTime:
-						deltaTime(
-							500,
-						), // Large delta to exceed range
-					occurredAt:
-						nowTime(
-							Date.now(),
 						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-
-			// Shot should be removed due to range limit
-			expect(
-				newState.shots.find(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				),
-			).toBeUndefined();
-		});
-
-		it("should remove shots that go out of map bounds", () => {
-			// Position shot near right edge
-			const edgeShot =
-				createTestShot(
-					"shot1",
-					"player1",
-					"player",
-					790,
-					300,
-				);
-			state.shots =
-				[
-					edgeShot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						}, // Moving right, will exit bounds
-					deltaTime:
-						deltaTime(
-							100,
+						createTestPlayer(
+							"player2",
 						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
+					];
+				const mapSize =
+					{
+						width: 800,
+						height: 600,
+					};
 
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
+				const initialState =
+					createInitialState(
+						players,
+						mapSize,
+						1,
+						1,
+						1,
+						0,
+					);
+
+				expect(
+					initialState.players,
+				).toHaveLength(
+					2,
 				);
-
-			// Shot should be removed due to boundary
-			expect(
-				newState.shots.find(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				),
-			).toBeUndefined();
-		});
-
-		it("should move shots without collision when no targets in path", () => {
-			// Position shot away from any targets
-			const isolatedShot =
-				createTestShot(
-					"shot1",
-					"player1",
-					"player",
-					50,
-					50,
-				);
-			state.shots =
-				[
-					isolatedShot,
-				];
-
-			// Move enemies far away
-			state.enemies =
-				[
-					createTestEnemy(
-						"enemy1",
-						700,
-						500,
-					),
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						},
-					deltaTime:
-						deltaTime(
-							50,
-						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-
-			// Shot should still exist and have moved
-			const movedShot =
-				newState.shots.find(
-					(
-						s,
-					) =>
-						s.id ===
-						"shot1",
-				);
-			expect(
-				movedShot,
-			).toBeDefined();
-			expect(
-				movedShot
-					?.position
-					.x,
-			).toBeGreaterThan(
-				50,
-			); // Should have moved right
-		});
-	});
-
-	describe("round state", () => {
-		it("should end round when all players die", () => {
-			// Create dead players by applying fatal damage
-			const deathEvent1 =
-				player1.beHit(
-					player1.healthPoints,
-					nowTime(
-						Date.now(),
-					),
-				);
-			const deathEvent2 =
-				player2.beHit(
-					player2.healthPoints,
-					nowTime(
-						Date.now(),
-					),
-				);
-			const deadPlayer1 =
-				player1.applyEvent(
-					withEventMeta(
-						deathEvent1,
-						deltaTime(
-							16,
-						),
-						nowTime(
-							Date.now(),
-						),
-					),
-				);
-			const deadPlayer2 =
-				player2.applyEvent(
-					withEventMeta(
-						deathEvent2,
-						deltaTime(
-							16,
-						),
-						nowTime(
-							Date.now(),
-						),
-					),
-				);
-			state.players =
-				[
-					deadPlayer1,
-					deadPlayer2,
-				];
-
-			const shot =
-				createTestShot(
-					"shot1",
-					"enemy1",
-					"enemy",
-					100,
-					100,
-				);
-			state.shots =
-				[
-					shot,
-				];
-
-			const moveShotEvent: GameEvent =
-				{
-					type: "moveShot",
-					shotId:
-						"shot1",
-					direction:
-						{
-							x: 1,
-							y: 0,
-						},
-					deltaTime:
-						deltaTime(
-							16,
-						),
-					occurredAt:
-						nowTime(
-							Date.now(),
-						),
-					chance: 0.5,
-				};
-
-			const newState =
-				moveShot(
-					state,
-					moveShotEvent,
-				);
-			expect(
-				newState
-					.round
-					.isRunning,
-			).toBe(
-				false,
-			);
-			expect(
-				newState
-					.round
-					.endedAt,
-			).toBeDefined();
-		});
-	});
-
-	describe("createInitialState", () => {
-		it("should create valid initial state", () => {
-			const players =
-				[
-					createTestPlayer(
-						"player1",
-					),
-					createTestPlayer(
-						"player2",
-					),
-				];
-			const mapSize =
-				{
-					width: 800,
-					height: 600,
-				};
-
-			const initialState =
-				createInitialState(
-					players,
-					mapSize,
-					1,
-					1,
-					1,
+				expect(
+					initialState.enemies,
+				).toHaveLength(
 					0,
 				);
-
-			expect(
-				initialState.players,
-			).toHaveLength(
-				2,
-			);
-			expect(
-				initialState.enemies,
-			).toHaveLength(
-				0,
-			);
-			expect(
-				initialState.shots,
-			).toHaveLength(
-				0,
-			);
-			expect(
-				initialState.objects,
-			).toHaveLength(
-				0,
-			);
-			expect(
-				initialState
-					.round
-					.isRunning,
-			).toBe(
-				true,
-			);
-			expect(
-				initialState
-					.round
-					.wave,
-			).toBe(
-				1,
-			);
-			expect(
-				initialState
-					.round
-					.duration,
-			).toBe(
-				25,
-			);
-			expect(
-				initialState.mapSize,
-			).toEqual(
-				mapSize,
-			);
+				expect(
+					initialState.shots,
+				).toHaveLength(
+					0,
+				);
+				expect(
+					initialState.objects,
+				).toHaveLength(
+					0,
+				);
+				expect(
+					initialState
+						.round
+						.isRunning,
+				).toBe(
+					true,
+				);
+				expect(
+					initialState
+						.round
+						.wave,
+				).toBe(
+					1,
+				);
+				expect(
+					initialState
+						.round
+						.duration,
+				).toBe(
+					25,
+				);
+				expect(
+					initialState.mapSize,
+				).toEqual(
+					mapSize,
+				);
+			});
 		});
 	});
 });

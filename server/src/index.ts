@@ -192,7 +192,7 @@ app.get(
 					_path,
 					c,
 				) => {
-					return c.header(
+					c.header(
 						"Cache-Control",
 						`public, immutable, max-age=31536000`,
 					);
@@ -203,6 +203,9 @@ app.get(
 					c,
 				) => {
 					httpServerLogger.info(
+						{
+							path,
+						},
 						"Not found",
 					);
 					c.redirect(

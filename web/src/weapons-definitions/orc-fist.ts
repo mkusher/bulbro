@@ -5,19 +5,19 @@ import type { Weapon } from "../weapon";
  */
 export const orcFist: Weapon =
 	{
-		id: "enemyFist", // Note: This should probably be "orcFist" but keeping as "fist" for compatibility
+		id: "enemyFist",
 		name: "Enemy Fist",
 		classes:
 			[
 				"unarmed",
 				"heavy",
 			],
-		shotSpeed: 100,
+		shotSpeed: 500,
 		statsBonus:
 			{
-				range: 40,
+				range: 60,
 				damage: 3,
 				meleeDamage: 5,
-				attackSpeed: 30,
+				attackSpeed: 1,
 			},
 	};

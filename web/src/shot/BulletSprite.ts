@@ -6,7 +6,7 @@ import type { ShotState } from "./ShotState";
 const width = 8;
 const height = 16;
 /**
- * Manages an enemy sprite graphic.
+ * Manages a bullet sprite graphic.
  */
 export class BulletSprite {
 	#gfx: PIXI.Graphics;
@@ -34,6 +34,11 @@ export class BulletSprite {
 				.lineStyle(
 					2,
 				);
+		// Set initial rotation based on shot direction
+		this.#gfx.rotation =
+			rotation(
+				shot.direction,
+			);
 	}
 
 	/**

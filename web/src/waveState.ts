@@ -531,275 +531,6 @@ export function generateMaterialMovementEvents(
 }
 
 const enemiesBodiesDisappearAfter = 2000;
-export function moveShot(
-	state: WaveState,
-	action: Extract<
-		Action,
-		{
-			type: "moveShot";
-		}
-	>,
-): WaveState {
-	const {
-		shotId,
-		direction,
-		deltaTime,
-		occurredAt:
-			now,
-	} = action;
-	const bounds: Rectangle =
-		{
-			x: 0,
-			y: 0,
-			width:
-				state
-					.mapSize
-					.width,
-			height:
-				state
-					.mapSize
-					.height,
-		};
-	const newShots: ShotState[] =
-		[];
-	let newEnemies =
-		state.enemies;
-	let newPlayers =
-		state.players;
-	let newObjects =
-		state.objects;
-	for (const shot of state.shots) {
-		if (
-			shot.id !==
-			shotId
-		) {
-			newShots.push(
-				shot,
-			);
-			continue;
-		}
-		const prevPos =
-			shot.position;
-		const nextPos =
-			movePosition(
-				prevPos,
-				shot.speed,
-				direction,
-				deltaTime,
-			);
-		if (
-			!rectContainsPoint(
-				bounds,
-				nextPos,
-			) ||
-			distance(
-				shot.startPosition,
-				nextPos,
-			) >
-				shot.range
-		) {
-			continue;
-		}
-		if (
-			shot.shooterType ===
-			"player"
-		) {
-			const segment =
-				{
-					start:
-						prevPos,
-					end: nextPos,
-				};
-			let isHit = false;
-			const killedEnemies =
-				newEnemies.filter(
-					(
-						e,
-					) =>
-						e.killedAt,
-				);
-			const notKilled =
-				newEnemies.filter(
-					(
-						e,
-					) =>
-						!e.killedAt,
-				);
-			newEnemies =
-				notKilled.map(
-					(
-						e,
-					) => {
-						if (
-							e.killedAt
-						)
-							return e;
-						const enemyRect =
-							rectFromCenter(
-								e.position,
-								ENEMY_SIZE,
-							);
-						if (
-							rectIntersectsLine(
-								enemyRect,
-								segment,
-							)
-						) {
-							isHit = true;
-							return e.applyEvent(
-								withEventMeta(
-									e.beHit(
-										shot,
-										now,
-									),
-									deltaTime,
-									now,
-								),
-							);
-						}
-						return e;
-					},
-				);
-			const newKilled =
-				newEnemies.filter(
-					(
-						e,
-					) =>
-						e.killedAt,
-				);
-			newObjects =
-				[
-					...newObjects,
-					...newKilled.map(
-						(
-							e,
-						) =>
-							e.toMaterial(),
-					),
-				];
-			newEnemies =
-				killedEnemies.concat(
-					newEnemies,
-				);
-			if (
-				isHit
-			)
-				continue;
-		}
-		if (
-			shot.shooterType ===
-			"enemy"
-		) {
-			const segment =
-				{
-					start:
-						prevPos,
-					end: nextPos,
-				};
-			let isHit = false;
-			newPlayers =
-				newPlayers.map(
-					(
-						p,
-					) => {
-						if (
-							!p.isAlive()
-						) {
-							return p;
-						}
-						const playerRect =
-							rectFromCenter(
-								p.position,
-								BULBRO_SIZE,
-							);
-						if (
-							rectIntersectsLine(
-								playerRect,
-								segment,
-							)
-						) {
-							isHit = true;
-							return p.applyEvent(
-								withEventMeta(
-									p.beHit(
-										shot.damage,
-										now,
-									),
-									deltaTime,
-									now,
-								),
-							);
-						}
-						return p;
-					},
-				);
-			if (
-				isHit
-			)
-				continue;
-		}
-		const moveEvent =
-			shot.move(
-				nextPos,
-			);
-		newShots.push(
-			shot.applyEvent(
-				withEventMeta(
-					moveEvent,
-					deltaTime,
-					now,
-				),
-			),
-		);
-	}
-	newEnemies =
-		newEnemies.filter(
-			(
-				e,
-			) =>
-				e.healthPoints >
-					0 ||
-				(e.killedAt &&
-					now -
-						e.killedAt <
-						enemiesBodiesDisappearAfter),
-		);
-	const isRunning =
-		newPlayers.filter(
-			(
-				p,
-			) =>
-				p.isAlive(),
-		)
-			.length >
-			0 &&
-		state
-			.round
-			.isRunning;
-	return {
-		...state,
-		enemies:
-			newEnemies,
-		players:
-			newPlayers,
-		shots:
-			newShots,
-		objects:
-			newObjects,
-		round:
-			{
-				...state.round,
-				isRunning,
-				endedAt:
-					!isRunning
-						? (state
-								.round
-								.endedAt ??
-							now)
-						: undefined,
-			},
-	};
-}
 
 export function spawnEnemy(
 	state: WaveState,
@@ -1306,19 +1037,111 @@ export function updateState(
 			);
 		}
 		case "moveShot": {
-			const newState =
-				moveShot(
-					state,
-					action,
-				);
+			// moveShot is now handled in TickProcess.#generateShotMovementEvents
+			// and collision events are generated directly (enemyReceivedHit, bulbroReceivedHit, etc.)
+			// So we just return the state unchanged here
+			return state;
+		}
+		case "enemyReceivedHit": {
 			return {
-				...newState,
-				round:
-					!newState
-						.round
-						.isRunning
-						? newState.round
-						: state.round,
+				...state,
+				enemies:
+					state.enemies.map(
+						(
+							enemy,
+						) => {
+							if (
+								enemy.id !==
+								action.enemyId
+							) {
+								return enemy;
+							}
+							return enemy.applyEvent(
+								action,
+							);
+						},
+					),
+			};
+		}
+		case "enemyDied": {
+			return {
+				...state,
+				enemies:
+					state.enemies.map(
+						(
+							enemy,
+						) => {
+							if (
+								enemy.id !==
+								action.enemyId
+							) {
+								return enemy;
+							}
+							return enemy.applyEvent(
+								action,
+							);
+						},
+					),
+				objects:
+					[
+						...state.objects,
+						...state.enemies
+							.filter(
+								(
+									e,
+								) =>
+									e.id ===
+									action.enemyId,
+							)
+							.map(
+								(
+									e,
+								) =>
+									e.toMaterial(),
+							),
+					],
+			};
+		}
+		case "bulbroReceivedHit": {
+			return {
+				...state,
+				players:
+					state.players.map(
+						(
+							player,
+						) => {
+							if (
+								player.id !==
+								action.bulbroId
+							) {
+								return player;
+							}
+							return player.applyEvent(
+								action,
+							);
+						},
+					),
+			};
+		}
+		case "bulbroDied": {
+			return {
+				...state,
+				players:
+					state.players.map(
+						(
+							player,
+						) => {
+							if (
+								player.id !==
+								action.bulbroId
+							) {
+								return player;
+							}
+							return player.applyEvent(
+								action,
+							);
+						},
+					),
 			};
 		}
 		case "spawnEnemy": {
@@ -1333,15 +1156,70 @@ export function updateState(
 				action,
 			);
 		}
+		case "shotMoved": {
+			return {
+				...state,
+				shots:
+					state.shots.map(
+						(
+							shot,
+						) => {
+							if (
+								shot.id !==
+								action.shotId
+							) {
+								return shot;
+							}
+							return shot.applyEvent(
+								action,
+							);
+						},
+					),
+			};
+		}
+		case "shotExpired": {
+			return {
+				...state,
+				shots:
+					state.shots.filter(
+						(
+							shot,
+						) =>
+							shot.id !==
+							action.shotId,
+					),
+			};
+		}
 		case "tick": {
 			const round =
 				updateRound(
 					state.round,
 					action,
 				);
+			// Check if all players are dead to end the round
+			const alivePlayersCount =
+				state.players.filter(
+					(
+						p,
+					) =>
+						p.isAlive(),
+				).length;
+			const isRunning =
+				alivePlayersCount >
+					0 &&
+				round.isRunning;
 			return {
 				...state,
-				round,
+				round:
+					{
+						...round,
+						isRunning,
+						endedAt:
+							!isRunning &&
+							round.isRunning
+								? action.occurredAt
+								: round.endedAt,
+					},
 			};
 		}
 		default:

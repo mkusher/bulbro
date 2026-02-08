@@ -2,7 +2,7 @@
 	"name": "bulbro-server",
 	"dependencies": {
 		"arktype": "^2.1.25",
-		"hono": "^4.10.4",
+		"hono": "^4.11.9",
 		"pino": "^10.1.0",
 		"pino-pretty": "^13.1.2"
 	},

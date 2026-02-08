@@ -147,12 +147,12 @@ export class DefaultEnemyBehaviors
 			(
 				weapon,
 			) => {
-				const reloadTime =
+				const weaponTime =
 					weapon
 						.statsBonus
 						?.attackSpeed ??
 					1;
-				const attackSpeed =
+				const entityAttackSpeed =
 					enemy
 						.stats
 						.attackSpeed ??
@@ -160,8 +160,8 @@ export class DefaultEnemyBehaviors
 				if (
 					isWeaponReadyToShoot(
 						weapon.lastStrikedAt,
-						reloadTime,
-						attackSpeed,
+						weaponTime,
+						entityAttackSpeed,
 						now,
 					)
 				) {

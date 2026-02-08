@@ -1,3 +1,4 @@
+import type { Signal } from "@preact/signals";
 import type {
 	BulbroAttackedEvent,
 	BulbroReceivedHitEvent,
@@ -6,9 +7,9 @@ import type {
 	GameEvent,
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
-import { audioEngine } from "./AudioEngine";
+import type { WaveState } from "@/waveState";
 import { fromWeaponState } from "@/weapon";
-import { waveState } from "@/waveState";
+import { audioEngine } from "./AudioEngine";
 
 /**
  * Audio Controller - Event-based audio playback
@@ -17,6 +18,15 @@ import { waveState } from "@/waveState";
  * Maps weapon/attack types to specific sound effects.
  */
 class AudioController {
+	#waveStateSignal: Signal<WaveState | null>;
+
+	constructor(
+		waveStateSignal: Signal<WaveState | null>,
+	) {
+		this.#waveStateSignal =
+			waveStateSignal;
+	}
+
 	/**
 	 * Process an array of game events and play corresponding sound effects
 	 */
@@ -109,11 +119,19 @@ class AudioController {
 
 		// Get the weapon definition from state
 		const state =
-			waveState.value;
+			this
+				.#waveStateSignal
+				.value;
+
+		if (
+			!state
+		)
+			return;
+
 		const player =
 			state.players.find(
 				(
-					p,
+					p: any,
 				) =>
 					p.id ===
 					event.bulbroId,
@@ -127,7 +145,7 @@ class AudioController {
 		const weaponState =
 			player.weapons.find(
 				(
-					w,
+					w: any,
 				) =>
 					w.id ===
 					weaponId,
@@ -164,11 +182,19 @@ class AudioController {
 
 		// Get the weapon definition from state
 		const state =
-			waveState.value;
+			this
+				.#waveStateSignal
+				.value;
+
+		if (
+			!state
+		)
+			return;
+
 		const enemy =
 			state.enemies.find(
 				(
-					e,
+					e: any,
 				) =>
 					e.id ===
 					event.enemyId,
@@ -182,7 +208,7 @@ class AudioController {
 		const weaponState =
 			enemy.weapons.find(
 				(
-					w,
+					w: any,
 				) =>
 					w.id ===
 					weaponId,
@@ -292,6 +318,7 @@ class AudioController {
 	}
 }
 
-// Singleton instance
-export const audioController =
-	new AudioController();
+// Export the class to be instantiated where waveState is available
+export {
+	AudioController,
+};

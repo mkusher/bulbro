@@ -6,6 +6,7 @@ import type {
 import type { EnemyState } from "./enemy/EnemyState";
 import {
 	addition,
+	type Direction,
 	direction,
 	distance,
 	type Position,
@@ -19,6 +20,7 @@ import {
 	type WaveState,
 	type WeaponState,
 } from "./waveState";
+import { getWeaponSize } from "./weapon/sprites/WeaponSprite";
 
 export const minWeaponRange = 25;
 
@@ -188,29 +190,57 @@ export const shouldSpawnEnemy =
 			1
 		);
 	};
-/** Determines if a weapon is ready to shoot.
- * Calculates elapsed time since last shot, divided by reload time, scaled by attack speed.
- * Returns true if the weapon is ready to fire (fraction >= 1).
+/**
+ * Calculates the attack cooldown in milliseconds.
+ * @param weaponTime - base time between attacks in seconds (from weapon.statsBonus.attackSpeed)
+ * @param entityAttackSpeed - percentage improvement from entity stats (0 = no improvement, 50 = 50% faster)
+ * @returns cooldown in milliseconds, minimum 100ms
+ */
+export function getAttackCooldown(
+	weaponTime: number,
+	entityAttackSpeed: number,
+): number {
+	const improvement =
+		Math.min(
+			entityAttackSpeed,
+			90,
+		);
+	const cooldownMs =
+		weaponTime *
+		1000 *
+		(1 -
+			improvement /
+				100);
+	return Math.max(
+		100,
+		cooldownMs,
+	);
+}
+
+/**
+ * Determines if a weapon is ready to shoot.
+ * @param lastStrikedAt - timestamp of last attack
+ * @param weaponTime - base time between attacks in seconds (from weapon)
+ * @param entityAttackSpeed - percentage improvement from entity stats
+ * @param now - current time
  */
 export function isWeaponReadyToShoot(
 	lastStrikedAt: number,
-	reloadTime: number,
-	attackSpeed: number,
+	weaponTime: number,
+	entityAttackSpeed: number,
 	now: NowTime,
 ): boolean {
 	const elapsed =
 		now -
 		lastStrikedAt;
-	const chanceForReloaded =
-		elapsed /
-		reloadTime /
-		1000;
+	const cooldown =
+		getAttackCooldown(
+			weaponTime,
+			entityAttackSpeed,
+		);
 	return (
-		chanceForReloaded +
-			(chanceForReloaded *
-				attackSpeed) /
-				100 >=
-		1
+		elapsed >=
+		cooldown
 	);
 }
 
@@ -336,25 +366,61 @@ export function shoot(
 ): ShotState {
 	const id =
 		uuidv4();
-	const weaponPosition =
-		calculateWeaponPosition(
+	const weaponIndex =
+		player.weapons.findIndex(
+			(
+				w,
+			) =>
+				w.id ===
+				weapon.id,
+		);
+	// Use world offset that accounts for facing direction
+	const facingDirection =
+		player.lastDirection ?? {
+			x: 1,
+			y: 0,
+		};
+
+	// Calculate weapon visual center in world (including aiming influence).
+	// This matches where the weapon sprite actually renders.
+	const weaponVisualOffset =
+		calculateWeaponVisualWorldOffset(
 			weapon,
-			player.weapons.findIndex(
-				(
-					w,
-				) =>
-					w.id ===
-					weapon.id,
-			)!,
+			weaponIndex,
 			player
 				.weapons
 				.length,
+			facingDirection,
+		);
+	const weaponVisualPosition =
+		addition(
+			player.position,
+			weaponVisualOffset,
+		);
+	const shotDirection =
+		direction(
+			weaponVisualPosition,
+			targetPosition,
+		);
+
+	// Calculate shot start position at the weapon's end (barrel tip)
+	// Use weapon width (length along aim direction) / 2 from visual center
+	const weaponSize =
+		getWeaponSize(
+			weapon.type,
+		);
+	const barrelTipOffset =
+		calculateBarrelTipOffset(
+			weaponVisualOffset,
+			shotDirection,
+			weaponSize,
 		);
 	const currentPosition =
 		addition(
 			player.position,
-			weaponPosition,
+			barrelTipOffset,
 		);
+
 	const playerDamage =
 		player
 			.stats
@@ -407,6 +473,8 @@ export function shoot(
 			speed:
 				weapon.shotSpeed,
 			knockback,
+			weaponType:
+				weapon.type,
 		},
 	);
 }
@@ -448,13 +516,25 @@ export const getHpRegenerationPerSecond =
 export const knockbackSpeed = 25;
 export const knockbackTimeout = 200;
 
-export function calculateWeaponPosition(
-	weapon: WeaponState,
+// Visual offset applied to weapons container relative to bulbro sprite center
+// This must match the offset in WeaponsSprite.appendTo()
+export const weaponContainerOffset =
+	{
+		x: 12,
+		y: 16,
+	};
+
+// Shared constants for weapon positioning
+const weaponOrbitRadius = 32;
+const aimingInfluence = 0.3;
+
+/**
+ * Calculates the base orbital position for a weapon around the character.
+ */
+function getWeaponOrbitalPosition(
 	index: number,
 	totalWeapons: number,
 ) {
-	// Calculate position around the bulbro character
-	const radius = 28; // Distance from center
 	const angleStep =
 		(2 *
 			Math.PI) /
@@ -466,39 +546,168 @@ export function calculateWeaponPosition(
 		angleStep *
 		index;
 
-	// Base position around the character
-	const baseX =
-		Math.cos(
-			angle,
-		) *
-		radius;
-	const baseY =
-		Math.sin(
-			angle,
-		) *
-		radius;
+	return {
+		x:
+			Math.cos(
+				angle,
+			) *
+			weaponOrbitRadius,
+		y:
+			Math.sin(
+				angle,
+			) *
+			weaponOrbitRadius,
+	};
+}
 
-	// Apply aiming direction offset
-	const aimingInfluence = 0.3; // How much the aiming direction affects position
+/**
+ * Calculates weapon's position relative to the weapons container.
+ * Used by sprites for visual positioning within the container.
+ * Includes aiming influence offset for visual feedback.
+ */
+export function calculateWeaponPosition(
+	weapon: WeaponState,
+	index: number,
+	totalWeapons: number,
+) {
+	const base =
+		getWeaponOrbitalPosition(
+			index,
+			totalWeapons,
+		);
+
+	// Apply aiming direction offset for visual feedback
 	const aimingX =
 		weapon
 			.aimingDirection
 			.x *
 		aimingInfluence *
-		radius;
+		weaponOrbitRadius;
 	const aimingY =
 		weapon
 			.aimingDirection
 			.y *
 		aimingInfluence *
-		radius;
+		weaponOrbitRadius;
 
 	return {
 		x:
-			baseX +
+			base.x +
 			aimingX,
 		y:
-			baseY +
+			base.y +
 			aimingY,
+	};
+}
+
+/**
+ * Calculates weapon's world position offset relative to bulbro's position.
+ * Used for spawning bullets and calculating aim direction.
+ * Accounts for the weapons container offset and the bulbro's facing direction.
+ */
+export function calculateWeaponWorldOffset(
+	index: number,
+	totalWeapons: number,
+	facingDirection: Direction,
+) {
+	const base =
+		getWeaponOrbitalPosition(
+			index,
+			totalWeapons,
+		);
+
+	// When bulbro faces left (scale.x = -1), the visual x position is flipped
+	const directionMultiplier =
+		facingDirection.x <
+		0
+			? -1
+			: 1;
+
+	return {
+		x:
+			(base.x +
+				weaponContainerOffset.x) *
+			directionMultiplier,
+		y:
+			base.y +
+			weaponContainerOffset.y,
+	};
+}
+
+// Weapon sprite scaling factor (must match WeaponsSprite)
+const weaponSpriteScale = 0.125;
+
+/**
+ * Calculates weapon's visual world position offset relative to bulbro's position.
+ * Matches the rendering pipeline: orbital + aiming influence + container offset,
+ * with x flipped when facing left.
+ */
+export function calculateWeaponVisualWorldOffset(
+	weapon: WeaponState,
+	index: number,
+	totalWeapons: number,
+	facingDirection: Direction,
+) {
+	const localPos =
+		calculateWeaponPosition(
+			weapon,
+			index,
+			totalWeapons,
+		);
+
+	const directionMultiplier =
+		facingDirection.x <
+		0
+			? -1
+			: 1;
+
+	return {
+		x:
+			(localPos.x +
+				weaponContainerOffset.x) *
+			directionMultiplier,
+		y:
+			localPos.y +
+			weaponContainerOffset.y,
+	};
+}
+
+/**
+ * Calculates the barrel tip (weapon end) position in world coordinates.
+ * The shot spawns at the weapon's visual center + width/2 along the
+ * aiming direction, matching where the weapon sprite's right edge is.
+ */
+export function calculateBarrelTipOffset(
+	weaponVisualOffset: Position,
+	aimingDirection: Direction,
+	weaponSize: Size,
+) {
+	// If not aiming, just return weapon visual center
+	if (
+		aimingDirection.x ===
+			0 &&
+		aimingDirection.y ===
+			0
+	) {
+		return weaponVisualOffset;
+	}
+
+	// The weapon sprite is anchored at center (0.5, 0.5).
+	// The "barrel tip" is at width/2 from center along the aiming direction.
+	// Apply weapon sprite scaling to convert from texture pixels to world units.
+	const tipDistance =
+		(weaponSize.width /
+			2) *
+		weaponSpriteScale;
+
+	return {
+		x:
+			weaponVisualOffset.x +
+			aimingDirection.x *
+				tipDistance,
+		y:
+			weaponVisualOffset.y +
+			aimingDirection.y *
+				tipDistance,
 	};
 }

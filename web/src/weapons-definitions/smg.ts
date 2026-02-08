@@ -15,8 +15,8 @@ export const smg: Weapon =
 		shotSpeed: 2000,
 		statsBonus:
 			{
-				damage: 3,
-				attackSpeed: 0.17,
+				damage: 1,
+				attackSpeed: 0.2,
 				range: 400,
 			},
 	};

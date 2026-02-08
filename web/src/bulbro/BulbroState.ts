@@ -17,7 +17,7 @@ import type {
 } from "@/time";
 import {
 	calculateStats,
-	calculateWeaponPosition,
+	calculateWeaponWorldOffset,
 	findClosestEnemyInRange,
 	getHpRegenerationPerSecond,
 	isInRange,
@@ -316,20 +316,20 @@ export class BulbroState
 			(
 				weapon,
 			) => {
-				const reloadTime =
+				const weaponTime =
 					weapon
 						.statsBonus
 						.attackSpeed ??
-					0;
-				const attackSpeed =
+					1;
+				const entityAttackSpeed =
 					this
 						.stats
 						.attackSpeed;
 				if (
 					isWeaponReadyToShoot(
 						weapon.lastStrikedAt,
-						reloadTime,
-						attackSpeed,
+						weaponTime,
+						entityAttackSpeed,
 						now,
 					)
 				) {
@@ -439,13 +439,28 @@ export class BulbroState
 							}
 
 							const offset =
-								calculateWeaponPosition(
-									weapon,
+								calculateWeaponWorldOffset(
 									index,
 									this
 										.weapons
 										.length,
+									this
+										.lastDirection,
 								);
+							const position =
+								addition(
+									this
+										.position,
+									offset,
+								);
+							const aimingDirection =
+								direction(
+									position,
+									target.position,
+								);
+							// When facing left, the sprite container is flipped (scale.x = -1),
+							// so we need to flip the x component of the aiming direction
+							// for the weapon to aim correctly in the flipped coordinate space
 							const directionMultiplier =
 								this
 									.lastDirection
@@ -453,39 +468,17 @@ export class BulbroState
 								0
 									? -1
 									: 1;
-							const position =
-								{
-									x:
-										this
-											.position
-											.x +
-										offset.x *
-											directionMultiplier,
-									y:
-										this
-											.position
-											.y +
-										offset.y -
-										BULBRO_SIZE.height /
-											2,
-								};
-							const aimingDirection =
-								direction(
-									position,
-									target.position,
-								);
-							const reversed =
+							const adjustedDirection =
 								{
 									x:
 										aimingDirection.x *
 										directionMultiplier,
-									y:
-										-aimingDirection.y,
+									y: aimingDirection.y,
 								};
 							return {
 								...weapon,
 								aimingDirection:
-									reversed,
+									adjustedDirection,
 							};
 						},
 					),

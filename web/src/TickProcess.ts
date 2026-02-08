@@ -1,9 +1,13 @@
+import type { Signal } from "@preact/signals";
 import type { Logger } from "pino";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
+import { AudioController } from "./audio/AudioController";
+import { BULBRO_SIZE } from "./bulbro";
 import type { PlayerControl } from "./controls";
+import { ENEMY_SIZE } from "./enemy";
 import { EnemySpawner } from "./enemy/EnemySpawner";
 import type {
 	GameEvent,
@@ -17,17 +21,21 @@ import {
 import { updateStatsFromStateChange } from "./gameStats";
 import {
 	type Direction,
+	distance,
+	rectContainsPoint,
+	rectFromCenter,
+	rectIntersectsLine,
 	zeroPoint,
 } from "./geometry";
 import type { StageWithUi } from "./graphics/StageWithUi";
 import { logger as defaultLogger } from "./logger";
+import { movePosition } from "./physics";
 import type { WaveState } from "./waveState";
 import {
 	generateMaterialMovementEvents,
 	getTimeLeft,
 	updateState,
 } from "./waveState";
-import { audioController } from "./audio/AudioController";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
@@ -44,12 +52,14 @@ export class TickProcess {
 	#controls: PlayerControl[];
 	#eventQueue: GameEventQueue;
 	#enemySpawner: EnemySpawner;
+	#audioController: AudioController;
 
 	constructor(
 		logger: Logger,
 		scene: StageWithUi,
 		controls: PlayerControl[],
 		eventQueue: GameEventQueue,
+		waveStateSignal: Signal<WaveState | null>,
 		debug: boolean,
 	) {
 		this.#scene =
@@ -65,6 +75,10 @@ export class TickProcess {
 			controls;
 		this.#eventQueue =
 			eventQueue;
+		this.#audioController =
+			new AudioController(
+				waveStateSignal,
+			);
 		this.#enemySpawner =
 			new EnemySpawner(
 				this
@@ -116,7 +130,7 @@ export class TickProcess {
 			);
 
 		// Phase 3.5: Handle audio events
-		audioController.handleEvents(
+		this.#audioController.handleEvents(
 			events,
 		);
 
@@ -372,27 +386,161 @@ export class TickProcess {
 		deltaTime: DeltaTime,
 		baseEvents: GameEventInternal[],
 	): void {
-		state.shots.forEach(
-			(
-				shot,
-			) => {
-				// Keep the existing moveShot event structure
-				// The complex collision detection and hit processing is still handled in currentState.ts
-				const shotMoveEvent =
+		const {
+			mapSize,
+			shots,
+			enemies,
+			players,
+		} =
+			state;
+		const bounds =
+			{
+				x: 0,
+				y: 0,
+				width:
+					mapSize.width,
+				height:
+					mapSize.height,
+			};
+
+		for (const shot of shots) {
+			const prevPos =
+				shot.position;
+			const nextPos =
+				movePosition(
+					prevPos,
+					shot.speed,
+					shot.direction,
+					deltaTime,
+				);
+
+			// Check bounds and range
+			if (
+				!rectContainsPoint(
+					bounds,
+					nextPos,
+				) ||
+				distance(
+					shot.startPosition,
+					nextPos,
+				) >
+					shot.range
+			) {
+				// Generate shotExpired event for out of bounds or out of range shots
+				baseEvents.push(
 					{
-						type: "moveShot" as const,
+						type: "shotExpired",
 						shotId:
 							shot.id,
-						direction:
-							shot.direction,
-						chance:
-							Math.random(),
-					};
+						position:
+							nextPos,
+					},
+				);
+				continue;
+			}
+
+			const segment =
+				{
+					start:
+						prevPos,
+					end: nextPos,
+				};
+			let isHit = false;
+
+			// Player shots hitting enemies
+			if (
+				shot.shooterType ===
+				"player"
+			) {
+				for (const enemy of enemies) {
+					if (
+						enemy.killedAt
+					)
+						continue;
+					const enemyRect =
+						rectFromCenter(
+							enemy.position,
+							ENEMY_SIZE,
+						);
+					if (
+						rectIntersectsLine(
+							enemyRect,
+							segment,
+						)
+					) {
+						isHit = true;
+						const hitEvent =
+							enemy.beHit(
+								shot,
+								now,
+							);
+						baseEvents.push(
+							hitEvent,
+						);
+						break;
+					}
+				}
+			}
+
+			// Enemy shots hitting players
+			if (
+				shot.shooterType ===
+				"enemy"
+			) {
+				for (const player of players) {
+					if (
+						!player.isAlive()
+					)
+						continue;
+					const playerRect =
+						rectFromCenter(
+							player.position,
+							BULBRO_SIZE,
+						);
+					if (
+						rectIntersectsLine(
+							playerRect,
+							segment,
+						)
+					) {
+						isHit = true;
+						const hitEvent =
+							player.beHit(
+								shot.damage,
+								now,
+							);
+						baseEvents.push(
+							hitEvent,
+						);
+						break;
+					}
+				}
+			}
+
+			// If hit, generate shotExpired event to remove the shot
+			if (
+				isHit
+			) {
+				baseEvents.push(
+					{
+						type: "shotExpired",
+						shotId:
+							shot.id,
+						position:
+							nextPos,
+					},
+				);
+			} else {
+				// If no hit, generate shot move event
+				const shotMoveEvent =
+					shot.move(
+						nextPos,
+					);
 				baseEvents.push(
 					shotMoveEvent,
 				);
-			},
-		);
+			}
+		}
 	}
 
 	#addEventsToQueue(
@@ -401,10 +549,11 @@ export class TickProcess {
 		events.forEach(
 			(
 				event,
-			) =>
+			) => {
 				this.#eventQueue.addEvent(
 					event,
-				),
+				);
+			},
 		);
 	}
 

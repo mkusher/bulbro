@@ -135,6 +135,8 @@ export function createShotState(
 								y: 0,
 							},
 						knockback: 5,
+						weaponType:
+							"pistol",
 						...shot,
 					},
 				),

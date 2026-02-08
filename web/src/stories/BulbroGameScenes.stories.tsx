@@ -2,12 +2,12 @@ import {
 	bulbros,
 	findBulbroById,
 } from "../characters-definitions";
+import {
+	deltaTime,
+	nowTime,
+} from "../time";
 import type { WeaponType } from "../weapon";
 import { weapons } from "../weapons-definitions";
-import {
-	nowTime,
-	deltaTime,
-} from "../time";
 import { StorybookGameScene } from "./StorybookGameScene";
 import {
 	createBulbroState,
@@ -851,6 +851,285 @@ export const AllWeaponsShowcase =
 					{
 						control:
 							"boolean",
+					},
+			},
+	};
+
+// Single weapon selection
+export const WithSingleWeapon =
+	{
+		render:
+			(
+				args: any,
+			) => {
+				const selectedWeapons: WeaponType[] =
+					args.weapon
+						? [
+								args.weapon,
+							]
+						: [];
+				const initialState =
+					createState(
+						args.bulbroType,
+						selectedWeapons,
+					);
+
+				return (
+					<StorybookGameScene
+						initialState={
+							initialState
+						}
+						debug={
+							args.debug
+						}
+						{...args}
+					/>
+				);
+			},
+		args: {
+			bulbroType:
+				"well-rounded",
+			debug: false,
+			weapon:
+				"pistol" as WeaponType,
+		},
+		argTypes:
+			{
+				bulbroType:
+					{
+						options:
+							bulbros.map(
+								(
+									bulbro,
+								) =>
+									bulbro.id,
+							),
+						control:
+							{
+								type: "radio",
+							},
+					},
+				debug:
+					{
+						control:
+							"boolean",
+					},
+				weapon:
+					{
+						options:
+							weapons.map(
+								(
+									w,
+								) =>
+									w.id,
+							),
+						control:
+							{
+								type: "select",
+							},
+					},
+			},
+	};
+
+// Two weapons selection
+export const WithTwoWeapons =
+	{
+		render:
+			(
+				args: any,
+			) => {
+				const selectedWeapons: WeaponType[] =
+					[
+						args.weapon1,
+						args.weapon2,
+					].filter(
+						Boolean,
+					);
+				const initialState =
+					createState(
+						args.bulbroType,
+						selectedWeapons,
+					);
+
+				return (
+					<StorybookGameScene
+						initialState={
+							initialState
+						}
+						debug={
+							args.debug
+						}
+						{...args}
+					/>
+				);
+			},
+		args: {
+			bulbroType:
+				"well-rounded",
+			debug: false,
+			weapon1:
+				"pistol" as WeaponType,
+			weapon2:
+				"knife" as WeaponType,
+		},
+		argTypes:
+			{
+				bulbroType:
+					{
+						options:
+							bulbros.map(
+								(
+									bulbro,
+								) =>
+									bulbro.id,
+							),
+						control:
+							{
+								type: "radio",
+							},
+					},
+				debug:
+					{
+						control:
+							"boolean",
+					},
+				weapon1:
+					{
+						options:
+							weapons.map(
+								(
+									w,
+								) =>
+									w.id,
+							),
+						control:
+							{
+								type: "select",
+							},
+					},
+				weapon2:
+					{
+						options:
+							weapons.map(
+								(
+									w,
+								) =>
+									w.id,
+							),
+						control:
+							{
+								type: "select",
+							},
+					},
+			},
+	};
+
+// Three weapons selection
+export const WithThreeWeapons =
+	{
+		render:
+			(
+				args: any,
+			) => {
+				const selectedWeapons: WeaponType[] =
+					[
+						args.weapon1,
+						args.weapon2,
+						args.weapon3,
+					].filter(
+						Boolean,
+					);
+				const initialState =
+					createState(
+						args.bulbroType,
+						selectedWeapons,
+					);
+
+				return (
+					<StorybookGameScene
+						initialState={
+							initialState
+						}
+						debug={
+							args.debug
+						}
+						{...args}
+					/>
+				);
+			},
+		args: {
+			bulbroType:
+				"well-rounded",
+			debug: false,
+			weapon1:
+				"pistol" as WeaponType,
+			weapon2:
+				"knife" as WeaponType,
+			weapon3:
+				"sword" as WeaponType,
+		},
+		argTypes:
+			{
+				bulbroType:
+					{
+						options:
+							bulbros.map(
+								(
+									bulbro,
+								) =>
+									bulbro.id,
+							),
+						control:
+							{
+								type: "radio",
+							},
+					},
+				debug:
+					{
+						control:
+							"boolean",
+					},
+				weapon1:
+					{
+						options:
+							weapons.map(
+								(
+									w,
+								) =>
+									w.id,
+							),
+						control:
+							{
+								type: "select",
+							},
+					},
+				weapon2:
+					{
+						options:
+							weapons.map(
+								(
+									w,
+								) =>
+									w.id,
+							),
+						control:
+							{
+								type: "select",
+							},
+					},
+				weapon3:
+					{
+						options:
+							weapons.map(
+								(
+									w,
+								) =>
+									w.id,
+							),
+						control:
+							{
+								type: "select",
+							},
 					},
 			},
 	};

@@ -435,49 +435,50 @@ export function rectFromCenter(
 	};
 }
 
+/**
+ * Calculate rotation angle from a direction vector.
+ * Returns angle in radians for sprites that point UP at rotation=0.
+ *
+ * In screen coordinates:
+ * - Positive Y is DOWN
+ * - Positive X is RIGHT
+ * - Rotation is clockwise
+ *
+ * Results:
+ * - 0 = pointing up (negative Y)
+ * - PI/2 = pointing right (positive X)
+ * - PI = pointing down (positive Y)
+ * - 3PI/2 = pointing left (negative X)
+ */
 export function rotation(
 	direction: Direction,
 ) {
 	if (
+		direction.x ===
+			0 &&
 		direction.y ===
-		0
+			0
 	) {
-		if (
-			direction.x >
-			0
-		) {
-			return (
-				Math.PI /
-				2
-			);
-		}
-		if (
-			direction.x <
-			0
-		) {
-			return (
-				(3 /
-					2) *
-				Math.PI
-			);
-		}
-
 		return 0;
 	}
-	const r =
-		Math.atan(
-			direction.x /
-				direction.y,
+	// atan2(y, x) returns angle from positive X axis
+	// We want angle from negative Y axis (up) for sprites pointing up at 0°
+	// atan2(x, -y) gives us angle from negative Y axis
+	const angle =
+		Math.atan2(
+			direction.x,
+			-direction.y,
 		);
+	// Normalize to 0 to 2PI range
 	if (
-		direction.y <
+		angle <
 		0
 	) {
 		return (
-			r +
-			Math.PI
+			angle +
+			2 *
+				Math.PI
 		);
 	}
-
-	return r;
+	return angle;
 }

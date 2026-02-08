@@ -1,5 +1,11 @@
 import type { Signal } from "@preact/signals";
 import type { Logger } from "pino";
+import {
+	audioEngine,
+	bgmEnabled,
+	setFullBgmVolume,
+	setQuietBgmVolume,
+} from "./audio";
 import type { PlayerControl } from "./controls";
 import { DurationTracker } from "./DurationTracker";
 import {
@@ -12,12 +18,6 @@ import { StageWithUi } from "./graphics/StageWithUi";
 import { TickProcess } from "./TickProcess";
 import { deltaTime } from "./time";
 import { waveState } from "./waveState";
-import {
-	audioEngine,
-	bgmEnabled,
-	setFullBgmVolume,
-	setQuietBgmVolume,
-} from "./audio";
 
 export class WaveProcess {
 	#logger: Logger;
@@ -86,6 +86,7 @@ export class WaveProcess {
 					.#playerControls,
 				this
 					.#eventQueue,
+				waveState,
 				this
 					.#debug,
 			);
