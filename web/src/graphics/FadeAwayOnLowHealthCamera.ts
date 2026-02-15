@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { SimpleLightmapFilter } from "pixi-filters/simple-lightmap";
 import type {
 	Position,
 	Size,
@@ -10,17 +9,15 @@ import { Assets } from "@/Assets";
 
 /**
  * Decorator that darkens the screen when player health drops below 50%.
- * Uses SimpleLightmapFilter to linearly fade from alpha 1.0 at 50% hp to 0.5 at 0% hp.
+ * Uses a multiply-blended lightmap sprite overlay whose alpha transitions
+ * from 0.1 at 50% hp to 1.0 at 0% hp.
  */
 export class FadeAwayOnLowHealthCamera
 	implements
 		Camera
 {
-	#lightmap:
-		| PIXI.Texture
-		| undefined;
 	#camera: Camera;
-	#filter: SimpleLightmapFilter | null =
+	#overlay: PIXI.Sprite | null =
 		null;
 
 	constructor(
@@ -57,17 +54,33 @@ export class FadeAwayOnLowHealthCamera
 	async init(
 		size: Size,
 	) {
-		this.#lightmap =
-			new PIXI.Texture(
-				{
-					source:
-						await Assets.get(
-							"lightmap",
-						),
-				},
-			);
 		await this.#camera.init(
 			size,
+		);
+		const source =
+			await Assets.get(
+				"lightmap",
+			);
+		const texture =
+			new PIXI.Texture(
+				{
+					source,
+				},
+			);
+		this.#overlay =
+			new PIXI.Sprite(
+				texture,
+			);
+		this.#overlay.width =
+			size.width;
+		this.#overlay.height =
+			size.height;
+		this.#overlay.blendMode =
+			"multiply";
+		this.#overlay.alpha = 0;
+		this.ui.addChild(
+			this
+				.#overlay,
 		);
 	}
 
@@ -110,79 +123,29 @@ export class FadeAwayOnLowHealthCamera
 				: 0;
 
 		if (
-			ratio >
-			0.5
+			this
+				.#overlay
 		) {
-			this.#removeFilter();
-		} else {
-			const alpha =
-				0 +
-				(ratio /
-					0.5) *
-					1;
-			this.#applyFilter(
-				alpha,
-			);
+			if (
+				ratio >
+				0.5
+			) {
+				this.#overlay.alpha = 0;
+			} else {
+				// At 50% hp: alpha = 0.1, at 0% hp: alpha = 1.0
+				const t =
+					1 -
+					ratio /
+						0.5;
+				this.#overlay.alpha =
+					0.1 +
+					t *
+						0.9;
+			}
 		}
 
 		this.#camera.update(
 			state,
 		);
-	}
-
-	#applyFilter(
-		alpha: number,
-	) {
-		if (
-			!this
-				.#filter
-		) {
-			this.#filter =
-				new SimpleLightmapFilter(
-					{
-						lightMap:
-							this
-								.#lightmap!,
-						alpha,
-					},
-				);
-			this.stage.filters =
-				[
-					...(this
-						.stage
-						.filters ??
-						[]),
-					this
-						.#filter,
-				];
-			return;
-		}
-		this.#filter.alpha =
-			alpha;
-	}
-
-	#removeFilter() {
-		if (
-			!this
-				.#filter
-		) {
-			return;
-		}
-		this.stage.filters =
-			(
-				this
-					.stage
-					.filters ??
-				[]
-			).filter(
-				(
-					f,
-				) =>
-					f !==
-					this
-						.#filter,
-			);
-		this.#filter =
-			null;
 	}
 }
