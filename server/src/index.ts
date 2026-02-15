@@ -200,7 +200,6 @@ app.get(
 			onNotFound:
 				(
 					path,
-					c,
 				) => {
 					httpServerLogger.info(
 						{
@@ -208,11 +207,18 @@ app.get(
 						},
 						"Not found",
 					);
-					c.redirect(
-						"/",
-					);
 				},
 			precompressed: true,
+		},
+	),
+);
+
+app.get(
+	"*",
+	serveStatic(
+		{
+			root: "./public",
+			path: "/index.html",
 		},
 	),
 );

@@ -3,6 +3,10 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { defineConfig } from "vite";
 
+const backendHost =
+	process.env.BACKEND_HOST ??
+	"https://bulbro.lol";
+
 export default defineConfig(
 	{
 		plugins:
@@ -23,6 +27,25 @@ export default defineConfig(
 							__dirname,
 							"src",
 						),
+					},
+			},
+		server:
+			{
+				proxy:
+					{
+						"/api":
+							{
+								target: backendHost,
+								changeOrigin:
+									true,
+							},
+						"/ws":
+							{
+								target: backendHost,
+								changeOrigin:
+									true,
+								ws: true,
+							},
 					},
 			},
 		appType:

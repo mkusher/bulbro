@@ -1,3 +1,10 @@
 export const apiUrl =
-	"https://bulbro.lol/api/";
-export const wsUrl = `wss://bulbro.lol/ws`;
+	"/api/";
+const wsProtocol =
+	window
+		.location
+		.protocol ===
+	"https:"
+		? "wss"
+		: "ws";
+export const wsUrl = `${wsProtocol}://${window.location.host}/ws`;

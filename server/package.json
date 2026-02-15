@@ -9,6 +9,6 @@
 	"scripts": {
 		"format": "biome format --fix ./src",
 		"start": "bun --port 8080 src/index.ts",
-		"dev": "bun --watch src/index.ts"
+		"dev": "bun --port 4080 --watch src/index.ts"
 	}
 }
