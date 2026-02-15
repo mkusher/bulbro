@@ -15,7 +15,7 @@ import { logger as baseLogger } from "./logger";
 import { configureApi } from "./router";
 import { WebsocketConnection } from "./websocket-connection";
 import { websocketConnections } from "./websocket-connections";
-import { prometheus } from "@hono/prometheus"
+import { prometheus } from "@hono/prometheus";
 
 const {
 	upgradeWebSocket,
@@ -23,7 +23,11 @@ const {
 } =
 	createBunWebSocket<ServerWebSocket>();
 
-const { registerMetrics, printMetrics } = prometheus()
+const {
+	registerMetrics,
+	printMetrics,
+} =
+	prometheus();
 
 const httpServerLogger =
 	baseLogger.child(
@@ -37,7 +41,9 @@ const logger =
 
 const app =
 	new Hono()
-    .use(registerMetrics)
+		.use(
+			registerMetrics,
+		)
 		.use(
 			requestId(),
 		)
@@ -186,7 +192,10 @@ app.use(
 	),
 );
 
-app.get("/metrics", printMetrics)
+app.get(
+	"/metrics",
+	printMetrics,
+);
 
 app.get(
 	"*",

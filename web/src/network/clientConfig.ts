@@ -1,5 +1,10 @@
 export const apiUrl =
-	"/api/";
+	new URL(
+		"/api/",
+		window
+			.location
+			.href,
+	);
 const wsProtocol =
 	window
 		.location
@@ -7,4 +12,7 @@ const wsProtocol =
 	"https:"
 		? "wss"
 		: "ws";
-export const wsUrl = `${wsProtocol}://${window.location.host}/ws`;
+export const wsUrl =
+	new URL(
+		`${wsProtocol}://${window.location.host}/ws`,
+	);

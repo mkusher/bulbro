@@ -8,7 +8,9 @@ type NativeMessageHandler<
 	) => void;
 
 export class WebsocketConnection {
-	#url: string;
+	#url:
+		| string
+		| URL;
 	#logger: Logger;
 	#ws!: WebSocket;
 	#connectionEstablishmentResolvers!: Partial<
@@ -17,7 +19,9 @@ export class WebsocketConnection {
 	#listeners: Array<NativeMessageHandler> =
 		[];
 	constructor(
-		url: string,
+		url:
+			| URL
+			| string,
 		logger: Logger,
 	) {
 		this.#logger =
