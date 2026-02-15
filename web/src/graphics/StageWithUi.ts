@@ -1,5 +1,6 @@
 import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
+import type { GameEvent } from "@/game-events/GameEvents";
 import type {
 	DeltaTime,
 	NowTime,
@@ -12,6 +13,7 @@ import { InWaveStats } from "../bulbro/sprites/InWaveStats";
 import { canvasSize } from "../game-canvas";
 import type { WaveState } from "../waveState";
 import type { Camera } from "./Camera";
+import { HitIndicators } from "./HitIndicators";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
 import { WaveSprite } from "./WaveSprite";
@@ -31,6 +33,7 @@ export class StageWithUi {
 	#uiLayer: PIXI.RenderLayer;
 	#camera: Camera;
 	#logger: Logger;
+	#hitIndicators: HitIndicators;
 
 	constructor(
 		logger: Logger,
@@ -77,6 +80,15 @@ export class StageWithUi {
 			this
 				.#uiLayer,
 		);
+
+		this.#hitIndicators =
+			new HitIndicators();
+		this.#hitIndicators.appendTo(
+			this
+				.playingFieldContainer,
+			this
+				.#uiLayer,
+		);
 	}
 
 	/**
@@ -104,6 +116,7 @@ export class StageWithUi {
 				0,
 			),
 			state,
+			[],
 		);
 	}
 
@@ -114,6 +127,7 @@ export class StageWithUi {
 		deltaTime: DeltaTime,
 		now: NowTime,
 		state: WaveState,
+		events: GameEvent[],
 	): void {
 		// Update scene (players, enemies, shots, objects)
 		this.#scene.update(
@@ -137,6 +151,11 @@ export class StageWithUi {
 		);
 		this.#updatePlayerStats(
 			deltaTime,
+			state,
+		);
+		this.#hitIndicators.update(
+			deltaTime,
+			events,
 			state,
 		);
 	}

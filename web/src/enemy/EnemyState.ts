@@ -260,6 +260,8 @@ export class EnemyState
 				enemyId:
 					this
 						.id,
+				damage:
+					shot.damage,
 				position:
 					{
 						x: this

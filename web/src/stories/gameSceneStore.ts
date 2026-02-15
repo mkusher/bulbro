@@ -70,29 +70,6 @@ let playTimer: Timer | null =
 let config: GameSceneConfig | null =
 	null;
 
-const sceneWrapper =
-	{
-		totalTime: 0,
-		update:
-			(
-				dt: number,
-				now: number,
-				state: WaveState,
-			) => {
-				sceneWrapper.totalTime +=
-					dt;
-				scene?.update(
-					deltaTime(
-						dt,
-					),
-					nowTime(
-						now,
-					),
-					state,
-				);
-			},
-	} as any;
-
 // Ticker callback
 const tickerCallback =
 	(
@@ -110,11 +87,17 @@ const tickerCallback =
 			ticker.deltaMS;
 		const now =
 			performance.now();
+		const activeScene =
+			scene;
+		if (
+			!activeScene
+		)
+			return;
 
 		const tickProcess =
 			new TickProcess(
 				defaultLogger,
-				sceneWrapper,
+				activeScene,
 				[
 					controls,
 				],
@@ -360,6 +343,7 @@ export async function stop(): Promise<void> {
 				0,
 			),
 			nextState,
+			[],
 		);
 	}
 }
@@ -386,10 +370,16 @@ export function step(
 			60; // 60 FPS
 		const now =
 			Date.now();
+		const activeScene =
+			scene;
+		if (
+			!activeScene
+		)
+			return;
 		const tickProcess =
 			new TickProcess(
 				defaultLogger,
-				sceneWrapper,
+				activeScene,
 				[
 					controls,
 				],
@@ -483,6 +473,7 @@ export function updateConfig(
 					0,
 				),
 				newConfig.initialState,
+				[],
 			);
 		}
 	}

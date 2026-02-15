@@ -27,7 +27,6 @@ import {
 	rectIntersectsLine,
 	zeroPoint,
 } from "./geometry";
-import type { StageWithUi } from "./graphics/StageWithUi";
 import { logger as defaultLogger } from "./logger";
 import { movePosition } from "./physics";
 import type { WaveState } from "./waveState";
@@ -41,7 +40,7 @@ import {
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
  */
 export class TickProcess {
-	#scene: StageWithUi;
+	#scene: SceneWithUi;
 	#logger =
 		defaultLogger.child(
 			{
@@ -56,7 +55,7 @@ export class TickProcess {
 
 	constructor(
 		logger: Logger,
-		scene: StageWithUi,
+		scene: SceneWithUi,
 		controls: PlayerControl[],
 		eventQueue: GameEventQueue,
 		waveStateSignal: Signal<WaveState | null>,
@@ -145,6 +144,7 @@ export class TickProcess {
 			deltaTime,
 			now,
 			newState,
+			events,
 		);
 
 		return newState;
@@ -591,3 +591,13 @@ export class TickProcess {
 		};
 	}
 }
+
+type SceneWithUi =
+	{
+		update(
+			deltaTime: DeltaTime,
+			now: NowTime,
+			state: WaveState,
+			events: GameEvent[],
+		): void;
+	};

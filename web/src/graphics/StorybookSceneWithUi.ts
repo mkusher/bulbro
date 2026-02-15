@@ -1,5 +1,6 @@
 import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
+import type { GameEvent } from "@/game-events/GameEvents";
 import type {
 	DeltaTime,
 	NowTime,
@@ -16,6 +17,7 @@ import {
 import { CoordinateGridOverlay } from "../stories/CoordinateGridOverlay";
 import type { WaveState } from "../waveState";
 import type { Camera } from "./Camera";
+import { HitIndicators } from "./HitIndicators";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
 import { WaveSprite } from "./WaveSprite";
@@ -32,6 +34,8 @@ export class StorybookSceneWithUi {
 	#uiLayer: PIXI.RenderLayer;
 	#camera: Camera;
 	#logger: Logger;
+	#hitIndicators: HitIndicators;
+	#totalTime = 0;
 	#coordinateGrid: CoordinateGridOverlay | null =
 		null;
 
@@ -81,6 +85,15 @@ export class StorybookSceneWithUi {
 				.#uiLayer,
 		);
 
+		this.#hitIndicators =
+			new HitIndicators();
+		this.#hitIndicators.appendTo(
+			this
+				.playingFieldContainer,
+			this
+				.#uiLayer,
+		);
+
 		if (
 			showCoordinateGrid
 		) {
@@ -125,6 +138,7 @@ export class StorybookSceneWithUi {
 				0,
 			),
 			state,
+			[],
 		);
 	}
 
@@ -132,7 +146,10 @@ export class StorybookSceneWithUi {
 		deltaTime: DeltaTime,
 		now: NowTime,
 		state: WaveState,
+		events: GameEvent[],
 	): void {
+		this.#totalTime +=
+			deltaTime;
 		this.#scene.update(
 			deltaTime,
 			now,
@@ -153,6 +170,11 @@ export class StorybookSceneWithUi {
 		);
 		this.#updatePlayerStats(
 			deltaTime,
+			state,
+		);
+		this.#hitIndicators.update(
+			deltaTime,
+			events,
 			state,
 		);
 	}

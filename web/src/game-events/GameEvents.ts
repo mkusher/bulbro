@@ -90,6 +90,7 @@ export type BulbroDiedEvent =
 	{
 		type: "bulbroDied";
 		bulbroId: string;
+		damage: number;
 		position: {
 			x: number;
 			y: number;
@@ -134,6 +135,7 @@ export type EnemyDiedEvent =
 	{
 		type: "enemyDied";
 		enemyId: string;
+		damage: number;
 		position: {
 			x: number;
 			y: number;

@@ -531,6 +531,7 @@ export class BulbroState
 				bulbroId:
 					this
 						.id,
+				damage,
 				position:
 					{
 						x: this

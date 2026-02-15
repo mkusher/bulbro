@@ -340,6 +340,11 @@ describe("TickProcess", () => {
 			).toBe(
 				"enemy1",
 			);
+			expect(
+				hitEvent?.damage,
+			).toBe(
+				10,
+			);
 		});
 
 		it("should generate bulbroReceivedHit event when enemy shot hits player", () => {
@@ -426,6 +431,11 @@ describe("TickProcess", () => {
 				hitEvent?.bulbroId,
 			).toBe(
 				"player1",
+			);
+			expect(
+				hitEvent?.damage,
+			).toBe(
+				15,
 			);
 		});
 
