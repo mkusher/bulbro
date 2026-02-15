@@ -508,12 +508,42 @@ export const getHpRegenerationPerSecond =
 export const knockbackSpeed = 25;
 export const knockbackTimeout = 200;
 
-// Visual offset applied to weapons container relative to bulbro sprite center
-// This must match the offset in WeaponsSprite.appendTo()
+const bulbroBodySize =
+	{
+		width: 100,
+		height: 130,
+	};
+const bulbroCharacterScaling = 0.25;
+
+// Offset of the weapons container relative to bulbro origin.
+// Must match BulbaSprite weaponsContainer positioning.
+const weaponsContainerPosition =
+	{
+		x:
+			-(
+				bulbroBodySize.width *
+				bulbroCharacterScaling
+			) /
+			2,
+		y:
+			-(
+				bulbroBodySize.height *
+				bulbroCharacterScaling
+			) -
+			5,
+	};
+
+// Orbit center offset inside the weapons container (body center).
 export const weaponContainerOffset =
 	{
-		x: 12,
-		y: 16,
+		x:
+			(bulbroBodySize.width *
+				bulbroCharacterScaling) /
+			2,
+		y:
+			(bulbroBodySize.height *
+				bulbroCharacterScaling) /
+			2,
 	};
 
 // Shared constants for weapon positioning
@@ -553,8 +583,8 @@ function getWeaponOrbitalPosition(
 }
 
 /**
- * Calculates weapon's position relative to the weapons container.
- * Used by sprites for visual positioning within the container.
+ * Calculates weapon's position relative to the bulbro sprite center.
+ * Used by sprites for visual positioning and includes container offset.
  * Includes aiming influence offset for visual feedback.
  */
 export function calculateWeaponPosition(
@@ -585,10 +615,12 @@ export function calculateWeaponPosition(
 	return {
 		x:
 			base.x +
-			aimingX,
+			aimingX +
+			weaponContainerOffset.x,
 		y:
 			base.y +
-			aimingY,
+			aimingY +
+			weaponContainerOffset.y,
 	};
 }
 
@@ -618,11 +650,13 @@ export function calculateWeaponWorldOffset(
 	return {
 		x:
 			(base.x +
-				weaponContainerOffset.x) *
+				weaponContainerOffset.x +
+				weaponsContainerPosition.x) *
 			directionMultiplier,
 		y:
 			base.y +
-			weaponContainerOffset.y,
+			weaponContainerOffset.y +
+			weaponsContainerPosition.y,
 	};
 }
 
@@ -656,11 +690,11 @@ export function calculateWeaponVisualWorldOffset(
 	return {
 		x:
 			(localPos.x +
-				weaponContainerOffset.x) *
+				weaponsContainerPosition.x) *
 			directionMultiplier,
 		y:
 			localPos.y +
-			weaponContainerOffset.y,
+			weaponsContainerPosition.y,
 	};
 }
 
@@ -674,7 +708,6 @@ export function calculateBarrelTipOffset(
 	aimingDirection: Direction,
 	weaponSize: Size,
 ) {
-	return weaponVisualOffset;
 	// If not aiming, just return weapon visual center
 	if (
 		aimingDirection.x ===

@@ -67,7 +67,10 @@ export const toWeaponState =
 			w.shotSpeed,
 		type: w.id,
 		aimingDirection:
-			zeroPoint(),
+			{
+				x: 1,
+				y: 0,
+			},
 	});
 
 export const fromWeaponState =
