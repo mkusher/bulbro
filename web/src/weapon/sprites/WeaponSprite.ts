@@ -10,6 +10,7 @@ import {
 	type Size,
 	zeroPoint,
 } from "@/geometry";
+import { DebugSprite } from "@/graphics/DebugSprite";
 import type { WeaponType } from "@/weapon";
 
 type TextureConfig =
@@ -193,23 +194,61 @@ export class WeaponSprite {
 		new PIXI.Container();
 	#sprite =
 		new PIXI.Sprite();
+	#debugSprite?: DebugSprite;
 	#weaponType: WeaponType;
 	#scaling: Scaling;
 
 	constructor(
 		weaponType: WeaponType,
 		scaling: Scaling = 0.5,
+		debug: boolean = false,
 	) {
 		this.#scaling =
 			scaling;
 		this.#weaponType =
 			weaponType;
+		if (
+			debug
+		) {
+			const weaponConfig =
+				weapons[
+					weaponType
+				];
+			this.#debugSprite =
+				new DebugSprite(
+					{
+						width:
+							weaponConfig
+								.size
+								.width *
+							scaling,
+						height:
+							weaponConfig
+								.size
+								.height *
+							scaling,
+					},
+					{
+						anchor:
+							"center",
+					},
+				);
+		}
 
 		// Build hierarchy: positionContainer → rotationContainer → sprite
 		this.#rotationContainer.addChild(
 			this
 				.#sprite,
 		);
+		if (
+			this
+				.#debugSprite
+		) {
+			this.#debugSprite.appendTo(
+				this
+					.#rotationContainer,
+			);
+		}
 		this.#positionContainer.addChild(
 			this
 				.#rotationContainer,

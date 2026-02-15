@@ -435,6 +435,8 @@ export abstract class BaseScene<
 					const sprite =
 						new ShotSprite(
 							shot,
+							this
+								.#debug,
 						);
 					sprite.appendTo(
 						this

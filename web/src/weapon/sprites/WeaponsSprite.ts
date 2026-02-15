@@ -1,9 +1,6 @@
 import * as PIXI from "pixi.js";
 import type { BulbroState } from "@/bulbro/BulbroState";
-import {
-	calculateWeaponPosition,
-	weaponContainerOffset,
-} from "@/game-formulas";
+import { calculateWeaponPosition } from "@/game-formulas";
 import type { WeaponState } from "../WeaponState";
 import { WeaponSprite } from "./WeaponSprite";
 
@@ -16,9 +13,13 @@ export class WeaponsSprite {
 			string,
 			WeaponSprite
 		>();
+	#debug: boolean;
 
-	constructor() {
-		// Constructor is intentionally empty
+	constructor(
+		debug: boolean = false,
+	) {
+		this.#debug =
+			debug;
 	}
 
 	appendTo(
@@ -28,11 +29,6 @@ export class WeaponsSprite {
 			this
 				.#container,
 		);
-		// Use shared offset constant so visual matches game logic
-		this.#container.position.y =
-			weaponContainerOffset.y;
-		this.#container.position.x =
-			weaponContainerOffset.x;
 	}
 
 	async update(
@@ -88,6 +84,8 @@ export class WeaponsSprite {
 						new WeaponSprite(
 							weapon.type,
 							scaling,
+							this
+								.#debug,
 						);
 					weaponSprite.init();
 					weaponSprite.appendTo(

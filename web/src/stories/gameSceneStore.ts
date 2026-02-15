@@ -6,7 +6,8 @@ import {
 	classicMapSize,
 } from "@/game-canvas";
 import { InMemoryGameEventQueue } from "@/game-events/GameEventQueue";
-import { AutoCenterOnPlayerCamera } from "@/graphics/AutoCenterOnPlayerCamera";
+import type { Camera } from "@/graphics/Camera";
+import { createGameCamera } from "@/graphics/GameCamera";
 import { StorybookSceneWithUi } from "@/graphics/StorybookSceneWithUi";
 import { logger as defaultLogger } from "@/logger";
 import { TickProcess } from "@/TickProcess";
@@ -56,7 +57,7 @@ export const isInitialized =
 	);
 
 // Internal state
-let camera: AutoCenterOnPlayerCamera | null =
+let camera: Camera | null =
 	null;
 let scene: StorybookSceneWithUi | null =
 	null;
@@ -177,7 +178,7 @@ export async function initialize(
 			};
 
 		camera =
-			new AutoCenterOnPlayerCamera();
+			createGameCamera();
 		await camera.init(
 			{
 				width,
@@ -314,9 +315,22 @@ export async function playPause(): Promise<void> {
 export async function stop(): Promise<void> {
 	sceneState.value =
 		"stopped";
+	const nextState =
+		config?.initialState
+			? {
+					...config.initialState,
+					round:
+						{
+							...config
+								.initialState
+								.round,
+							startedAt:
+								Date.now(),
+						},
+				}
+			: null;
 	gameState.value =
-		config?.initialState ||
-		null;
+		nextState;
 	tickCount.value = 0;
 	elapsedTime.value = 0;
 
@@ -336,7 +350,7 @@ export async function stop(): Promise<void> {
 	// Update scene with initial state
 	if (
 		scene &&
-		gameState.value
+		nextState
 	) {
 		scene.update(
 			deltaTime(
@@ -345,7 +359,7 @@ export async function stop(): Promise<void> {
 			nowTime(
 				0,
 			),
-			gameState.value,
+			nextState,
 		);
 	}
 }

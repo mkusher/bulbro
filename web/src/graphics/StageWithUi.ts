@@ -11,7 +11,7 @@ import {
 import { InWaveStats } from "../bulbro/sprites/InWaveStats";
 import { canvasSize } from "../game-canvas";
 import type { WaveState } from "../waveState";
-import type { AutoCenterOnPlayerCamera } from "./AutoCenterOnPlayerCamera";
+import type { Camera } from "./Camera";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
 import { WaveSprite } from "./WaveSprite";
@@ -29,13 +29,13 @@ export class StageWithUi {
 	> =
 		new Map();
 	#uiLayer: PIXI.RenderLayer;
-	#camera: AutoCenterOnPlayerCamera;
+	#camera: Camera;
 	#logger: Logger;
 
 	constructor(
 		logger: Logger,
 		debug: boolean,
-		camera: AutoCenterOnPlayerCamera,
+		camera: Camera,
 		scale: number,
 	) {
 		this.#logger =

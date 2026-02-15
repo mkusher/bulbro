@@ -1,20 +1,18 @@
 import type { Logger } from "pino";
-import { zeroPoint } from "@/geometry";
 import type { DeltaTime } from "@/time";
 import type { WaveState } from "../waveState";
-import type { AutoCenterOnPlayerCamera } from "./AutoCenterOnPlayerCamera";
 import { BaseScene } from "./BaseScene";
+import type { Camera } from "./Camera";
 
 /**
  * Core scene that handles display of players, enemies, and game objects.
  * Does not include UI elements like timers, health bars, etc.
- * Uses AutoCenterOnPlayerCamera for automatic camera following.
  */
-export class Scene extends BaseScene<AutoCenterOnPlayerCamera> {
+export class Scene extends BaseScene<Camera> {
 	constructor(
 		logger: Logger,
 		debug: boolean,
-		camera: AutoCenterOnPlayerCamera,
+		camera: Camera,
 		scale: number,
 	) {
 		super(
@@ -29,9 +27,6 @@ export class Scene extends BaseScene<AutoCenterOnPlayerCamera> {
 	 * Initialize playing field immediately in constructor for production scenes.
 	 */
 	protected async initializePlayingField(): Promise<void> {
-		// For production scenes, initialize playing field synchronously in constructor
-		// This is overridden because the base class does async init in init() method
-		// but Scene.ts originally did it in constructor
 		this.playingFieldTile.init(
 			this
 				.camera
@@ -41,22 +36,16 @@ export class Scene extends BaseScene<AutoCenterOnPlayerCamera> {
 		);
 	}
 
-	/**
-	 * Updates camera to follow the first player.
-	 */
 	protected updateCamera(
 		deltaTime: DeltaTime,
 		state: WaveState,
 	): void {
 		this.camera.update(
-			state
-				.players[0]
-				?.position ??
-				zeroPoint(),
+			state,
 		);
 	}
 
-	get camera(): AutoCenterOnPlayerCamera {
+	get camera(): Camera {
 		return super
 			.camera;
 	}

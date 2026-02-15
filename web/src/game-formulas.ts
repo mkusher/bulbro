@@ -397,11 +397,6 @@ export function shoot(
 			player.position,
 			weaponVisualOffset,
 		);
-	const shotDirection =
-		direction(
-			weaponVisualPosition,
-			targetPosition,
-		);
 
 	// Calculate shot start position at the weapon's end (barrel tip)
 	// Use weapon width (length along aim direction) / 2 from visual center
@@ -409,18 +404,18 @@ export function shoot(
 		getWeaponSize(
 			weapon.type,
 		);
-	const barrelTipOffset =
+	const barrelPosition =
 		calculateBarrelTipOffset(
-			weaponVisualOffset,
-			shotDirection,
+			weaponVisualPosition,
+			weapon.aimingDirection,
 			weaponSize,
 		);
-	const currentPosition =
-		addition(
-			player.position,
-			barrelTipOffset,
-		);
 
+	const shotDirection =
+		direction(
+			barrelPosition,
+			targetPosition,
+		);
 	const playerDamage =
 		player
 			.stats
@@ -462,14 +457,11 @@ export function shoot(
 				playerRange +
 				weaponRange,
 			position:
-				currentPosition,
+				barrelPosition,
 			startPosition:
-				currentPosition,
+				barrelPosition,
 			direction:
-				direction(
-					currentPosition,
-					targetPosition,
-				),
+				shotDirection,
 			speed:
 				weapon.shotSpeed,
 			knockback,
@@ -682,6 +674,7 @@ export function calculateBarrelTipOffset(
 	aimingDirection: Direction,
 	weaponSize: Size,
 ) {
+	return weaponVisualOffset;
 	// If not aiming, just return weapon visual center
 	if (
 		aimingDirection.x ===

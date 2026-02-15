@@ -11,9 +11,11 @@ export class ShotSprite extends GameSprite {
 		| EnemyProjectileSprite
 		| BulletSprite
 		| null;
+	#debugCenter?: PIXI.Graphics;
 
 	constructor(
 		shot: ShotState,
+		debug: boolean = false,
 	) {
 		super(
 			{
@@ -25,6 +27,24 @@ export class ShotSprite extends GameSprite {
 					},
 			},
 		);
+		if (
+			debug
+		) {
+			this.#debugCenter =
+				new PIXI.Graphics()
+					.circle(
+						0,
+						0,
+						8,
+					)
+					.fill(
+						0xffffff,
+					);
+			this.addChild(
+				this
+					.#debugCenter,
+			);
+		}
 		// Don't create visible sprite for unarmed weapons
 		if (
 			isUnarmedWeapon(

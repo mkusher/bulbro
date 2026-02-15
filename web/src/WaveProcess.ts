@@ -13,7 +13,8 @@ import {
 	scale,
 } from "./game-canvas";
 import { InMemoryGameEventQueue } from "./game-events/GameEventQueue";
-import { AutoCenterOnPlayerCamera } from "./graphics/AutoCenterOnPlayerCamera";
+import type { Camera } from "./graphics/Camera";
+import { createGameCamera } from "./graphics/GameCamera";
 import { StageWithUi } from "./graphics/StageWithUi";
 import { TickProcess } from "./TickProcess";
 import { deltaTime } from "./time";
@@ -30,7 +31,7 @@ export class WaveProcess {
 		>();
 	#debug: boolean;
 	#playerControls: PlayerControl[];
-	#camera: AutoCenterOnPlayerCamera;
+	#camera: Camera;
 	#eventQueue: InMemoryGameEventQueue;
 	#tickProcess: TickProcess;
 	#durationTracker =
@@ -61,7 +62,7 @@ export class WaveProcess {
 		this.#gameCanvasSignal =
 			gameCanvasSignal;
 		this.#camera =
-			new AutoCenterOnPlayerCamera();
+			createGameCamera();
 		this.#scene =
 			new StageWithUi(
 				this

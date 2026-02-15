@@ -6,8 +6,8 @@ import type {
 } from "@/geometry";
 import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { CharacterSprites } from "@/graphics/CharacterSprite";
+import { DebugSprite } from "@/graphics/DebugSprite";
 import { GameSprite } from "@/graphics/GameSprite";
-import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import type {
 	DeltaTime,
@@ -46,10 +46,9 @@ const fullSize =
  */
 export class BulbaSprite extends GameSprite {
 	#sprite!: PIXI.Container;
-	#debugSprite?: RectangleGfx;
+	#debugSprite?: DebugSprite;
 	#characterScaling = 0.25;
-	#weaponsSprite =
-		new WeaponsSprite();
+	#weaponsSprite: WeaponsSprite;
 	#movement?: AnimatedSprite<PIXI.Container>;
 	#idle?: AnimatedSprite<PIXI.Container>;
 	#whenHit?: AnimatedSprite<PIXI.Container>;
@@ -73,14 +72,22 @@ export class BulbaSprite extends GameSprite {
 		);
 		this.#faceType =
 			faceType;
+		this.#weaponsSprite =
+			new WeaponsSprite(
+				Boolean(
+					debug,
+				),
+			);
 		if (
 			debug
 		) {
 			this.#debugSprite =
-				new RectangleGfx(
+				new DebugSprite(
 					fullSize,
-					0x0000ff,
-					0.9,
+					{
+						anchor:
+							"bottom-center",
+					},
 				);
 		}
 	}
@@ -199,14 +206,7 @@ export class BulbaSprite extends GameSprite {
 
 			this.#debugSprite?.update(
 				rectangle,
-				0xff00ff,
-				0.9,
 			);
-			this.#debugSprite.position.y =
-				-rectangle.height;
-			this.#debugSprite.position.x =
-				-rectangle.width /
-				2;
 		}
 		this.#weaponsSprite.update(
 			player,

@@ -8,8 +8,8 @@ import type {
 	Size,
 } from "@/geometry";
 import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
+import { DebugSprite } from "@/graphics/DebugSprite";
 import { GameSprite } from "@/graphics/GameSprite";
-import { Rectangle as RectangleGfx } from "@/graphics/Rectangle";
 import { RotatingDisapperanceAnimation } from "@/graphics/RotatingDisappearanceAnimation";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import type {
@@ -33,7 +33,7 @@ type PhysicalRectangle =
  */
 export class BulbaEnemySprite extends GameSprite {
 	#sprite!: PIXI.Container;
-	#debugSprite?: RectangleGfx;
+	#debugSprite?: DebugSprite;
 	#movement?: AnimatedSprite<PIXI.Container>;
 	#idle?: AnimatedSprite<PIXI.Container>;
 	#dead?: AnimatedSprite<PIXI.Container>;
@@ -69,10 +69,12 @@ export class BulbaEnemySprite extends GameSprite {
 			debug
 		) {
 			this.#debugSprite =
-				new RectangleGfx(
+				new DebugSprite(
 					size,
-					0xff00ff,
-					0.9,
+					{
+						anchor:
+							"bottom-center",
+					},
 				);
 		}
 		this.init();
@@ -225,14 +227,7 @@ export class BulbaEnemySprite extends GameSprite {
 		) {
 			this.#debugSprite?.update(
 				rectangle,
-				0xff00ff,
-				0.9,
 			);
-			this.#debugSprite.position.y =
-				-rectangle.height;
-			this.#debugSprite.position.x =
-				-rectangle.width /
-				2;
 		}
 
 		this.#enemySprites

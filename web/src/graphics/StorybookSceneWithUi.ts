@@ -15,7 +15,7 @@ import {
 } from "../game-canvas";
 import { CoordinateGridOverlay } from "../stories/CoordinateGridOverlay";
 import type { WaveState } from "../waveState";
-import type { AutoCenterOnPlayerCamera } from "./AutoCenterOnPlayerCamera";
+import type { Camera } from "./Camera";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
 import { WaveSprite } from "./WaveSprite";
@@ -30,7 +30,7 @@ export class StorybookSceneWithUi {
 	> =
 		new Map();
 	#uiLayer: PIXI.RenderLayer;
-	#camera: AutoCenterOnPlayerCamera;
+	#camera: Camera;
 	#logger: Logger;
 	#coordinateGrid: CoordinateGridOverlay | null =
 		null;
@@ -38,7 +38,7 @@ export class StorybookSceneWithUi {
 	constructor(
 		logger: Logger,
 		debug: boolean,
-		camera: AutoCenterOnPlayerCamera,
+		camera: Camera,
 		scale: number,
 		showCoordinateGrid: boolean = false,
 	) {

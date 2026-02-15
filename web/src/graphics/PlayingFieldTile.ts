@@ -5,9 +5,68 @@ import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
 import type { WaveState } from "../waveState";
 
 export const FIELD_BACKGROUND_COLOR = 0x475b46;
-const GRASS_DARKER = 0x3d4a37;
-const GRASS_LIGHTER = 0x5a6e52;
-const DITHER_PATTERN_SIZE = 8;
+
+const NOISE_TILE_SIZE = 128;
+
+function createNoiseTexture(): PIXI.Texture {
+	const canvas =
+		document.createElement(
+			"canvas",
+		);
+	canvas.width =
+		NOISE_TILE_SIZE;
+	canvas.height =
+		NOISE_TILE_SIZE;
+	const ctx =
+		canvas.getContext(
+			"2d",
+		)!;
+	const imageData =
+		ctx.createImageData(
+			NOISE_TILE_SIZE,
+			NOISE_TILE_SIZE,
+		);
+	const data =
+		imageData.data;
+	for (
+		let i = 0;
+		i <
+		data.length;
+		i += 4
+	) {
+		const noise =
+			Math.random() *
+			255 *
+			0.15;
+		data[
+			i
+		] =
+			noise;
+		data[
+			i +
+				1
+		] =
+			noise;
+		data[
+			i +
+				2
+		] =
+			noise;
+		data[
+			i +
+				3
+		] =
+			255;
+	}
+	ctx.putImageData(
+		imageData,
+		0,
+		0,
+	);
+	return PIXI.Texture.from(
+		canvas,
+	);
+}
 
 /**
  * Handles display of players, enemies, and UI elements in the game scene.
@@ -33,56 +92,28 @@ export class PlayingFieldTile {
 				);
 		this.#container =
 			new PIXI.Container();
+
+		const noiseTexture =
+			createNoiseTexture();
+		const noiseOverlay =
+			new PIXI.TilingSprite(
+				{
+					texture:
+						noiseTexture,
+					width:
+						size.width,
+					height:
+						size.height,
+				},
+			);
+		noiseOverlay.alpha = 0.25;
+
 		this.#container.addChild(
 			this
 				.#sprite,
 		);
-
-		// Add dithering pattern for grass variation
-		const ditherPattern =
-			new PIXI.Graphics();
-		for (
-			let x = 0;
-			x <
-			size.width;
-			x +=
-				DITHER_PATTERN_SIZE *
-				2
-		) {
-			for (
-				let y = 0;
-				y <
-				size.height;
-				y +=
-					DITHER_PATTERN_SIZE *
-					2
-			) {
-				ditherPattern
-					.rect(
-						x,
-						y,
-						DITHER_PATTERN_SIZE,
-						DITHER_PATTERN_SIZE,
-					)
-					.fill(
-						GRASS_DARKER,
-					);
-				ditherPattern
-					.rect(
-						x +
-							DITHER_PATTERN_SIZE,
-						y +
-							DITHER_PATTERN_SIZE,
-						DITHER_PATTERN_SIZE,
-						DITHER_PATTERN_SIZE,
-					)
-					.fill(
-						GRASS_LIGHTER,
-					);
-			}
-		}
 		this.#container.addChild(
-			ditherPattern,
+			noiseOverlay,
 		);
 
 		this.#backgroundPattern =

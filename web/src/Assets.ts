@@ -31,6 +31,10 @@ const assetDefinitions =
 			{
 				path: "/game-assets/all-enemies.png",
 			},
+		lightmap:
+			{
+				path: "/lightmap.png",
+			},
 	} as const;
 
 export type AssetName =
