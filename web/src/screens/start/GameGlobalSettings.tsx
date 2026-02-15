@@ -1,4 +1,9 @@
 import { AudioSettings } from "@/audio/AudioSettings";
+import {
+	exitFullscreen,
+	isFullscreen,
+	requestFullscreen,
+} from "@/fullscreen";
 import { CentralCard } from "@/ui/Layout";
 import { useRouter } from "@/ui/routing";
 import { Button } from "@/ui/shadcn/button";
@@ -19,15 +24,11 @@ type Props =
 const toggleFullscreen =
 	() => {
 		if (
-			document.fullscreenEnabled
+			isFullscreen.value
 		) {
-			if (
-				!document.fullscreenElement
-			) {
-				document.body.requestFullscreen();
-			} else {
-				document.exitFullscreen();
-			}
+			requestFullscreen();
+		} else {
+			exitFullscreen();
 		}
 	};
 export function GameGlobalSettings() {
@@ -62,19 +63,18 @@ export function GameGlobalSettingsLayout({
 								Display
 							</legend>
 							<div className="flex items-center gap-3">
-								<Checkbox
+								<Button
 									id="full-screen"
-									onChange={
+									type="button"
+									className="flex"
+									onClick={
 										toggleFullscreen
 									}
-									checked={
-										!!document.fullscreenElement
-									}
-								/>
-								<Label htmlFor="full-screen">
-									Full
-									screen
-								</Label>
+								>
+									{!isFullscreen.value
+										? "Enter full scren"
+										: "Exit full screen"}
+								</Button>
 							</div>
 							<div className="grid gap-2">
 								<Label htmlFor="size-mode">

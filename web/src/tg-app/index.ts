@@ -22,7 +22,7 @@ const getWebApp =
 	() =>
 		window
 			.Telegram
-			.WebApp;
+			?.WebApp;
 
 export async function initWebApp() {
 	await import(
@@ -151,3 +151,26 @@ export const isTgApp =
 				.id >
 			0,
 	);
+
+const getFullscreenState =
+	() =>
+		getWebApp()
+			?.isFullscreen ??
+		false;
+
+export const isFullscreen =
+	signal(
+		getFullscreenState(),
+	);
+
+export async function requestFullscreen() {
+	await getWebApp()?.requestFullscreen();
+	isFullscreen.value =
+		getFullscreenState();
+}
+
+export async function exitFullscreen() {
+	await getWebApp()?.exitFullscreen();
+	isFullscreen.value =
+		getFullscreenState();
+}
