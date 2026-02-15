@@ -11,6 +11,7 @@ import {
 } from "./game-formulas";
 import {
 	addition,
+	normalize,
 	zeroPoint,
 } from "./geometry";
 import { uuid } from "./uuid";
@@ -80,6 +81,40 @@ function createTestWeapon(
 }
 
 const scale = 0.125;
+const weaponOrbitRadius = 32;
+const aimingInfluence = 0.3;
+const bulbroBodySize =
+	{
+		width: 100,
+		height: 130,
+	};
+const bulbroCharacterScaling = 0.25;
+const weaponsContainerPosition =
+	{
+		x:
+			-(
+				bulbroBodySize.width *
+				bulbroCharacterScaling
+			) /
+			2,
+		y:
+			-(
+				bulbroBodySize.height *
+				bulbroCharacterScaling
+			) -
+			5,
+	};
+const weaponContainerOffset =
+	{
+		x:
+			(bulbroBodySize.width *
+				bulbroCharacterScaling) /
+			2,
+		y:
+			(bulbroBodySize.height *
+				bulbroCharacterScaling) /
+			2,
+	};
 
 describe("shoot", () => {
 	const playerPos =
@@ -101,11 +136,15 @@ describe("shoot", () => {
 			createTestWeapon(
 				"pistol",
 			);
+		const aimingDirection =
+			normalize(
+				{
+					x: aimX,
+					y: aimY,
+				},
+			);
 		weapon.aimingDirection =
-			{
-				x: aimX,
-				y: aimY,
-			};
+			aimingDirection;
 		const player =
 			createTestBulbro(
 				playerPos.x,
@@ -127,6 +166,24 @@ describe("shoot", () => {
 				playerPos,
 				weaponVisualOffset,
 			);
+		const expectedWeaponCenter =
+			{
+				x:
+					playerPos.x +
+					weaponOrbitRadius +
+					aimingDirection.x *
+						aimingInfluence *
+						weaponOrbitRadius +
+					weaponContainerOffset.x +
+					weaponsContainerPosition.x,
+				y:
+					playerPos.y +
+					aimingDirection.y *
+						aimingInfluence *
+						weaponOrbitRadius +
+					weaponContainerOffset.y +
+					weaponsContainerPosition.y,
+			};
 		const halfWidth =
 			(getWeaponSize(
 				"pistol",
@@ -139,11 +196,11 @@ describe("shoot", () => {
 			{
 				x:
 					weaponCenter.x +
-					aimX *
+					aimingDirection.x *
 						1000,
 				y:
 					weaponCenter.y +
-					aimY *
+					aimingDirection.y *
 						1000,
 			};
 		const shot =
@@ -156,9 +213,34 @@ describe("shoot", () => {
 		return {
 			shot,
 			weaponCenter,
+			expectedWeaponCenter,
 			halfWidth,
 		};
 	}
+
+	it("matches BulbaSprite weapons container positioning", () => {
+		const {
+			weaponCenter,
+			expectedWeaponCenter,
+		} =
+			shootAt(
+				1,
+				0,
+			);
+
+		expect(
+			weaponCenter.x,
+		).toBeCloseTo(
+			expectedWeaponCenter.x,
+			1,
+		);
+		expect(
+			weaponCenter.y,
+		).toBeCloseTo(
+			expectedWeaponCenter.y,
+			1,
+		);
+	});
 
 	it("starts shot from right of weapon center when aiming right (1, 0)", () => {
 		const {

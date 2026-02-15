@@ -47,6 +47,7 @@ import {
 	bgmEnabled,
 } from "@/audio";
 import { useStartBgm } from "@/audio/useStartBgm";
+import { Failed } from "../Failed";
 
 function getShareUrl() {
 	const lobby =
@@ -132,10 +133,7 @@ export function SetupOnlineGame() {
 		iam.isGuest
 	) {
 		return (
-			<h1>
-				Not
-				authenticated
-			</h1>
+			<Failed />
 		);
 	}
 	const onReady =
