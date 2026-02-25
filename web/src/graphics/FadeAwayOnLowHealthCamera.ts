@@ -138,9 +138,9 @@ export class FadeAwayOnLowHealthCamera
 					ratio /
 						0.5;
 				this.#overlay.alpha =
-					0.1 +
+					0.2 +
 					t *
-						0.9;
+						0.5;
 			}
 		}
 

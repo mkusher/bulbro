@@ -5,12 +5,12 @@ import type { DeltaTime } from "@/time";
 import { uuid } from "@/uuid";
 import type { WaveState } from "@/waveState";
 
-const INDICATOR_DURATION_MS = 1000;
-const INDICATOR_RISE = 64;
+const INDICATOR_DURATION_MS = 2000;
+const INDICATOR_RISE = 96;
 const PLAYER_DAMAGE_COLOR =
-	"#ff2c2c";
+	"#ff1c1c";
 const ENEMY_DAMAGE_COLOR =
-	"#ffd166";
+	"#ffc166";
 
 type IndicatorEntry =
 	{
