@@ -21,7 +21,10 @@ import {
 	babyEnemy,
 } from "../enemies-definitions";
 import type { EnemyCharacter } from ".";
-import { ENEMY_SIZE } from ".";
+import {
+	buildEnemyCharacterForWave,
+	ENEMY_SIZE,
+} from ".";
 import {
 	type EnemyState,
 	spawnEnemy,
@@ -31,17 +34,42 @@ const hasSecondPassedAfter =
 	(
 		now: NowTime,
 		deltaTime: DeltaTime,
-	) =>
-	(
-		second: number,
-	) =>
-		now >=
-			second *
-				1000 &&
-		now -
-			deltaTime <
-			second *
-				1000;
+	) => {
+		const currentSecond =
+			Math.floor(
+				now /
+					1000,
+			);
+		const previousSecond =
+			Math.floor(
+				(now -
+					deltaTime) /
+					1000,
+			);
+		const hasSecondPassed =
+			currentSecond -
+				previousSecond >
+			0;
+		return {
+			hasSecondPassed,
+			currentSecond,
+		};
+	};
+const shortRange =
+	{
+		from: 200,
+		to: 400,
+	};
+const mediumRange =
+	{
+		from: 400,
+		to: 600,
+	};
+const longRange =
+	{
+		from: 600,
+		to: 900,
+	};
 
 export class EnemySpawner {
 	#logger: Logger;
@@ -65,81 +93,49 @@ export class EnemySpawner {
 			waveState
 				.round
 				.difficulty;
-		const hasSecondPassed =
+		const passedSecond =
 			hasSecondPassedAfter(
 				now,
 				deltaTime,
 			);
-		const shortRange =
-			{
-				from: 200,
-				to: 400,
-			};
-		const mediumRange =
-			{
-				from: 400,
-				to: 600,
-			};
-		const longRange =
-			{
-				from: 600,
-				to: 900,
-			};
-		if (
-			hasSecondPassed(
+
+		const secondForBaby =
+			[
 				0,
-			) ||
-			hasSecondPassed(
 				3,
-			) ||
-			hasSecondPassed(
 				6,
-			) ||
-			hasSecondPassed(
 				9,
-			) ||
-			hasSecondPassed(
 				12,
-			) ||
-			hasSecondPassed(
 				18,
-			) ||
-			hasSecondPassed(
 				24,
-			) ||
-			hasSecondPassed(
 				27,
-			) ||
-			hasSecondPassed(
 				30,
-			) ||
-			hasSecondPassed(
 				33,
-			) ||
-			hasSecondPassed(
 				36,
-			) ||
-			hasSecondPassed(
 				39,
-			) ||
-			hasSecondPassed(
 				42,
-			) ||
-			hasSecondPassed(
 				45,
-			) ||
-			hasSecondPassed(
 				48,
-			) ||
-			hasSecondPassed(
 				51,
-			) ||
-			hasSecondPassed(
 				54,
-			) ||
-			hasSecondPassed(
 				57,
-			)
+			];
+
+		if (
+			!passedSecond.hasSecondPassed
+		) {
+			return [];
+		}
+
+		if (
+			secondForBaby.find(
+				(
+					second,
+				) =>
+					passedSecond.currentSecond ===
+					second,
+			) !==
+			undefined
 		) {
 			const center =
 				waveState
@@ -155,9 +151,14 @@ export class EnemySpawner {
 						2,
 				);
 			return this.#spawnCluster(
-				[
-					babyEnemy,
-				],
+				this.#prepareEnemies(
+					[
+						babyEnemy,
+					],
+					waveState
+						.round
+						.wave,
+				),
 				numberOfEnemies,
 				shortRange,
 				{
@@ -171,9 +172,8 @@ export class EnemySpawner {
 				waveState.mapSize,
 			);
 		} else if (
-			hasSecondPassed(
-				15,
-			)
+			passedSecond.currentSecond ===
+			15
 		) {
 			const center =
 				waveState
@@ -189,10 +189,15 @@ export class EnemySpawner {
 						2,
 				);
 			return this.#spawnCluster(
-				[
-					babyEnemy,
-					aphidEnemy,
-				],
+				this.#prepareEnemies(
+					[
+						babyEnemy,
+						aphidEnemy,
+					],
+					waveState
+						.round
+						.wave,
+				),
 				numberOfEnemies,
 				mediumRange,
 				{
@@ -206,9 +211,8 @@ export class EnemySpawner {
 				waveState.mapSize,
 			);
 		} else if (
-			hasSecondPassed(
-				21,
-			)
+			passedSecond.currentSecond ===
+			21
 		) {
 			const center =
 				waveState
@@ -225,9 +229,14 @@ export class EnemySpawner {
 				);
 			return [
 				...this.#spawnCluster(
-					[
-						aphidEnemy,
-					],
+					this.#prepareEnemies(
+						[
+							aphidEnemy,
+						],
+						waveState
+							.round
+							.wave,
+					),
 					numberOfEnemies,
 					longRange,
 					{
@@ -241,9 +250,14 @@ export class EnemySpawner {
 					waveState.mapSize,
 				),
 				...this.#spawnCluster(
-					[
-						babyEnemy,
-					],
+					this.#prepareEnemies(
+						[
+							babyEnemy,
+						],
+						waveState
+							.round
+							.wave,
+					),
 					numberOfEnemies,
 					shortRange,
 					{
@@ -288,7 +302,7 @@ export class EnemySpawner {
 							center,
 							mapSize,
 						);
-					return this.#spawnEnemy(
+					return this.#spawnEnemies(
 						enemiesToSpawn,
 						position,
 					);
@@ -296,7 +310,7 @@ export class EnemySpawner {
 			);
 	}
 
-	#spawnEnemy(
+	#spawnEnemies(
 		enemiesToSpawn: EnemyCharacter[],
 		position: Position,
 	) {
@@ -411,6 +425,21 @@ export class EnemySpawner {
 			Math.random() *
 				(to -
 					from)
+		);
+	}
+
+	#prepareEnemies(
+		enemies: EnemyCharacter[],
+		waveNumber: number,
+	) {
+		return enemies.map(
+			(
+				e,
+			) =>
+				buildEnemyCharacterForWave(
+					e,
+					waveNumber,
+				),
 		);
 	}
 }

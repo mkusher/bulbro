@@ -49,6 +49,7 @@ import type {
 	Weapon,
 	WeaponType,
 } from "./weapon";
+import { babyEnemy } from "./enemies-definitions";
 
 function createTestPlayer(
 	id: string,
@@ -231,27 +232,8 @@ function createTestEnemyCharacter(
 	weapons: Weapon[] = [],
 ): EnemyCharacter {
 	return {
+		...babyEnemy,
 		id,
-		sprite:
-			"potatoBeetleBaby",
-		name: `enemy-${id}`,
-		stats:
-			{
-				maxHp: 50,
-				hpRegeneration: 0,
-				damage: 5,
-				meleeDamage: 0,
-				rangedDamage: 0,
-				elementalDamage: 0,
-				attackSpeed: 1,
-				critChance: 0,
-				range: 20,
-				armor: 0,
-				dodge: 0,
-				speed: 50,
-				materialsDropped: 1,
-				knockback: 0,
-			},
 		weapons,
 	};
 }

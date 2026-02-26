@@ -11,11 +11,15 @@ export const beetleWarrior: EnemyCharacter =
 		stats:
 			{
 				...baseStats,
-				maxHp: 36,
+				maxHp: 6,
 				speed: 150,
 				damage: 3,
 				range: 80,
 				attackSpeed: 2,
+			},
+		waveIncreaseStats:
+			{
+				maxHp: 6,
 			},
 		weapons:
 			[

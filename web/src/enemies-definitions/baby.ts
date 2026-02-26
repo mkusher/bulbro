@@ -17,6 +17,10 @@ export const babyEnemy: EnemyCharacter =
 				range: 80,
 				materialsDropped: 1,
 			},
+		waveIncreaseStats:
+			{
+				maxHp: 2,
+			},
 		weapons:
 			[
 				orcFist,

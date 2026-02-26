@@ -15,6 +15,7 @@ export interface EnemyCharacter {
 	sprite: EnemyType;
 	name: string;
 	stats: EnemyStats;
+	waveIncreaseStats: Partial<EnemyStats>;
 	weapons: Weapon[];
 	behaviors?: typeof EnemyBehaviorsType.infer;
 }

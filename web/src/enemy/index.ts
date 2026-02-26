@@ -1,6 +1,10 @@
 import type { Size } from "../geometry";
 
 export type { EnemyCharacter } from "./EnemyCharacter";
+export {
+	buildEnemyCharacterForWave,
+	buildWaveStats,
+} from "./buildEnemyCharacterForWave";
 export type { EnemyStats } from "./EnemyState";
 export {
 	EnemyState,

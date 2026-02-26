@@ -16,6 +16,8 @@ export const treeEnemy: EnemyCharacter =
 				range: 0,
 				materialsDropped: 0,
 			},
+		waveIncreaseStats:
+			{},
 		weapons:
 			[
 				orcFist,

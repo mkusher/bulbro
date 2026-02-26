@@ -44,3 +44,6 @@ dist
 *storybook.log
 storybook-static
 PLAN.md
+
+.playwright/*
+.playwright-cli/*
