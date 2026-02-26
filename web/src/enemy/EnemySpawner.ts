@@ -19,6 +19,7 @@ import {
 	allEnemies,
 	aphidEnemy,
 	babyEnemy,
+	beetleWarrior,
 } from "../enemies-definitions";
 import type { EnemyCharacter } from ".";
 import {
@@ -98,6 +99,15 @@ export class EnemySpawner {
 				now,
 				deltaTime,
 			);
+		if (
+			!passedSecond.hasSecondPassed
+		) {
+			return [];
+		}
+		const center =
+			waveState
+				.players[0]!
+				.position;
 
 		const secondForBaby =
 			[
@@ -121,35 +131,61 @@ export class EnemySpawner {
 				57,
 			];
 
+		const secondForBeetleWarior =
+			[
+				4,
+				14,
+				34,
+				48,
+			];
+		const angle =
+			this.#randomInRange(
+				0,
+				Math.PI *
+					2,
+			);
+
 		if (
-			!passedSecond.hasSecondPassed
+			currentWave >
+				3 &&
+			secondForBeetleWarior.indexOf(
+				passedSecond.currentSecond,
+			) >
+				-1
 		) {
-			return [];
+			const numberOfEnemies =
+				1 +
+				difficulty;
+			return this.#spawnCluster(
+				this.#prepareEnemies(
+					[
+						beetleWarrior,
+					],
+					currentWave,
+				),
+				numberOfEnemies,
+				longRange,
+				{
+					from: angle,
+					to:
+						angle +
+						Math.PI /
+							4,
+				},
+				center,
+				waveState.mapSize,
+			);
 		}
 
 		if (
-			secondForBaby.find(
-				(
-					second,
-				) =>
-					passedSecond.currentSecond ===
-					second,
-			) !==
-			undefined
+			secondForBaby.indexOf(
+				passedSecond.currentSecond,
+			) >
+			-1
 		) {
-			const center =
-				waveState
-					.players[0]!
-					.position;
 			const numberOfEnemies =
 				5 +
 				difficulty;
-			const angle =
-				this.#randomInRange(
-					0,
-					Math.PI *
-						2,
-				);
 			return this.#spawnCluster(
 				this.#prepareEnemies(
 					[
@@ -171,23 +207,14 @@ export class EnemySpawner {
 				center,
 				waveState.mapSize,
 			);
-		} else if (
+		}
+		if (
 			passedSecond.currentSecond ===
 			15
 		) {
-			const center =
-				waveState
-					.players[0]!
-					.position;
 			const numberOfEnemies =
 				5 +
 				difficulty;
-			const angle =
-				this.#randomInRange(
-					0,
-					Math.PI *
-						2,
-				);
 			return this.#spawnCluster(
 				this.#prepareEnemies(
 					[
@@ -210,23 +237,14 @@ export class EnemySpawner {
 				center,
 				waveState.mapSize,
 			);
-		} else if (
+		}
+		if (
 			passedSecond.currentSecond ===
 			21
 		) {
-			const center =
-				waveState
-					.players[0]!
-					.position;
 			const numberOfEnemies =
 				5 +
 				difficulty;
-			const angle =
-				this.#randomInRange(
-					0,
-					Math.PI *
-						2,
-				);
 			return [
 				...this.#spawnCluster(
 					this.#prepareEnemies(

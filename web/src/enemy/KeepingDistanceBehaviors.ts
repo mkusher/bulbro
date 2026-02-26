@@ -22,6 +22,12 @@ import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyState } from "./EnemyState";
 import { KnockbackMovement } from "./KnockbackMovement";
 
+const lookupRanges =
+	{
+		from: 0.5,
+		to: 1,
+	};
+
 export class KeepkingDistanceBehaviors
 	implements
 		EnemyBehaviors
@@ -63,12 +69,6 @@ export class KeepkingDistanceBehaviors
 		) {
 			return [];
 		}
-
-		const lookupRanges =
-			{
-				from: 0.75,
-				to: 1,
-			};
 
 		const actualRange =
 			currentEnemy

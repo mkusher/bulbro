@@ -15,7 +15,7 @@ export const aphidEnemy: EnemyCharacter =
 				maxHp: 2,
 				speed: 150,
 				damage: 2,
-				range: 2000,
+				range: 1500,
 			},
 		waveIncreaseStats:
 			{

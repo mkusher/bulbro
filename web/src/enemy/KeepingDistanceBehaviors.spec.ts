@@ -136,7 +136,7 @@ describe("KeepingDistanceBehaviors", () => {
 			);
 		});
 
-		it("should move away when player is too close (inside 0.75 range)", () => {
+		it("should move away when player is too close (inside 0.5 range)", () => {
 			const behavior =
 				new KeepkingDistanceBehaviors();
 			const now =
@@ -145,7 +145,7 @@ describe("KeepingDistanceBehaviors", () => {
 				);
 			const tooCloseDistance =
 				actualRange *
-				0.5;
+				0.45;
 			const enemy =
 				createTestEnemy(
 					{
