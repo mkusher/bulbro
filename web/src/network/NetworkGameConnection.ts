@@ -7,7 +7,7 @@ import type {
 	WavePromises,
 } from "@/GameProcess";
 import type { Logger } from "@/logger";
-import type { WaveProcess } from "@/WaveProcess";
+import type { WaveProcess } from "@/GameProcess";
 import { waveState } from "@/waveState";
 import { currentUser } from "./currentUser";
 import type { InGameCommunicationChannel } from "./InGameCommunicationChannel";

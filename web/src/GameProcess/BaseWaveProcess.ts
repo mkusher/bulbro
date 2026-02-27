@@ -5,22 +5,32 @@ import {
 	bgmEnabled,
 	setFullBgmVolume,
 	setQuietBgmVolume,
-} from "./audio";
-import type { PlayerControl } from "./controls";
-import { DurationTracker } from "./DurationTracker";
+} from "../audio";
+import type { PlayerControl } from "../controls";
+import { DurationTracker } from "../DurationTracker";
 import {
 	canvasSize,
 	scale,
-} from "./game-canvas";
-import { InMemoryGameEventQueue } from "./game-events/GameEventQueue";
-import type { Camera } from "./graphics/Camera";
-import { createGameCamera } from "./graphics/GameCamera";
-import { StageWithUi } from "./graphics/StageWithUi";
-import { TickProcess } from "./TickProcess";
-import { deltaTime } from "./time";
-import { waveState } from "./waveState";
+} from "../game-canvas";
+import { InMemoryGameEventQueue } from "../game-events/GameEventQueue";
+import type { Camera } from "../graphics/Camera";
+import { createGameCamera } from "../graphics/GameCamera";
+import { StageWithUi } from "../graphics/StageWithUi";
+import { deltaTime } from "../time";
+import { waveState } from "../waveState";
+import type {
+	GameEventsProcessor,
+	TickProcessFactory,
+	WaveProcess,
+} from "./index";
+import { AudioEventsProcessor } from "./processors/AudioEventsProcessor";
+import { GameStatsProcessor } from "./processors/GameStatsProcessor";
+import { WaveStateProcessor } from "./processors/WaveStateProcessor";
 
-export class WaveProcess {
+export class BaseWaveProcess
+	implements
+		WaveProcess
+{
 	#logger: Logger;
 	#scene: StageWithUi;
 	#tickIndex = 0;
@@ -33,13 +43,14 @@ export class WaveProcess {
 	#playerControls: PlayerControl[];
 	#camera: Camera;
 	#eventQueue: InMemoryGameEventQueue;
-	#tickProcess: TickProcess;
+	#createTickProcess: TickProcessFactory;
 	#durationTracker =
 		new DurationTracker();
 	#gameCanvasSignal: Signal<
 		| HTMLCanvasElement
 		| undefined
 	>;
+	#processors: GameEventsProcessor[];
 
 	constructor(
 		baseLogger: Logger,
@@ -49,6 +60,7 @@ export class WaveProcess {
 			| undefined
 		>,
 		debug: boolean,
+		createTickProcess: TickProcessFactory,
 	) {
 		this.#logger =
 			baseLogger.child(
@@ -77,20 +89,20 @@ export class WaveProcess {
 			playerControls;
 		this.#eventQueue =
 			new InMemoryGameEventQueue();
-		this.#tickProcess =
-			new TickProcess(
-				this
-					.#logger,
-				this
-					.#scene,
-				this
-					.#playerControls,
-				this
-					.#eventQueue,
-				waveState,
-				this
-					.#debug,
-			);
+		this.#createTickProcess =
+			createTickProcess;
+		this.#processors =
+			[
+				new WaveStateProcessor(
+					waveState,
+				),
+				new AudioEventsProcessor(
+					waveState,
+				),
+				new GameStatsProcessor(
+					waveState,
+				),
+			];
 	}
 
 	get gameCanvas() {
@@ -247,13 +259,46 @@ export class WaveProcess {
 					"Current state",
 				);
 			}
-			// Delegate per-tick updates to TickProcess and get events for network sync
-			waveState.value =
-				this.#tickProcess.tick(
+			// Create a new TickProcess for each tick and generate events
+			const tickProcess =
+				this.#createTickProcess(
+					this
+						.#logger,
+					this
+						.#playerControls,
+				);
+			const events =
+				tickProcess.tick(
 					state,
 					delta,
 					now,
 				);
+
+			// Add events to queue for network synchronization
+			for (const event of events) {
+				this.#eventQueue.addEvent(
+					event,
+				);
+			}
+
+			// Process events through all processors
+			for (const processor of this
+				.#processors) {
+				processor.handleEvents(
+					events,
+				);
+			}
+
+			if (
+				waveState.value
+			) {
+				this.#scene.update(
+					delta,
+					now,
+					waveState.value,
+					events,
+				);
+			}
 		};
 
 	get eventQueue() {

@@ -22,7 +22,7 @@ import {
 	deltaTime,
 	nowTime,
 } from "@/time";
-import type { WaveProcess } from "@/WaveProcess";
+import type { WaveProcess } from "@/GameProcess";
 import type {
 	WaveState,
 	WeaponState,

@@ -10,7 +10,8 @@ import type { Camera } from "@/graphics/Camera";
 import { createGameCamera } from "@/graphics/GameCamera";
 import { StorybookSceneWithUi } from "@/graphics/StorybookSceneWithUi";
 import { logger as defaultLogger } from "@/logger";
-import { TickProcess } from "@/TickProcess";
+import { BaseTickProcess } from "@/GameProcess/BaseTickProcess";
+import { WaveStateProcessor } from "@/GameProcess/processors/WaveStateProcessor";
 import {
 	deltaTime,
 	nowTime,
@@ -95,33 +96,57 @@ const tickerCallback =
 			return;
 
 		const tickProcess =
-			new TickProcess(
+			new BaseTickProcess(
 				defaultLogger,
-				activeScene,
 				[
 					controls,
 				],
-				eventQueue,
-				gameState,
-				config?.debug ||
-					false,
 			);
-		const newState =
+		const dt_ =
+			deltaTime(
+				dt,
+			);
+		const now_ =
+			nowTime(
+				now,
+			);
+		const events =
 			tickProcess.tick(
 				gameState.value,
-				deltaTime(
-					dt,
-				),
-				nowTime(
-					now,
-				),
+				dt_,
+				now_,
 			);
 
-		gameState.value =
-			newState;
-		config?.onStateUpdate?.(
-			newState,
+		for (const event of events) {
+			eventQueue.addEvent(
+				event,
+			);
+		}
+
+		const waveStateProcessor =
+			new WaveStateProcessor(
+				gameState,
+			);
+		waveStateProcessor.handleEvents(
+			events,
 		);
+		if (
+			gameState.value
+		) {
+			activeScene.update(
+				dt_,
+				now_,
+				gameState.value,
+				events,
+			);
+		}
+		if (
+			gameState.value
+		) {
+			config?.onStateUpdate?.(
+				gameState.value,
+			);
+		}
 		tickCount.value += 1;
 		elapsedTime.value +=
 			dt /
@@ -377,16 +402,11 @@ export function step(
 		)
 			return;
 		const tickProcess =
-			new TickProcess(
+			new BaseTickProcess(
 				defaultLogger,
-				activeScene,
 				[
 					controls,
 				],
-				eventQueue,
-				gameState,
-				config?.debug ||
-					false,
 			);
 
 		if (
@@ -396,18 +416,42 @@ export function step(
 				gameState.value,
 			);
 		} else {
-			const newState =
+			const dt_ =
+				deltaTime(
+					dt,
+				);
+			const now_ =
+				nowTime(
+					now,
+				);
+			const events =
 				tickProcess.tick(
 					gameState.value,
-					deltaTime(
-						dt,
-					),
-					nowTime(
-						now,
-					),
+					dt_,
+					now_,
 				);
-			gameState.value =
-				newState;
+			for (const event of events) {
+				eventQueue.addEvent(
+					event,
+				);
+			}
+			const waveStateProcessor =
+				new WaveStateProcessor(
+					gameState,
+				);
+			waveStateProcessor.handleEvents(
+				events,
+			);
+			if (
+				gameState.value
+			) {
+				activeScene.update(
+					dt_,
+					now_,
+					gameState.value,
+					events,
+				);
+			}
 		}
 		tickCount.value += 1;
 		elapsedTime.value +=

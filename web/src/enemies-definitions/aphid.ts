@@ -19,7 +19,7 @@ export const aphidEnemy: EnemyCharacter =
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 2,
+				maxHp: 1,
 			},
 		weapons:
 			[

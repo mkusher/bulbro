@@ -136,7 +136,7 @@ describe("RageRunningBehaviors", () => {
 			);
 		});
 
-		it("should run at 2x speed in remembered direction during second raging phase", () => {
+		it("should run at 3x speed in remembered direction during second raging phase", () => {
 			const behavior =
 				new RageRunningBehaviors();
 			const now =
@@ -233,7 +233,7 @@ describe("RageRunningBehaviors", () => {
 					);
 				const expectedDistance =
 					(initialSpeed *
-						2 *
+						3 *
 						16) /
 					1000;
 				expect(

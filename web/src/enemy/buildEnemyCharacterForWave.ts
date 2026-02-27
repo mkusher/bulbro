@@ -32,7 +32,8 @@ export function buildWaveStats(
 				] ??
 					0) +
 				increase *
-					waveNumber;
+					(waveNumber -
+						1);
 		}
 	}
 

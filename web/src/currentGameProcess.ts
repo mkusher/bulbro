@@ -5,7 +5,8 @@ import {
 	resetGameStats,
 	startWaveTracking,
 } from "./gameStats";
-import { GameProcess } from "./GameProcess";
+import { BaseGameProcess } from "./GameProcess/BaseGameProcess";
+import type { GameProcess } from "./GameProcess";
 import type { Difficulty } from "./game-formulas";
 import type { Player } from "./player";
 import {
@@ -15,7 +16,7 @@ import {
 
 export const currentGameProcess =
 	signal<GameProcess>(
-		new GameProcess(
+		new BaseGameProcess(
 			localStorage.getItem(
 				"__enable_debug",
 			) ===

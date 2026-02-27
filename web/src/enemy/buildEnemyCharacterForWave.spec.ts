@@ -48,11 +48,11 @@ describe("buildEnemyCharacterForWave", () => {
 		},
 	);
 
-	it("should return enemy with unchanged stats for wave 0", () => {
+	it("should return enemy with unchanged stats for wave 1", () => {
 		const result =
 			buildEnemyCharacterForWave(
 				baseEnemy,
-				0,
+				1,
 			);
 
 		expect(
@@ -78,7 +78,7 @@ describe("buildEnemyCharacterForWave", () => {
 		);
 	});
 
-	it("should increase stats by waveIncreaseStats * waveNumber", () => {
+	it("should increase stats by 2 waveIncreaseStats on wave 3", () => {
 		const result =
 			buildEnemyCharacterForWave(
 				baseEnemy,
@@ -92,7 +92,7 @@ describe("buildEnemyCharacterForWave", () => {
 		).toBe(
 			10 +
 				5 *
-					3,
+					2,
 		);
 		expect(
 			result
@@ -101,7 +101,7 @@ describe("buildEnemyCharacterForWave", () => {
 		).toBe(
 			2 +
 				1 *
-					3,
+					2,
 		);
 	});
 
@@ -170,31 +170,6 @@ describe("buildEnemyCharacterForWave", () => {
 				maxHp: 5,
 				damage: 1,
 			},
-		);
-	});
-
-	it("should handle wave number of 1", () => {
-		const result =
-			buildEnemyCharacterForWave(
-				baseEnemy,
-				1,
-			);
-
-		expect(
-			result
-				.stats
-				.maxHp,
-		).toBe(
-			10 +
-				5,
-		);
-		expect(
-			result
-				.stats
-				.damage,
-		).toBe(
-			2 +
-				1,
 		);
 	});
 });

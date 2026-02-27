@@ -1,24 +1,21 @@
-import type { Signal } from "@preact/signals";
 import type { Logger } from "pino";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
-import { AudioController } from "./audio/AudioController";
-import { BULBRO_SIZE } from "./bulbro";
-import type { PlayerControl } from "./controls";
-import { ENEMY_SIZE } from "./enemy";
-import { EnemySpawner } from "./enemy/EnemySpawner";
+import { BULBRO_SIZE } from "../bulbro";
+import type { PlayerControl } from "../controls";
+import { ENEMY_SIZE } from "../enemy";
+import { EnemySpawner } from "../enemy/EnemySpawner";
 import type {
 	GameEvent,
 	GameEventInternal,
-	GameEventQueue,
-} from "./game-events/GameEvents";
+} from "../game-events/GameEvents";
 import {
 	withEventMeta,
 	withEventMetaMultiple,
-} from "./game-events/GameEvents";
-import { updateStatsFromStateChange } from "./gameStats";
+} from "../game-events/GameEvents";
+import type { TickProcess } from "./index";
 import {
 	type Direction,
 	distance,
@@ -26,21 +23,22 @@ import {
 	rectFromCenter,
 	rectIntersectsLine,
 	zeroPoint,
-} from "./geometry";
-import { logger as defaultLogger } from "./logger";
-import { movePosition } from "./physics";
-import type { WaveState } from "./waveState";
+} from "../geometry";
+import { logger as defaultLogger } from "../logger";
+import { movePosition } from "../physics";
+import type { WaveState } from "../waveState";
 import {
 	generateMaterialMovementEvents,
 	getTimeLeft,
-	updateState,
-} from "./waveState";
+} from "../waveState";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
  */
-export class TickProcess {
-	#scene: SceneWithUi;
+export class BaseTickProcess
+	implements
+		TickProcess
+{
 	#logger =
 		defaultLogger.child(
 			{
@@ -49,20 +47,12 @@ export class TickProcess {
 			},
 		);
 	#controls: PlayerControl[];
-	#eventQueue: GameEventQueue;
 	#enemySpawner: EnemySpawner;
-	#audioController: AudioController;
 
 	constructor(
 		logger: Logger,
-		scene: SceneWithUi,
 		controls: PlayerControl[],
-		eventQueue: GameEventQueue,
-		waveStateSignal: Signal<WaveState | null>,
-		debug: boolean,
 	) {
-		this.#scene =
-			scene;
 		this.#logger =
 			logger.child(
 				{},
@@ -72,12 +62,6 @@ export class TickProcess {
 		);
 		this.#controls =
 			controls;
-		this.#eventQueue =
-			eventQueue;
-		this.#audioController =
-			new AudioController(
-				waveStateSignal,
-			);
 		this.#enemySpawner =
 			new EnemySpawner(
 				this
@@ -92,7 +76,7 @@ export class TickProcess {
 		state: WaveState,
 		deltaTime: DeltaTime,
 		now: NowTime,
-	): WaveState {
+	): GameEvent[] {
 		this.#logger.debug(
 			{
 				event:
@@ -104,50 +88,11 @@ export class TickProcess {
 			"Tick start",
 		);
 
-		// Phase 1: Generate all events for this tick
-		const events =
-			this.#generateTickEvents(
-				state,
-				deltaTime,
-				now,
-			);
-
-		// Phase 2: Add events to queue for network synchronization
-		this.#addEventsToQueue(
-			events,
-		);
-
-		// Phase 3: Apply events to state to get new state
-		let newState =
-			this.#applyEventsToState(
-				state,
-				events,
-			);
-		newState =
-			this.#aim(
-				newState,
-			);
-
-		// Phase 3.5: Handle audio events
-		this.#audioController.handleEvents(
-			events,
-		);
-
-		// Phase 3.6: Handle stats by comparing state changes
-		updateStatsFromStateChange(
+		return this.#generateTickEvents(
 			state,
-			newState,
-		);
-
-		// Phase 4: Update rendering
-		this.#scene.update(
 			deltaTime,
 			now,
-			newState,
-			events,
 		);
-
-		return newState;
 	}
 
 	/**
@@ -542,62 +487,4 @@ export class TickProcess {
 			}
 		}
 	}
-
-	#addEventsToQueue(
-		events: GameEvent[],
-	): void {
-		events.forEach(
-			(
-				event,
-			) => {
-				this.#eventQueue.addEvent(
-					event,
-				);
-			},
-		);
-	}
-
-	#applyEventsToState(
-		state: WaveState,
-		events: GameEvent[],
-	): WaveState {
-		return events.reduce(
-			(
-				currentState,
-				event,
-			) =>
-				updateState(
-					currentState,
-					event,
-				),
-			state,
-		);
-	}
-
-	#aim(
-		state: WaveState,
-	) {
-		return {
-			...state,
-			players:
-				state.players.map(
-					(
-						p,
-					) =>
-						p.aim(
-							state.enemies,
-						),
-				),
-		};
-	}
 }
-
-type SceneWithUi =
-	{
-		update(
-			deltaTime: DeltaTime,
-			now: NowTime,
-			state: WaveState,
-			events: GameEvent[],
-		): void;
-	};

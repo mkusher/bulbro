@@ -9,25 +9,13 @@ import {
 	deltaTime,
 	nowTime,
 } from "@/time";
-import { BulbroState } from "./bulbro";
-import { EnemyState } from "./enemy";
-import { InMemoryGameEventQueue } from "./game-events/GameEventQueue";
-import type { GameEventQueue } from "./game-events/GameEvents";
-import type { StageWithUi } from "./graphics/StageWithUi";
-import { logger } from "./logger";
-import { ShotState } from "./shot/ShotState";
-import { TickProcess } from "./TickProcess";
-import type { WaveState } from "./waveState";
-
-/**
- * Create a mock stage for testing
- */
-function createMockStage(): unknown {
-	return {
-		update:
-			() => {},
-	};
-}
+import { BulbroState } from "../bulbro";
+import { EnemyState } from "../enemy";
+import { logger } from "../logger";
+import { ShotState } from "../shot/ShotState";
+import { BaseTickProcess } from "./BaseTickProcess";
+import type { TickProcess } from "./index";
+import type { WaveState } from "../waveState";
 
 /**
  * Helper to create a test shot
@@ -202,17 +190,10 @@ function createTestWeapon(
 
 describe("TickProcess", () => {
 	let tickProcess: TickProcess;
-	let eventQueue: GameEventQueue;
-	let stage: unknown;
 	let state: WaveState;
 
 	beforeEach(
 		() => {
-			eventQueue =
-				new InMemoryGameEventQueue();
-			stage =
-				createMockStage();
-
 			// Create initial state
 			const now =
 				Date.now();
@@ -256,23 +237,15 @@ describe("TickProcess", () => {
 				};
 
 			// Create TickProcess
-			const stateSignal =
-				signal<WaveState | null>(
-					state,
-				);
 			tickProcess =
-				new TickProcess(
+				new BaseTickProcess(
 					logger.child(
 						{
 							component:
 								"TickProcessTest",
 						},
 					),
-					stage as StageWithUi,
 					[], // Empty controls for testing
-					eventQueue,
-					stateSignal,
-					false,
 				);
 		},
 	);
@@ -310,19 +283,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick with large deltaTime to ensure collision
-			tickProcess.tick(
-				state,
-				deltaTime(
-					100,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						100,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that enemyReceivedHit event was generated
-			const events =
-				eventQueue.flush();
 			const hitEvent =
 				events.find(
 					(
@@ -402,19 +374,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that bulbroReceivedHit event was generated
-			const events =
-				eventQueue.flush();
 			const hitEvent =
 				events.find(
 					(
@@ -459,19 +430,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick with enough deltaTime to go out of bounds
-			tickProcess.tick(
-				state,
-				deltaTime(
-					100,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						100,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that shotExpired event was generated
-			const events =
-				eventQueue.flush();
 			const expiredEvent =
 				events.find(
 					(
@@ -530,19 +500,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that shotExpired event was generated
-			const events =
-				eventQueue.flush();
 			const expiredEvent =
 				events.find(
 					(
@@ -578,19 +547,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that shotMoved event was generated
-			const events =
-				eventQueue.flush();
 			const moveEvent =
 				events.find(
 					(
@@ -628,19 +596,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Get all events
-			const events =
-				eventQueue.flush();
 
 			// Should have at least shotMoved and tick events
 			expect(
@@ -687,15 +654,14 @@ describe("TickProcess", () => {
 				);
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				dt,
-				now,
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					dt,
+					now,
+				);
 
 			// Get all events
-			const events =
-				eventQueue.flush();
 
 			// All events should have metadata
 			for (const event of events) {
@@ -710,19 +676,18 @@ describe("TickProcess", () => {
 
 		it("should generate tick event on every tick", () => {
 			// Run tick without any shots
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Get all events
-			const events =
-				eventQueue.flush();
 
 			// Should have tick event
 			const tickEvent =
@@ -773,19 +738,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick with large deltaTime to ensure collision
-			tickProcess.tick(
-				state,
-				deltaTime(
-					100,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						100,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that both events were generated
-			const events =
-				eventQueue.flush();
 			const hitEvent =
 				events.find(
 					(
@@ -842,19 +806,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Get all events
-			const events =
-				eventQueue.flush();
 			const shotMovedEvents =
 				events.filter(
 					(
@@ -926,19 +889,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that bulbroAttacked event was generated
-			const events =
-				eventQueue.flush();
 			const attackEvent =
 				events.find(
 					(
@@ -1015,19 +977,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that bulbroAttacked event includes target
-			const events =
-				eventQueue.flush();
 			const attackEvent =
 				events.find(
 					(
@@ -1080,19 +1041,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that both bulbroAttacked and shot events were generated
-			const events =
-				eventQueue.flush();
 			const attackEvent =
 				events.find(
 					(
@@ -1151,19 +1111,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that no bulbroAttacked event was generated
-			const events =
-				eventQueue.flush();
 			const attackEvent =
 				events.find(
 					(
@@ -1252,19 +1211,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that no bulbroAttacked event was generated
-			const events =
-				eventQueue.flush();
 			const attackEvent =
 				events.find(
 					(
@@ -1352,19 +1310,18 @@ describe("TickProcess", () => {
 				];
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				deltaTime(
-					16,
-				),
-				nowTime(
-					Date.now(),
-				),
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				);
 
 			// Check that bulbroAttacked events for both players were generated
-			const events =
-				eventQueue.flush();
 			const attackEvents =
 				events.filter(
 					(
@@ -1445,15 +1402,14 @@ describe("TickProcess", () => {
 				);
 
 			// Run tick
-			tickProcess.tick(
-				state,
-				dt,
-				now,
-			);
+			const events =
+				tickProcess.tick(
+					state,
+					dt,
+					now,
+				);
 
 			// Check that bulbroAttacked event has metadata
-			const events =
-				eventQueue.flush();
 			const attackEvent =
 				events.find(
 					(

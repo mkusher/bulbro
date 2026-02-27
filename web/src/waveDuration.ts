@@ -1,9 +1,3 @@
-/**
- * Calculates wave duration based on wave number.
- * Wave 1: 25 seconds
- * Wave 2: 40 seconds
- * Wave 3+: 60 seconds
- */
 export function getWaveDuration(
 	wave: number,
 ): number {
@@ -16,6 +10,12 @@ export function getWaveDuration(
 	if (
 		wave ===
 		2
+	) {
+		return 30;
+	}
+	if (
+		wave ===
+		3
 	) {
 		return 40;
 	}

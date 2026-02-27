@@ -1,40 +1,40 @@
 import type { Logger } from "pino";
-import type { PlayerControl } from "./controls";
-import { currentGameCanvas } from "./currentGameProcess";
-import { classicMapSize } from "./game-canvas";
+import type { PlayerControl } from "../controls";
+import { currentGameCanvas } from "../currentGameProcess";
+import { classicMapSize } from "../game-canvas";
 import {
 	type GameEvent,
 	withEventMeta,
-} from "./game-events/GameEvents";
-import type { Difficulty } from "./game-formulas";
-import { logger as defaultLogger } from "./logger";
-import type { Player } from "./player";
+} from "../game-events/GameEvents";
+import type { Difficulty } from "../game-formulas";
+import { logger as defaultLogger } from "../logger";
+import type { Player } from "../player";
 import {
 	deltaTime,
 	nowTime,
-} from "./time";
-import { WaveProcess } from "./WaveProcess";
+} from "../time";
+import { BaseTickProcess } from "./BaseTickProcess";
+import { BaseWaveProcess } from "./BaseWaveProcess";
+import type {
+	GameProcess,
+	TickProcessFactory,
+	WaveProcess,
+	WavePromises,
+} from "./index";
 import {
 	createInitialState,
 	nextWave,
 	type WaveState,
 	waveState,
-} from "./waveState";
-
-export type WavePromises =
-	{
-		waveInitPromise: Promise<WaveProcess>;
-		wavePromise: Promise<
-			| "win"
-			| "fail"
-			| undefined
-		>;
-	};
+} from "../waveState";
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.
  */
-export class GameProcess {
+export class BaseGameProcess
+	implements
+		GameProcess
+{
 	#logger: Logger;
 	#waveProcess?: WaveProcess;
 	#debug: boolean;
@@ -140,17 +140,33 @@ export class GameProcess {
 		return this.#startWaveProcess();
 	}
 
+	#createTickProcess: TickProcessFactory =
+		(
+			logger,
+			controls,
+		) =>
+			new BaseTickProcess(
+				logger,
+				controls,
+			);
+
+	#createWaveProcess() {
+		return new BaseWaveProcess(
+			this
+				.#logger,
+			this
+				.#playerControls,
+			currentGameCanvas,
+			this
+				.#debug,
+			this
+				.#createTickProcess,
+		);
+	}
+
 	#startWaveProcess() {
 		this.#waveProcess =
-			new WaveProcess(
-				this
-					.#logger,
-				this
-					.#playerControls,
-				currentGameCanvas,
-				this
-					.#debug,
-			);
+			this.#createWaveProcess();
 		const waveInitPromise =
 			this.#waveProcess.init();
 		const wavePromise =
@@ -162,6 +178,11 @@ export class GameProcess {
 			waveInitPromise,
 			wavePromise,
 		};
+	}
+
+	get waveProcess() {
+		return this
+			.#waveProcess;
 	}
 
 	get gameCanvas() {

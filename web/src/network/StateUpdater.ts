@@ -3,7 +3,7 @@ import type { GameEvent } from "@/game-events/GameEvents";
 import type { Logger } from "@/logger";
 import type { ShotState } from "@/shot/ShotState";
 import { deltaTime } from "@/time";
-import type { WaveProcess } from "@/WaveProcess";
+import type { WaveProcess } from "@/GameProcess";
 import type { WaveState } from "@/waveState";
 import { updateState } from "@/waveState";
 import type { User } from "./currentUser";

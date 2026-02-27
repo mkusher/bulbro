@@ -8,7 +8,7 @@ import type { PlayerControl } from "@/controls";
 import type { GameEventQueue } from "@/game-events/GameEvents";
 import { zeroPoint } from "@/geometry";
 import { throttle } from "@/signals";
-import type { WaveProcess } from "@/WaveProcess";
+import type { WaveProcess } from "@/GameProcess";
 import type { WaveState } from "@/waveState";
 import type {
 	InGameCommunicationChannel,

@@ -16,6 +16,7 @@ export const beetleWarrior: EnemyCharacter =
 				damage: 3,
 				range: 80,
 				attackSpeed: 2,
+				materialsDropped: 4,
 			},
 		waveIncreaseStats:
 			{

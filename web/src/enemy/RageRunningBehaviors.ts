@@ -77,7 +77,7 @@ export class RageRunningBehaviors
 					currentEnemy
 						.stats
 						.speed *
-						2,
+						3,
 				);
 			return this.#default.moveToDirection(
 				ragingEnemy,
