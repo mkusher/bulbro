@@ -1,11 +1,6 @@
 import { useState } from "preact/hooks";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
-import {
-	addWeaponToPlayer,
-	type PreRoundState,
-	purchaseWeapon,
-} from "@/shop/PreRoundState";
 import type { WaveStats } from "@/shop/PrevWaveStats";
 import type { ShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
@@ -22,6 +17,40 @@ export default {
 		"Shop/PreRoundScreen",
 };
 
+/**
+ * Calculates the re-roll price for a given re-roll count.
+ */
+function getRerollPrice(
+	rerollCount: number,
+): number {
+	if (
+		rerollCount <=
+		0
+	)
+		return 4;
+	return (
+		4 *
+		2 **
+			(rerollCount -
+				1)
+	);
+}
+
+interface StoryPlayerState {
+	id: string;
+	weapons: Weapon[];
+	materials: number;
+	level: number;
+	rerollCount: number;
+}
+
+interface StoryState {
+	currentWave: number;
+	player: StoryPlayerState;
+	shopItems: ShopItem[];
+	prevWaveStats?: WaveStats;
+}
+
 // Helper to create initial state for stories using the generator
 function createInitialState(
 	weapons: Weapon[],
@@ -30,37 +59,88 @@ function createInitialState(
 	prevWaveStats?: WaveStats,
 	maxShopItems?: number,
 	level: number = 1,
-): PreRoundState {
-	// Generate shop items from the bulbro's available weapons, excluding owned weapons
+	rerollCount: number = 0,
+): StoryState {
 	const shopItems =
 		generateShopItems(
 			wellRoundedBulbro,
 			{
-				excludeOwned:
+				excludeWeapons:
 					weapons,
 				maxItems:
 					maxShopItems,
 				wave,
 				level,
+				rerollCount,
 			},
 		);
 
 	return {
 		currentWave:
 			wave,
-		players:
-			[
-				{
-					id: "player-1",
-					bulbro:
-						wellRoundedBulbro,
-					weapons,
-					materials,
-					level,
-				},
-			],
+		player:
+			{
+				id: "player-1",
+				weapons,
+				materials,
+				level,
+				rerollCount,
+			},
 		shopItems,
 		prevWaveStats,
+	};
+}
+
+function handleStoryPurchase(
+	state: StoryState,
+	item: ShopItem,
+): StoryState | null {
+	if (
+		state
+			.player
+			.materials <
+		item.price
+	)
+		return null;
+
+	const newPlayer =
+		{
+			...state.player,
+			weapons:
+				[
+					...state
+						.player
+						.weapons,
+					item.weapon,
+				],
+			materials:
+				state
+					.player
+					.materials -
+				item.price,
+		};
+
+	const newShopItems =
+		generateShopItems(
+			wellRoundedBulbro,
+			{
+				excludeWeapons:
+					newPlayer.weapons,
+				maxItems: 4,
+				wave: state.currentWave,
+				level:
+					newPlayer.level,
+				rerollCount:
+					newPlayer.rerollCount,
+			},
+		);
+
+	return {
+		...state,
+		player:
+			newPlayer,
+		shopItems:
+			newShopItems,
 	};
 }
 
@@ -73,7 +153,7 @@ export const CompletePreRoundScreen =
 					state,
 					setState,
 				] =
-					useState<PreRoundState>(
+					useState<StoryState>(
 						() =>
 							createInitialState(
 								[
@@ -95,18 +175,69 @@ export const CompletePreRoundScreen =
 							),
 					);
 
-				const player =
-					state
-						.players[0]!;
+				const rerollPrice =
+					getRerollPrice(
+						state
+							.player
+							.rerollCount +
+							1,
+					);
+
+				const handleReroll =
+					() => {
+						if (
+							state
+								.player
+								.materials <
+							rerollPrice
+						)
+							return;
+						const newRerollCount =
+							state
+								.player
+								.rerollCount +
+							1;
+						const newPlayer =
+							{
+								...state.player,
+								materials:
+									state
+										.player
+										.materials -
+									rerollPrice,
+								rerollCount:
+									newRerollCount,
+							};
+						setState(
+							{
+								...state,
+								player:
+									newPlayer,
+								shopItems:
+									generateShopItems(
+										wellRoundedBulbro,
+										{
+											excludeWeapons:
+												newPlayer.weapons,
+											maxItems: 4,
+											wave: state.currentWave,
+											level:
+												newPlayer.level,
+											rerollCount:
+												newRerollCount,
+										},
+									),
+							},
+						);
+					};
 
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
 						const newState =
-							purchaseWeapon(
+							handleStoryPurchase(
 								state,
-								player.id,
 								item,
 							);
 						if (
@@ -138,11 +269,15 @@ export const CompletePreRoundScreen =
 						}
 						player={{
 							bulbro:
-								player.bulbro,
+								wellRoundedBulbro,
 							weapons:
-								player.weapons,
+								state
+									.player
+									.weapons,
 							materials:
-								player.materials,
+								state
+									.player
+									.materials,
 							onWeaponClick:
 								handleWeaponClick,
 						}}
@@ -160,6 +295,12 @@ export const CompletePreRoundScreen =
 								"Starting wave...",
 							)
 						}
+						onReroll={
+							handleReroll
+						}
+						rerollPrice={
+							rerollPrice
+						}
 					/>
 				);
 			},
@@ -174,7 +315,7 @@ export const EarlyGame =
 					state,
 					setState,
 				] =
-					useState<PreRoundState>(
+					useState<StoryState>(
 						() =>
 							createInitialState(
 								[
@@ -195,18 +336,13 @@ export const EarlyGame =
 							),
 					);
 
-				const player =
-					state
-						.players[0]!;
-
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
 						const newState =
-							purchaseWeapon(
+							handleStoryPurchase(
 								state,
-								player.id,
 								item,
 							);
 						if (
@@ -225,11 +361,15 @@ export const EarlyGame =
 						}
 						player={{
 							bulbro:
-								player.bulbro,
+								wellRoundedBulbro,
 							weapons:
-								player.weapons,
+								state
+									.player
+									.weapons,
 							materials:
-								player.materials,
+								state
+									.player
+									.materials,
 						}}
 						shopItems={
 							state.shopItems
@@ -259,7 +399,7 @@ export const LateGame =
 					state,
 					setState,
 				] =
-					useState<PreRoundState>(
+					useState<StoryState>(
 						() =>
 							createInitialState(
 								[
@@ -282,18 +422,13 @@ export const LateGame =
 							),
 					);
 
-				const player =
-					state
-						.players[0]!;
-
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
 						const newState =
-							purchaseWeapon(
+							handleStoryPurchase(
 								state,
-								player.id,
 								item,
 							);
 						if (
@@ -312,11 +447,15 @@ export const LateGame =
 						}
 						player={{
 							bulbro:
-								player.bulbro,
+								wellRoundedBulbro,
 							weapons:
-								player.weapons,
+								state
+									.player
+									.weapons,
 							materials:
-								player.materials,
+								state
+									.player
+									.materials,
 						}}
 						shopItems={
 							state.shopItems
@@ -346,7 +485,7 @@ export const LowMaterialsScenario =
 					state,
 					setState,
 				] =
-					useState<PreRoundState>(
+					useState<StoryState>(
 						() =>
 							createInitialState(
 								[
@@ -368,18 +507,13 @@ export const LowMaterialsScenario =
 							),
 					);
 
-				const player =
-					state
-						.players[0]!;
-
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
 						const newState =
-							purchaseWeapon(
+							handleStoryPurchase(
 								state,
-								player.id,
 								item,
 							);
 						if (
@@ -398,11 +532,15 @@ export const LowMaterialsScenario =
 						}
 						player={{
 							bulbro:
-								player.bulbro,
+								wellRoundedBulbro,
 							weapons:
-								player.weapons,
+								state
+									.player
+									.weapons,
 							materials:
-								player.materials,
+								state
+									.player
+									.materials,
 						}}
 						shopItems={
 							state.shopItems
@@ -423,7 +561,7 @@ export const LowMaterialsScenario =
 			},
 	};
 
-// Story demonstrating addWeaponToPlayer function
+// Story demonstrating free weapon addition (no cost)
 export const AddWeaponDemo =
 	{
 		render:
@@ -432,7 +570,7 @@ export const AddWeaponDemo =
 					state,
 					setState,
 				] =
-					useState<PreRoundState>(
+					useState<StoryState>(
 						() =>
 							createInitialState(
 								[
@@ -453,24 +591,42 @@ export const AddWeaponDemo =
 							),
 					);
 
-				const player =
-					state
-						.players[0]!;
-
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
-						// Use addWeaponToPlayer directly (without deducting materials)
-						// to demonstrate the function
-						const newState =
-							addWeaponToPlayer(
-								state,
-								player.id,
-								item.weapon,
-							);
+						// Add weapon without deducting materials
+						const newPlayer =
+							{
+								...state.player,
+								weapons:
+									[
+										...state
+											.player
+											.weapons,
+										item.weapon,
+									],
+							};
 						setState(
-							newState,
+							{
+								...state,
+								player:
+									newPlayer,
+								shopItems:
+									generateShopItems(
+										wellRoundedBulbro,
+										{
+											excludeWeapons:
+												newPlayer.weapons,
+											maxItems: 4,
+											wave: state.currentWave,
+											level:
+												newPlayer.level,
+											rerollCount:
+												newPlayer.rerollCount,
+										},
+									),
+							},
 						);
 					};
 
@@ -479,14 +635,8 @@ export const AddWeaponDemo =
 						<div className="p-2 mb-2 bg-yellow-100 dark:bg-yellow-900 text-sm rounded">
 							This
 							demo
-							uses{" "}
-							<code>
-								addWeaponToPlayer
-							</code>{" "}
-							-
+							adds
 							weapons
-							are
-							added
 							without
 							deducting
 							materials.
@@ -497,11 +647,15 @@ export const AddWeaponDemo =
 							}
 							player={{
 								bulbro:
-									player.bulbro,
+									wellRoundedBulbro,
 								weapons:
-									player.weapons,
+									state
+										.player
+										.weapons,
 								materials:
-									player.materials,
+									state
+										.player
+										.materials,
 							}}
 							shopItems={
 								state.shopItems
@@ -532,9 +686,8 @@ export const AllShopItems =
 					state,
 					setState,
 				] =
-					useState<PreRoundState>(
+					useState<StoryState>(
 						() => {
-							// Generate all shop items without any exclusions
 							const shopItems =
 								generateShopItems(
 									wellRoundedBulbro,
@@ -545,35 +698,27 @@ export const AllShopItems =
 								);
 							return {
 								currentWave: 1,
-								players:
-									[
-										{
-											id: "player-1",
-											bulbro:
-												wellRoundedBulbro,
-											weapons:
-												[],
-											materials: 1000,
-											level: 1,
-										},
-									],
+								player:
+									{
+										id: "player-1",
+										weapons:
+											[],
+										materials: 1000,
+										level: 1,
+										rerollCount: 0,
+									},
 								shopItems,
 							};
 						},
 					);
-
-				const player =
-					state
-						.players[0]!;
 
 				const handlePurchase =
 					(
 						item: ShopItem,
 					) => {
 						const newState =
-							purchaseWeapon(
+							handleStoryPurchase(
 								state,
-								player.id,
 								item,
 							);
 						if (
@@ -615,11 +760,15 @@ export const AllShopItems =
 							}
 							player={{
 								bulbro:
-									player.bulbro,
+									wellRoundedBulbro,
 								weapons:
-									player.weapons,
+									state
+										.player
+										.weapons,
 								materials:
-									player.materials,
+									state
+										.player
+										.materials,
 							}}
 							shopItems={
 								state.shopItems

@@ -51,6 +51,7 @@ function createFadeAwayState(
 				lastMovedAt: 0,
 				lastHitAt: 0,
 				healedByHpRegenerationAt: 0,
+				rerollCount: 0,
 				lastDirection:
 					{
 						x: 0,

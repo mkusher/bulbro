@@ -39,6 +39,8 @@ export type GameEventInternal =
 	| MoveShotEvent
 	| ShotMovedEvent
 	| ShotExpiredEvent
+	| ShopRerolledEvent
+	| ShopPurchasedEvent
 	| TickEvent
 	| UndefinedEvent;
 
@@ -239,6 +241,22 @@ export type MoveShotEvent =
 		shotId: string;
 		direction: Direction;
 		chance: number;
+	};
+
+export type ShopPurchasedEvent =
+	{
+		type: "shopPurchased";
+		playerId: string;
+		weaponId: string;
+		price: number;
+	};
+
+export type ShopRerolledEvent =
+	{
+		type: "shopRerolled";
+		playerId: string;
+		cost: number;
+		rerollCount: number;
 	};
 
 export type ShotEvent =

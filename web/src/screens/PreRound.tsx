@@ -2,16 +2,12 @@ import { useState } from "preact/hooks";
 import { findBulbroById } from "@/characters-definitions";
 import { startWave } from "@/currentGameProcess";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
-import {
-	type PreRoundState,
-	purchaseWeapon,
-} from "@/shop/PreRoundState";
 import type { ShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
-import type { WaveState } from "@/waveState";
 import {
+	waveState,
 	selectWeapons as selectWeaponsInState,
-	spendMaterials,
+	updateState,
 } from "@/waveState";
 import {
 	fromWeaponState,
@@ -19,196 +15,222 @@ import {
 	type Weapon,
 } from "@/weapon";
 import { useStartBgm } from "@/audio";
+import { recordReroll } from "@/gameStats";
+import { withEventMeta } from "@/game-events/GameEvents";
+import {
+	deltaTime as dt,
+	nowTime,
+} from "@/time";
 
 /**
- * Converts WaveState to PreRoundState for use with the layout.
- * Uses the shop items generator to create shop items from the player's bulbro.
+ * Calculates the re-roll price for a given re-roll count.
+ * First display is free (rerollCount=0), then $4, $8, $16, $32...
  */
-function waveStateToPreRoundState(
-	waveState: WaveState,
-): PreRoundState {
-	const wave =
-		waveState
-			.round
-			.wave;
-
-	const players =
-		waveState.players.map(
-			(
-				player,
-			) => {
-				// Look up the full bulbro character definition by ID
-				const bulbro =
-					findBulbroById(
-						player.id,
-					);
-				const ownedWeapons =
-					player.weapons.map(
-						fromWeaponState,
-					);
-
-				return {
-					id: player.id,
-					bulbro,
-					weapons:
-						ownedWeapons,
-					materials:
-						player.materialsAvailable,
-					level:
-						player.level,
-				};
-			},
-		);
-
-	// Generate shop items from the first player's bulbro, excluding owned weapons
-	const firstPlayer =
-		players[0];
-	const shopItems =
-		firstPlayer
-			? generateShopItems(
-					firstPlayer.bulbro,
-					{
-						excludeOwned:
-							firstPlayer.weapons,
-						maxItems: 4,
-						wave,
-						level:
-							firstPlayer.level,
-					},
-				)
-			: [];
-
-	return {
-		currentWave:
-			wave,
-		players,
-		shopItems,
-	};
+function getRerollPrice(
+	rerollCount: number,
+): number {
+	if (
+		rerollCount <=
+		0
+	)
+		return 4;
+	return (
+		4 *
+		2 **
+			(rerollCount -
+				1)
+	);
 }
 
-type Props =
-	{
-		state: WaveState;
-	};
+/**
+ * Generates shop items for the first player from the current wave state.
+ */
+function generateShopItemsFromWaveState(): ShopItem[] {
+	const state =
+		waveState.value;
+	const player =
+		state
+			.players[0];
+	if (
+		!player
+	)
+		return [];
+
+	const bulbro =
+		findBulbroById(
+			player.type,
+		);
+
+	return generateShopItems(
+		bulbro,
+		{
+			excludeWeapons:
+				[],
+			maxItems: 4,
+			wave: state
+				.round
+				.wave,
+			level:
+				player.level,
+			rerollCount:
+				player.rerollCount,
+		},
+	);
+}
 
 /**
  * PreRound screen component.
- * Manages state and connects to the game process.
- * Uses PreRoundLayout for rendering and generates shop items automatically.
+ * Reads and writes the waveState signal directly.
  */
-export function PreRound({
-	state,
-}: Props) {
+export function PreRound() {
 	const [
-		currentState,
-		setCurrentState,
+		shopItems,
+		setShopItems,
 	] =
 		useState(
-			state,
-		);
-	const [
-		preRoundState,
-		setPreRoundState,
-	] =
-		useState(
-			() =>
-				waveStateToPreRoundState(
-					state,
-				),
+			generateShopItemsFromWaveState,
 		);
 
 	useStartBgm();
+
+	const state =
+		waveState.value;
+	const player =
+		state
+			.players[0];
+	const rerollCount =
+		player?.rerollCount ??
+		0;
+	const rerollPrice =
+		getRerollPrice(
+			rerollCount +
+				1,
+		);
+
+	const handleReroll =
+		() => {
+			if (
+				!player ||
+				player.materialsAvailable <
+					rerollPrice
+			)
+				return;
+
+			const newRerollCount =
+				rerollCount +
+				1;
+
+			recordReroll(
+				rerollPrice,
+			);
+
+			const now =
+				nowTime(
+					Date.now(),
+				);
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "shopRerolled",
+							playerId:
+								player.id,
+							cost: rerollPrice,
+							rerollCount:
+								newRerollCount,
+						},
+						dt(
+							0,
+						),
+						now,
+					),
+				);
+
+			setShopItems(
+				generateShopItemsFromWaveState(),
+			);
+		};
 
 	const handlePurchase =
 		(
 			item: ShopItem,
 		) => {
-			const player =
-				preRoundState
-					.players[0];
 			if (
-				!player
+				!player ||
+				player.materialsAvailable <
+					item.price
 			)
 				return;
 
-			const newPreRoundState =
-				purchaseWeapon(
-					preRoundState,
-					player.id,
-					item,
+			const now =
+				nowTime(
+					Date.now(),
 				);
-			if (
-				newPreRoundState
-			) {
-				// Regenerate shop items after purchase (exclude newly owned weapons)
-				const updatedPlayer =
-					newPreRoundState.players.find(
-						(
-							p,
-						) =>
-							p.id ===
-							player.id,
-					);
-				const newShopItems =
-					updatedPlayer
-						? generateShopItems(
-								updatedPlayer.bulbro,
-								{
-									excludeOwned:
-										updatedPlayer.weapons,
-									maxItems: 4,
-									wave: preRoundState.currentWave,
-									level:
-										updatedPlayer.level,
-								},
-							)
-						: newPreRoundState.shopItems;
 
-				setPreRoundState(
+			// Apply purchase event to deduct materials
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "shopPurchased",
+							playerId:
+								player.id,
+							weaponId:
+								item
+									.weapon
+									.id,
+							price:
+								item.price,
+						},
+						dt(
+							0,
+						),
+						now,
+					),
+				);
+
+			// Add weapon to player's loadout
+			const updatedPlayer =
+				waveState.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						player.id,
+				);
+			const newWeapons =
+				[
+					...(updatedPlayer?.weapons ??
+						[]),
+					toWeaponState(
+						item.weapon,
+					),
+				];
+
+			waveState.value =
+				selectWeaponsInState(
+					waveState.value,
 					{
-						...newPreRoundState,
-						shopItems:
-							newShopItems,
+						type: "select-weapons",
+						playerId:
+							player.id,
+						weapons:
+							newWeapons,
+						now,
 					},
 				);
 
-				// Also update the wave state with the new weapon and deduct materials
-				let newWaveState =
-					selectWeaponsInState(
-						currentState,
-						{
-							type: "select-weapons",
-							playerId:
-								player.id,
-							weapons:
-								newPreRoundState.players
-									.find(
-										(
-											p,
-										) =>
-											p.id ===
-											player.id,
-									)
-									?.weapons.map(
-										toWeaponState,
-									) ??
-								[],
-							now: Date.now(),
-						},
-					);
-
-				// Deduct materials from the bulbro
-				newWaveState =
-					spendMaterials(
-						newWaveState,
-						player.id,
-						item.price,
-					);
-
-				setCurrentState(
-					newWaveState,
-				);
-			}
+			setShopItems(
+				shopItems.filter(
+					(
+						i,
+					) =>
+						i !==
+						item,
+				),
+			);
 		};
 
 	const handleWeaponClick =
@@ -227,13 +249,10 @@ export function PreRound({
 	const handleStartWave =
 		() => {
 			startWave(
-				currentState,
+				waveState.value,
 			);
 		};
 
-	const player =
-		preRoundState
-			.players[0];
 	if (
 		!player
 	) {
@@ -246,29 +265,47 @@ export function PreRound({
 		);
 	}
 
+	const bulbro =
+		findBulbroById(
+			player.type,
+		);
+	const ownedWeapons =
+		player.weapons.map(
+			fromWeaponState,
+		);
+
 	return (
 		<PreRoundLayout
 			currentWave={
-				preRoundState.currentWave
+				state
+					.round
+					.wave
 			}
 			player={{
-				bulbro:
-					player.bulbro,
+				bulbro,
 				weapons:
-					player.weapons,
+					ownedWeapons,
 				materials:
-					player.materials,
+					player.materialsAvailable,
 				onWeaponClick:
 					handleWeaponClick,
 			}}
 			shopItems={
-				preRoundState.shopItems
+				shopItems
 			}
 			onPurchase={
 				handlePurchase
 			}
 			onStartWave={
 				handleStartWave
+			}
+			onReroll={
+				handleReroll
+			}
+			rerollPrice={
+				shopItems.length
+					? rerollPrice
+					: 0
 			}
 		/>
 	);

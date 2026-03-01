@@ -69,6 +69,13 @@ export const DefaultShop =
 						item.price,
 					);
 				},
+			onReroll:
+				() => {
+					console.log(
+						"Re-roll clicked",
+					);
+				},
+			rerollPrice: 4,
 		},
 	};
 

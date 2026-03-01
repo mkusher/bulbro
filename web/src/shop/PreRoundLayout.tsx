@@ -46,6 +46,10 @@ export interface PreRoundLayoutProps {
 	) => void;
 	/** Callback when the start wave button is clicked */
 	onStartWave?: () => void;
+	/** Callback when the re-roll button is clicked */
+	onReroll?: () => void;
+	/** Current re-roll price */
+	rerollPrice?: number;
 }
 
 /**
@@ -60,6 +64,8 @@ export function PreRoundLayout({
 	prevWaveStats,
 	onPurchase,
 	onStartWave,
+	onReroll,
+	rerollPrice,
 }: PreRoundLayoutProps) {
 	const nextWave =
 		currentWave +
@@ -147,6 +153,12 @@ export function PreRoundLayout({
 					}
 					onPurchase={
 						onPurchase
+					}
+					onReroll={
+						onReroll
+					}
+					rerollPrice={
+						rerollPrice
 					}
 				/>
 

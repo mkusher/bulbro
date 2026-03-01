@@ -52,6 +52,7 @@ function createTestBulbro(
 			lastMovedAt: 0,
 			lastHitAt: 0,
 			healedByHpRegenerationAt: 0,
+			rerollCount: 0,
 			lastDirection:
 				facingDirection,
 		},

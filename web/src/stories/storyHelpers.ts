@@ -180,6 +180,7 @@ function createMockBulbro(
 			weapons:
 				[],
 			healedByHpRegenerationAt: 0,
+			rerollCount: 0,
 			stats:
 				{
 					...baseStats,

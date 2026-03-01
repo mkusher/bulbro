@@ -1190,6 +1190,21 @@ export function updateState(
 					),
 			};
 		}
+		case "shopRerolled":
+		case "shopPurchased": {
+			return {
+				...state,
+				players:
+					state.players.map(
+						(
+							player,
+						) =>
+							player.applyEvent(
+								action,
+							),
+					),
+			};
+		}
 		case "tick": {
 			const round =
 				updateRound(

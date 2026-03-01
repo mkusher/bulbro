@@ -33,6 +33,8 @@ export const Failed =
 						damageTaken: 3250,
 						materialsCollected: 156,
 						totalSurvivalTime: 542,
+						materialsSpent: 0,
+						rerolls: 0,
 					};
 				return (
 					<FailedScreen />
@@ -62,6 +64,8 @@ export const FirstWaveFailed =
 						damageTaken: 100,
 						materialsCollected: 5,
 						totalSurvivalTime: 35,
+						materialsSpent: 0,
+						rerolls: 0,
 					};
 				return (
 					<FailedScreen />
@@ -84,6 +88,8 @@ export const NoWaveStats =
 						damageTaken: 0,
 						materialsCollected: 0,
 						totalSurvivalTime: 0,
+						materialsSpent: 0,
+						rerolls: 0,
 					};
 				return (
 					<FailedScreen />

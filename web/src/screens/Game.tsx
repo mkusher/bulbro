@@ -14,7 +14,6 @@ import { PreRound } from "@/screens/PreRound";
 import { MainContainer } from "@/ui/Layout";
 import { Loader } from "@/ui/Loading";
 import { SplashBanner } from "@/ui/Splash";
-import { waveState } from "@/waveState";
 import { StartScreen } from "./StartScreen";
 
 export function InGame() {
@@ -71,11 +70,7 @@ export function InGame() {
 					noPadding
 					top
 				>
-					<PreRound
-						state={
-							waveState.value
-						}
-					/>
+					<PreRound />
 				</MainContainer>
 			</SplashBanner>
 		);

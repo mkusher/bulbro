@@ -3,6 +3,93 @@ import type { ShopItem } from "@/shop/Shop";
 import type { Weapon } from "@/weapon";
 
 /**
+ * Simple seeded pseudo-random number generator (mulberry32).
+ * Returns a function that produces deterministic values in [0, 1).
+ */
+function seededRng(
+	seed: number,
+): () => number {
+	return () => {
+		seed |= 0;
+		seed =
+			(seed +
+				0x6d2b79f5) |
+			0;
+		let t =
+			Math.imul(
+				seed ^
+					(seed >>>
+						15),
+				1 |
+					seed,
+			);
+		t =
+			(t +
+				Math.imul(
+					t ^
+						(t >>>
+							7),
+					61 |
+						t,
+				)) ^
+			t;
+		return (
+			((t ^
+				(t >>>
+					14)) >>>
+				0) /
+			4294967296
+		);
+	};
+}
+
+/**
+ * Fisher-Yates shuffle using a seeded RNG for deterministic results.
+ */
+function shuffleArray<
+	T,
+>(
+	array: T[],
+	seed: number,
+): void {
+	const rng =
+		seededRng(
+			seed,
+		);
+	for (
+		let i =
+			array.length -
+			1;
+		i >
+		0;
+		i--
+	) {
+		const j =
+			Math.floor(
+				rng() *
+					(i +
+						1),
+			);
+		[
+			array[
+				i
+			],
+			array[
+				j
+			],
+		] =
+			[
+				array[
+					j
+				]!,
+				array[
+					i
+				]!,
+			];
+	}
+}
+
+/**
  * Base prices for different weapon classes (normalized to wave 1).
  * These are relative values that get scaled by wave/level.
  */
@@ -59,9 +146,9 @@ const STAT_PRICE_WEIGHTS: Record<
 const PRICE_CONFIG =
 	{
 		/** Minimum price at wave 1 */
-		minPrice: 10,
+		minPrice: 4,
 		/** Maximum price at wave 1 for the most expensive items */
-		maxPriceWave1: 50,
+		maxPriceWave1: 20,
 		/** Price multiplier per wave (compound growth) */
 		waveMultiplier: 1.15,
 		/** Price multiplier per bulbro level */
@@ -207,13 +294,15 @@ export function calculateWeaponPrice(
  */
 export interface GenerateShopItemsOptions {
 	/** Weapons to exclude (e.g., already owned weapons) */
-	excludeOwned?: Weapon[];
+	excludeWeapons?: Weapon[];
 	/** Maximum number of items to include in shop */
 	maxItems?: number;
 	/** Current wave number (1-based, default: 1) */
 	wave?: number;
 	/** Bulbro level (1-based, default: 1) */
 	level?: number;
+	/** Re-roll count for shuffling items (0 = first display, each value gives different selection) */
+	rerollCount?: number;
 }
 
 /**
@@ -235,16 +324,17 @@ export function generateShopItems(
 	options: GenerateShopItemsOptions = {},
 ): ShopItem[] {
 	const {
-		excludeOwned = [],
+		excludeWeapons = [],
 		maxItems,
 		wave = 1,
 		level = 1,
+		rerollCount,
 	} = options;
 
 	// Get IDs of weapons to exclude
 	const excludedIds =
 		new Set(
-			excludeOwned.map(
+			excludeWeapons.map(
 				(
 					w,
 				) =>
@@ -277,15 +367,25 @@ export function generateShopItems(
 				}),
 			);
 
-	// Sort by price (cheapest first) for better UX
-	shopItems.sort(
-		(
-			a,
-			b,
-		) =>
-			a.price -
-			b.price,
-	);
+	// Shuffle items if rerollCount is provided, otherwise sort by price
+	if (
+		rerollCount !==
+		undefined
+	) {
+		shuffleArray(
+			shopItems,
+			rerollCount,
+		);
+	} else {
+		shopItems.sort(
+			(
+				a,
+				b,
+			) =>
+				a.price -
+				b.price,
+		);
+	}
 
 	// Limit items if maxItems is specified
 	if (

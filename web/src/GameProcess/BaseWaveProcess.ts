@@ -99,9 +99,7 @@ export class BaseWaveProcess
 				new AudioEventsProcessor(
 					waveState,
 				),
-				new GameStatsProcessor(
-					waveState,
-				),
+				new GameStatsProcessor(),
 			];
 	}
 

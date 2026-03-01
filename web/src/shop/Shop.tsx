@@ -20,12 +20,16 @@ export interface ShopProps {
 	onPurchase?: (
 		item: ShopItem,
 	) => void;
+	onReroll?: () => void;
+	rerollPrice?: number;
 }
 
 export function Shop({
 	items,
 	availableMaterials,
 	onPurchase,
+	onReroll,
+	rerollPrice,
 }: ShopProps) {
 	const [
 		purchasedItems,
@@ -87,12 +91,36 @@ export function Shop({
 					<h3 className="text-sm font-semibold">
 						Shop
 					</h3>
-					<span className="text-xs text-muted-foreground">
-						$
-						{
-							availableMaterials
-						}
-					</span>
+					<div className="flex items-center gap-2">
+						{onReroll &&
+							rerollPrice !==
+								undefined && (
+								<Button
+									onClick={
+										onReroll
+									}
+									disabled={
+										availableMaterials <
+										rerollPrice
+									}
+									size="sm"
+									variant="outline"
+									className="h-7 text-xs px-3"
+								>
+									Re-roll
+									$
+									{
+										rerollPrice
+									}
+								</Button>
+							)}
+						<span className="text-xs text-muted-foreground">
+							$
+							{
+								availableMaterials
+							}
+						</span>
+					</div>
 				</div>
 			</CardHeader>
 			<CardContent className="pt-0">

@@ -1,6 +1,6 @@
 import { signal } from "@preact/signals";
 import type { WaveStats } from "@/shop/PrevWaveStats";
-import type { WaveState } from "@/waveState";
+import type { GameEvent } from "@/game-events/GameEvents";
 
 /**
  * Total game stats accumulated across all waves.
@@ -12,6 +12,8 @@ export interface TotalGameStats {
 	damageTaken: number;
 	materialsCollected: number;
 	totalSurvivalTime: number;
+	materialsSpent: number;
+	rerolls: number;
 }
 
 /**
@@ -25,6 +27,8 @@ function createEmptyGameStats(): TotalGameStats {
 		damageTaken: 0,
 		materialsCollected: 0,
 		totalSurvivalTime: 0,
+		materialsSpent: 0,
+		rerolls: 0,
 	};
 }
 
@@ -122,6 +126,7 @@ export function finalizeWaveStats(
 		gameStats.value;
 	gameStats.value =
 		{
+			...current,
 			wavesCompleted:
 				current.wavesCompleted +
 				1,
@@ -144,118 +149,68 @@ export function finalizeWaveStats(
 }
 
 /**
- * Updates wave stats by comparing state before and after a tick.
- * This approach catches all changes including those from internal event processing.
+ * Records a shop reroll in the total game stats.
  */
-export function updateStatsFromStateChange(
-	prevState: WaveState,
-	newState: WaveState,
+export function recordReroll(
+	cost: number,
+): void {
+	const current =
+		gameStats.value;
+	gameStats.value =
+		{
+			...current,
+			materialsSpent:
+				current.materialsSpent +
+				cost,
+			rerolls:
+				current.rerolls +
+				1,
+		};
+}
+
+/**
+ * Updates wave stats by processing game events directly.
+ */
+export function updateStatsFromEvents(
+	events: GameEvent[],
 ): void {
 	let enemiesKilled = 0;
 	let damageDealt = 0;
 	let damageTaken = 0;
 	let materialsCollected = 0;
 
-	// Count newly killed enemies
-	for (const enemy of newState.enemies) {
-		if (
-			enemy.killedAt
+	for (const event of events) {
+		switch (
+			event.type
 		) {
-			const prevEnemy =
-				prevState.enemies.find(
-					(
-						e,
-					) =>
-						e.id ===
-						enemy.id,
-				);
-			if (
-				prevEnemy &&
-				!prevEnemy.killedAt
-			) {
+			case "enemyDied":
 				enemiesKilled++;
-				// Damage dealt is the enemy's max HP (they're dead now)
 				damageDealt +=
-					prevEnemy.healthPoints;
-			}
-		} else {
-			// Enemy still alive, check if they took damage
-			const prevEnemy =
-				prevState.enemies.find(
-					(
-						e,
-					) =>
-						e.id ===
-						enemy.id,
+					event.damage;
+				break;
+			case "enemyReceivedHit":
+				damageDealt +=
+					event.damage;
+				break;
+			case "bulbroReceivedHit":
+				damageTaken +=
+					event.damage;
+				break;
+			case "bulbroDied":
+				damageTaken +=
+					event.damage;
+				break;
+			case "materialCollected":
+				materialsCollected++;
+				break;
+			case "shopRerolled":
+				recordReroll(
+					event.cost,
 				);
-			if (
-				prevEnemy &&
-				prevEnemy.healthPoints >
-					enemy.healthPoints
-			) {
-				damageDealt +=
-					prevEnemy.healthPoints -
-					enemy.healthPoints;
-			}
+				break;
 		}
 	}
 
-	// Count damage taken by players
-	for (const player of newState.players) {
-		const prevPlayer =
-			prevState.players.find(
-				(
-					p,
-				) =>
-					p.id ===
-					player.id,
-			);
-		if (
-			prevPlayer &&
-			prevPlayer.healthPoints >
-				player.healthPoints
-		) {
-			damageTaken +=
-				prevPlayer.healthPoints -
-				player.healthPoints;
-		}
-	}
-
-	// Count materials collected (materials that disappeared from objects)
-	const prevMaterialCount =
-		prevState.objects.filter(
-			(
-				o,
-			) =>
-				o.type ===
-				"material",
-		).length;
-	const newMaterialCount =
-		newState.objects.filter(
-			(
-				o,
-			) =>
-				o.type ===
-				"material",
-		).length;
-	// Materials are removed when collected, and new ones spawn when enemies die
-	// We need to track the difference accounting for spawned materials
-	const materialsSpawned =
-		enemiesKilled; // One material per kill
-	const materialsDelta =
-		prevMaterialCount -
-		newMaterialCount;
-	if (
-		materialsDelta >
-		0
-	) {
-		// More materials were removed than appeared, so some were collected
-		materialsCollected =
-			materialsDelta +
-			materialsSpawned;
-	}
-
-	// Only update if there are changes
 	if (
 		enemiesKilled >
 			0 ||

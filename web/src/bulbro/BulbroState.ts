@@ -70,6 +70,7 @@ type BulbroStateProperties =
 		readonly healedByHpRegenerationAt: number;
 		readonly killedAt?: number;
 		readonly lastDirection: Direction;
+		readonly rerollCount: number;
 	};
 
 /**
@@ -156,6 +157,12 @@ export class BulbroState
 		return this
 			.#props
 			.healedByHpRegenerationAt;
+	}
+
+	get rerollCount() {
+		return this
+			.#props
+			.rerollCount;
 	}
 
 	constructor(
@@ -832,6 +839,50 @@ export class BulbroState
 				);
 			}
 
+			case "shopRerolled":
+				if (
+					event.playerId !==
+					this
+						.id
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						materialsAvailable:
+							Math.max(
+								0,
+								this
+									.materialsAvailable -
+									event.cost,
+							),
+						rerollCount:
+							event.rerollCount,
+					},
+				);
+
+			case "shopPurchased":
+				if (
+					event.playerId !==
+					this
+						.id
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						materialsAvailable:
+							Math.max(
+								0,
+								this
+									.materialsAvailable -
+									event.price,
+							),
+					},
+				);
+
 			default:
 				return this;
 		}
@@ -900,6 +951,7 @@ export function spawnBulbro(
 			materialsAvailable: 0,
 			lastDirection:
 				zeroPoint(),
+			rerollCount: 0,
 		},
 	);
 }
