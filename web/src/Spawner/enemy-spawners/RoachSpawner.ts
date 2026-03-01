@@ -29,7 +29,9 @@ export class RoachSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed
+			!passedSecond.hasSecondPassed ||
+			passedSecond.currentSecond <
+				1
 		) {
 			return [];
 		}

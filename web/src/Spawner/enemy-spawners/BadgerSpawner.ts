@@ -29,14 +29,16 @@ export class BadgerSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed
+			!passedSecond.hasSecondPassed ||
+			passedSecond.currentSecond <
+				1
 		) {
 			return [];
 		}
 
 		if (
 			passedSecond.currentSecond %
-				5 ===
+				8 ===
 			0
 		) {
 			return spawnCluster(

@@ -76,7 +76,7 @@ export class ColoradoBeetleSpawner
 			0
 		) {
 			return this.#spawnCluster(
-				4,
+				3,
 				shortRange,
 				range(
 					randomAngle(),

@@ -29,7 +29,9 @@ export class HedgehogSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed
+			!passedSecond.hasSecondPassed ||
+			passedSecond.currentSecond <
+				1
 		) {
 			return [];
 		}

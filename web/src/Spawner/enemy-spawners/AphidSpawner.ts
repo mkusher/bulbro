@@ -29,14 +29,16 @@ export class AphidSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed
+			!passedSecond.hasSecondPassed ||
+			passedSecond.currentSecond <
+				1
 		) {
 			return [];
 		}
 
 		if (
 			passedSecond.currentSecond %
-				10 ===
+				12 ===
 			0
 		) {
 			const angle =
@@ -75,7 +77,7 @@ export class AphidSpawner
 		if (
 			(passedSecond.currentSecond +
 				1) %
-				6 ===
+				8 ===
 			0
 		) {
 			return spawnCluster(

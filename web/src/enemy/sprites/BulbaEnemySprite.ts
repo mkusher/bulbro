@@ -1,5 +1,8 @@
 import * as PIXI from "pixi.js";
-import { ColorOverlayFilter } from "pixi-filters";
+import {
+	ColorOverlayFilter,
+	OutlineFilter,
+} from "pixi-filters";
 import { ConvolutionFilter } from "pixi-filters/convolution";
 import { Assets } from "@/Assets";
 import type {
@@ -457,9 +460,19 @@ export class BulbaEnemySprite extends GameSprite {
 			),
 		);
 
+		const outlineFilter =
+			new OutlineFilter(
+				2,
+				0x000000,
+				1.0,
+			);
 		container.addChild(
 			scaling,
 		);
+		container.filters =
+			[
+				outlineFilter,
+			];
 		scaling.y =
 			-container.height;
 		scaling.x =

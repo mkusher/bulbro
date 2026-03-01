@@ -29,14 +29,16 @@ export class BeetleWarriorSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed
+			!passedSecond.hasSecondPassed ||
+			passedSecond.currentSecond <
+				1
 		) {
 			return [];
 		}
 
 		if (
 			passedSecond.currentSecond %
-				4 ===
+				6 ===
 			0
 		) {
 			return spawnCluster(
