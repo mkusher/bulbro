@@ -55,6 +55,11 @@ function createTestBulbro(
 			rerollCount: 0,
 			lastDirection:
 				facingDirection,
+			lastHorizontalDirection:
+				facingDirection.x !==
+				0
+					? facingDirection.x
+					: 1,
 		},
 	);
 }
@@ -160,7 +165,7 @@ describe("shoot", () => {
 				weapon,
 				0,
 				1,
-				facingRight,
+				facingRight.x,
 			);
 		const weaponCenter =
 			addition(

@@ -155,6 +155,7 @@ export type EnemyReceivedHitEvent =
 		type: "enemyReceivedHit";
 		enemyId: string;
 		damage: number;
+		newHealthPoints: number;
 	};
 
 export type EnemySpawnedEvent =

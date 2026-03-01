@@ -13,4 +13,5 @@ export const aphidGun: Weapon =
 			{
 				attackSpeed: 2,
 			},
+		basePrice: 5,
 	};

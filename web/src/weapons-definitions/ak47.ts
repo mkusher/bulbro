@@ -21,4 +21,5 @@ export const ak47: Weapon =
 				attackSpeed: 0.3,
 				knockback: 5,
 			},
+		basePrice: 5,
 	};

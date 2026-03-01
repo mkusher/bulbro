@@ -20,4 +20,5 @@ export const sword: Weapon =
 				range: 80,
 				attackSpeed: 0.9,
 			},
+		basePrice: 5,
 	};

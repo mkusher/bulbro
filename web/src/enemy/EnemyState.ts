@@ -31,6 +31,7 @@ export type {
 
 export const RAGE_STARTING_DURATION = 500;
 export const RAGE_TOTAL_DURATION = 1500;
+export const DEATH_DURATION = 1000;
 
 /**
  * Immutable runtime state of a single enemy.
@@ -73,6 +74,7 @@ export type EnemyStateProps =
 		readonly killedAt?: number;
 		readonly knockback?: Knockback;
 		readonly lastDirection?: Direction;
+		readonly lastHorizontalDirection: number;
 		readonly behaviors?: EnemyBehaviors;
 		readonly ragingStartedAt?: number;
 		readonly ragingDirection?: Direction;
@@ -138,6 +140,11 @@ export class EnemyState
 		return this
 			.#props
 			.lastDirection;
+	}
+	get lastHorizontalDirection() {
+		return this
+			.#props
+			.lastHorizontalDirection;
 	}
 	get behaviors(): EnemyBehaviors {
 		return this
@@ -243,16 +250,16 @@ export class EnemyState
 		| EnemyReceivedHitEvent
 		| EnemyDiedEvent {
 		const newHealthPoints =
-			this
-				.healthPoints -
-			shot.damage;
+			Math.max(
+				this
+					.healthPoints -
+					shot.damage,
+				0,
+			);
 
 		if (
 			newHealthPoints <=
-				0 &&
-			this
-				.healthPoints >
-				0
+			0
 		) {
 			// Enemy dies
 			return {
@@ -281,7 +288,10 @@ export class EnemyState
 				this
 					.id,
 			damage:
-				shot.damage,
+				this
+					.healthPoints -
+				newHealthPoints,
+			newHealthPoints,
 		};
 	}
 
@@ -309,6 +319,17 @@ export class EnemyState
 							event.occurredAt,
 						lastDirection:
 							event.direction,
+						lastHorizontalDirection:
+							event
+								.direction
+								.x !==
+							0
+								? event
+										.direction
+										.x
+								: this
+										.#props
+										.lastHorizontalDirection,
 						knockback:
 							undefined,
 					},
@@ -505,6 +526,7 @@ export function spawnEnemy(
 				character.stats,
 			lastMovedAt: 0,
 			lastHitAt: 0,
+			lastHorizontalDirection: 1,
 			behaviors:
 				getBehaviors(
 					character.behaviors,

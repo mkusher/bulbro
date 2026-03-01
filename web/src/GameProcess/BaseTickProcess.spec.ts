@@ -13,9 +13,12 @@ import { BulbroState } from "../bulbro";
 import { EnemyState } from "../enemy";
 import { logger } from "../logger";
 import { ShotState } from "../shot/ShotState";
+import type {
+	WaveState,
+	WeaponState,
+} from "../waveState";
 import { BaseTickProcess } from "./BaseTickProcess";
 import type { TickProcess } from "./index";
-import type { WaveState } from "../waveState";
 
 /**
  * Helper to create a test shot
@@ -98,6 +101,7 @@ function createTestEnemy(
 				[],
 			lastMovedAt: 0,
 			lastHitAt: 0,
+			lastHorizontalDirection: 1,
 			killedAt:
 				undefined,
 		},
@@ -111,7 +115,7 @@ function createTestPlayer(
 	id: string,
 	x = 100,
 	y = 100,
-	weapons: any = [],
+	weapons: WeaponState[] = [],
 ): BulbroState {
 	return new BulbroState(
 		{
@@ -158,6 +162,7 @@ function createTestPlayer(
 					x: 1,
 					y: 0,
 				},
+			lastHorizontalDirection: 1,
 		},
 	);
 }
@@ -1193,6 +1198,7 @@ describe("TickProcess", () => {
 								x: 1,
 								y: 0,
 							},
+						lastHorizontalDirection: 1,
 					},
 				);
 			state.players =

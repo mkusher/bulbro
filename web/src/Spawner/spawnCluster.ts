@@ -1,12 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import type { EnemyEvent } from "@/game-events/GameEvents";
-import {
-	addition,
-	type Point,
-	type Position,
-	type Range,
-	type Size,
-} from "@/geometry";
 import type { EnemyCharacter } from "@/enemy";
 import {
 	buildEnemyCharacterForWave,
@@ -16,6 +8,19 @@ import {
 	type EnemyState,
 	spawnEnemy,
 } from "@/enemy/EnemyState";
+import type { EnemyEvent } from "@/game-events/GameEvents";
+import {
+	addition,
+	type Point,
+	type Position,
+	type Range,
+	type Size,
+} from "@/geometry";
+import {
+	pickRandom,
+	randomAngle,
+	randomInRange,
+} from "@/random";
 import type { WaveState } from "@/waveState";
 
 function spawnCount(
@@ -32,6 +37,10 @@ function spawnCount(
 			.length
 	);
 }
+
+export {
+	randomAngle,
+};
 
 export function spawnCluster(
 	enemies: EnemyCharacter[],
@@ -85,14 +94,6 @@ export function getSpawnCenter(
 	return waveState
 		.players[0]!
 		.position;
-}
-
-export function randomAngle() {
-	return (
-		Math.random() *
-		Math.PI *
-		2
-	);
 }
 
 function prepareEnemies(
@@ -190,29 +191,4 @@ function randomPositionInRadius(
 			),
 		),
 	};
-}
-
-function pickRandom<
-	T,
->(
-	list: T[],
-) {
-	return list[
-		Math.floor(
-			list.length *
-				Math.random(),
-		)
-	]!;
-}
-
-function randomInRange(
-	from: number,
-	to: number,
-) {
-	return (
-		from +
-		Math.random() *
-			(to -
-				from)
-	);
 }

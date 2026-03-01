@@ -15,6 +15,10 @@ import {
 	type Weapon,
 } from "@/weapon";
 import { useStartBgm } from "@/audio";
+import {
+	firstRerollPrice,
+	rerollIncrease,
+} from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
 import { withEventMeta } from "@/game-events/GameEvents";
 import {
@@ -23,22 +27,20 @@ import {
 } from "@/time";
 
 /**
- * Calculates the re-roll price for a given re-roll count.
- * First display is free (rerollCount=0), then $4, $8, $16, $32...
+ * Calculates the re-roll price for a given re-roll count and wave.
  */
 function getRerollPrice(
 	rerollCount: number,
+	wave: number,
 ): number {
-	if (
-		rerollCount <=
-		0
-	)
-		return 4;
 	return (
-		4 *
-		2 **
-			(rerollCount -
-				1)
+		firstRerollPrice(
+			wave,
+		) +
+		rerollCount *
+			rerollIncrease(
+				wave,
+			)
 	);
 }
 
@@ -70,8 +72,6 @@ function generateShopItemsFromWaveState(): ShopItem[] {
 			wave: state
 				.round
 				.wave,
-			level:
-				player.level,
 			rerollCount:
 				player.rerollCount,
 		},
@@ -103,8 +103,10 @@ export function PreRound() {
 		0;
 	const rerollPrice =
 		getRerollPrice(
-			rerollCount +
-				1,
+			rerollCount,
+			state
+				.round
+				.wave,
 		);
 
 	const handleReroll =

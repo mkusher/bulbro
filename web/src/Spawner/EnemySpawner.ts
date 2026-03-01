@@ -4,40 +4,39 @@ import type {
 	NowTime,
 } from "@/time";
 import type { WaveState } from "@/waveState";
-import type { WaveSpawner } from "./WaveSpawner";
-import { DefaultWaveSpawner } from "./DefaultWaveSpawner";
-import { FirstWaveSpawner } from "./FirstWaveSpawner";
-import { FourthWaveSpawner } from "./FourthWaveSpawner";
-import { SecondWaveSpawner } from "./SecondWaveSpawner";
-import { ThirdWaveSpawner } from "./ThirdWaveSpawner";
+import {
+	AphidSpawner,
+	BabySpawner,
+	BadgerSpawner,
+	BeetleArcherSpawner,
+	BeetleWarriorSpawner,
+	ColoradoBeetleSpawner,
+	HedgehogSpawner,
+	RoachSpawner,
+	WildBoarSpawner,
+} from "./enemy-spawners";
 
-const spawners =
-	new Map<
-		number,
-		WaveSpawner
-	>(
-		[
-			[
-				1,
-				new FirstWaveSpawner(),
-			],
-			[
-				2,
-				new SecondWaveSpawner(),
-			],
-			[
-				3,
-				new ThirdWaveSpawner(),
-			],
-			[
-				4,
-				new FourthWaveSpawner(),
-			],
-		],
-	);
+type SpawnerLogic =
+	{
+		tick(
+			waveState: WaveState,
+			deltaTime: DeltaTime,
+			now: NowTime,
+		): EnemyEvent[];
+	};
 
-const defaultSpawner: WaveSpawner =
-	new DefaultWaveSpawner();
+const spawners: SpawnerLogic[] =
+	[
+		new BabySpawner(),
+		new ColoradoBeetleSpawner(),
+		new BeetleWarriorSpawner(),
+		new BeetleArcherSpawner(),
+		new AphidSpawner(),
+		new RoachSpawner(),
+		new HedgehogSpawner(),
+		new WildBoarSpawner(),
+		new BadgerSpawner(),
+	];
 
 export class EnemySpawner {
 	tick(
@@ -45,19 +44,15 @@ export class EnemySpawner {
 		deltaTime: DeltaTime,
 		now: NowTime,
 	): EnemyEvent[] {
-		const wave =
-			waveState
-				.round
-				.wave;
-		const spawner =
-			spawners.get(
-				wave,
-			) ??
-			defaultSpawner;
-		return spawner.tick(
-			waveState,
-			deltaTime,
-			now,
+		return spawners.flatMap(
+			(
+				s,
+			) =>
+				s.tick(
+					waveState,
+					deltaTime,
+					now,
+				),
 		);
 	}
 }

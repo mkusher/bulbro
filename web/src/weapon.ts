@@ -53,6 +53,7 @@ export interface Weapon {
 	classes: WeaponClass[];
 	statsBonus: StatsBonus;
 	shotSpeed: number;
+	basePrice: number;
 }
 
 export const toWeaponState =

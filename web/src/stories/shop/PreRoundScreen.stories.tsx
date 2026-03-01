@@ -1,5 +1,9 @@
 import { useState } from "preact/hooks";
 import { wellRoundedBulbro } from "@/characters-definitions";
+import {
+	firstRerollPrice,
+	rerollIncrease,
+} from "@/game-formulas";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { WaveStats } from "@/shop/PrevWaveStats";
 import type { ShopItem } from "@/shop/Shop";
@@ -18,21 +22,20 @@ export default {
 };
 
 /**
- * Calculates the re-roll price for a given re-roll count.
+ * Calculates the re-roll price for a given re-roll count and wave.
  */
 function getRerollPrice(
 	rerollCount: number,
+	wave: number,
 ): number {
-	if (
-		rerollCount <=
-		0
-	)
-		return 4;
 	return (
-		4 *
-		2 **
-			(rerollCount -
-				1)
+		firstRerollPrice(
+			wave,
+		) +
+		rerollCount *
+			rerollIncrease(
+				wave,
+			)
 	);
 }
 
@@ -40,7 +43,6 @@ interface StoryPlayerState {
 	id: string;
 	weapons: Weapon[];
 	materials: number;
-	level: number;
 	rerollCount: number;
 }
 
@@ -58,7 +60,6 @@ function createInitialState(
 	wave: number,
 	prevWaveStats?: WaveStats,
 	maxShopItems?: number,
-	level: number = 1,
 	rerollCount: number = 0,
 ): StoryState {
 	const shopItems =
@@ -70,7 +71,6 @@ function createInitialState(
 				maxItems:
 					maxShopItems,
 				wave,
-				level,
 				rerollCount,
 			},
 		);
@@ -83,7 +83,6 @@ function createInitialState(
 				id: "player-1",
 				weapons,
 				materials,
-				level,
 				rerollCount,
 			},
 		shopItems,
@@ -128,8 +127,6 @@ function handleStoryPurchase(
 					newPlayer.weapons,
 				maxItems: 4,
 				wave: state.currentWave,
-				level:
-					newPlayer.level,
 				rerollCount:
 					newPlayer.rerollCount,
 			},
@@ -179,8 +176,8 @@ export const CompletePreRoundScreen =
 					getRerollPrice(
 						state
 							.player
-							.rerollCount +
-							1,
+							.rerollCount,
+						state.currentWave,
 					);
 
 				const handleReroll =
@@ -221,8 +218,6 @@ export const CompletePreRoundScreen =
 												newPlayer.weapons,
 											maxItems: 4,
 											wave: state.currentWave,
-											level:
-												newPlayer.level,
 											rerollCount:
 												newRerollCount,
 										},
@@ -620,8 +615,6 @@ export const AddWeaponDemo =
 												newPlayer.weapons,
 											maxItems: 4,
 											wave: state.currentWave,
-											level:
-												newPlayer.level,
 											rerollCount:
 												newPlayer.rerollCount,
 										},
@@ -693,7 +686,6 @@ export const AllShopItems =
 									wellRoundedBulbro,
 									{
 										wave: 1,
-										level: 1,
 									},
 								);
 							return {
@@ -704,7 +696,6 @@ export const AllShopItems =
 										weapons:
 											[],
 										materials: 1000,
-										level: 1,
 										rerollCount: 0,
 									},
 								shopItems,
@@ -787,8 +778,8 @@ export const AllShopItems =
 			},
 	};
 
-// Story demonstrating wave/level price scaling
-export const WaveLevelPriceScaling =
+// Story demonstrating wave/reroll price scaling
+export const WaveRerollPriceScaling =
 	{
 		render:
 			() => {
@@ -800,11 +791,11 @@ export const WaveLevelPriceScaling =
 						1,
 					);
 				const [
-					level,
-					setLevel,
+					rerollCount,
+					setRerollCount,
 				] =
 					useState(
-						1,
+						0,
 					);
 
 				const shopItems =
@@ -812,7 +803,7 @@ export const WaveLevelPriceScaling =
 						wellRoundedBulbro,
 						{
 							wave,
-							level,
+							rerollCount,
 						},
 					);
 
@@ -820,7 +811,7 @@ export const WaveLevelPriceScaling =
 					<div className="p-4 max-w-4xl mx-auto">
 						<div className="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded">
 							<h2 className="text-lg font-bold mb-2">
-								Wave/Level
+								Wave/Reroll
 								Price
 								Scaling
 								Demo
@@ -829,7 +820,8 @@ export const WaveLevelPriceScaling =
 								Adjust
 								wave
 								and
-								level
+								reroll
+								count
 								to
 								see
 								how
@@ -839,7 +831,7 @@ export const WaveLevelPriceScaling =
 								1
 								prices
 								are
-								$10-$50,
+								$4-$20,
 								growing
 								~15%
 								per
@@ -847,7 +839,7 @@ export const WaveLevelPriceScaling =
 								and
 								~10%
 								per
-								level.
+								reroll.
 							</p>
 							<div className="flex gap-4">
 								<label className="flex items-center gap-2">
@@ -883,19 +875,19 @@ export const WaveLevelPriceScaling =
 								</label>
 								<label className="flex items-center gap-2">
 									<span>
-										Level:
+										Rerolls:
 									</span>
 									<input
 										type="range"
-										min="1"
+										min="0"
 										max="10"
 										value={
-											level
+											rerollCount
 										}
 										onChange={(
 											e,
 										) =>
-											setLevel(
+											setRerollCount(
 												Number(
 													(
 														e.target as HTMLInputElement
@@ -908,7 +900,7 @@ export const WaveLevelPriceScaling =
 									/>
 									<span className="w-8 text-center font-mono">
 										{
-											level
+											rerollCount
 										}
 									</span>
 								</label>

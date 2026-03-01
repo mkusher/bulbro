@@ -20,4 +20,5 @@ export const brick: Weapon =
 				attackSpeed: 1.39,
 				damage: 30,
 			},
+		basePrice: 5,
 	};

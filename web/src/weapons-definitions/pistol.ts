@@ -20,4 +20,5 @@ export const pistol: Weapon =
 				attackSpeed: 0.5,
 				knockback: 5,
 			},
+		basePrice: 5,
 	};

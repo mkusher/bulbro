@@ -98,6 +98,7 @@ function createTestBulbro(
 					x: 1,
 					y: 0,
 				}, // normalized right direction
+			lastHorizontalDirection: 1,
 		},
 	);
 }

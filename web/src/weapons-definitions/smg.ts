@@ -19,4 +19,5 @@ export const smg: Weapon =
 				attackSpeed: 0.2,
 				range: 400,
 			},
+		basePrice: 5,
 	};

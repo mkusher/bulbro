@@ -23,4 +23,5 @@ export const doubleBarrelShotgun: Weapon =
 				range: 350,
 				knockback: 16,
 			},
+		basePrice: 5,
 	};

@@ -20,4 +20,5 @@ export const knife: Weapon =
 				range: 150,
 				knockback: 2,
 			},
+		basePrice: 5,
 	};

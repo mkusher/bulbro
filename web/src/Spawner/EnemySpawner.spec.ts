@@ -737,48 +737,4 @@ describe("EnemySpawner", () => {
 			);
 		});
 	});
-
-	describe("spawn count", () => {
-		it("should spawn 5 + difficulty + players enemies", () => {
-			const spawner =
-				new EnemySpawner();
-			const player =
-				createTestBulbro(
-					{
-						x: 500,
-						y: 500,
-					},
-				);
-			const waveState =
-				createWaveState(
-					[
-						player,
-					],
-				);
-			waveState.round.difficulty = 3;
-
-			const now =
-				nowTime(
-					0,
-				);
-			const dt =
-				deltaTime(
-					16,
-				);
-
-			const events =
-				spawner.tick(
-					waveState,
-					dt,
-					now,
-				);
-
-			// Should spawn 5 + 3 (difficulty) + 1 (player) = 9 enemies
-			expect(
-				events.length,
-			).toBe(
-				9,
-			);
-		});
-	});
 });

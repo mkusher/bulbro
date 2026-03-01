@@ -8,7 +8,10 @@ import {
 } from "./bulbro";
 import { ENEMY_SIZE } from "./enemy";
 import { DefaultEnemyBehaviors } from "./enemy/DefaultEnemyBehaviors";
-import { EnemyState } from "./enemy/EnemyState";
+import {
+	DEATH_DURATION,
+	EnemyState,
+} from "./enemy/EnemyState";
 import type {
 	EnemyMovedEvent,
 	GameEvent,
@@ -40,6 +43,7 @@ import type { MapObject } from "./object";
 import { movePosition } from "./physics";
 import type { Player } from "./player";
 import type { ShotState } from "./shot/ShotState";
+import { hasSecondPassedAfter } from "./time";
 import { getWaveDuration } from "./waveDuration";
 import type { WeaponState } from "./weapon/WeaponState";
 
@@ -1223,8 +1227,30 @@ export function updateState(
 				alivePlayersCount >
 					0 &&
 				round.isRunning;
+			const secondPassed =
+				hasSecondPassedAfter(
+					action.occurredAt,
+					action.deltaTime,
+				);
+			let enemies =
+				state.enemies;
+			if (
+				secondPassed.hasSecondPassed
+			) {
+				enemies =
+					enemies.filter(
+						(
+							e,
+						) =>
+							!e.killedAt ||
+							action.occurredAt -
+								e.killedAt <
+								DEATH_DURATION,
+					);
+			}
 			return {
 				...state,
+				enemies,
 				round:
 					{
 						...round,

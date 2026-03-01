@@ -19,4 +19,5 @@ export const hand: Weapon =
 				knockback: 30,
 				attackSpeed: 1.01,
 			},
+		basePrice: 5,
 	};

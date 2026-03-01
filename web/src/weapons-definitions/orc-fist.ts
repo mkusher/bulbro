@@ -20,4 +20,5 @@ export const orcFist: Weapon =
 				meleeDamage: 5,
 				attackSpeed: 1,
 			},
+		basePrice: 5,
 	};

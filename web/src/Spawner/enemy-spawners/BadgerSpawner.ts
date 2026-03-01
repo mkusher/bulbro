@@ -1,18 +1,56 @@
 import type { EnemyEvent } from "@/game-events/GameEvents";
+import { range } from "@/geometry";
+import { pickRandom } from "@/random";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
+import { hasSecondPassedAfter } from "@/time";
 import type { WaveState } from "@/waveState";
 import { badger } from "../../enemies-definitions";
-import { hasSecondPassedAfter } from "../hasSecondPassedAfter";
 import {
 	randomAngle,
 	spawnCluster,
 } from "../spawnCluster";
 import { mediumRange } from "../spawnRanges";
-import type { WaveSpawner } from "../WaveSpawner";
-import { range } from "@/geometry";
+import type {
+	WaveConfig,
+	WaveSpawner,
+} from "../WaveConfig";
+
+const waveConfigs =
+	new Map<
+		number,
+		WaveConfig
+	>(
+		[
+			[
+				11,
+				{
+					firstSpawn: 15,
+					interval: 10,
+					amount:
+						[
+							1,
+							2,
+						],
+					spawnRange:
+						mediumRange,
+				},
+			],
+		],
+	);
+
+const getWaveConfig =
+	(
+		wave: number,
+	):
+		| WaveConfig
+		| undefined => {
+		return waveConfigs.get(
+			wave,
+		);
+	};
 
 export class BadgerSpawner
 	implements
@@ -29,24 +67,54 @@ export class BadgerSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed ||
-			passedSecond.currentSecond <
-				1
+			!passedSecond.hasSecondPassed
 		) {
 			return [];
 		}
 
+		const wave =
+			waveState
+				.round
+				.wave;
+		const config =
+			getWaveConfig(
+				wave,
+			);
 		if (
-			passedSecond.currentSecond %
-				8 ===
+			!config
+		) {
+			return [];
+		}
+
+		const currentSecond =
+			passedSecond.currentSecond;
+
+		if (
+			currentSecond <
+			config.firstSpawn
+		) {
+			return [];
+		}
+
+		const timeSinceFirstSpawn =
+			currentSecond -
+			config.firstSpawn;
+
+		if (
+			timeSinceFirstSpawn %
+				config.interval ===
 			0
 		) {
+			const amount =
+				pickRandom(
+					config.amount,
+				);
 			return spawnCluster(
 				[
 					badger,
 				],
-				2,
-				mediumRange,
+				amount,
+				config.spawnRange,
 				range(
 					randomAngle(),
 					Math.PI /

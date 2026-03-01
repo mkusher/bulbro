@@ -19,4 +19,5 @@ export const laserGun: Weapon =
 				range: 500,
 				knockback: 0,
 			},
+		basePrice: 5,
 	};

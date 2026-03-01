@@ -6,6 +6,7 @@ import {
 } from "bun:test";
 import { BulbroState } from "./bulbro/BulbroState";
 import { baseStats } from "./characters-definitions/base";
+import { babyEnemy } from "./enemies-definitions";
 import { DefaultEnemyBehaviors } from "./enemy/DefaultEnemyBehaviors";
 import type { EnemyCharacter } from "./enemy/EnemyCharacter";
 import {
@@ -49,7 +50,6 @@ import type {
 	Weapon,
 	WeaponType,
 } from "./weapon";
-import { babyEnemy } from "./enemies-definitions";
 
 function createTestPlayer(
 	id: string,
@@ -125,6 +125,7 @@ function createTestBulbro(
 					x: 1,
 					y: 0,
 				},
+			lastHorizontalDirection: 1,
 		},
 	);
 }
@@ -165,6 +166,7 @@ function createTestEnemy(
 				[],
 			lastMovedAt: 0,
 			lastHitAt: 0,
+			lastHorizontalDirection: 1,
 			killedAt:
 				undefined,
 		},
@@ -255,6 +257,7 @@ function createTestWeaponDefinition(
 				attackSpeed: 1,
 			},
 		shotSpeed: 200,
+		basePrice: 5,
 	};
 }
 

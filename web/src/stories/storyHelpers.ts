@@ -181,6 +181,7 @@ function createMockBulbro(
 				[],
 			healedByHpRegenerationAt: 0,
 			rerollCount: 0,
+			lastHorizontalDirection: 1,
 			stats:
 				{
 					...baseStats,

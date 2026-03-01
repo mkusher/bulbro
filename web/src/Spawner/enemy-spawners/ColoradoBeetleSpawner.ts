@@ -1,21 +1,101 @@
 import type { EnemyEvent } from "@/game-events/GameEvents";
+import {
+	type Range,
+	range,
+} from "@/geometry";
+import { pickRandom } from "@/random";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
+import { hasSecondPassedAfter } from "@/time";
 import type { WaveState } from "@/waveState";
 import { coloradoBeetle } from "../../enemies-definitions";
-import { hasSecondPassedAfter } from "../hasSecondPassedAfter";
 import {
 	randomAngle,
 	spawnCluster,
 } from "../spawnCluster";
 import { shortRange } from "../spawnRanges";
-import type { WaveSpawner } from "../WaveSpawner";
-import {
-	range,
-	type Range,
-} from "@/geometry";
+import type {
+	WaveConfig,
+	WaveSpawner,
+} from "../WaveConfig";
+
+const waveConfigs =
+	new Map<
+		number,
+		WaveConfig
+	>(
+		[
+			[
+				2,
+				{
+					firstSpawn: 1,
+					interval: 3,
+					amount:
+						[
+							3,
+							4,
+						],
+					spawnRange:
+						shortRange,
+				},
+			],
+			[
+				3,
+				{
+					firstSpawn: 10,
+					interval: 6,
+					amount:
+						[
+							3,
+							4,
+						],
+					spawnRange:
+						shortRange,
+				},
+			],
+			[
+				5,
+				{
+					firstSpawn: 3,
+					interval: 5,
+					amount:
+						[
+							3,
+							4,
+						],
+					spawnRange:
+						shortRange,
+				},
+			],
+			[
+				6,
+				{
+					firstSpawn: 3,
+					interval: 3,
+					amount:
+						[
+							3,
+							4,
+						],
+					spawnRange:
+						shortRange,
+				},
+			],
+		],
+	);
+
+const getWaveConfig =
+	(
+		wave: number,
+	):
+		| WaveConfig
+		| undefined => {
+		return waveConfigs.get(
+			wave,
+		);
+	};
 
 export class ColoradoBeetleSpawner
 	implements
@@ -37,16 +117,48 @@ export class ColoradoBeetleSpawner
 			return [];
 		}
 
+		const wave =
+			waveState
+				.round
+				.wave;
+		const config =
+			getWaveConfig(
+				wave,
+			);
 		if (
-			passedSecond.currentSecond %
-				5 ===
+			!config
+		) {
+			return [];
+		}
+
+		const currentSecond =
+			passedSecond.currentSecond;
+
+		if (
+			currentSecond <
+			config.firstSpawn
+		) {
+			return [];
+		}
+
+		const timeSinceFirstSpawn =
+			currentSecond -
+			config.firstSpawn;
+
+		if (
+			timeSinceFirstSpawn %
+				config.interval ===
 			0
 		) {
 			const angle =
 				randomAngle();
+			const amount =
+				pickRandom(
+					config.amount,
+				);
 			return [
 				...this.#spawnCluster(
-					2,
+					amount,
 					shortRange,
 					range(
 						angle,
@@ -56,7 +168,7 @@ export class ColoradoBeetleSpawner
 					waveState,
 				),
 				...this.#spawnCluster(
-					1,
+					amount,
 					shortRange,
 					range(
 						angle +
@@ -67,24 +179,6 @@ export class ColoradoBeetleSpawner
 					waveState,
 				),
 			];
-		}
-
-		if (
-			(passedSecond.currentSecond +
-				1) %
-				3 ===
-			0
-		) {
-			return this.#spawnCluster(
-				3,
-				shortRange,
-				range(
-					randomAngle(),
-					Math.PI /
-						4,
-				),
-				waveState,
-			);
 		}
 
 		return [];

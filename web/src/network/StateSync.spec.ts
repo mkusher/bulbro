@@ -193,6 +193,7 @@ function createTestBulbro(
 					x: 1,
 					y: 0,
 				}, // right direction vector
+			lastHorizontalDirection: 1,
 		},
 	);
 }

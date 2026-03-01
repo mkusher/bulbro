@@ -70,6 +70,7 @@ type BulbroStateProperties =
 		readonly healedByHpRegenerationAt: number;
 		readonly killedAt?: number;
 		readonly lastDirection: Direction;
+		readonly lastHorizontalDirection: number;
 		readonly rerollCount: number;
 	};
 
@@ -157,6 +158,12 @@ export class BulbroState
 		return this
 			.#props
 			.healedByHpRegenerationAt;
+	}
+
+	get lastHorizontalDirection() {
+		return this
+			.#props
+			.lastHorizontalDirection;
 	}
 
 	get rerollCount() {
@@ -452,7 +459,7 @@ export class BulbroState
 										.weapons
 										.length,
 									this
-										.lastDirection,
+										.lastHorizontalDirection,
 								);
 							const position =
 								addition(
@@ -470,8 +477,7 @@ export class BulbroState
 							// for the weapon to aim correctly in the flipped coordinate space
 							const directionMultiplier =
 								this
-									.lastDirection
-									.x <
+									.lastHorizontalDirection <
 								0
 									? -1
 									: 1;
@@ -666,6 +672,17 @@ export class BulbroState
 							),
 						lastDirection:
 							event.direction,
+						lastHorizontalDirection:
+							event
+								.direction
+								.x !==
+							0
+								? event
+										.direction
+										.x
+								: this
+										.#props
+										.lastHorizontalDirection,
 						lastMovedAt:
 							event.occurredAt,
 						lastHitAt:
@@ -710,6 +727,17 @@ export class BulbroState
 							event.occurredAt,
 						lastDirection:
 							event.direction,
+						lastHorizontalDirection:
+							event
+								.direction
+								.x !==
+							0
+								? event
+										.direction
+										.x
+								: this
+										.#props
+										.lastHorizontalDirection,
 					},
 				);
 
@@ -951,6 +979,7 @@ export function spawnBulbro(
 			materialsAvailable: 0,
 			lastDirection:
 				zeroPoint(),
+			lastHorizontalDirection: 1,
 			rerollCount: 0,
 		},
 	);

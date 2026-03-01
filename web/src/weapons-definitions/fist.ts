@@ -19,4 +19,5 @@ export const fist: Weapon =
 				attackSpeed: 0.78,
 				range: 150,
 			},
+		basePrice: 5,
 	};

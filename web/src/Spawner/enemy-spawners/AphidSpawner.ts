@@ -1,18 +1,112 @@
 import type { EnemyEvent } from "@/game-events/GameEvents";
+import { range } from "@/geometry";
+import { pickRandom } from "@/random";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
+import { hasSecondPassedAfter } from "@/time";
 import type { WaveState } from "@/waveState";
 import { aphidEnemy } from "../../enemies-definitions";
-import { hasSecondPassedAfter } from "../hasSecondPassedAfter";
 import {
 	randomAngle,
 	spawnCluster,
 } from "../spawnCluster";
 import { mediumRange } from "../spawnRanges";
-import type { WaveSpawner } from "../WaveSpawner";
-import { range } from "@/geometry";
+import type {
+	WaveConfig,
+	WaveSpawner,
+} from "../WaveConfig";
+
+const waveConfigs =
+	new Map<
+		number,
+		WaveConfig
+	>(
+		[
+			[
+				4,
+				{
+					firstSpawn: 1,
+					interval: 5,
+					amount:
+						[
+							2,
+							2,
+						],
+					spawnRange:
+						mediumRange,
+				},
+			],
+			[
+				5,
+				{
+					firstSpawn: 25,
+					interval: 6,
+					amount:
+						[
+							1,
+							2,
+						],
+					spawnRange:
+						mediumRange,
+				},
+			],
+			[
+				7,
+				{
+					firstSpawn: 30,
+					interval: 5,
+					amount:
+						[
+							2,
+							3,
+						],
+					spawnRange:
+						mediumRange,
+				},
+			],
+			[
+				8,
+				{
+					firstSpawn: 4,
+					interval: 2,
+					amount:
+						[
+							1,
+							2,
+						],
+					spawnRange:
+						mediumRange,
+				},
+			],
+			[
+				11,
+				{
+					firstSpawn: 25,
+					interval: 3,
+					amount:
+						[
+							2,
+							3,
+						],
+					spawnRange:
+						mediumRange,
+				},
+			],
+		],
+	);
+
+const getWaveConfig =
+	(
+		wave: number,
+	):
+		| WaveConfig
+		| undefined => {
+		return waveConfigs.get(
+			wave,
+		);
+	};
 
 export class AphidSpawner
 	implements
@@ -29,27 +123,57 @@ export class AphidSpawner
 				deltaTime,
 			);
 		if (
-			!passedSecond.hasSecondPassed ||
-			passedSecond.currentSecond <
-				1
+			!passedSecond.hasSecondPassed
 		) {
 			return [];
 		}
 
+		const wave =
+			waveState
+				.round
+				.wave;
+		const config =
+			getWaveConfig(
+				wave,
+			);
 		if (
-			passedSecond.currentSecond %
-				12 ===
+			!config
+		) {
+			return [];
+		}
+
+		const currentSecond =
+			passedSecond.currentSecond;
+
+		if (
+			currentSecond <
+			config.firstSpawn
+		) {
+			return [];
+		}
+
+		const timeSinceFirstSpawn =
+			currentSecond -
+			config.firstSpawn;
+
+		if (
+			timeSinceFirstSpawn %
+				config.interval ===
 			0
 		) {
 			const angle =
 				randomAngle();
+			const amount =
+				pickRandom(
+					config.amount,
+				);
 			return [
 				...spawnCluster(
 					[
 						aphidEnemy,
 					],
-					2,
-					mediumRange,
+					amount,
+					config.spawnRange,
 					range(
 						angle,
 						Math.PI /
@@ -61,8 +185,8 @@ export class AphidSpawner
 					[
 						aphidEnemy,
 					],
-					1,
-					mediumRange,
+					amount,
+					config.spawnRange,
 					range(
 						angle +
 							Math.PI,
@@ -72,27 +196,6 @@ export class AphidSpawner
 					waveState,
 				),
 			];
-		}
-
-		if (
-			(passedSecond.currentSecond +
-				1) %
-				8 ===
-			0
-		) {
-			return spawnCluster(
-				[
-					aphidEnemy,
-				],
-				2,
-				mediumRange,
-				range(
-					randomAngle(),
-					Math.PI /
-						4,
-				),
-				waveState,
-			);
 		}
 
 		return [];

@@ -57,6 +57,7 @@ function createFadeAwayState(
 						x: 0,
 						y: 0,
 					},
+				lastHorizontalDirection: 1,
 			},
 		);
 

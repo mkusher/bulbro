@@ -375,11 +375,8 @@ export function shoot(
 				weapon.id,
 		);
 	// Use world offset that accounts for facing direction
-	const facingDirection =
-		player.lastDirection ?? {
-			x: 1,
-			y: 0,
-		};
+	const lastHorizontalDirection =
+		player.lastHorizontalDirection;
 
 	// Calculate weapon visual center in world (including aiming influence).
 	// This matches where the weapon sprite actually renders.
@@ -390,7 +387,7 @@ export function shoot(
 			player
 				.weapons
 				.length,
-			facingDirection,
+			lastHorizontalDirection,
 		);
 	const weaponVisualPosition =
 		addition(
@@ -632,7 +629,7 @@ export function calculateWeaponPosition(
 export function calculateWeaponWorldOffset(
 	index: number,
 	totalWeapons: number,
-	facingDirection: Direction,
+	lastHorizontalDirection: number,
 ) {
 	const base =
 		getWeaponOrbitalPosition(
@@ -642,7 +639,7 @@ export function calculateWeaponWorldOffset(
 
 	// When bulbro faces left (scale.x = -1), the visual x position is flipped
 	const directionMultiplier =
-		facingDirection.x <
+		lastHorizontalDirection <
 		0
 			? -1
 			: 1;
@@ -672,7 +669,7 @@ export function calculateWeaponVisualWorldOffset(
 	weapon: WeaponState,
 	index: number,
 	totalWeapons: number,
-	facingDirection: Direction,
+	lastHorizontalDirection: number,
 ) {
 	const localPos =
 		calculateWeaponPosition(
@@ -682,7 +679,7 @@ export function calculateWeaponVisualWorldOffset(
 		);
 
 	const directionMultiplier =
-		facingDirection.x <
+		lastHorizontalDirection <
 		0
 			? -1
 			: 1;
@@ -736,4 +733,45 @@ export function calculateBarrelTipOffset(
 			aimingDirection.y *
 				tipDistance,
 	};
+}
+
+export function rerollIncrease(
+	waveNumber: number,
+) {
+	return Math.max(
+		1,
+		Math.floor(
+			0.4 *
+				waveNumber,
+		),
+	);
+}
+
+export function firstRerollPrice(
+	waveNumber: number,
+) {
+	return (
+		Math.floor(
+			waveNumber *
+				0.75,
+		) +
+		rerollIncrease(
+			waveNumber,
+		)
+	);
+}
+
+export function itemPrice(
+	basePrice: number,
+	waveNumber: number,
+	inflation: number,
+) {
+	return Math.floor(
+		(basePrice +
+			waveNumber +
+			basePrice *
+				waveNumber *
+				0.1) *
+			inflation,
+	);
 }
