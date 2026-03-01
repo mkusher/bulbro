@@ -12,13 +12,13 @@ export const ak47: Weapon =
 				"gun",
 				"heavy",
 			],
-		shotSpeed: 1200,
+		shotSpeed: 1800,
 		statsBonus:
 			{
-				damage: 5,
+				damage: 2,
 				rangedDamage: 2,
 				range: 500,
-				attackSpeed: 0.7,
+				attackSpeed: 0.3,
 				knockback: 5,
 			},
 	};

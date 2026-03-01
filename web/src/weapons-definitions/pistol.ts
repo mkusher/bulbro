@@ -15,9 +15,9 @@ export const pistol: Weapon =
 		shotSpeed: 1500,
 		statsBonus:
 			{
-				damage: 4,
+				damage: 2,
 				range: 400,
-				attackSpeed: 0.8,
+				attackSpeed: 0.5,
 				knockback: 5,
 			},
 	};

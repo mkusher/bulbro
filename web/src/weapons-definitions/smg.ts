@@ -12,7 +12,7 @@ export const smg: Weapon =
 				"gun",
 				"support",
 			],
-		shotSpeed: 2000,
+		shotSpeed: 1400,
 		statsBonus:
 			{
 				damage: 1,
