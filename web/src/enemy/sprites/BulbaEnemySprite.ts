@@ -350,6 +350,7 @@ export class BulbaEnemySprite extends GameSprite {
 								10,
 							)
 						]!,
+						false,
 					),
 				20,
 				2,
@@ -448,6 +449,7 @@ export class BulbaEnemySprite extends GameSprite {
 
 	async #buildEnemy(
 		rectangle: PhysicalRectangle,
+		useOutline = true,
 	) {
 		const container =
 			new PIXI.Container();
@@ -460,19 +462,23 @@ export class BulbaEnemySprite extends GameSprite {
 			),
 		);
 
-		const outlineFilter =
-			new OutlineFilter(
-				2,
-				0x000000,
-				1.0,
-			);
 		container.addChild(
 			scaling,
 		);
-		container.filters =
-			[
-				outlineFilter,
-			];
+		if (
+			useOutline
+		) {
+			const outlineFilter =
+				new OutlineFilter(
+					2,
+					0x000000,
+					1.0,
+				);
+			container.filters =
+				[
+					outlineFilter,
+				];
+		}
 		scaling.y =
 			-container.height;
 		scaling.x =
