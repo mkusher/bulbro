@@ -1,8 +1,7 @@
 import type { EnemyCharacter } from "../enemy";
-import { orcFist } from "../weapons-definitions/orc-fist";
 import { baseStats } from "./base";
 
-export const treeEnemy: EnemyCharacter =
+export const tree: EnemyCharacter =
 	{
 		id: "tree",
 		name: "Tree",
@@ -11,15 +10,15 @@ export const treeEnemy: EnemyCharacter =
 		stats:
 			{
 				...baseStats,
-				maxHp: 60,
+				maxHp: 12,
 				speed: 0,
 				range: 0,
-				materialsDropped: 0,
+				materialsDropped: 3,
 			},
 		waveIncreaseStats:
-			{},
+			{
+				maxHp: 6,
+			},
 		weapons:
-			[
-				orcFist,
-			],
+			[],
 	};

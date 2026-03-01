@@ -1,25 +1,25 @@
 import { aphidGun } from "@/weapons-definitions/aphid-gun";
 import type { EnemyCharacter } from "../enemy";
-import type { Weapon } from "../weapon";
 import { baseStats } from "./base";
 
 export const aphidEnemy: EnemyCharacter =
 	{
 		id: "aphid",
-		name: "Aphid Enemy",
+		name: "Aphid",
 		sprite:
 			"aphid",
 		stats:
 			{
 				...baseStats,
-				maxHp: 2,
+				maxHp: 8,
 				speed: 150,
-				damage: 2,
-				range: 1500,
+				damage: 1,
+				range: 1200,
 			},
 		waveIncreaseStats:
 			{
 				maxHp: 1,
+				damage: 1,
 			},
 		weapons:
 			[

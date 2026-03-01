@@ -482,3 +482,15 @@ export function rotation(
 	}
 	return angle;
 }
+
+export function range(
+	from: number,
+	add: number,
+): Range {
+	return {
+		from,
+		to:
+			from +
+			add,
+	};
+}

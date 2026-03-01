@@ -4,193 +4,50 @@ import type {
 	NowTime,
 } from "@/time";
 import type { WaveState } from "@/waveState";
-import {
-	aphidEnemy,
-	babyEnemy,
-	beetleWarrior,
-} from "../enemies-definitions";
-import { hasSecondPassedAfter } from "./hasSecondPassedAfter";
-import {
-	randomAngle,
-	spawnCluster,
-	spawnCount,
-} from "./spawnCluster";
-import {
-	longRange,
-	mediumRange,
-	shortRange,
-} from "./spawnRanges";
 import type { WaveSpawner } from "./WaveSpawner";
-
-const secondForBaby =
-	[
-		0,
-		3,
-		6,
-		9,
-		12,
-		18,
-		24,
-		27,
-		30,
-		33,
-		36,
-		39,
-		42,
-		45,
-		48,
-		51,
-		54,
-		57,
-	];
-
-const secondForBeetleWarrior =
-	[
-		4,
-		14,
-		34,
-		48,
-	];
+import {
+	BabySpawner,
+	ColoradoBeetleSpawner,
+	BeetleWarriorSpawner,
+	AphidSpawner,
+	RoachSpawner,
+	HedgehogSpawner,
+	WildBoarSpawner,
+	BadgerSpawner,
+	BeetleArcherSpawner,
+} from "./enemy-spawners";
 
 export class DefaultWaveSpawner
 	implements
 		WaveSpawner
 {
+	private spawners: WaveSpawner[] =
+		[
+			new BabySpawner(),
+			new ColoradoBeetleSpawner(),
+			new BeetleWarriorSpawner(),
+			new BeetleArcherSpawner(),
+			new AphidSpawner(),
+			new RoachSpawner(),
+			new HedgehogSpawner(),
+			new WildBoarSpawner(),
+			new BadgerSpawner(),
+		];
+
 	tick(
 		waveState: WaveState,
 		deltaTime: DeltaTime,
 		now: NowTime,
 	): EnemyEvent[] {
-		const passedSecond =
-			hasSecondPassedAfter(
-				now,
-				deltaTime,
-			);
-		if (
-			!passedSecond.hasSecondPassed
-		) {
-			return [];
-		}
-
-		const angle =
-			randomAngle();
-
-		if (
-			secondForBeetleWarrior.indexOf(
-				passedSecond.currentSecond,
-			) >
-			-1
-		) {
-			return spawnCluster(
-				[
-					beetleWarrior,
-				],
-				spawnCount(
-					1,
+		return this.spawners.flatMap(
+			(
+				s,
+			) =>
+				s.tick(
 					waveState,
+					deltaTime,
+					now,
 				),
-				longRange,
-				{
-					from: angle,
-					to:
-						angle +
-						Math.PI /
-							4,
-				},
-				waveState,
-			);
-		}
-
-		const count =
-			spawnCount(
-				5,
-				waveState,
-			);
-
-		if (
-			secondForBaby.indexOf(
-				passedSecond.currentSecond,
-			) >
-			-1
-		) {
-			return spawnCluster(
-				[
-					babyEnemy,
-				],
-				count,
-				shortRange,
-				{
-					from: angle,
-					to:
-						angle +
-						Math.PI /
-							4,
-				},
-				waveState,
-			);
-		}
-		if (
-			passedSecond.currentSecond ===
-			15
-		) {
-			return spawnCluster(
-				[
-					babyEnemy,
-					aphidEnemy,
-				],
-				count,
-				mediumRange,
-				{
-					from: angle,
-					to:
-						angle +
-						Math.PI /
-							2,
-				},
-				waveState,
-			);
-		}
-		if (
-			passedSecond.currentSecond ===
-			21
-		) {
-			return [
-				...spawnCluster(
-					[
-						aphidEnemy,
-					],
-					count,
-					longRange,
-					{
-						from: angle,
-						to:
-							angle +
-							Math.PI /
-								2,
-					},
-					waveState,
-				),
-				...spawnCluster(
-					[
-						babyEnemy,
-					],
-					count,
-					shortRange,
-					{
-						from:
-							angle +
-							Math.PI,
-						to:
-							angle +
-							(Math.PI *
-								3) /
-								2,
-					},
-					waveState,
-				),
-			];
-		}
-
-		return [];
+		);
 	}
 }

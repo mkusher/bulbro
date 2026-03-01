@@ -18,7 +18,7 @@ import {
 } from "@/enemy/EnemyState";
 import type { WaveState } from "@/waveState";
 
-export function spawnCount(
+function spawnCount(
 	base: number,
 	waveState: WaveState,
 ): number {
@@ -35,11 +35,16 @@ export function spawnCount(
 
 export function spawnCluster(
 	enemies: EnemyCharacter[],
-	amount: number,
+	baseAmount: number,
 	radius: Range,
 	angle: Range,
 	waveState: WaveState,
 ): EnemyEvent[] {
+	const amount =
+		spawnCount(
+			baseAmount,
+			waveState,
+		);
 	const center =
 		getSpawnCenter(
 			waveState,

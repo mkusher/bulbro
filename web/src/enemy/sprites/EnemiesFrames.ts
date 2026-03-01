@@ -11,8 +11,8 @@ export const potatoBeetleBaby =
 		},
 		gameSize:
 			{
-				width: 40,
-				height: 30,
+				width: 30,
+				height: 20,
 			},
 	} as const;
 
@@ -29,8 +29,8 @@ export const potatoBeetleWarrior =
 		},
 		gameSize:
 			{
-				width: 50,
-				height: 50,
+				width: 30,
+				height: 30,
 			},
 	} as const;
 
@@ -52,20 +52,20 @@ export const aphid =
 			},
 	} as const;
 
-export const coloradoPotatoBeetleWarrior =
+export const coloradoBeetle =
 	{
 		position:
 			{
-				x: 375,
-				y: 45,
+				x: 70,
+				y: 23,
 			},
 		size: {
-			width: 320,
-			height: 160,
+			width: 256,
+			height: 190,
 		},
 		gameSize:
 			{
-				width: 60,
+				width: 50,
 				height: 30,
 			},
 	};
@@ -74,17 +74,89 @@ export const hedghehog =
 	{
 		position:
 			{
-				x: 365,
-				y: 550,
+				x: 84,
+				y: 730,
 			},
 		size: {
-			width: 200,
+			width: 210,
+			height: 210,
+		},
+		gameSize:
+			{
+				width: 50,
+				height: 50,
+			},
+	};
+
+export const wildBoar =
+	{
+		position:
+			{
+				x: 360,
+				y: 20,
+			},
+		size: {
+			width: 285,
 			height: 200,
 		},
 		gameSize:
 			{
-				width: 45,
-				height: 45,
+				width: 50,
+				height: 40,
+			},
+	};
+
+export const badger =
+	{
+		position:
+			{
+				x: 360,
+				y: 220,
+			},
+		size: {
+			width: 285,
+			height: 200,
+		},
+		gameSize:
+			{
+				width: 50,
+				height: 40,
+			},
+	};
+
+export const roach =
+	{
+		position:
+			{
+				x: 350,
+				y: 425,
+			},
+		size: {
+			width: 275,
+			height: 210,
+		},
+		gameSize:
+			{
+				width: 50,
+				height: 40,
+			},
+	};
+
+export const beetleArcher =
+	{
+		position:
+			{
+				x: 359,
+				y: 655,
+			},
+		size: {
+			width: 251,
+			height: 170,
+		},
+		gameSize:
+			{
+				width: 50,
+				height: 30,
 			},
 	};
 
@@ -92,27 +164,31 @@ export const tree =
 	{
 		position:
 			{
-				x: 365,
-				y: 550,
+				x: 350,
+				y: 840,
 			},
 		size: {
-			width: 200,
-			height: 200,
+			width: 260,
+			height: 320,
 		},
 		gameSize:
 			{
-				width: 45,
-				height: 45,
+				width: 50,
+				height: 75,
 			},
 	};
 
 export const enemyTypes =
 	[
+		"aphid",
 		"potatoBeetleBaby",
 		"potatoBeetleWarrior",
-		"aphid",
-		"coloradoPotatoBeetleWarrior",
+		"coloradoBeetle",
+		"beetleArcher",
 		"hedghehog",
+		"wildBoar",
+		"badger",
+		"roach",
 		"tree",
 	] as const;
 export type EnemyType =

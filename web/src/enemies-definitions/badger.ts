@@ -1,25 +1,26 @@
+import { orcFist } from "@/weapons-definitions/orc-fist";
 import type { EnemyCharacter } from "../enemy";
-import { orcFist } from "../weapons-definitions/orc-fist";
 import { baseStats } from "./base";
 
-export const babyEnemy: EnemyCharacter =
+export const badger: EnemyCharacter =
 	{
-		id: "baby",
-		name: "Baby colorado beetle",
+		id: "badger",
+		name: "Badger",
 		sprite:
-			"potatoBeetleBaby",
+			"badger",
 		stats:
 			{
 				...baseStats,
-				maxHp: 3,
-				speed: 200,
-				damage: 1,
+				maxHp: 10,
+				speed: 280,
+				damage: 3,
 				range: 80,
+				attackSpeed: 2,
+				materialsDropped: 3,
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 2,
-				damage: 1,
+				maxHp: 1,
 			},
 		weapons:
 			[

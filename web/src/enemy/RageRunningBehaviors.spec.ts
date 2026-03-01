@@ -14,7 +14,7 @@ import {
 	nowTime,
 } from "@/time";
 import type { WaveState } from "@/waveState";
-import { beetleWarrior } from "../enemies-definitions/beetle-warrior";
+import { beetleWarrior } from "../enemies-definitions";
 import {
 	EnemyState,
 	RAGE_STARTING_DURATION,

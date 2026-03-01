@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { PlayingFieldTile } from "../graphics/PlayingFieldTile";
 import { PixiApp } from "../ui/PixiApp";
 import type { EnemyCharacter } from "./EnemyCharacter";
 import { BulbaEnemySprite } from "./sprites/BulbaEnemySprite";
@@ -8,14 +9,12 @@ export type EnemyDisplayProps =
 		enemy: EnemyCharacter;
 		width?: number;
 		height?: number;
-		backgroundColor?: number;
 	};
 
 export function EnemyDisplay({
 	enemy,
 	width = 200,
 	height = 150,
-	backgroundColor = 0x1a1a2e,
 }: EnemyDisplayProps) {
 	const onInit =
 		async (
@@ -30,6 +29,19 @@ export function EnemyDisplay({
 			const actualHeight =
 				rect.height ||
 				height;
+
+			const fieldTile =
+				new PlayingFieldTile(
+					{
+						width:
+							actualWidth,
+						height:
+							actualHeight,
+					},
+				);
+			await fieldTile.init(
+				app.stage,
+			);
 
 			const wrapper =
 				new PIXI.Container();
@@ -65,9 +77,6 @@ export function EnemyDisplay({
 			}
 			height={
 				height
-			}
-			backgroundColor={
-				backgroundColor
 			}
 			onInit={
 				onInit

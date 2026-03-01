@@ -1,0 +1,31 @@
+import { orcFist } from "@/weapons-definitions/orc-fist";
+import type { EnemyCharacter } from "../enemy";
+import { baseStats } from "./base";
+
+export const hedghehog: EnemyCharacter =
+	{
+		id: "hedghehog",
+		name: "Hedghehog",
+		sprite:
+			"hedghehog",
+		stats:
+			{
+				...baseStats,
+				maxHp: 6,
+				speed: 280,
+				damage: 3,
+				range: 80,
+				attackSpeed: 2,
+				materialsDropped: 3,
+			},
+		waveIncreaseStats:
+			{
+				maxHp: 1,
+			},
+		weapons:
+			[
+				orcFist,
+			],
+		behaviors:
+			"default",
+	};
