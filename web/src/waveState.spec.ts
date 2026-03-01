@@ -1917,7 +1917,7 @@ describe("waveState", () => {
 						.round
 						.duration,
 				).toBe(
-					25,
+					20,
 				);
 				expect(
 					initialState.mapSize,

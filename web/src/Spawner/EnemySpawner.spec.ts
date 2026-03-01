@@ -5,7 +5,6 @@ import {
 	it,
 	mock,
 } from "bun:test";
-import type { Logger } from "pino";
 import {
 	type BulbroState,
 	spawnBulbro,
@@ -16,28 +15,8 @@ import {
 	nowTime,
 } from "@/time";
 import type { WaveState } from "@/waveState";
-import { ENEMY_SIZE } from ".";
+import { ENEMY_SIZE } from "@/enemy";
 import { EnemySpawner } from "./EnemySpawner";
-
-// Create a mock logger
-const createMockLogger =
-	(): Logger => {
-		return {
-			debug:
-				() => {},
-			info: () => {},
-			warn: () => {},
-			error:
-				() => {},
-			fatal:
-				() => {},
-			trace:
-				() => {},
-			child:
-				() =>
-					createMockLogger(),
-		} as unknown as Logger;
-	};
 
 describe("EnemySpawner", () => {
 	const createTestBulbro =
@@ -88,9 +67,7 @@ describe("EnemySpawner", () => {
 	describe("spawn position clamping", () => {
 		it("should clamp spawn positions to map boundaries when player is at top-left corner", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const mapSize =
 				{
 					width: 500,
@@ -186,9 +163,7 @@ describe("EnemySpawner", () => {
 
 		it("should clamp spawn positions to map boundaries when player is at bottom-right corner", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const mapSize =
 				{
 					width: 500,
@@ -284,9 +259,7 @@ describe("EnemySpawner", () => {
 
 		it("should clamp spawn positions on very small maps", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			// Very small map - smaller than spawn distance ranges
 			const mapSize =
 				{
@@ -374,9 +347,7 @@ describe("EnemySpawner", () => {
 
 		it("should spawn enemies within bounds on normal-sized maps", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const mapSize =
 				{
 					width: 6000,
@@ -463,9 +434,7 @@ describe("EnemySpawner", () => {
 
 		it("should clamp positions at second 15 spawn wave (medium range)", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const mapSize =
 				{
 					width: 500,
@@ -553,9 +522,7 @@ describe("EnemySpawner", () => {
 
 		it("should clamp positions at second 21 spawn wave (long range + short range)", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const mapSize =
 				{
 					width: 500,
@@ -645,9 +612,7 @@ describe("EnemySpawner", () => {
 	describe("spawn timing", () => {
 		it("should spawn enemies at second 0", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const player =
 				createTestBulbro(
 					{
@@ -693,9 +658,7 @@ describe("EnemySpawner", () => {
 
 		it("should not spawn enemies between spawn seconds", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const player =
 				createTestBulbro(
 					{
@@ -736,9 +699,7 @@ describe("EnemySpawner", () => {
 
 		it("should spawn enemies at second 3", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const player =
 				createTestBulbro(
 					{
@@ -778,11 +739,9 @@ describe("EnemySpawner", () => {
 	});
 
 	describe("spawn count", () => {
-		it("should spawn 5 + difficulty enemies", () => {
+		it("should spawn 5 + difficulty + players enemies", () => {
 			const spawner =
-				new EnemySpawner(
-					createMockLogger(),
-				);
+				new EnemySpawner();
 			const player =
 				createTestBulbro(
 					{
@@ -814,11 +773,11 @@ describe("EnemySpawner", () => {
 					now,
 				);
 
-			// Should spawn 5 + 3 = 8 enemies
+			// Should spawn 5 + 3 (difficulty) + 1 (player) = 9 enemies
 			expect(
 				events.length,
 			).toBe(
-				8,
+				9,
 			);
 		});
 	});

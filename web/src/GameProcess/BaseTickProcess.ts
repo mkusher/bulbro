@@ -6,7 +6,7 @@ import type {
 import { BULBRO_SIZE } from "../bulbro";
 import type { PlayerControl } from "../controls";
 import { ENEMY_SIZE } from "../enemy";
-import { EnemySpawner } from "../enemy/EnemySpawner";
+import { EnemySpawner } from "../Spawner/EnemySpawner";
 import type {
 	GameEvent,
 	GameEventInternal,
@@ -63,10 +63,7 @@ export class BaseTickProcess
 		this.#controls =
 			controls;
 		this.#enemySpawner =
-			new EnemySpawner(
-				this
-					.#logger,
-			);
+			new EnemySpawner();
 	}
 
 	/**
