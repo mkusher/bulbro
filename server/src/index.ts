@@ -198,6 +198,16 @@ app.get(
 );
 
 app.get(
+	"/",
+	serveStatic(
+		{
+			root: "./public",
+			path: "/index.html",
+		},
+	),
+);
+
+app.get(
 	"*",
 	serveStatic(
 		{
