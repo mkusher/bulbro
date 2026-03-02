@@ -101,7 +101,7 @@ export function SetupSinglePlayer() {
 							onSubmit
 						}
 					>
-						<Card className="flex flex-col gap-6 mt-30">
+						<Card className="flex flex-col gap-6 mt-30 mb-30">
 							<CardHeader>
 								<h1 className="text-3xl">
 									Start

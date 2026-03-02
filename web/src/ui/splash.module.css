@@ -2,16 +2,16 @@
 	display: block;
 	background:
 		no-repeat
-		url(/assets/bulbro-splash-title.png)
+		url(/assets/bulbro-title.png)
 		top
 		center,
 		no-repeat
-		url(/assets/bulbro-splash-characters.png)
-		bottom
+		url(/assets/bulbro-splash.png)
+		top
 		center;
 	background-size:
 		contain,
-		contain;
+		cover;
 }
 .splash-title {
 	display: block;
@@ -19,9 +19,9 @@
 	height: 40vh;
 	position: relative;
 	background: no-repeat
-		url(/assets/bulbro-splash-title.png)
+		url(/assets/bulbro-title.png)
 		top
-		left;
+		center;
 	background-size: contain;
 	margin-bottom: 16px;
 }

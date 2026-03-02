@@ -2,8 +2,9 @@ import * as PIXI from "pixi.js";
 
 export class PixiAppSemaphore {
 	#available: number;
-	#lock: PromiseWithResolvers<void> | null =
-		null;
+	#queue: Array<
+		() => void
+	> = [];
 	constructor(
 		limit: number,
 	) {
@@ -16,37 +17,27 @@ export class PixiAppSemaphore {
 				.#available <
 			1
 		) {
-			await this.waitForAvailability();
+			await new Promise<void>(
+				(
+					resolve,
+				) => {
+					this.#queue.push(
+						resolve,
+					);
+				},
+			);
 		}
 		this
 			.#available--;
 		return new PIXI.Application();
 	}
-	waitForAvailability() {
-		if (
-			!this
-				.#lock
-		) {
-			this.#lock =
-				Promise.withResolvers();
-		}
-		return this
-			.#lock
-			.promise;
-	}
 	release(): void {
 		this
 			.#available++;
-		if (
-			this
-				.#lock &&
-			this
-				.#available >
-				0
-		) {
-			this.#lock.resolve();
-			this.#lock =
-				null;
+		const next =
+			this.#queue.shift();
+		if (next) {
+			next();
 		}
 	}
 }
