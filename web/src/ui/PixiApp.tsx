@@ -10,7 +10,7 @@ import { PixiAppSemaphore } from "./PixiAppSemaphore";
 
 const pixiAppSemaphore =
 	new PixiAppSemaphore(
-		2,
+		8,
 	);
 
 const sleep =
