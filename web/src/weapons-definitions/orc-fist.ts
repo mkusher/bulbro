@@ -14,11 +14,6 @@ export const orcFist: Weapon =
 			],
 		shotSpeed: 500,
 		statsBonus:
-			{
-				range: 60,
-				damage: 3,
-				meleeDamage: 5,
-				attackSpeed: 1,
-			},
+			{},
 		basePrice: 5,
 	};

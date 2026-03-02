@@ -4,7 +4,8 @@ export class PixiAppSemaphore {
 	#available: number;
 	#queue: Array<
 		() => void
-	> = [];
+	> =
+		[];
 	constructor(
 		limit: number,
 	) {
@@ -36,7 +37,9 @@ export class PixiAppSemaphore {
 			.#available++;
 		const next =
 			this.#queue.shift();
-		if (next) {
+		if (
+			next
+		) {
 			next();
 		}
 	}

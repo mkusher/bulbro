@@ -16,16 +16,17 @@ export const wildBoar: EnemyCharacter =
 				damage: 3,
 				range: 80,
 				attackSpeed: 2,
-				materialsDropped: 3,
+				materialsDropped: 5,
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 1,
+				maxHp: 10,
+				materialsDropped: 3,
 			},
 		weapons:
 			[
 				orcFist,
 			],
 		behaviors:
-			"default",
+			"rage-running",
 	};

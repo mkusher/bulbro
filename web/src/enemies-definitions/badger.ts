@@ -14,7 +14,7 @@ export const badger: EnemyCharacter =
 				maxHp: 10,
 				speed: 280,
 				damage: 3,
-				range: 80,
+				range: 100,
 				attackSpeed: 2,
 				materialsDropped: 3,
 			},

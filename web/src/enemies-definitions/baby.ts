@@ -14,7 +14,7 @@ export const babyEnemy: EnemyCharacter =
 				maxHp: 3,
 				speed: 200,
 				damage: 1,
-				range: 80,
+				range: 100,
 			},
 		waveIncreaseStats:
 			{

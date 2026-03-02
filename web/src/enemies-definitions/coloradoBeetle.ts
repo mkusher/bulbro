@@ -14,7 +14,7 @@ export const coloradoBeetle: EnemyCharacter =
 				maxHp: 2,
 				speed: 380,
 				damage: 1,
-				range: 80,
+				range: 100,
 				attackSpeed: 2,
 				materialsDropped: 1,
 			},

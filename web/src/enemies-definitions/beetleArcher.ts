@@ -14,13 +14,14 @@ export const beetleArcher: EnemyCharacter =
 				maxHp: 2,
 				speed: 380,
 				damage: 3,
-				range: 80,
+				range: 1200,
 				attackSpeed: 2,
 				materialsDropped: 1,
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 1,
+				maxHp: 5,
+				materialsDropped: 1,
 			},
 		weapons:
 			[
