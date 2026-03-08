@@ -60,7 +60,7 @@
 	gap: var(
 		--main-gap
 	);
-	background-color: #ebf8f9;
+	background-color: oklch(0.24 0.015 55);
 }
 
 .main-container

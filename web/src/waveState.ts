@@ -17,6 +17,8 @@ import type {
 	GameEvent,
 	MaterialCollectedEvent,
 	MaterialMovedEvent,
+	ShotExpiredEvent,
+	ShotMovedEvent,
 } from "./game-events/GameEvents";
 import { withEventMeta } from "./game-events/GameEvents";
 import {
@@ -382,6 +384,15 @@ export function handleMaterialCollected(
 }
 
 const materialPickupSpeed = 600;
+
+// Issue 4: module-level constant — avoids allocating a new shape object every frame per material
+const MATERIAL_SHAPE =
+	{
+		type: "rectangle" as const,
+		width: 16,
+		height: 16,
+	};
+
 export function generateMaterialMovementEvents(
 	state: WaveState,
 	deltaTime: DeltaTime,
@@ -394,13 +405,15 @@ export function generateMaterialMovementEvents(
 		| MaterialCollectedEvent
 	)[] =
 		[];
-	const players =
-		state.players;
-	const materialSize =
-		{
-			width: 16,
-			height: 16,
-		};
+
+	// Issue 4: hoist alive-players filter outside the material loop
+	const alivePlayers =
+		state.players.filter(
+			(
+				p,
+			) =>
+				p.isAlive(),
+		);
 
 	for (const object of state.objects) {
 		if (
@@ -412,46 +425,40 @@ export function generateMaterialMovementEvents(
 		const player =
 			findClosest(
 				object,
-				players.filter(
-					(
-						p,
-					) =>
-						p.isAlive(),
-				),
+				alivePlayers,
 			);
 
 		if (
-			player &&
+			!player
+		)
+			continue;
+
+		// Issue 4: compute distance once and reuse for both the range check and movement
+		const distToPlayer =
 			distance(
 				player.position,
 				object.position,
-			) <=
-				player
-					.stats
-					.pickupRange
+			);
+
+		if (
+			distToPlayer <=
+			player
+				.stats
+				.pickupRange
 		) {
-			const shape =
-				{
-					type: "rectangle",
-					...materialSize,
-				} as const;
 			const mover =
 				new Movement(
 					{
 						position:
 							object.position,
-						shape,
+						shape:
+							MATERIAL_SHAPE,
 					},
 					state.mapSize,
 				);
 
 			const directionToPlayer =
 				direction(
-					object.position,
-					player.position,
-				);
-			const distanceToPlayer =
-				distance(
 					object.position,
 					player.position,
 				);
@@ -464,7 +471,7 @@ export function generateMaterialMovementEvents(
 			const actualMovementDistance =
 				Math.min(
 					maxMovementDistance,
-					distanceToPlayer,
+					distToPlayer,
 				);
 			const adjustedSpeed =
 				actualMovementDistance /
@@ -489,7 +496,7 @@ export function generateMaterialMovementEvents(
 						.y
 			) {
 				// Check if material is very close to player center (within collection threshold)
-				const distanceToPlayer =
+				const distanceAfterMove =
 					distance(
 						newPosition,
 						player.position,
@@ -497,7 +504,7 @@ export function generateMaterialMovementEvents(
 				const collectionThreshold = 3; // Nearly touching player center
 
 				if (
-					distanceToPlayer <=
+					distanceAfterMove <=
 					collectionThreshold
 				) {
 					// Generate material collected event instead of movement
@@ -1352,4 +1359,205 @@ export function fromJSON(
 								),
 				),
 		};
+}
+
+// ---------------------------------------------------------------------------
+// Issue 2: Batch event handlers — apply many same-type events in one pass
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply all enemyMoved events in a single enemies.map() pass instead of one
+ * map per event.
+ */
+export function applyEnemyMovedBatch(
+	state: WaveState,
+	events: Extract<
+		GameEvent,
+		{
+			type: "enemyMoved";
+		}
+	>[],
+): WaveState {
+	if (
+		events.length ===
+		0
+	)
+		return state;
+	const updates =
+		new Map<
+			string,
+			(typeof events)[number]
+		>();
+	for (const event of events) {
+		updates.set(
+			event.enemyId,
+			event,
+		);
+	}
+	return {
+		...state,
+		enemies:
+			state.enemies.map(
+				(
+					enemy,
+				) => {
+					const event =
+						updates.get(
+							enemy.id,
+						);
+					if (
+						!event
+					)
+						return enemy;
+					return enemy.applyEvent(
+						event,
+					);
+				},
+			),
+	};
+}
+
+/**
+ * Apply all shotMoved and shotExpired events in a single shots pass instead
+ * of one pass per event.
+ */
+export function applyShotEventsBatch(
+	state: WaveState,
+	movedEvents: Extract<
+		GameEvent,
+		{
+			type: "shotMoved";
+		}
+	>[],
+	expiredEvents: Extract<
+		GameEvent,
+		{
+			type: "shotExpired";
+		}
+	>[],
+): WaveState {
+	if (
+		movedEvents.length ===
+			0 &&
+		expiredEvents.length ===
+			0
+	)
+		return state;
+
+	const moved =
+		new Map<
+			string,
+			(typeof movedEvents)[number]
+		>();
+	for (const event of movedEvents) {
+		moved.set(
+			event.shotId,
+			event,
+		);
+	}
+	const expired =
+		new Set<string>();
+	for (const event of expiredEvents) {
+		expired.add(
+			event.shotId,
+		);
+	}
+
+	const shots =
+		state.shots.reduce<
+			typeof state.shots
+		>(
+			(
+				acc,
+				shot,
+			) => {
+				if (
+					expired.has(
+						shot.id,
+					)
+				)
+					return acc;
+				const event =
+					moved.get(
+						shot.id,
+					);
+				if (
+					!event
+				) {
+					acc.push(
+						shot,
+					);
+					return acc;
+				}
+				acc.push(
+					shot.applyEvent(
+						event,
+					),
+				);
+				return acc;
+			},
+			[],
+		);
+	return {
+		...state,
+		shots,
+	};
+}
+
+/**
+ * Apply all materialMoved events in a single objects.map() pass.
+ */
+export function applyMaterialMovedBatch(
+	state: WaveState,
+	events: Extract<
+		GameEvent,
+		{
+			type: "materialMoved";
+		}
+	>[],
+): WaveState {
+	if (
+		events.length ===
+		0
+	)
+		return state;
+	const updates =
+		new Map<
+			string,
+			(typeof events)[number]
+		>();
+	for (const event of events) {
+		updates.set(
+			event.materialId,
+			event,
+		);
+	}
+	return {
+		...state,
+		objects:
+			state.objects.map(
+				(
+					object,
+				) => {
+					if (
+						object.type !==
+						"material"
+					)
+						return object;
+					const event =
+						updates.get(
+							object.id,
+						);
+					if (
+						!event
+					)
+						return object;
+					return {
+						...object,
+						position:
+							event.to,
+					};
+				},
+			),
+	};
 }

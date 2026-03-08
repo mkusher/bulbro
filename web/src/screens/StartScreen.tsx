@@ -1,7 +1,7 @@
 import { useLocation } from "preact-iso";
 import { isTgApp } from "@/tg-app";
 import { MainContainer } from "@/ui/Layout";
-import { SplashBanner } from "@/ui/Splash";
+import { SplashBanner, SplashTitle } from "@/ui/Splash";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -64,7 +64,8 @@ export const StartScreenComponent =
 				top
 			>
 				<div className="flex h-screen w-4/5">
-					<div className="m-auto w-full flex flex-col gap-6 pb-40">
+					<div className="m-auto w-full flex flex-col items-center gap-6 pb-40">
+						<SplashTitle />
 						<Tabs defaultValue="local">
 							<TabsList>
 								<TabsTrigger value="local">

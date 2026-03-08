@@ -530,7 +530,7 @@ const weaponsContainerPosition =
 				bulbroBodySize.height *
 				bulbroCharacterScaling
 			) -
-			5,
+			15,
 	};
 
 // Orbit center offset inside the weapons container (body center).

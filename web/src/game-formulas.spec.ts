@@ -108,7 +108,7 @@ const weaponsContainerPosition =
 				bulbroBodySize.height *
 				bulbroCharacterScaling
 			) -
-			5,
+			15,
 	};
 const weaponContainerOffset =
 	{

@@ -1,3 +1,4 @@
+import { prometheus } from "@hono/prometheus";
 import type { ServerWebSocket } from "bun";
 import {
 	type Context,
@@ -15,7 +16,6 @@ import { logger as baseLogger } from "./logger";
 import { configureApi } from "./router";
 import { WebsocketConnection } from "./websocket-connection";
 import { websocketConnections } from "./websocket-connections";
-import { prometheus } from "@hono/prometheus";
 
 const {
 	upgradeWebSocket,
@@ -46,6 +46,19 @@ const app =
 		)
 		.use(
 			requestId(),
+		)
+		.use(
+			"*",
+			async (
+				c,
+				next,
+			) => {
+				c.header(
+					"Cache-Control",
+					"no-cache, no-store, must-revalidate",
+				);
+				await next();
+			},
 		)
 		.use(
 			honoLogger(

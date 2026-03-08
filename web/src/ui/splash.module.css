@@ -2,26 +2,21 @@
 	display: block;
 	background:
 		no-repeat
-		url(/assets/bulbro-title.png)
-		top
-		center,
-		no-repeat
 		url(/assets/bulbro-splash.png)
 		top
 		center;
-	background-size:
-		contain,
-		cover;
+	background-size: cover;
 }
 .splash-title {
 	display: block;
-	width: 100vw;
-	height: 40vh;
+	width: min(80vw, 480px);
+	height: 25vh;
 	position: relative;
 	background: no-repeat
 		url(/assets/bulbro-title.png)
-		top
+		center
 		center;
 	background-size: contain;
-	margin-bottom: 16px;
+	margin-bottom: -16px;
+	flex-shrink: 0;
 }

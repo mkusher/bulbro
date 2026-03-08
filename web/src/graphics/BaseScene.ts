@@ -261,86 +261,81 @@ export abstract class BaseScene<
 		now: NowTime,
 		state: WaveState,
 	) {
-		// Sync player sprites
-		state.players.forEach(
-			(
-				p: BulbroState,
-			) => {
-				if (
-					!this.#playerSprites.has(
-						p.id,
-					)
-				) {
-					const sprite =
-						createBulbroSprite(
-							p.type,
-							this
-								.#debug,
-						);
-					sprite.init(
+		// Issue 5: build ID set once for O(1) stale-sprite lookup
+		const playerIds =
+			new Set(
+				state.players.map(
+					(
 						p,
-					);
-					sprite.appendTo(
-						this
-							.playingFieldTile
-							.container,
-						this
-							.#playingFieldLayer,
-					);
-					this.#playerSprites.set(
+					) =>
 						p.id,
-						sprite,
-					);
-					this.logSpriteCreation(
-						"player",
-						p.id,
-						p.position,
-						this
-							.#playerSprites
-							.size,
-					);
-				}
-			},
-		);
-		Array.from(
-			this.#playerSprites.entries(),
-		).forEach(
-			([
-				id,
-				sprite,
-			]) => {
-				if (
-					!state.players.find(
-						(
-							p,
-						) =>
-							p.id ===
-							id,
-					)
-				) {
-					sprite.remove();
-					this.#playerSprites.delete(
-						id,
-					);
-				}
-			},
-		);
-		// Update player positions and opacity
-		state.players.forEach(
-			(
-				p: BulbroState,
-			) => {
-				const sprite =
-					this.#playerSprites.get(
-						p.id,
-					)!;
-				sprite.update(
-					p,
-					deltaTime,
-					now,
+				),
+			);
+
+		// Remove stale sprites
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#playerSprites) {
+			if (
+				!playerIds.has(
+					id,
+				)
+			) {
+				sprite.remove();
+				this.#playerSprites.delete(
+					id,
 				);
-			},
-		);
+			}
+		}
+
+		// Create/update sprites
+		for (const p of state.players) {
+			if (
+				!this.#playerSprites.has(
+					p.id,
+				)
+			) {
+				const sprite =
+					createBulbroSprite(
+						p.type,
+						this
+							.#debug,
+					);
+				sprite.init(
+					p,
+				);
+				sprite.appendTo(
+					this
+						.playingFieldTile
+						.container,
+					this
+						.#playingFieldLayer,
+				);
+				this.#playerSprites.set(
+					p.id,
+					sprite,
+				);
+				this.logSpriteCreation(
+					"player",
+					p.id,
+					p.position,
+					this
+						.#playerSprites
+						.size,
+				);
+			}
+			const sprite =
+				this.#playerSprites.get(
+					p.id,
+				)!;
+			sprite.update(
+				p,
+				deltaTime,
+				now,
+			);
+		}
 	}
 
 	#updateEnemies(
@@ -348,173 +343,181 @@ export abstract class BaseScene<
 		now: NowTime,
 		state: WaveState,
 	) {
-		state.enemies.forEach(
-			(
-				e: EnemyState,
-			) => {
-				if (
-					!this.#enemySprites.has(
+		// Issue 5: build ID set once for O(1) stale-sprite lookup
+		const enemyIds =
+			new Set(
+				state.enemies.map(
+					(
+						e,
+					) =>
 						e.id,
-					)
-				) {
-					const sprite =
-						createEnemySprite(
-							e.type,
-							this
-								.#debug,
-						);
-					sprite.appendTo(
-						this
-							.playingFieldTile
-							.container,
-						this
-							.#playingFieldLayer,
-					);
-					this.#enemySprites.set(
-						e.id,
-						sprite,
-					);
-					this.logSpriteCreation(
-						"enemy",
-						e.id,
-						e.position,
-						this
-							.#enemySprites
-							.size,
-					);
-				}
-				const sprite =
-					this.#enemySprites.get(
-						e.id,
-					)!;
-				sprite.update(
-					e,
-					deltaTime,
-					now,
+				),
+			);
+
+		// Remove stale sprites
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#enemySprites) {
+			if (
+				!enemyIds.has(
+					id,
+				)
+			) {
+				sprite.remove();
+				this.#enemySprites.delete(
+					id,
 				);
-			},
-		);
-		Array.from(
-			this.#enemySprites.entries(),
-		).forEach(
-			([
-				id,
-				sprite,
-			]) => {
-				if (
-					!state.enemies.find(
-						(
-							e,
-						) =>
-							e.id ===
-							id,
-					)
-				) {
-					sprite.remove();
-					this.#enemySprites.delete(
-						id,
+			}
+		}
+
+		// Create/update sprites
+		for (const e of state.enemies) {
+			if (
+				!this.#enemySprites.has(
+					e.id,
+				)
+			) {
+				const sprite =
+					createEnemySprite(
+						e.type,
+						this
+							.#debug,
 					);
-				}
-			},
-		);
+				sprite.appendTo(
+					this
+						.playingFieldTile
+						.container,
+					this
+						.#playingFieldLayer,
+				);
+				this.#enemySprites.set(
+					e.id,
+					sprite,
+				);
+				this.logSpriteCreation(
+					"enemy",
+					e.id,
+					e.position,
+					this
+						.#enemySprites
+						.size,
+				);
+			}
+			const sprite =
+				this.#enemySprites.get(
+					e.id,
+				)!;
+			sprite.update(
+				e,
+				deltaTime,
+				now,
+			);
+		}
 	}
 
 	#updateShots(
 		deltaTime: DeltaTime,
 		state: WaveState,
 	) {
-		state.shots.forEach(
-			(
-				shot,
-			) => {
-				if (
-					!this.#shotSprites.has(
-						shot.id,
-					)
-				) {
-					const sprite =
-						new ShotSprite(
-							shot,
-							this
-								.#debug,
-						);
-					sprite.appendTo(
-						this
-							.playingFieldTile
-							.container,
-						this
-							.#playingFieldLayer,
-					);
-					this.#shotSprites.set(
-						shot.id,
-						sprite,
-					);
-				}
-			},
-		);
-		Array.from(
-			this.#shotSprites.entries(),
-		).forEach(
-			([
-				id,
-				sprite,
-			]) => {
-				if (
-					!state.shots.find(
-						(
-							e,
-						) =>
-							e.id ===
-							id,
-					)
-				) {
-					sprite.remove();
-					this.#shotSprites.delete(
-						id,
-					);
-				}
-			},
-		);
-		state.shots.forEach(
-			(
-				s,
-			) => {
-				const sprite =
-					this.#shotSprites.get(
+		// Issue 5: build ID set once for O(1) stale-sprite lookup
+		const shotIds =
+			new Set(
+				state.shots.map(
+					(
+						s,
+					) =>
 						s.id,
-					)!;
-				sprite.update(
-					deltaTime,
-					s,
+				),
+			);
+
+		// Remove stale sprites
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#shotSprites) {
+			if (
+				!shotIds.has(
+					id,
+				)
+			) {
+				sprite.remove();
+				this.#shotSprites.delete(
+					id,
 				);
-			},
-		);
+			}
+		}
+
+		// Create/update sprites
+		for (const s of state.shots) {
+			if (
+				!this.#shotSprites.has(
+					s.id,
+				)
+			) {
+				const sprite =
+					new ShotSprite(
+						s,
+						this
+							.#debug,
+					);
+				sprite.appendTo(
+					this
+						.playingFieldTile
+						.container,
+					this
+						.#playingFieldLayer,
+				);
+				this.#shotSprites.set(
+					s.id,
+					sprite,
+				);
+			}
+			const sprite =
+				this.#shotSprites.get(
+					s.id,
+				)!;
+			sprite.update(
+				deltaTime,
+				s,
+			);
+		}
 	}
 
 	#updateObjects(
 		deltaTime: DeltaTime,
 		state: WaveState,
 	) {
+		// Issue 6: single pass over objects instead of two separate filter calls
+		const materials: Material[] =
+			[];
+		const spawnings: SpawningEnemy[] =
+			[];
+		for (const object of state.objects) {
+			if (
+				object.type ===
+				"material"
+			)
+				materials.push(
+					object,
+				);
+			else if (
+				object.type ===
+				"spawning-enemy"
+			)
+				spawnings.push(
+					object,
+				);
+		}
 		this.#updateMaterials(
 			deltaTime,
-			state.objects.filter(
-				(
-					object,
-				) =>
-					object.type ===
-					"material",
-			),
+			materials,
 		);
-
 		this.#updateSpawnings(
 			deltaTime,
-			state.objects.filter(
-				(
-					object,
-				) =>
-					object.type ===
-					"spawning-enemy",
-			),
+			spawnings,
 		);
 	}
 
@@ -522,130 +525,136 @@ export abstract class BaseScene<
 		deltaTime: DeltaTime,
 		spawnings: SpawningEnemy[],
 	) {
-		spawnings.forEach(
-			(
-				spawning,
-			) => {
-				if (
-					!this.#spawningSprites.has(
-						spawning.id,
-					)
-				) {
-					const sprite =
-						new SpawningEnemySprite(
-							this
-								.#debug,
-						);
-					sprite.appendTo(
-						this
-							.playingFieldTile
-							.container,
-						this
-							.#playingFieldLayer,
-					);
-					this.#spawningSprites.set(
-						spawning.id,
-						sprite,
-					);
-				}
-				const sprite =
-					this.#spawningSprites.get(
-						spawning.id,
-					)!;
-				sprite.update(
-					spawning,
-					deltaTime,
+		// Issue 5: build ID set once for O(1) stale-sprite lookup
+		const spawningIds =
+			new Set(
+				spawnings.map(
+					(
+						s,
+					) =>
+						s.id,
+				),
+			);
+
+		// Remove stale sprites
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#spawningSprites) {
+			if (
+				!spawningIds.has(
+					id,
+				)
+			) {
+				sprite.remove();
+				this.#spawningSprites.delete(
+					id,
 				);
-			},
-		);
-		Array.from(
-			this.#spawningSprites.entries(),
-		).forEach(
-			([
-				id,
-				sprite,
-			]) => {
-				if (
-					!spawnings.find(
-						(
-							e,
-						) =>
-							e.id ===
-							id,
-					)
-				) {
-					sprite.remove();
-					this.#spawningSprites.delete(
-						id,
+			}
+		}
+
+		// Create/update sprites
+		for (const spawning of spawnings) {
+			if (
+				!this.#spawningSprites.has(
+					spawning.id,
+				)
+			) {
+				const sprite =
+					new SpawningEnemySprite(
+						this
+							.#debug,
 					);
-				}
-			},
-		);
+				sprite.appendTo(
+					this
+						.playingFieldTile
+						.container,
+					this
+						.#playingFieldLayer,
+				);
+				this.#spawningSprites.set(
+					spawning.id,
+					sprite,
+				);
+			}
+			const sprite =
+				this.#spawningSprites.get(
+					spawning.id,
+				)!;
+			sprite.update(
+				spawning,
+				deltaTime,
+			);
+		}
 	}
 
 	#updateMaterials(
 		deltaTime: DeltaTime,
 		materials: Material[],
 	) {
-		materials.forEach(
-			(
-				material,
-			) => {
-				if (
-					!this.#materialSprites.has(
-						material.id,
-					)
-				) {
-					const sprite =
-						new MaterialSprite(
-							this
-								.#debug,
-						);
-					sprite.init(
-						material,
-						this
-							.playingFieldTile
-							.container,
-						this
-							.#playingFieldLayer,
-					);
-					this.#materialSprites.set(
-						material.id,
-						sprite,
-					);
-				}
-				const sprite =
-					this.#materialSprites.get(
-						material.id,
-					)!;
-				sprite.update(
-					material,
-					deltaTime,
+		// Issue 5: build ID set once for O(1) stale-sprite lookup
+		const materialIds =
+			new Set(
+				materials.map(
+					(
+						m,
+					) =>
+						m.id,
+				),
+			);
+
+		// Remove stale sprites
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#materialSprites) {
+			if (
+				!materialIds.has(
+					id,
+				)
+			) {
+				sprite.remove();
+				this.#materialSprites.delete(
+					id,
 				);
-			},
-		);
-		Array.from(
-			this.#materialSprites.entries(),
-		).forEach(
-			([
-				id,
-				sprite,
-			]) => {
-				if (
-					!materials.find(
-						(
-							e,
-						) =>
-							e.id ===
-							id,
-					)
-				) {
-					sprite.remove();
-					this.#materialSprites.delete(
-						id,
+			}
+		}
+
+		// Create/update sprites
+		for (const material of materials) {
+			if (
+				!this.#materialSprites.has(
+					material.id,
+				)
+			) {
+				const sprite =
+					new MaterialSprite(
+						this
+							.#debug,
 					);
-				}
-			},
-		);
+				sprite.init(
+					material,
+					this
+						.playingFieldTile
+						.container,
+					this
+						.#playingFieldLayer,
+				);
+				this.#materialSprites.set(
+					material.id,
+					sprite,
+				);
+			}
+			const sprite =
+				this.#materialSprites.get(
+					material.id,
+				)!;
+			sprite.update(
+				material,
+				deltaTime,
+			);
+		}
 	}
 }
