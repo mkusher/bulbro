@@ -215,6 +215,14 @@ function makeState(
 					Date.now(),
 			},
 		...overrides,
+		lastShotsAt:
+			nowTime(
+				0,
+			),
+		lastMovementsAt:
+			nowTime(
+				0,
+			),
 	};
 }
 

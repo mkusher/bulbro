@@ -13,7 +13,7 @@ import {
 	deltaTime,
 	nowTime,
 } from "../time";
-import { BaseTickProcess } from "./BaseTickProcess";
+import { FullGameTickProcess } from "./FullGameTickProcess";
 import { BaseWaveProcess } from "./BaseWaveProcess";
 import type {
 	GameProcess,
@@ -145,7 +145,7 @@ export class BaseGameProcess
 			logger,
 			controls,
 		) =>
-			new BaseTickProcess(
+			new FullGameTickProcess(
 				logger,
 				controls,
 			);

@@ -1,7 +1,6 @@
 .splash-container {
 	display: block;
-	background:
-		no-repeat
+	background: no-repeat
 		url(/assets/bulbro-splash.png)
 		top
 		center;
@@ -9,7 +8,10 @@
 }
 .splash-title {
 	display: block;
-	width: min(80vw, 480px);
+	width: min(
+		80vw,
+		480px
+	);
 	height: 25vh;
 	position: relative;
 	background: no-repeat

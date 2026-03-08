@@ -139,6 +139,14 @@ function createTestState(
 					200,
 				),
 			],
+		lastShotsAt:
+			nowTime(
+				0,
+			),
+		lastMovementsAt:
+			nowTime(
+				0,
+			),
 	};
 }
 

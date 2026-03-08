@@ -75,6 +75,14 @@ describe("RageRunningBehaviors", () => {
 						startedAt:
 							Date.now(),
 					},
+				lastShotsAt:
+					nowTime(
+						0,
+					),
+				lastMovementsAt:
+					nowTime(
+						0,
+					),
 			};
 		};
 

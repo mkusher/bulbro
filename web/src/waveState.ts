@@ -1,6 +1,12 @@
 import { signal } from "@preact/signals";
-import type { DeltaTime } from "@/time";
-import { deltaTime } from "@/time";
+import type {
+	DeltaTime,
+	NowTime,
+} from "@/time";
+import {
+	deltaTime,
+	nowTime,
+} from "@/time";
 import {
 	BULBRO_SIZE,
 	BulbroState,
@@ -75,6 +81,10 @@ export interface WaveState {
 	shots: ShotState[];
 	/** Timestamp of last enemy spawn */
 	lastSpawnAt?: number;
+	/** Timestamp of last shot event */
+	lastShotsAt: NowTime;
+	/** Timestamp of last movement event (material, enemy, or bulbro) */
+	lastMovementsAt: NowTime;
 	round: RoundState;
 }
 
@@ -130,6 +140,14 @@ export const nextWave =
 									),
 							),
 					),
+			),
+		lastShotsAt:
+			nowTime(
+				0,
+			),
+		lastMovementsAt:
+			nowTime(
+				0,
 			),
 		round:
 			{
@@ -214,6 +232,14 @@ export const createInitialState =
 				[],
 			shots:
 				[],
+			lastShotsAt:
+				nowTime(
+					0,
+				),
+			lastMovementsAt:
+				nowTime(
+					0,
+				),
 			round:
 				{
 					isRunning: true,
@@ -254,6 +280,8 @@ export function movePlayer(
 ): WaveState {
 	return {
 		...state,
+		lastMovementsAt:
+			action.occurredAt,
 		players:
 			state.players.map(
 				(
@@ -683,6 +711,8 @@ export function addShot(
 			: state.enemies;
 	return {
 		...state,
+		lastShotsAt:
+			now,
 		players:
 			newPlayers,
 		enemies:

@@ -77,6 +77,14 @@ function makeState(
 			[],
 		shots:
 			[],
+		lastShotsAt:
+			nowTime(
+				0,
+			),
+		lastMovementsAt:
+			nowTime(
+				0,
+			),
 		round:
 			{
 				isRunning: true,

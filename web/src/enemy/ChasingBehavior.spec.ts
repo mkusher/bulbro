@@ -75,6 +75,14 @@ describe("ChasingBehavior", () => {
 						startedAt:
 							Date.now(),
 					},
+				lastShotsAt:
+					nowTime(
+						0,
+					),
+				lastMovementsAt:
+					nowTime(
+						0,
+					),
 			};
 		};
 

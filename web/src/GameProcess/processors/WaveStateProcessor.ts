@@ -144,6 +144,31 @@ export class WaveStateProcessor
 				materialMovedEvents,
 			);
 
+		// Update lastMovementsAt if any batch movement events occurred
+		if (
+			enemyMovedEvents.length >
+			0
+		) {
+			newState =
+				{
+					...newState,
+					lastMovementsAt:
+						enemyMovedEvents[0]!
+							.occurredAt,
+				};
+		} else if (
+			materialMovedEvents.length >
+			0
+		) {
+			newState =
+				{
+					...newState,
+					lastMovementsAt:
+						materialMovedEvents[0]!
+							.occurredAt,
+				};
+		}
+
 		newState =
 			{
 				...newState,

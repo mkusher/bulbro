@@ -10,7 +10,7 @@ import type { Camera } from "@/graphics/Camera";
 import { createGameCamera } from "@/graphics/GameCamera";
 import { StorybookSceneWithUi } from "@/graphics/StorybookSceneWithUi";
 import { logger as defaultLogger } from "@/logger";
-import { BaseTickProcess } from "@/GameProcess/BaseTickProcess";
+import { FullGameTickProcess } from "@/GameProcess/FullGameTickProcess";
 import { WaveStateProcessor } from "@/GameProcess/processors/WaveStateProcessor";
 import {
 	deltaTime,
@@ -96,7 +96,7 @@ const tickerCallback =
 			return;
 
 		const tickProcess =
-			new BaseTickProcess(
+			new FullGameTickProcess(
 				defaultLogger,
 				[
 					controls,
@@ -402,7 +402,7 @@ export function step(
 		)
 			return;
 		const tickProcess =
-			new BaseTickProcess(
+			new FullGameTickProcess(
 				defaultLogger,
 				[
 					controls,

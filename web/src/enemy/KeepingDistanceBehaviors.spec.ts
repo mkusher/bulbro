@@ -75,6 +75,14 @@ describe("KeepingDistanceBehaviors", () => {
 						startedAt:
 							Date.now(),
 					},
+				lastShotsAt:
+					nowTime(
+						0,
+					),
+				lastMovementsAt:
+					nowTime(
+						0,
+					),
 			};
 		};
 	const actualRange =

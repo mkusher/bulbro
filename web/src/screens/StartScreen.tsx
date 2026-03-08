@@ -1,7 +1,10 @@
 import { useLocation } from "preact-iso";
 import { isTgApp } from "@/tg-app";
 import { MainContainer } from "@/ui/Layout";
-import { SplashBanner, SplashTitle } from "@/ui/Splash";
+import {
+	SplashBanner,
+	SplashTitle,
+} from "@/ui/Splash";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,

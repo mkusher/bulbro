@@ -1,9 +1,9 @@
-import type { EnemyEvent } from "@/game-events/GameEvents";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
-import type { WaveState } from "@/waveState";
+import type { GameEventInternal } from "../../game-events/GameEvents";
+import type { WaveState } from "../../waveState";
 import {
 	AphidSpawner,
 	BabySpawner,
@@ -14,7 +14,8 @@ import {
 	HedgehogSpawner,
 	RoachSpawner,
 	WildBoarSpawner,
-} from "./enemy-spawners";
+} from "../../Spawner/enemy-spawners";
+import type { EventGenerator } from "./EventGenerator";
 
 type SpawnerLogic =
 	{
@@ -22,7 +23,7 @@ type SpawnerLogic =
 			waveState: WaveState,
 			deltaTime: DeltaTime,
 			now: NowTime,
-		): EnemyEvent[];
+		): GameEventInternal[];
 	};
 
 const spawners: SpawnerLogic[] =
@@ -38,18 +39,21 @@ const spawners: SpawnerLogic[] =
 		new BadgerSpawner(),
 	];
 
-export class EnemySpawner {
-	tick(
-		waveState: WaveState,
+export class EnemySpawnEventsGenerator
+	implements
+		EventGenerator
+{
+	generate(
+		state: WaveState,
 		deltaTime: DeltaTime,
 		now: NowTime,
-	): EnemyEvent[] {
+	): GameEventInternal[] {
 		return spawners.flatMap(
 			(
 				s,
 			) =>
 				s.tick(
-					waveState,
+					state,
 					deltaTime,
 					now,
 				),

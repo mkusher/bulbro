@@ -17,7 +17,7 @@ import type {
 	WaveState,
 	WeaponState,
 } from "../waveState";
-import { BaseTickProcess } from "./BaseTickProcess";
+import { FullGameTickProcess } from "./FullGameTickProcess";
 import type { TickProcess } from "./index";
 
 /**
@@ -194,7 +194,7 @@ function createTestWeapon(
 	};
 }
 
-describe("TickProcess", () => {
+describe("FullGameTickProcess", () => {
 	let tickProcess: TickProcess;
 	let state: WaveState;
 
@@ -229,6 +229,14 @@ describe("TickProcess", () => {
 						[],
 					objects:
 						[],
+					lastShotsAt:
+						nowTime(
+							0,
+						),
+					lastMovementsAt:
+						nowTime(
+							0,
+						),
 					round:
 						{
 							isRunning: true,
@@ -244,7 +252,7 @@ describe("TickProcess", () => {
 
 			// Create TickProcess
 			tickProcess =
-				new BaseTickProcess(
+				new FullGameTickProcess(
 					logger.child(
 						{
 							component:

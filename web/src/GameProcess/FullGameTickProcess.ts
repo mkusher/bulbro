@@ -13,16 +13,14 @@ import {
 	withEventMetaMultiple,
 } from "../game-events/GameEvents";
 import { logger as defaultLogger } from "../logger";
-import { EnemySpawner } from "../Spawner/EnemySpawner";
 import type { WaveState } from "../waveState";
-import {
-	generateMaterialMovementEvents,
-	getTimeLeft,
-} from "../waveState";
+import { getTimeLeft } from "../waveState";
 import type { TickProcess } from "./index";
 import type { EventGenerator } from "./event-generators";
 import {
 	EnemyBehaviorEventGenerator,
+	EnemySpawnEventsGenerator,
+	MaterialsMovementEventsGenerator,
 	PlayerHealEventGenerator,
 	PlayerMovementEventGenerator,
 	PlayerWeaponEventGenerator,
@@ -32,7 +30,7 @@ import {
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.
  */
-export class BaseTickProcess
+export class FullGameTickProcess
 	implements
 		TickProcess
 {
@@ -43,7 +41,6 @@ export class BaseTickProcess
 					"TickProcess",
 			},
 		);
-	#enemySpawner: EnemySpawner;
 	#generators: EventGenerator[];
 
 	constructor(
@@ -57,8 +54,6 @@ export class BaseTickProcess
 		this.#logger.debug(
 			"TickProcess initialized",
 		);
-		this.#enemySpawner =
-			new EnemySpawner();
 		this.#generators =
 			[
 				new PlayerHealEventGenerator(),
@@ -68,12 +63,11 @@ export class BaseTickProcess
 				new EnemyBehaviorEventGenerator(),
 				new PlayerWeaponEventGenerator(),
 				new ShotMovementEventGenerator(),
+				new MaterialsMovementEventsGenerator(),
+				new EnemySpawnEventsGenerator(),
 			];
 	}
 
-	/**
-	 * Run one tick: produces events for movement, enemy AI, spawning, and rendering.
-	 */
 	tick(
 		state: WaveState,
 		deltaTime: DeltaTime,
@@ -145,25 +139,6 @@ export class BaseTickProcess
 				),
 			);
 		}
-
-		// Generate individual material movement events
-		const materialMoveEvents =
-			generateMaterialMovementEvents(
-				state,
-				deltaTime,
-			);
-		baseEvents.push(
-			...materialMoveEvents,
-		);
-
-		// Generate enemy spawn events
-		baseEvents.push(
-			...this.#enemySpawner.tick(
-				state,
-				deltaTime,
-				now,
-			),
-		);
 
 		// Generate tick event
 		baseEvents.push(

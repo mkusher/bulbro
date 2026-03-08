@@ -1,6 +1,9 @@
 import pino from "pino";
 
-const level =
+const minLevel =
+	localStorage.getItem(
+		"min_log_level",
+	) ??
 	"info";
 
 type LogRecord =
@@ -9,9 +12,18 @@ type LogRecord =
 		msg: string;
 		time: number;
 	};
-const levels =
+const levels: Record<
+	number,
+	| string
+	| undefined
+> =
 	{
-		30: "log",
+		10: "trace",
+		20: "debug",
+		30: "info",
+		40: "warn",
+		50: "error",
+		60: "fatal",
 	};
 /**
  * Default application logger.
@@ -19,7 +31,8 @@ const levels =
 export const logger =
 	pino(
 		{
-			level,
+			level:
+				minLevel,
 			browser:
 				{
 					write(
@@ -33,6 +46,11 @@ export const logger =
 								...rest
 							} =
 								o as LogRecord;
+							const levelName =
+								levels[
+									level
+								] ??
+								level;
 							const logTime =
 								new Date();
 							logTime.setTime(
@@ -57,7 +75,7 @@ export const logger =
 								formatted = ` <${formatted}>`;
 							}
 							console.log(
-								`${logTime.toISOString()} ${level} ${msg}${formatted}`,
+								`${logTime.toISOString()} ${levelName} ${msg}${formatted}`,
 								{
 									params:
 										rest,

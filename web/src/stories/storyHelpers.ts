@@ -7,6 +7,7 @@ import { baseStats } from "@/characters-definitions/base";
 import type { EnemyState } from "@/enemy/EnemyState";
 import { classicMapSize } from "@/game-canvas";
 import { ShotState } from "@/shot/ShotState";
+import { nowTime } from "@/time";
 import type { WaveState } from "@/waveState";
 
 // Helper to create a minimal game state
@@ -39,6 +40,14 @@ export function createGameState(
 					Date.now(),
 			},
 		...overrides,
+		lastShotsAt:
+			nowTime(
+				0,
+			),
+		lastMovementsAt:
+			nowTime(
+				0,
+			),
 	};
 }
 
