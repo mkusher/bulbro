@@ -5,3 +5,7 @@ declare module "*.module.css" {
 	>;
 	export default styles;
 }
+declare module "*.css" {
+	const styles: string;
+	export default styles;
+}

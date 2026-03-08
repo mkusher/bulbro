@@ -7,7 +7,7 @@ import {
 	spawnBulbro,
 } from "./bulbro";
 import { ENEMY_SIZE } from "./enemy";
-import { DefaultEnemyBehaviors } from "./enemy/DefaultEnemyBehaviors";
+import { ChasingBehavior } from "./enemy/ChasingBehavior";
 import {
 	DEATH_DURATION,
 	EnemyState,

@@ -27,5 +27,5 @@ export const coloradoBeetle: EnemyCharacter =
 				orcFist,
 			],
 		behaviors:
-			"default",
+			"chasing",
 	};

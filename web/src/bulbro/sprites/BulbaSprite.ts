@@ -8,6 +8,7 @@ import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { CharacterSprites } from "@/graphics/CharacterSprite";
 import { DebugSprite } from "@/graphics/DebugSprite";
 import { GameSprite } from "@/graphics/GameSprite";
+import { ShadowSprite } from "@/graphics/ShadowSprite";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import type {
 	DeltaTime,
@@ -19,6 +20,7 @@ import {
 } from "@/time";
 import { WeaponsSprite } from "@/weapon/sprites/WeaponsSprite.ts";
 import type { BulbroState } from "../BulbroState";
+import { OverheadHealthBar } from "./OverheadHealthBar.ts";
 import { BodySprite } from "./BodySprite.ts";
 import {
 	FaceSprite,
@@ -41,20 +43,28 @@ const fullSize =
 		height: 280,
 	};
 
+const bodySize =
+	{
+		width: 100,
+		height: 130,
+	};
+
 /**
  * Manages a player sprite graphic.
  */
 export class BulbaSprite extends GameSprite {
 	#sprite!: PIXI.Container;
 	#debugSprite?: DebugSprite;
-	#characterScaling = 0.25;
+	#characterScaling = 0.3;
 	#weaponsSprite: WeaponsSprite;
 	#movement?: AnimatedSprite<PIXI.Container>;
 	#idle?: AnimatedSprite<PIXI.Container>;
 	#whenHit?: AnimatedSprite<PIXI.Container>;
 	#whenDangerouslyHit?: AnimatedSprite<PIXI.Container>;
 	#characterSprites?: CharacterSprites<PIXI.Container>;
+	#shadow: ShadowSprite;
 	#faceType: FaceType;
+	#overheadHealthBar: OverheadHealthBar;
 
 	constructor(
 		faceType: FaceType,
@@ -72,11 +82,34 @@ export class BulbaSprite extends GameSprite {
 		);
 		this.#faceType =
 			faceType;
+		this.#shadow =
+			new ShadowSprite(
+				{
+					width:
+						fullSize.width *
+						this
+							.#characterScaling,
+					height:
+						fullSize.height *
+						this
+							.#characterScaling,
+				},
+			);
 		this.#weaponsSprite =
 			new WeaponsSprite(
 				Boolean(
 					debug,
 				),
+			);
+		this.#overheadHealthBar =
+			new OverheadHealthBar(
+				bodySize.width *
+					this
+						.#characterScaling,
+				bodySize.height *
+					this
+						.#characterScaling +
+					5,
 			);
 		if (
 			debug
@@ -133,6 +166,11 @@ export class BulbaSprite extends GameSprite {
 				},
 			);
 
+		this.#shadow.appendTo(
+			this
+				.container,
+		);
+
 		this.#sprite =
 			await this.#idle.getSprite(
 				deltaTime(
@@ -174,6 +212,10 @@ export class BulbaSprite extends GameSprite {
 			parent,
 			layer,
 		);
+		this.#overheadHealthBar.appendTo(
+			parent,
+			layer,
+		);
 	}
 
 	update(
@@ -181,6 +223,8 @@ export class BulbaSprite extends GameSprite {
 		delta: DeltaTime,
 		now: NowTime,
 	) {
+		this.#shadow.visible =
+			player.isAlive();
 		this.#updateSpritePosition(
 			player.position,
 			player.lastDirection,
@@ -209,6 +253,10 @@ export class BulbaSprite extends GameSprite {
 			);
 		}
 		this.#weaponsSprite.update(
+			player,
+		);
+
+		this.#overheadHealthBar.update(
 			player,
 		);
 
@@ -282,6 +330,7 @@ export class BulbaSprite extends GameSprite {
 	 */
 	override remove(): void {
 		this.#weaponsSprite.remove();
+		this.#overheadHealthBar.remove();
 		super.remove();
 	}
 
@@ -417,7 +466,7 @@ export class BulbaSprite extends GameSprite {
 		scaling.filters =
 			[
 				new OutlineFilter(
-					2,
+					3,
 					0x000000,
 					1.0,
 				),

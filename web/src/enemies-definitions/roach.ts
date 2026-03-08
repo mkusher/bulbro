@@ -27,5 +27,5 @@ export const roach: EnemyCharacter =
 				orcFist,
 			],
 		behaviors:
-			"default",
+			"chasing",
 	};

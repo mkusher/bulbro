@@ -27,5 +27,5 @@ export const hedghehog: EnemyCharacter =
 				orcFist,
 			],
 		behaviors:
-			"default",
+			"chasing",
 	};

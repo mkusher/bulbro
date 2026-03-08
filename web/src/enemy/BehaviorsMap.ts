@@ -1,4 +1,4 @@
-import { DefaultEnemyBehaviors } from "./DefaultEnemyBehaviors";
+import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviorsType } from "./EnemyCharacter";
 import { KeepkingDistanceBehaviors } from "./KeepingDistanceBehaviors";
 import { RageRunningBehaviors } from "./RageRunningBehaviors";
@@ -6,6 +6,12 @@ import { RageRunningBehaviors } from "./RageRunningBehaviors";
 export function getBehaviors(
 	behavior?: typeof EnemyBehaviorsType.infer,
 ) {
+	if (
+		behavior ===
+		"chasing"
+	) {
+		return new ChasingBehavior();
+	}
 	if (
 		behavior ===
 		"rage-running"
@@ -18,5 +24,5 @@ export function getBehaviors(
 	) {
 		return new KeepkingDistanceBehaviors();
 	}
-	return new DefaultEnemyBehaviors();
+	return new ChasingBehavior();
 }

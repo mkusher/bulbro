@@ -13,6 +13,7 @@ import type {
 import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { DebugSprite } from "@/graphics/DebugSprite";
 import { GameSprite } from "@/graphics/GameSprite";
+import { ShadowSprite } from "@/graphics/ShadowSprite";
 import { RotatingDisapperanceAnimation } from "@/graphics/RotatingDisappearanceAnimation";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import type {
@@ -31,6 +32,8 @@ type PhysicalRectangle =
 		offset?: Position;
 	};
 
+const DEFAULT_SCALING = 0.3;
+
 /**
  * Manages an enemy sprite graphic.
  */
@@ -44,6 +47,7 @@ export class BulbaEnemySprite extends GameSprite {
 	#whenDangerouslyHit?: AnimatedSprite<PIXI.Container>;
 	#raging?: AnimatedSprite<PIXI.Container>;
 	#enemySprites?: EnemySprites<PIXI.Container>;
+	#shadow: ShadowSprite;
 	#defaultFrame: PhysicalRectangle;
 
 	constructor(
@@ -68,12 +72,25 @@ export class BulbaEnemySprite extends GameSprite {
 			this
 				.#defaultFrame
 				.size;
+		const scaledSize =
+			{
+				width:
+					size.width *
+					DEFAULT_SCALING,
+				height:
+					size.height *
+					DEFAULT_SCALING,
+			};
+		this.#shadow =
+			new ShadowSprite(
+				scaledSize,
+			);
 		if (
 			debug
 		) {
 			this.#debugSprite =
 				new DebugSprite(
-					size,
+					scaledSize,
 					{
 						anchor:
 							"bottom-center",
@@ -166,6 +183,11 @@ export class BulbaEnemySprite extends GameSprite {
 					.#raging,
 			);
 
+		this.#shadow.appendTo(
+			this
+				.container,
+		);
+
 		this.#sprite =
 			await this.#idle.getSprite(
 				deltaTime(
@@ -205,6 +227,8 @@ export class BulbaEnemySprite extends GameSprite {
 		delta: DeltaTime,
 		now: NowTime,
 	) {
+		this.#shadow.visible =
+			!enemy.killedAt;
 		const shape =
 			enemy.toMovableObject();
 		const rectangle =
@@ -455,7 +479,8 @@ export class BulbaEnemySprite extends GameSprite {
 			new PIXI.Container();
 		const scaling =
 			new PIXI.Container();
-		scaling.scale = 0.25;
+		scaling.scale =
+			DEFAULT_SCALING;
 		scaling.addChild(
 			await this.#cutRectangle(
 				rectangle,
@@ -470,7 +495,7 @@ export class BulbaEnemySprite extends GameSprite {
 		) {
 			const outlineFilter =
 				new OutlineFilter(
-					2,
+					3,
 					0x000000,
 					1.0,
 				);

@@ -19,7 +19,7 @@ import type {
 	WeaponState,
 } from "../waveState";
 import { getBehaviors } from "./BehaviorsMap";
-import { DefaultEnemyBehaviors } from "./DefaultEnemyBehaviors";
+import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyCharacter } from "./EnemyCharacter";
 import { ENEMY_SIZE } from "./index";
@@ -170,7 +170,7 @@ export class EnemyState
 				...props,
 				behaviors:
 					props.behaviors ??
-					new DefaultEnemyBehaviors(),
+					new ChasingBehavior(),
 			};
 	}
 

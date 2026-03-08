@@ -5,7 +5,7 @@ import type { EnemyType } from "./EnemyState";
 
 export const EnemyBehaviorsType =
 	type(
-		"'default' | 'keeping-distance' | 'rage-running'",
+		"'chasing' | 'keeping-distance' | 'rage-running'",
 	);
 /**
  * Character model for an enemy.

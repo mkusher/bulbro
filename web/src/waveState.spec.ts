@@ -7,7 +7,7 @@ import {
 import { BulbroState } from "./bulbro/BulbroState";
 import { baseStats } from "./characters-definitions/base";
 import { babyEnemy } from "./enemies-definitions";
-import { DefaultEnemyBehaviors } from "./enemy/DefaultEnemyBehaviors";
+import { ChasingBehavior } from "./enemy/ChasingBehavior";
 import type { EnemyCharacter } from "./enemy/EnemyCharacter";
 import {
 	EnemyState,

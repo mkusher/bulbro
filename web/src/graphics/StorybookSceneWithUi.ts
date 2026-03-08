@@ -1,6 +1,7 @@
 import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
 import type { GameEvent } from "@/game-events/GameEvents";
+import type { Position } from "@/geometry";
 import type {
 	DeltaTime,
 	NowTime,
@@ -17,6 +18,7 @@ import {
 import { CoordinateGridOverlay } from "../stories/CoordinateGridOverlay";
 import type { WaveState } from "../waveState";
 import type { Camera } from "./Camera";
+import { DustCloudEffect } from "./DustCloudEffect";
 import { HitIndicators } from "./HitIndicators";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
@@ -35,6 +37,16 @@ export class StorybookSceneWithUi {
 	#camera: Camera;
 	#logger: Logger;
 	#hitIndicators: HitIndicators;
+	#dustEffects: Map<
+		string,
+		DustCloudEffect
+	> =
+		new Map();
+	#lastPlayerPositions: Map<
+		string,
+		Position
+	> =
+		new Map();
 	#totalTime = 0;
 	#coordinateGrid: CoordinateGridOverlay | null =
 		null;
@@ -177,6 +189,10 @@ export class StorybookSceneWithUi {
 			events,
 			state,
 		);
+		this.#updateDustEffects(
+			deltaTime,
+			state,
+		);
 	}
 
 	get playingFieldContainer() {
@@ -201,6 +217,72 @@ export class StorybookSceneWithUi {
 		return this
 			.#scene
 			.camera;
+	}
+
+	#updateDustEffects(
+		deltaTime: DeltaTime,
+		state: WaveState,
+	) {
+		state.players.forEach(
+			(
+				player,
+			) => {
+				if (
+					!this.#dustEffects.has(
+						player.id,
+					)
+				) {
+					const dust =
+						new DustCloudEffect();
+					dust.appendTo(
+						this
+							.playingFieldContainer,
+						this
+							.playingFieldLayer,
+					);
+					this.#dustEffects.set(
+						player.id,
+						dust,
+					);
+				}
+				const dust =
+					this.#dustEffects.get(
+						player.id,
+					)!;
+				const lastPos =
+					this.#lastPlayerPositions.get(
+						player.id,
+					);
+				const isMoving =
+					lastPos !==
+						undefined &&
+					(lastPos.x !==
+						player
+							.position
+							.x ||
+						lastPos.y !==
+							player
+								.position
+								.y);
+				this.#lastPlayerPositions.set(
+					player.id,
+					{
+						x: player
+							.position
+							.x,
+						y: player
+							.position
+							.y,
+					},
+				);
+				dust.update(
+					deltaTime,
+					player.position,
+					player.lastDirection,
+					isMoving,
+				);
+			},
+		);
 	}
 
 	#updatePlayerStats(

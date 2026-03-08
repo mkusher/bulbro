@@ -326,10 +326,13 @@ export function findClosestPlayerInRange(
 	return findClosestInRange(
 		enemy,
 		players,
-		weapon
+		(weapon
 			.statsBonus
 			.range ??
-			minWeaponRange,
+			minWeaponRange) +
+			enemy
+				.stats
+				.range,
 	);
 }
 

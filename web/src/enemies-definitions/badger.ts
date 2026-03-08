@@ -27,5 +27,5 @@ export const badger: EnemyCharacter =
 				orcFist,
 			],
 		behaviors:
-			"default",
+			"chasing",
 	};

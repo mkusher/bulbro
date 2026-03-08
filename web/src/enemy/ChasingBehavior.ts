@@ -24,7 +24,7 @@ import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyState } from "./EnemyState";
 import { KnockbackMovement } from "./KnockbackMovement";
 
-export class DefaultEnemyBehaviors
+export class ChasingBehavior
 	implements
 		EnemyBehaviors
 {

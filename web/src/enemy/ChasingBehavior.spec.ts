@@ -16,14 +16,13 @@ import {
 } from "@/time";
 import type { WaveState } from "@/waveState";
 import { babyEnemy } from "../enemies-definitions/baby";
-import { aphidEnemy } from "../enemies-definitions/aphid";
-import { DefaultEnemyBehaviors } from "./DefaultEnemyBehaviors";
+import { ChasingBehavior } from "./ChasingBehavior";
 import {
 	EnemyState,
 	spawnEnemy,
 } from "./EnemyState";
 
-describe("DefaultEnemyBehaviors", () => {
+describe("ChasingBehavior", () => {
 	const createTestEnemy =
 		(
 			position = zeroPoint(),
@@ -136,7 +135,7 @@ describe("DefaultEnemyBehaviors", () => {
 	describe("attack", () => {
 		it("should attack when player is in range and weapon ready", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -203,7 +202,7 @@ describe("DefaultEnemyBehaviors", () => {
 
 		it("should not attack when player is out of range", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -248,7 +247,7 @@ describe("DefaultEnemyBehaviors", () => {
 
 		it("should not attack when weapon is on cooldown", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -307,7 +306,7 @@ describe("DefaultEnemyBehaviors", () => {
 
 		it("should attack after cooldown has elapsed", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -353,10 +352,11 @@ describe("DefaultEnemyBehaviors", () => {
 							],
 					},
 				);
+
 			const player =
 				createTestBulbro(
 					{
-						x: 150,
+						x: 120,
 						y: 100,
 					},
 				);
@@ -424,7 +424,7 @@ describe("DefaultEnemyBehaviors", () => {
 
 		it("should target closest player in range", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -511,7 +511,7 @@ describe("DefaultEnemyBehaviors", () => {
 	describe("move", () => {
 		it("should move toward closest player", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -582,7 +582,7 @@ describe("DefaultEnemyBehaviors", () => {
 
 		it("should not move when no players", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),
@@ -618,7 +618,7 @@ describe("DefaultEnemyBehaviors", () => {
 
 		it("should not move when killed", () => {
 			const behavior =
-				new DefaultEnemyBehaviors();
+				new ChasingBehavior();
 			const now =
 				nowTime(
 					Date.now(),

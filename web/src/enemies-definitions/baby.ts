@@ -14,7 +14,7 @@ export const babyEnemy: EnemyCharacter =
 				maxHp: 3,
 				speed: 200,
 				damage: 1,
-				range: 100,
+				range: 160,
 			},
 		waveIncreaseStats:
 			{
@@ -26,5 +26,5 @@ export const babyEnemy: EnemyCharacter =
 				orcFist,
 			],
 		behaviors:
-			"default",
+			"chasing",
 	};

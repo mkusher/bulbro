@@ -17,7 +17,7 @@ import {
 	distance,
 } from "../geometry";
 import type { WaveState } from "../waveState";
-import { DefaultEnemyBehaviors } from "./DefaultEnemyBehaviors";
+import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyState } from "./EnemyState";
 import { KnockbackMovement } from "./KnockbackMovement";
@@ -32,10 +32,10 @@ export class KeepkingDistanceBehaviors
 	implements
 		EnemyBehaviors
 {
-	#default: DefaultEnemyBehaviors;
+	#default: ChasingBehavior;
 	constructor() {
 		this.#default =
-			new DefaultEnemyBehaviors();
+			new ChasingBehavior();
 	}
 	move(
 		currentEnemy: EnemyState,
