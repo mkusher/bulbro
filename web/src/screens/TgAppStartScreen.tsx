@@ -11,7 +11,10 @@ import {
 import { MainContainer } from "@/ui/Layout";
 import { Loader } from "@/ui/Loading";
 import { useRouter } from "@/ui/routing";
-import { SplashBanner } from "@/ui/Splash";
+import {
+	SplashBanner,
+	SplashTitle,
+} from "@/ui/Splash";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -96,7 +99,8 @@ export function TgAppStartScreen() {
 				top
 			>
 				<div className="flex h-screen w-4/5">
-					<div className="m-auto w-full flex flex-col gap-6 pb-40">
+					<div className="m-auto w-full flex flex-col items-center gap-6 pb-40">
+						<SplashTitle />
 						<Card>
 							<CardHeader>
 								<CardTitle>
