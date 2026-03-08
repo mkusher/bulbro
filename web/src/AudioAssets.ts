@@ -40,8 +40,13 @@ export const soundUrls =
 			import.meta
 				.url,
 		).toString(),
-		bgm: new URL(
-			"../sounds/bgm.mp3",
+		bgm1: new URL(
+			"../sounds/neon_genesis_protocol.mp3",
+			import.meta
+				.url,
+		).toString(),
+		bgm2: new URL(
+			"../sounds/neon_grid_runner.mp3",
 			import.meta
 				.url,
 		).toString(),

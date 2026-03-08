@@ -227,7 +227,7 @@ class AudioEngine {
 
 		const buffer =
 			this.#buffers.get(
-				"bgm",
+				"bgm1",
 			);
 		if (
 			!buffer
@@ -281,7 +281,7 @@ class AudioEngine {
 			) {
 				const buffer =
 					this.#buffers.get(
-						"bgm",
+						"bgm1",
 					);
 				if (
 					buffer
