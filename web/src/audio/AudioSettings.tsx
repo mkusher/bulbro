@@ -1,3 +1,4 @@
+import { useEffect } from "preact/hooks";
 import {
 	type SoundName,
 	soundUrls,
@@ -10,11 +11,17 @@ import {
 	effectsVolume,
 	isBgmPlaying,
 } from "@/audio/audioState";
+import { t } from "@/i18n";
 import { Button } from "@/ui/shadcn/button";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
 import { Slider } from "@/ui/shadcn/slider";
-import { useEffect } from "preact/hooks";
+import {
+	updateAudioEnabled,
+	updateBgmEnabled,
+	updateBgmVolume,
+	updateEffectsVolume,
+} from "@/userSettings";
 
 // Get effect sound names (everything except bgm)
 const effectSounds =
@@ -33,16 +40,18 @@ export function AudioSettings() {
 		(
 			checked: boolean,
 		) => {
-			audioEnabled.value =
-				checked;
+			updateAudioEnabled(
+				checked,
+			);
 		};
 
 	const handleBgmEnabledChange =
 		(
 			checked: boolean,
 		) => {
-			bgmEnabled.value =
-				checked;
+			updateBgmEnabled(
+				checked,
+			);
 			// Stop BGM if disabled while playing
 			if (
 				!checked &&
@@ -62,9 +71,10 @@ export function AudioSettings() {
 				vol !==
 				undefined
 			) {
-				effectsVolume.value =
+				updateEffectsVolume(
 					vol /
-					100;
+						100,
+				);
 			}
 		};
 
@@ -78,9 +88,10 @@ export function AudioSettings() {
 				vol !==
 				undefined
 			) {
-				bgmVolume.value =
+				updateBgmVolume(
 					vol /
-					100;
+						100,
+				);
 			}
 		};
 
@@ -113,7 +124,9 @@ export function AudioSettings() {
 	return (
 		<fieldset className="grid gap-4">
 			<legend className="text-lg font-semibold mb-2">
-				Audio
+				{t(
+					"audio.title",
+				)}
 			</legend>
 
 			{/* Master Audio Toggle */}
@@ -128,8 +141,9 @@ export function AudioSettings() {
 					}
 				/>
 				<Label htmlFor="audio-enabled">
-					Enable
-					Audio
+					{t(
+						"audio.enable",
+					)}
 				</Label>
 			</div>
 
@@ -137,8 +151,9 @@ export function AudioSettings() {
 			<div className="grid gap-2">
 				<div className="flex items-center justify-between">
 					<Label>
-						Effects
-						Volume
+						{t(
+							"audio.effectsVolume",
+						)}
 					</Label>
 					<span className="text-sm text-muted-foreground">
 						{Math.round(
@@ -174,8 +189,9 @@ export function AudioSettings() {
 			{/* Test Effect Sounds */}
 			<div className="grid gap-2">
 				<Label>
-					Test
-					Effects
+					{t(
+						"audio.testEffects",
+					)}
 				</Label>
 				<div className="flex flex-wrap gap-2">
 					{effectSounds.map(
@@ -222,9 +238,9 @@ export function AudioSettings() {
 					}
 				/>
 				<Label htmlFor="bgm-enabled">
-					Enable
-					Background
-					Music
+					{t(
+						"audio.enableBgm",
+					)}
 				</Label>
 			</div>
 
@@ -232,8 +248,9 @@ export function AudioSettings() {
 			<div className="grid gap-2">
 				<div className="flex items-center justify-between">
 					<Label>
-						BGM
-						Volume
+						{t(
+							"audio.bgmVolume",
+						)}
 					</Label>
 					<span className="text-sm text-muted-foreground">
 						{Math.round(
@@ -281,8 +298,12 @@ export function AudioSettings() {
 					}
 				>
 					{isBgmPlaying.value
-						? "Stop BGM"
-						: "Play BGM"}
+						? t(
+								"audio.stopBgm",
+							)
+						: t(
+								"audio.playBgm",
+							)}
 				</Button>
 			</div>
 		</fieldset>

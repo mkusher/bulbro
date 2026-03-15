@@ -4,11 +4,13 @@ import {
 	isFullscreen,
 	requestFullscreen,
 } from "@/fullscreen";
+import { t } from "@/i18n";
 import {
 	CentralCard,
 	MainContainer,
 } from "@/ui/Layout";
 import { useRouter } from "@/ui/routing";
+import { SplashBanner } from "@/ui/Splash";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -16,9 +18,7 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
-import { SplashBanner } from "@/ui/Splash";
 
 type Props =
 	{
@@ -60,7 +60,9 @@ export function GameGlobalSettingsLayout({
 					<Card>
 						<CardHeader>
 							<h2 className="text-xl font-bold">
-								Settings
+								{t(
+									"settings.title",
+								)}
 							</h2>
 						</CardHeader>
 						<CardContent className="grid gap-6">
@@ -69,7 +71,9 @@ export function GameGlobalSettingsLayout({
 
 								<fieldset className="grid gap-3">
 									<legend className="text-lg font-semibold mb-2">
-										Display
+										{t(
+											"settings.display",
+										)}
 									</legend>
 									<div className="flex items-center gap-3">
 										<Button
@@ -81,25 +85,33 @@ export function GameGlobalSettingsLayout({
 											}
 										>
 											{!isFullscreen.value
-												? "Enter full scren"
-												: "Exit full screen"}
+												? t(
+														"settings.enterFullscreen",
+													)
+												: t(
+														"settings.exitFullscreen",
+													)}
 										</Button>
 									</div>
 									<div className="grid gap-2">
 										<Label htmlFor="size-mode">
-											Size
-											game
-											for:
+											{t(
+												"settings.sizeFor",
+											)}
 										</Label>
 										<select
 											id="size-mode"
 											className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
 										>
 											<option>
-												Landscape
+												{t(
+													"settings.landscape",
+												)}
 											</option>
 											<option>
-												Portrait
+												{t(
+													"settings.portrait",
+												)}
 											</option>
 										</select>
 									</div>
@@ -113,10 +125,9 @@ export function GameGlobalSettingsLayout({
 									goBack
 								}
 							>
-								Back
-								to
-								main
-								menu
+								{t(
+									"settings.backToMenu",
+								)}
 							</Button>
 						</CardFooter>
 					</Card>

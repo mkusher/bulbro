@@ -6,6 +6,7 @@ import {
 	type Difficulty,
 	isDifficulty,
 } from "@/game-formulas";
+import { t } from "@/i18n";
 import { Label } from "./shadcn/label";
 
 export type Props =
@@ -22,7 +23,9 @@ export function DifficultySelector({
 	return (
 		<div className="gap-3 flex flex-col">
 			<Label>
-				Difficulty:
+				{t(
+					"difficulty.label",
+				)}
 			</Label>
 			<RadioGroup
 				className="gap-3 flex overflow-hidden flex-wrap"

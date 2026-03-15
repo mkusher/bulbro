@@ -1,4 +1,5 @@
 import { useState } from "preact/hooks";
+import { t } from "@/i18n";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -89,7 +90,9 @@ export function Shop({
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
 					<h3 className="text-sm font-semibold">
-						Shop
+						{t(
+							"shop.title",
+						)}
 					</h3>
 					<div className="flex items-center gap-2">
 						{onReroll &&
@@ -107,11 +110,13 @@ export function Shop({
 									variant="outline"
 									className="h-7 text-xs px-3"
 								>
-									Re-roll
-									$
-									{
-										rerollPrice
-									}
+									{t(
+										"shop.reroll",
+										{
+											price:
+												rerollPrice,
+										},
+									)}
 								</Button>
 							)}
 						<span className="text-xs text-muted-foreground">
@@ -193,10 +198,24 @@ export function Shop({
 											size="sm"
 										>
 											{purchased
-												? "Owned"
+												? t(
+														"shop.owned",
+													)
 												: affordable
-													? `$${item.price}`
-													: `Locked $${item.price}`}
+													? t(
+															"shop.price",
+															{
+																price:
+																	item.price,
+															},
+														)
+													: t(
+															"shop.locked",
+															{
+																price:
+																	item.price,
+															},
+														)}
 										</Button>
 									</CardContent>
 								</Card>

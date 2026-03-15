@@ -2,6 +2,7 @@ import {
 	gameStats,
 	lastWaveStats,
 } from "@/gameStats";
+import { t } from "@/i18n";
 import {
 	PrevWaveStats,
 	type WaveStats,
@@ -30,8 +31,9 @@ export function Failed() {
 				<Card>
 					<CardHeader className="text-center pb-2">
 						<h1 className="text-6xl font-bold text-destructive">
-							Game
-							Over
+							{t(
+								"gameover.title",
+							)}
 						</h1>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
@@ -54,10 +56,9 @@ export function Failed() {
 								size="lg"
 							>
 								<a href="/">
-									Return
-									to
-									Main
-									Menu
+									{t(
+										"gameover.returnToMenu",
+									)}
 								</a>
 							</Button>
 						</div>

@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { useLocation } from "preact-iso";
+import { t } from "@/i18n";
 import {
 	createLobby,
 	joinLobby,
@@ -22,9 +23,6 @@ import {
 } from "@/ui/shadcn/card";
 import { Input } from "@/ui/shadcn/input";
 import { Label } from "@/ui/shadcn/label";
-
-const createOrJoinLobbyInstruction =
-	"Nothing special, an online session. Now create or join a lobby";
 
 export function FindLobby() {
 	const location =
@@ -49,8 +47,6 @@ export function FindLobby() {
 		);
 	const user =
 		currentUser.value;
-	const instruction =
-		createOrJoinLobbyInstruction;
 
 	const toSetupOnlineGame =
 		toScreen(
@@ -83,21 +79,25 @@ export function FindLobby() {
 					<Card>
 						<CardHeader>
 							<CardTitle>
-								Lobby
+								{t(
+									"lobby.title",
+								)}
 							</CardTitle>
 							<CardDescription>
-								{
-									instruction
-								}
+								{t(
+									"online.description",
+								)}
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="flex flex-col gap-6">
 							<h2>
-								Hi,{" "}
-								{
-									user.username
-								}
-								!
+								{t(
+									"greeting",
+									{
+										username:
+											user.username,
+									},
+								)}
 							</h2>
 							<form
 								onSubmit={(
@@ -112,9 +112,9 @@ export function FindLobby() {
 							>
 								<div className="flex flex-col gap-3">
 									<Label htmlFor="join-lobby-id">
-										Enter
-										lobby
-										id:
+										{t(
+											"lobby.enterIdLabel",
+										)}
 									</Label>
 									<Input
 										id="join-lobby-id"
@@ -138,10 +138,9 @@ export function FindLobby() {
 										type="submit"
 										variant="outline"
 									>
-										Join
-										lobby
-										by
-										id
+										{t(
+											"lobby.joinById",
+										)}
 									</Button>
 								</div>
 							</form>
@@ -151,9 +150,9 @@ export function FindLobby() {
 										createNewLobby()
 									}
 								>
-									Start
-									new
-									lobby
+									{t(
+										"lobby.startNew",
+									)}
 								</Button>
 							</div>
 						</CardContent>
@@ -164,7 +163,9 @@ export function FindLobby() {
 									"game-settings",
 								)}
 							>
-								Settings
+								{t(
+									"start.settings",
+								)}
 							</Button>
 						</CardFooter>
 					</Card>

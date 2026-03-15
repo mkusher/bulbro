@@ -1,9 +1,10 @@
+import type { TotalGameStats as TotalGameStatsType } from "@/gameStats";
+import { t } from "@/i18n";
 import {
 	Card,
 	CardContent,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import type { TotalGameStats as TotalGameStatsType } from "@/gameStats";
 
 export interface TotalGameStatsProps {
 	stats: TotalGameStatsType;
@@ -30,16 +31,18 @@ export function TotalGameStats({
 		<Card className="w-full">
 			<CardHeader className="pb-2">
 				<h3 className="text-sm font-semibold">
-					Total
-					Game
-					Stats
+					{t(
+						"stats.totalGame",
+					)}
 				</h3>
 			</CardHeader>
 			<CardContent className="pt-0">
 				<div className="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
 					<div className="flex flex-col">
 						<span className="text-muted-foreground">
-							Waves
+							{t(
+								"stats.waves",
+							)}
 						</span>
 						<span className="text-base font-bold text-primary">
 							{
@@ -49,7 +52,9 @@ export function TotalGameStats({
 					</div>
 					<div className="flex flex-col">
 						<span className="text-muted-foreground">
-							Enemies
+							{t(
+								"stats.enemies",
+							)}
 						</span>
 						<span className="text-base font-bold text-primary">
 							{
@@ -59,7 +64,9 @@ export function TotalGameStats({
 					</div>
 					<div className="flex flex-col">
 						<span className="text-muted-foreground">
-							Damage
+							{t(
+								"stats.damage",
+							)}
 						</span>
 						<span className="text-base font-bold text-primary">
 							{stats.damageDealt.toLocaleString()}
@@ -67,7 +74,9 @@ export function TotalGameStats({
 					</div>
 					<div className="flex flex-col">
 						<span className="text-muted-foreground">
-							Taken
+							{t(
+								"stats.taken",
+							)}
 						</span>
 						<span className="text-base font-bold text-destructive">
 							{stats.damageTaken.toLocaleString()}
@@ -75,7 +84,9 @@ export function TotalGameStats({
 					</div>
 					<div className="flex flex-col">
 						<span className="text-muted-foreground">
-							Materials
+							{t(
+								"stats.materials",
+							)}
 						</span>
 						<span className="text-base font-bold text-primary">
 							{
@@ -85,7 +96,9 @@ export function TotalGameStats({
 					</div>
 					<div className="flex flex-col">
 						<span className="text-muted-foreground">
-							Time
+							{t(
+								"stats.time",
+							)}
 						</span>
 						<span className="text-base font-bold text-primary">
 							{formatTime(

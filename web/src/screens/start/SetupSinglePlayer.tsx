@@ -3,11 +3,17 @@ import {
 	useState,
 } from "preact/hooks";
 import { v4 } from "uuid";
+import {
+	audioEngine,
+	bgmEnabled,
+	useStartBgm,
+} from "@/audio";
 import type { Bulbro } from "@/bulbro";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { createMainControls } from "@/controls";
 import { startLocalGame } from "@/currentGameProcess";
 import type { Difficulty } from "@/game-formulas";
+import { t } from "@/i18n";
 import { createPlayer } from "@/player";
 import { BulbroSelector } from "@/ui/BulbroSelector";
 import { DifficultySelector } from "@/ui/DifficultySelector";
@@ -24,14 +30,8 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
-import {
-	audioEngine,
-	bgmEnabled,
-	useStartBgm,
-} from "@/audio";
 
 export function SetupSinglePlayer() {
 	const [
@@ -104,10 +104,9 @@ export function SetupSinglePlayer() {
 						<Card className="flex flex-col gap-6 mt-30 mb-30">
 							<CardHeader>
 								<h1 className="text-3xl">
-									Start
-									single
-									player
-									run
+									{t(
+										"setup.single.title",
+									)}
 								</h1>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-6 max-w-screen">
@@ -158,7 +157,9 @@ export function SetupSinglePlayer() {
 									type="submit"
 									className="w-full"
 								>
-									Start
+									{t(
+										"setup.single.start",
+									)}
 								</Button>
 							</CardFooter>
 						</Card>

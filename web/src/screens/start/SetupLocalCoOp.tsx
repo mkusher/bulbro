@@ -3,6 +3,11 @@ import {
 	useState,
 } from "preact/hooks";
 import { v4 } from "uuid";
+import {
+	audioEngine,
+	bgmEnabled,
+} from "@/audio";
+import { useStartBgm } from "@/audio/useStartBgm";
 import type { Bulbro } from "@/bulbro";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import {
@@ -11,6 +16,7 @@ import {
 } from "@/controls";
 import { startLocalGame } from "@/currentGameProcess";
 import type { Difficulty } from "@/game-formulas";
+import { t } from "@/i18n";
 import { createPlayer } from "@/player";
 import { BulbroSelector } from "@/ui/BulbroSelector";
 import { DifficultySelector } from "@/ui/DifficultySelector";
@@ -23,15 +29,9 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
-import {
-	audioEngine,
-	bgmEnabled,
-} from "@/audio";
-import { useStartBgm } from "@/audio/useStartBgm";
 
 export function SetupLocalCoOp() {
 	const [
@@ -114,10 +114,9 @@ export function SetupLocalCoOp() {
 			<Card>
 				<CardHeader>
 					<h2>
-						Start
-						new
-						co-op
-						session
+						{t(
+							"setup.coop.title",
+						)}
 					</h2>
 				</CardHeader>
 				<CardContent className="grid gap-6">
@@ -199,7 +198,9 @@ export function SetupLocalCoOp() {
 						type="submit"
 						className="w-full"
 					>
-						Start
+						{t(
+							"setup.coop.start",
+						)}
 					</Button>
 				</CardFooter>
 			</Card>

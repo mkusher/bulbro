@@ -3,6 +3,7 @@ import {
 	useState,
 } from "preact/hooks";
 import { useLocation } from "preact-iso";
+import { t } from "@/i18n";
 import { joinLobby } from "@/network/currentLobby";
 import {
 	initWebApp,
@@ -104,24 +105,24 @@ export function TgAppStartScreen() {
 						<Card>
 							<CardHeader>
 								<CardTitle>
-									Select
-									game
-									mode
+									{t(
+										"tgApp.selectMode",
+									)}
 								</CardTitle>
 								<CardDescription>
 									<p>
-										Hi,{" "}
-										{
-											tgUserName.value
-										}
+										{t(
+											"greeting",
+											{
+												username:
+													tgUserName.value,
+											},
+										)}
 									</p>
 									<p>
-										Nothing
-										special,
-										just
-										a
-										mode
-										selection
+										{t(
+											"tgApp.modeDescription",
+										)}
 									</p>
 								</CardDescription>
 							</CardHeader>
@@ -133,10 +134,9 @@ export function TgAppStartScreen() {
 										)}
 										variant="outline"
 									>
-										Start
-										single
-										player
-										run
+										{t(
+											"start.local.singlePlayer",
+										)}
 									</Button>
 								</div>
 								<div className="grid gap-3">
@@ -145,9 +145,9 @@ export function TgAppStartScreen() {
 											"find-lobby",
 										)}
 									>
-										Start
-										online
-										game
+										{t(
+											"online.title",
+										)}
 									</Button>
 								</div>
 								<div className="grid gap-3">
@@ -157,10 +157,9 @@ export function TgAppStartScreen() {
 										)}
 										variant="outline"
 									>
-										Start
-										local
-										co-op
-										run
+										{t(
+											"start.local.coOp",
+										)}
 									</Button>
 								</div>
 							</CardContent>
@@ -171,7 +170,9 @@ export function TgAppStartScreen() {
 										"settings",
 									)}
 								>
-									Settings
+									{t(
+										"start.settings",
+									)}
 								</Button>
 							</CardFooter>
 						</Card>

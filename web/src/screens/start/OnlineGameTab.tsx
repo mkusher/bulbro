@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import {
 	createUser,
 	currentUser,
@@ -15,14 +16,9 @@ import {
 import { Input } from "@/ui/shadcn/input";
 import { Label } from "@/ui/shadcn/label";
 
-const registerInstruction =
-	"Nothing special, an online session. First sign up";
-
 export function OnlineGameTab() {
 	const user =
 		currentUser.value;
-	const instruction =
-		registerInstruction;
 	const router =
 		useRouter();
 
@@ -30,12 +26,14 @@ export function OnlineGameTab() {
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					Online
+					{t(
+						"online.title",
+					)}
 				</CardTitle>
 				<CardDescription>
-					{
-						instruction
-					}
+					{t(
+						"online.description",
+					)}
 				</CardDescription>
 			</CardHeader>
 			<form
@@ -50,7 +48,9 @@ export function OnlineGameTab() {
 				<CardContent className="flex flex-col gap-3">
 					<div className="flex flex-col gap-3">
 						<Label htmlFor="tabs-demo-name">
-							Name
+							{t(
+								"online.name",
+							)}
 						</Label>
 						<Input
 							id="tabs-demo-name"
@@ -73,8 +73,9 @@ export function OnlineGameTab() {
 					</div>
 					<div className="grid">
 						<Button type="submit">
-							Sign
-							up
+							{t(
+								"online.signUp",
+							)}
 						</Button>
 					</div>
 				</CardContent>
@@ -86,7 +87,9 @@ export function OnlineGameTab() {
 						router.toSettings
 					}
 				>
-					Settings
+					{t(
+						"start.settings",
+					)}
 				</Button>
 			</CardFooter>
 		</Card>
