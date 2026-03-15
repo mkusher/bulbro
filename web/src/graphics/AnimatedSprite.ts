@@ -21,6 +21,7 @@ export class AnimatedSprite<
 	#elapsed = 0;
 	#frameDuration: number;
 	#cycle: boolean;
+	#frameCache = new Map<number, R>();
 
 	/**
 	 * @param framesCount Number of frames in the animation cycle
@@ -85,9 +86,18 @@ export class AnimatedSprite<
 			this.#elapsed %=
 				this.#frameDuration;
 		}
-		return this.#drawFrame(
-			this
-				.#frameIndex,
+		const cached = this.#frameCache.get(
+			this.#frameIndex,
 		);
+		if (cached) return cached;
+
+		const result = await this.#drawFrame(
+			this.#frameIndex,
+		);
+		this.#frameCache.set(
+			this.#frameIndex,
+			result,
+		);
+		return result;
 	}
 }

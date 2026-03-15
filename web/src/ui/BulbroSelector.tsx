@@ -4,6 +4,7 @@ import { BulbroStats } from "../bulbro/BulbroStats";
 import { bulbros } from "../characters-definitions";
 import { BulbroThumbnail } from "./BulbroThumbnail";
 import { WithContainerWidth } from "./WithContainerWidth";
+import { t } from "@/i18n"
 
 type BulbroSelectorProps =
 	{
@@ -25,8 +26,7 @@ export function BulbroSelector({
 			{/* Thumbnail Grid */}
 			<div className="flex flex-col">
 				<h3 className="text-lg font-semibold mb-3 text-center lg:text-left">
-					Select
-					Character
+          {t("character.select")}
 				</h3>
 				<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2">
 					{bulbros.map(
@@ -102,8 +102,7 @@ export function BulbroSelector({
 						{/* Weapons */}
 						<div>
 							<h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">
-								Default
-								Weapons
+                {t("character.defaultWeapons")}
 							</h4>
 							<div className="flex flex-wrap gap-2">
 								{displayedBulbro.defaultWeapons.map(
@@ -134,8 +133,7 @@ export function BulbroSelector({
 								.length && (
 							<div>
 								<h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">
-									Available
-									Weapons
+                  {t("character.availableWeapons")}
 								</h4>
 								<div className="flex flex-wrap gap-1">
 									{displayedBulbro.availableWeapons

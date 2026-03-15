@@ -289,18 +289,33 @@ export class BulbaSprite extends GameSprite {
 		) => {
 			if (
 				this
-					.#sprite
+					.#sprite !==
+				sprite
 			) {
-				sprite.x =
-					this.#sprite.x;
-				sprite.y =
-					this.#sprite.y;
-				this.#sprite?.removeFromParent();
+				if (
+					this
+						.#sprite
+				) {
+					sprite.x =
+						this.#sprite.x;
+					sprite.y =
+						this.#sprite.y;
+					this.#sprite?.removeFromParent();
+				}
+				this.#sprite =
+					sprite;
+				this.addChild(
+					sprite,
+				);
 			}
-			this.#sprite =
-				sprite;
-			this.addChild(
-				sprite,
+			// Re-attach weapons to the current frame's weaponsContainer
+			// Hierarchy: sprite (SwingingAnimation) -> character -> weaponsContainer
+			const character =
+				sprite.children[0] as PIXI.Container;
+			const weaponsContainer =
+				character.children[0] as PIXI.Container;
+			this.#weaponsSprite.appendTo(
+				weaponsContainer,
 			);
 			this.#updateSpritePosition(
 				player.position,
@@ -471,11 +486,6 @@ export class BulbaSprite extends GameSprite {
 					1.0,
 				),
 			];
-
-		// Add weapons sprite on top of body
-		this.#weaponsSprite.appendTo(
-			weaponsContainer,
-		);
 
 		// Use fixed body dimensions for offset calculation, not dynamic container bounds.
 		// Container bounds change when weapons rotate, causing unwanted character movement.

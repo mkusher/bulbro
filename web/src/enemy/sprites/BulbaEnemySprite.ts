@@ -272,15 +272,16 @@ export class BulbaEnemySprite extends GameSprite {
 					) {
 						if (
 							this
-								.#sprite
+								.#sprite !==
+							sprite
 						) {
 							this.#sprite?.removeFromParent();
+							this.#sprite =
+								sprite;
+							this.addChild(
+								sprite,
+							);
 						}
-						this.#sprite =
-							sprite;
-						this.addChild(
-							sprite,
-						);
 						this.#updateSpritePosition(
 							enemy.position,
 							rectangle,
