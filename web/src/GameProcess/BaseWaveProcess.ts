@@ -12,7 +12,7 @@ import {
 	canvasSize,
 	scale,
 } from "../game-canvas";
-import { InMemoryGameEventQueue } from "../game-events/GameEventQueue";
+import { InMemoryGameEventQueue } from "../game-events/InMemoryGameEventQueue";
 import type { Camera } from "../graphics/Camera";
 import { createGameCamera } from "../graphics/GameCamera";
 import { StageWithUi } from "../graphics/StageWithUi";
@@ -26,6 +26,8 @@ import type {
 import { AudioEventsProcessor } from "./processors/AudioEventsProcessor";
 import { GameStatsProcessor } from "./processors/GameStatsProcessor";
 import { WaveStateProcessor } from "./processors/WaveStateProcessor";
+import { VoidGameEventQueue } from "@/game-events/VoidGameEventQueue";
+import type { GameEventQueue } from "@/game-events/GameEvents";
 
 export class BaseWaveProcess
 	implements
@@ -42,7 +44,7 @@ export class BaseWaveProcess
 	#debug: boolean;
 	#playerControls: PlayerControl[];
 	#camera: Camera;
-	#eventQueue: InMemoryGameEventQueue;
+	#eventQueue: GameEventQueue;
 	#createTickProcess: TickProcessFactory;
 	#durationTracker =
 		new DurationTracker();
@@ -88,7 +90,7 @@ export class BaseWaveProcess
 		this.#playerControls =
 			playerControls;
 		this.#eventQueue =
-			new InMemoryGameEventQueue();
+			new VoidGameEventQueue();
 		this.#createTickProcess =
 			createTickProcess;
 		this.#processors =

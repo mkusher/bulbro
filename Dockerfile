@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.5-slim
+FROM oven/bun:1.3.10-slim
 
 WORKDIR /var/webapp
 COPY ./server/public/game-assets /var/webapp/server/public/game-assets/

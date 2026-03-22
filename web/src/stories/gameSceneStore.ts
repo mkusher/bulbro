@@ -5,7 +5,7 @@ import {
 	canvasSize,
 	classicMapSize,
 } from "@/game-canvas";
-import { InMemoryGameEventQueue } from "@/game-events/GameEventQueue";
+import { InMemoryGameEventQueue } from "@/game-events/InMemoryGameEventQueue";
 import type { Camera } from "@/graphics/Camera";
 import { createGameCamera } from "@/graphics/GameCamera";
 import { StorybookSceneWithUi } from "@/graphics/StorybookSceneWithUi";

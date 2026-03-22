@@ -1,7 +1,9 @@
 import type { PlayerControl } from "../controls";
 import type { Difficulty } from "../game-formulas";
-import type { GameEvent } from "../game-events/GameEvents";
-import { InMemoryGameEventQueue } from "../game-events/GameEventQueue";
+import type {
+	GameEvent,
+	GameEventQueue,
+} from "../game-events/GameEvents";
 import type { Player } from "../player";
 import type {
 	DeltaTime,
@@ -37,7 +39,7 @@ export interface WaveProcess {
 		| "fail"
 	>;
 	tick: () => void;
-	readonly eventQueue: InMemoryGameEventQueue;
+	readonly eventQueue: GameEventQueue;
 }
 
 export type WavePromises =
