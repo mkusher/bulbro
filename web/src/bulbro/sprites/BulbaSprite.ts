@@ -311,9 +311,11 @@ export class BulbaSprite extends GameSprite {
 			// Re-attach weapons to the current frame's weaponsContainer
 			// Hierarchy: sprite (SwingingAnimation) -> character -> weaponsContainer
 			const character =
-				sprite.children[0] as PIXI.Container;
+				sprite
+					.children[0] as PIXI.Container;
 			const weaponsContainer =
-				character.children[0] as PIXI.Container;
+				character
+					.children[0] as PIXI.Container;
 			this.#weaponsSprite.appendTo(
 				weaponsContainer,
 			);

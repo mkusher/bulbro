@@ -18,6 +18,7 @@ export default defineConfig(
 			{
 				outDir:
 					"../server/public",
+        emptyOutDir: true,
 			},
 		resolve:
 			{
