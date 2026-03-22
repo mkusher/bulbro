@@ -1,7 +1,7 @@
 .splash-container {
 	display: block;
 	background: no-repeat
-		url(/assets/bulbro-splash.png)
+		url(./splash/bulbro-splash.png)
 		top
 		center;
 	background-size: cover;
@@ -15,7 +15,7 @@
 	height: 25vh;
 	position: relative;
 	background: no-repeat
-		url(/assets/bulbro-title.png)
+		url(./splash/bulbro-title.png)
 		center
 		center;
 	background-size: contain;
