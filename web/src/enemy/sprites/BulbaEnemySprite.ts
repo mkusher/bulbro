@@ -10,18 +10,18 @@ import type {
 	Position,
 	Size,
 } from "@/geometry";
-import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { DebugSprite } from "@/graphics/DebugSprite";
+import { FrameAnimationController } from "@/graphics/FrameAnimationController";
 import { GameSprite } from "@/graphics/GameSprite";
 import { ShadowSprite } from "@/graphics/ShadowSprite";
-import { RotatingDisapperanceAnimation } from "@/graphics/RotatingDisappearanceAnimation";
-import { SwingingAnimation } from "@/graphics/SwingingAnimation";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
-import { deltaTime } from "@/time";
-import { EnemySprites } from "../EnemySprites";
+import {
+	EnemySprites,
+	type EnemyAnimationState,
+} from "../EnemySprites";
 import type { EnemyState } from "../EnemyState";
 import * as enemiesFrames from "./EnemiesFrames";
 
@@ -33,20 +33,28 @@ type PhysicalRectangle =
 	};
 
 const DEFAULT_SCALING = 0.3;
+const CYCLE_LENGTH = 20;
+const DEATH_ROTATIONS = 2;
 
 /**
- * Manages an enemy sprite graphic.
+ * Manages an enemy sprite graphic using persistent display nodes.
+ * Animation updates mutate existing Pixi objects instead of swapping containers.
  */
 export class BulbaEnemySprite extends GameSprite {
-	#sprite!: PIXI.Container;
+	#enemyRootContainer!: PIXI.Container;
+	#swingContainer!: PIXI.Container;
+	#scalingContainer!: PIXI.Container;
+	#bodySprite!: PIXI.Sprite;
+	#outlineFilter!: OutlineFilter;
+	#hitFilter!: ConvolutionFilter;
+	#rageFilter!: ColorOverlayFilter;
+	#normalFilters!: PIXI.Filter[];
+	#hitFilters!: PIXI.Filter[];
+	#rageFilters!: PIXI.Filter[];
+	readonly #deadFilters: PIXI.Filter[] =
+		[];
 	#debugSprite?: DebugSprite;
-	#movement?: AnimatedSprite<PIXI.Container>;
-	#idle?: AnimatedSprite<PIXI.Container>;
-	#dead?: AnimatedSprite<PIXI.Container>;
-	#whenHit?: AnimatedSprite<PIXI.Container>;
-	#whenDangerouslyHit?: AnimatedSprite<PIXI.Container>;
-	#raging?: AnimatedSprite<PIXI.Container>;
-	#enemySprites?: EnemySprites<PIXI.Container>;
+	#enemySprites!: EnemySprites;
 	#shadow: ShadowSprite;
 	#defaultFrame: PhysicalRectangle;
 
@@ -100,103 +108,200 @@ export class BulbaEnemySprite extends GameSprite {
 		this.init();
 	}
 
-	#fullTexture() {
-		return Assets.get(
-			"allEnemies",
+	async init(): Promise<void> {
+		const texture =
+			await this.#buildBodyTexture(
+				this
+					.#defaultFrame,
+			);
+
+		this.#bodySprite =
+			new PIXI.Sprite(
+				texture,
+			);
+		this.#bodySprite.scale.x =
+			-Math.abs(
+				this
+					.#bodySprite
+					.scale
+					.x,
+			);
+
+		this.#scalingContainer =
+			new PIXI.Container();
+		this.#scalingContainer.scale.set(
+			DEFAULT_SCALING,
 		);
-	}
+		this.#scalingContainer.addChild(
+			this
+				.#bodySprite,
+		);
 
-	async init() {
-		this.#idle =
-			this.#createSwingingAnimation(
-				[
-					this
-						.#defaultFrame,
-				],
-				30,
-				0.2,
-				{
-					x:
-						-0.8,
-					y: 1,
-				},
+		const scaledWidth =
+			this
+				.#defaultFrame
+				.size
+				.width *
+			DEFAULT_SCALING;
+		const scaledHeight =
+			this
+				.#defaultFrame
+				.size
+				.height *
+			DEFAULT_SCALING;
+		this.#scalingContainer.y =
+			-scaledHeight;
+		this.#scalingContainer.x =
+			scaledWidth /
+			2;
+
+		// #swingContainer sits at the feet (y=0). Scaling it keeps the bottom
+		// anchored at y=0, matching the original behaviour where swing was
+		// applied to the outer container whose origin was at feet level.
+		this.#swingContainer =
+			new PIXI.Container();
+		this.#swingContainer.addChild(
+			this
+				.#scalingContainer,
+		);
+
+		this.#enemyRootContainer =
+			new PIXI.Container();
+		this.#enemyRootContainer.addChild(
+			this
+				.#swingContainer,
+		);
+
+		this.#outlineFilter =
+			new OutlineFilter(
+				3,
+				0x000000,
+				1.0,
 			);
-		this.#movement =
-			this.#createSwingingAnimation(
-				[
-					this
-						.#defaultFrame,
-				],
-				15,
-				0.3,
-				{
-					x: 0.6,
-					y: 1,
-				},
-			);
-		this.#whenHit =
-			this.#createHitSprite(
-				50,
-				0.4,
-				{
-					x: 0.6,
-					y: 1,
-				},
+		this.#hitFilter =
+			new ConvolutionFilter();
+		this.#rageFilter =
+			new ColorOverlayFilter(
+				0xff0000,
+				0.85,
 			);
 
-		this.#whenDangerouslyHit =
-			this.#createSwingingAnimation(
-				[
-					this
-						.#defaultFrame,
-				],
-				60,
-				0.4,
-			);
-		this.#dead =
-			this.#createDeathAnimation(
-				[
-					this
-						.#defaultFrame,
-				],
-			);
-		this.#raging =
-			this.#createRagingAnimation();
+		this.#normalFilters =
+			[
+				this
+					.#outlineFilter,
+			];
+		this.#hitFilters =
+			[
+				this
+					.#outlineFilter,
+				this
+					.#hitFilter,
+			];
+		this.#rageFilters =
+			[
+				this
+					.#outlineFilter,
+				this
+					.#rageFilter,
+			];
+
+		this.#enemyRootContainer.filters =
+			this.#normalFilters;
 
 		this.#enemySprites =
 			new EnemySprites(
 				{
+					idle: {
+						controller:
+							new FrameAnimationController(
+								CYCLE_LENGTH,
+								30,
+							),
+						swingAmplitude: 0.2,
+						dimensions:
+							{
+								x:
+									-0.8,
+								y: 1,
+							},
+					},
 					walking:
-						this
-							.#movement,
-					hurt: this
-						.#whenHit,
+						{
+							controller:
+								new FrameAnimationController(
+									CYCLE_LENGTH,
+									15,
+								),
+							swingAmplitude: 0.3,
+							dimensions:
+								{
+									x: 0.6,
+									y: 1,
+								},
+						},
+					hurt: {
+						controller:
+							new FrameAnimationController(
+								CYCLE_LENGTH,
+								50,
+							),
+						swingAmplitude: 0.4,
+						dimensions:
+							{
+								x: 0.6,
+								y: 1,
+							},
+					},
 					hurtALot:
-						this
-							.#whenDangerouslyHit,
-					idle: this
-						.#idle,
-					dead: this
-						.#dead,
+						{
+							controller:
+								new FrameAnimationController(
+									CYCLE_LENGTH,
+									60,
+								),
+							swingAmplitude: 0.4,
+							dimensions:
+								{
+									x: 0,
+									y: 1,
+								},
+						},
+					raging:
+						{
+							controller:
+								new FrameAnimationController(
+									CYCLE_LENGTH,
+									750,
+								),
+							swingAmplitude: 0.3,
+							dimensions:
+								{
+									x:
+										-0.8,
+									y: 1,
+								},
+						},
+					dead: {
+						controller:
+							new FrameAnimationController(
+								CYCLE_LENGTH,
+								20,
+								false,
+							),
+						rotationsPerAnimation:
+							DEATH_ROTATIONS,
+					},
 				},
-				this
-					.#raging,
 			);
 
 		this.#shadow.appendTo(
 			this
 				.container,
 		);
-
-		this.#sprite =
-			await this.#idle.getSprite(
-				deltaTime(
-					0,
-				),
-			);
 		this.addChild(
 			this
-				.#sprite,
+				.#enemyRootContainer,
 		);
 		if (
 			this
@@ -227,8 +332,15 @@ export class BulbaEnemySprite extends GameSprite {
 		delta: DeltaTime,
 		now: NowTime,
 	) {
+		if (
+			!this
+				.#enemySprites
+		)
+			return;
+
 		this.#shadow.visible =
 			!enemy.killedAt;
+
 		const shape =
 			enemy.toMovableObject();
 		const rectangle =
@@ -242,6 +354,7 @@ export class BulbaEnemySprite extends GameSprite {
 							"Is not supported",
 						);
 					})();
+
 		this.#updateSpritePosition(
 			enemy.position,
 			rectangle,
@@ -257,301 +370,122 @@ export class BulbaEnemySprite extends GameSprite {
 			);
 		}
 
-		this.#enemySprites
-			?.getSprite(
+		const state =
+			this.#enemySprites.getState(
 				enemy,
 				delta,
 				now,
-			)
-			.then(
-				(
-					sprite,
-				) => {
-					if (
-						sprite
-					) {
-						if (
-							this
-								.#sprite !==
-							sprite
-						) {
-							this.#sprite?.removeFromParent();
-							this.#sprite =
-								sprite;
-							this.addChild(
-								sprite,
-							);
-						}
-						this.#updateSpritePosition(
-							enemy.position,
-							rectangle,
-							enemy.lastDirection,
-						);
-					}
-				},
 			);
+		this.#applyAnimationState(
+			state,
+		);
 	}
 
 	#updateSpritePosition(
 		pos: Position,
-		size: Size,
+		_size: Size,
 		lastDirection?: Direction,
 	): void {
 		this.updatePosition(
 			pos,
 			lastDirection,
 		);
+	}
 
+	#applyAnimationState(
+		state: EnemyAnimationState,
+	): void {
 		if (
 			!this
-				.#sprite
-		) {
+				.#enemyRootContainer
+		)
 			return;
-		}
-	}
 
-	#createSwingingAnimation(
-		body: PhysicalRectangle[],
-		amplitude: number,
-		frameSpeed: number,
-		dimensions?: Position,
-	) {
-		const indexInArray =
-			(
-				length: number,
-				frame: number,
-				changeEach: number = 1,
-			) =>
-				Math.floor(
-					frame /
-						changeEach,
-				) %
-				length;
-		const swingingWalk =
-			new SwingingAnimation(
-				(
-					frame,
-				) =>
-					this.#buildEnemy(
-						body[
-							indexInArray(
-								body.length,
-								frame,
-								10,
-							)
-						]!,
-					),
-				amplitude,
-				frameSpeed,
-				dimensions,
-			);
-		return swingingWalk.createAnimatedSprite();
-	}
+		// Apply swing/death transforms to #swingContainer whose origin is at
+		// the feet (y=0). This keeps the bottom of the sprite anchored while
+		// the body squashes/stretches upward, matching the original behaviour.
+		const effectiveScale =
+			state.overallScale;
+		this.#swingContainer.scale.x =
+			state.scaleX *
+			effectiveScale;
+		this.#swingContainer.scale.y =
+			state.scaleY *
+			effectiveScale;
+		this.#swingContainer.rotation =
+			state.rotation;
 
-	#createDeathAnimation(
-		body: PhysicalRectangle[],
-	) {
-		const indexInArray =
-			(
-				length: number,
-				frame: number,
-				changeEach: number = 1,
-			) =>
-				Math.floor(
-					frame /
-						changeEach,
-				) %
-				length;
-		const animation =
-			new RotatingDisapperanceAnimation(
-				(
-					frame,
-				) =>
-					this.#buildEnemy(
-						body[
-							indexInArray(
-								body.length,
-								frame,
-								10,
-							)
-						]!,
-						false,
-					),
-				20,
-				2,
-			);
-		return animation.createAnimatedSprite();
-	}
-
-	#createHitSprite(
-		amplitude: number,
-		frameSpeed: number,
-		dimensions?: Position,
-	) {
-		const swingingWalk =
-			new SwingingAnimation(
-				async (
-					frame,
-				) => {
-					const sprite =
-						await this.#buildEnemy(
-							this
-								.#defaultFrame,
-						);
-					const factor =
-						0.5 +
-						frame *
-							0.1;
-					const matrix =
-						[
-							0,
-							factor,
-							0,
-							factor,
-							1,
-							factor,
-							0,
-							factor,
-							0,
-						];
-					const conv =
-						new ConvolutionFilter(
-							matrix,
-						);
-					sprite.filters =
-						[
-							conv,
-						];
-					return sprite;
-				},
-				amplitude,
-				frameSpeed,
-				dimensions,
-			);
-		return swingingWalk.createAnimatedSprite();
-	}
-
-	#createRagingAnimation() {
-		const swingingWalk =
-			new SwingingAnimation(
-				async (
-					frame,
-				) => {
-					const sprite =
-						await this.#buildEnemy(
-							this
-								.#defaultFrame,
-						);
-					const shouldShowOverlay =
-						frame %
-							2 ===
-						0;
-					if (
-						shouldShowOverlay
-					) {
-						const colorOverlay =
-							new ColorOverlayFilter(
-								0xff0000,
-								0.85,
-							);
-						sprite.filters =
-							[
-								colorOverlay,
-							];
-					}
-					return sprite;
-				},
-				750,
-				0.3,
-				{
-					x:
-						-0.8,
-					y: 1,
-				},
-			);
-		return swingingWalk.createAnimatedSprite();
-	}
-
-	async #buildEnemy(
-		rectangle: PhysicalRectangle,
-		useOutline = true,
-	) {
-		const container =
-			new PIXI.Container();
-		const scaling =
-			new PIXI.Container();
-		scaling.scale =
-			DEFAULT_SCALING;
-		scaling.addChild(
-			await this.#cutRectangle(
-				rectangle,
-			),
-		);
-
-		container.addChild(
-			scaling,
-		);
-		if (
-			useOutline
+		switch (
+			state.effect
 		) {
-			const outlineFilter =
-				new OutlineFilter(
-					3,
-					0x000000,
-					1.0,
-				);
-			container.filters =
-				[
-					outlineFilter,
-				];
+			case "hit": {
+				const f =
+					state.hitFactor;
+				this.#hitFilter.matrix =
+					new Float32Array(
+						[
+							0,
+							f,
+							0,
+							f,
+							1,
+							f,
+							0,
+							f,
+							0,
+						],
+					);
+				this.#enemyRootContainer.filters =
+					this.#hitFilters;
+				break;
+			}
+			case "rage": {
+				this.#enemyRootContainer.filters =
+					state.showRageOverlay
+						? this
+								.#rageFilters
+						: this
+								.#normalFilters;
+				break;
+			}
+			default: {
+				this.#enemyRootContainer.filters =
+					state.kind ===
+					"dead"
+						? this
+								.#deadFilters
+						: this
+								.#normalFilters;
+			}
 		}
-		scaling.y =
-			-container.height;
-		scaling.x =
-			container.width /
-			2;
-		return container;
 	}
 
-	async #cutRectangle(
+	async #buildBodyTexture(
 		rectangle: PhysicalRectangle,
-	) {
+	): Promise<PIXI.Texture> {
 		const source =
-			await this.#fullTexture();
-		const texture =
-			new PIXI.Texture(
-				{
-					source,
-					frame:
-						new PIXI.Rectangle(
-							rectangle
-								.position
-								.x,
-							rectangle
-								.position
-								.y,
-							rectangle
-								.size
-								.width,
-							rectangle
-								.size
-								.height,
-						),
-				},
+			await Assets.get(
+				"allEnemies",
 			);
-		const sprite =
-			new PIXI.Sprite(
-				{
-					texture,
-				},
-			);
-		sprite.scale.x =
-			-1 *
-			Math.abs(
-				sprite
-					.scale
-					.x,
-			);
-		return sprite;
+		return new PIXI.Texture(
+			{
+				source,
+				frame:
+					new PIXI.Rectangle(
+						rectangle
+							.position
+							.x,
+						rectangle
+							.position
+							.y,
+						rectangle
+							.size
+							.width,
+						rectangle
+							.size
+							.height,
+					),
+			},
+		);
 	}
 }
