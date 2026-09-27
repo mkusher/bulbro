@@ -17,6 +17,7 @@ import {
 	startGame as startGameFromLobby,
 } from "./currentLobby";
 import { currentUser } from "./currentUser";
+import { authorizationHeaders } from "./currentUser";
 
 export async function startNetworkGameAsHost(
 	selectedDifficulty: Difficulty,
@@ -93,6 +94,8 @@ export async function sendGameStartedRequest(
 			{
 				method:
 					"POST",
+				headers:
+					authorizationHeaders(),
 				body: JSON.stringify(
 					{
 						state,

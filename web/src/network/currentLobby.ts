@@ -11,7 +11,10 @@ import {
 import type { Player } from "@/player";
 import type { WaveState } from "@/waveState";
 import { apiUrl } from "./clientConfig";
-import { currentUser } from "./currentUser";
+import {
+	authorizationHeaders,
+	currentUser,
+} from "./currentUser";
 import { LobbyConnection } from "./LobbyConnection";
 import {
 	LobbySchema,
@@ -37,6 +40,8 @@ export async function createLobby(
 			{
 				method:
 					"POST",
+				headers:
+					authorizationHeaders(),
 				body: JSON.stringify(
 					{
 						host: {
@@ -50,6 +55,13 @@ export async function createLobby(
 		);
 	const body =
 		await res.json();
+	if (
+		!res.ok
+	)
+		throw new Error(
+			body.error ??
+				"Could not create lobby",
+		);
 
 	const newLobby =
 		LobbySchema(
@@ -117,6 +129,8 @@ export async function joinLobby(
 			{
 				method:
 					"POST",
+				headers:
+					authorizationHeaders(),
 				body: JSON.stringify(
 					{
 						player:
@@ -131,6 +145,13 @@ export async function joinLobby(
 		);
 	const body =
 		await res.json();
+	if (
+		!res.ok
+	)
+		throw new Error(
+			body.error ??
+				"Could not join lobby",
+		);
 
 	const newLobby =
 		LobbySchema(
@@ -172,6 +193,8 @@ export async function markAsReady(
 			{
 				method:
 					"POST",
+				headers:
+					authorizationHeaders(),
 				body: JSON.stringify(
 					{
 						player,
@@ -179,7 +202,16 @@ export async function markAsReady(
 				),
 			},
 		);
-	await res.json();
+	if (
+		!res.ok
+	)
+		throw new Error(
+			(
+				await res.json()
+			)
+				.error ??
+				"Could not mark ready",
+		);
 
 	readyPlayers.value =
 		[
@@ -275,9 +307,23 @@ export function processLobbySocketMessage(
 				)
 					return;
 				currentLobby.value =
-					lobby.removePlayer(
+					lobby.updatePlayer(
 						player,
 					);
+				return;
+			}
+			case "player-connected": {
+				const player =
+					receivedMessage.player as PlayerAttendee;
+				const lobby =
+					currentLobby.value;
+				if (
+					lobby
+				)
+					currentLobby.value =
+						lobby.updatePlayer(
+							player,
+						);
 				return;
 			}
 			case "game-started": {

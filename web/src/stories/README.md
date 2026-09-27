@@ -69,7 +69,16 @@ cd web
 bun run storybook
 ```
 
-Then navigate to http://localhost:6006
+Then open the URL printed by Storybook.
+
+## Remote game with the real server
+
+1. Start the game server from `server/` with `bun start` (port 8080).
+2. Start Storybook from `web/` with `bun run storybook`.
+3. Open **Network / Remote Game (Real Server) / Two Tabs**. The server URL defaults to port 8080 on the Storybook host; edit it if your server uses another origin.
+4. In the first tab, click **Create game ID** and copy the displayed ID.
+5. Open the same story in a second tab, enter that ID, and click **Join game ID**.
+6. Mark both players ready, then click **Start game** in the host tab. Both tabs run the real game and show the remote participant's connection status.
 
 ## How to Use
 

@@ -16,6 +16,16 @@ export class WebsocketConnections {
 		userId: string,
 		ws: WebsocketConnection,
 	) {
+		const previous =
+			this.#byUser.get(
+				userId,
+			);
+		if (
+			previous
+		)
+			this.#byConnection.delete(
+				previous,
+			);
 		this.#byUser.set(
 			userId,
 			ws,
@@ -71,7 +81,11 @@ export class WebsocketConnections {
 			ws,
 		);
 		if (
-			userId
+			userId &&
+			this.#byUser.get(
+				userId,
+			) ===
+				ws
 		)
 			this.#byUser.delete(
 				userId,

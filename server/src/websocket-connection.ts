@@ -2,12 +2,14 @@ import { type } from "arktype";
 import type { WSContext } from "hono/ws";
 import type { Logger } from "pino";
 import { websocketConnections } from "./websocket-connections";
+import { verifyToken } from "./auth";
+import { markAsConnected } from "./game-lobby-controller";
 
 export const AuthMessage =
 	type(
 		{
 			type: "'auth'",
-			userId:
+			token:
 				"string",
 		},
 	);
@@ -29,11 +31,25 @@ export type ProcessMessage =
 export class WebsocketConnection {
 	#ws: WSContext;
 	#logger: Logger;
-	#processMessage: ProcessMessage;
+	#processMessage: (
+		userId: string,
+		m: {
+			type: string;
+		},
+	) => void;
+	#expires = 0;
+	#expirationTimer?: ReturnType<
+		typeof setTimeout
+	>;
 	constructor(
 		logger: Logger,
 		ws: WSContext,
-		processMessage: ProcessMessage,
+		processMessage: (
+			userId: string,
+			m: {
+				type: string;
+			},
+		) => void,
 	) {
 		this.#logger =
 			logger;
@@ -71,7 +87,7 @@ export class WebsocketConnection {
 		);
 	}
 
-	onMessage(
+	async onMessage(
 		data: string,
 	) {
 		try {
@@ -103,13 +119,54 @@ export class WebsocketConnection {
 				message.type
 			) {
 				case "auth": {
+					const claims =
+						await verifyToken(
+							(
+								message as {
+									token: string;
+								}
+							)
+								.token,
+						);
+					if (
+						!claims
+					)
+						return this.sendObject(
+							{
+								error:
+									"Unauthorized",
+							},
+						);
 					const userId =
-						(
-							message as {
-								userId: string;
-							}
-						)
-							.userId;
+						claims.id;
+					if (
+						websocketConnections.getByConnection(
+							this,
+						) &&
+						websocketConnections.getByConnection(
+							this,
+						) !==
+							userId
+					)
+						return this.sendObject(
+							{
+								error:
+									"Already authenticated",
+							},
+						);
+					this.#expires =
+						claims.expires;
+					clearTimeout(
+						this
+							.#expirationTimer,
+					);
+					this.#expirationTimer =
+						setTimeout(
+							() =>
+								this.#ws.close(),
+							claims.expires -
+								Date.now(),
+						);
 					websocketConnections.add(
 						userId,
 						this,
@@ -124,6 +181,9 @@ export class WebsocketConnection {
 					this.#logger.info(
 						"Websocket authentication succeeded",
 					);
+					await markAsConnected(
+						userId,
+					);
 					return this.sendObject(
 						{
 							type: "connection",
@@ -132,7 +192,35 @@ export class WebsocketConnection {
 					);
 				}
 				default:
+					if (
+						this
+							.#expires <=
+						Date.now()
+					) {
+						this.sendObject(
+							{
+								error:
+									"Session expired",
+							},
+						);
+						this.#ws.close();
+						return;
+					}
+					const userId =
+						websocketConnections.getByConnection(
+							this,
+						);
+					if (
+						!userId
+					)
+						return this.sendObject(
+							{
+								error:
+									"Unauthorized",
+							},
+						);
 					this.#processMessage(
+						userId,
 						message as {
 							type: string;
 						},
@@ -156,6 +244,10 @@ export class WebsocketConnection {
 	onClose(
 		ws: WSContext,
 	) {
+		clearTimeout(
+			this
+				.#expirationTimer,
+		);
 		this.updateConnection(
 			ws,
 		);

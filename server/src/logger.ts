@@ -1,5 +1,21 @@
-import path from "path";
+import { mkdirSync } from "node:fs";
+import path from "node:path";
 import pino from "pino";
+
+const logPath =
+	path.resolve(
+		import.meta
+			.dir,
+		"../var/dev.log",
+	);
+mkdirSync(
+	path.dirname(
+		logPath,
+	),
+	{
+		recursive: true,
+	},
+);
 
 export const logger =
 	pino(
@@ -13,11 +29,7 @@ export const logger =
 							options:
 								{
 									destination:
-										path.resolve(
-											import.meta
-												.dir,
-											"../var/dev.log",
-										),
+										logPath,
 								},
 						},
 

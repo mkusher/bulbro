@@ -132,9 +132,11 @@ const wsApp =
 								l,
 								ws,
 								(
+									userId,
 									message,
 								) =>
 									controller.routeMessage(
+										userId,
 										message,
 									),
 							);
@@ -181,7 +183,10 @@ const wsApp =
 						);
 
 						if (
-							userId
+							userId &&
+							!websocketConnections.get(
+								userId,
+							)
 						) {
 							await markAsDisconnected(
 								userId,

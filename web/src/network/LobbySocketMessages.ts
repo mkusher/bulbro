@@ -79,6 +79,14 @@ export const PlayerDisconnected =
 				"object",
 		},
 	);
+export const PlayerConnected =
+	type(
+		{
+			type: "'player-connected'",
+			player:
+				PlayerAttendee,
+		},
+	);
 export const GameStarted =
 	type(
 		{
@@ -96,6 +104,9 @@ export const WebsocketMessage =
 		)
 		.or(
 			PlayerDisconnected,
+		)
+		.or(
+			PlayerConnected,
 		)
 		.or(
 			GameStarted,

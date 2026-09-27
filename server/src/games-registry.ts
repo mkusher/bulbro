@@ -94,7 +94,11 @@ export class GamesRegistry {
 					host.id,
 				players:
 					[
-						host,
+						{
+							...host,
+							status:
+								"offline",
+						},
 					],
 				readyPlayers:
 					[],
@@ -129,6 +133,20 @@ export class GamesRegistry {
 		) {
 			return;
 		}
+		if (
+			game
+				.players
+				.length >=
+				2 &&
+			!game.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					player.id,
+			)
+		)
+			return;
 
 		const lobby =
 			{
@@ -142,7 +160,11 @@ export class GamesRegistry {
 								p.id !==
 								player.id,
 						),
-						player,
+						{
+							...player,
+							status:
+								"offline",
+						},
 					],
 			};
 		this.#registry.set(
@@ -166,12 +188,28 @@ export class GamesRegistry {
 		) {
 			return;
 		}
+		if (
+			!game.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					readyPlayer.id,
+			)
+		)
+			return;
 		const lobby: Lobby =
 			{
 				...game,
 				readyPlayers:
 					[
-						...game.readyPlayers,
+						...game.readyPlayers.filter(
+							(
+								p,
+							) =>
+								p.id !==
+								readyPlayer.id,
+						),
 						readyPlayer,
 					],
 			};
@@ -219,6 +257,50 @@ export class GamesRegistry {
 			lobby,
 		);
 
+		return lobby;
+	}
+
+	markConnected(
+		id: string,
+		playerId: string,
+	) {
+		const game =
+			this.#registry.get(
+				id,
+			);
+		if (
+			!game ||
+			!game.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					playerId,
+			)
+		)
+			return;
+		const lobby: Lobby =
+			{
+				...game,
+				players:
+					game.players.map(
+						(
+							p,
+						) =>
+							p.id ===
+							playerId
+								? {
+										...p,
+										status:
+											"connected",
+									}
+								: p,
+					),
+			};
+		this.#registry.set(
+			id,
+			lobby,
+		);
 		return lobby;
 	}
 

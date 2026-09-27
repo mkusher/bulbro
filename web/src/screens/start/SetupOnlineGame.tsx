@@ -272,10 +272,10 @@ export function SetupOnlineGame() {
 									Another
 									player
 									status:{" "}
-									{!anotherPlayer
-										? "Disconnected"
-										: (anotherPlayer.status ??
-											"Connected")}{" "}
+									{anotherPlayer?.status ===
+									"connected"
+										? "Connected"
+										: "Disconnected"}{" "}
 									{isAnotherPlayerReady
 										? "Ready"
 										: "Not ready"}
@@ -400,6 +400,8 @@ export function SetupOnlineGame() {
 											.value
 											.length <
 											2 ||
+										anotherPlayer?.status !==
+											"connected" ||
 										isStarting
 									}
 								>
