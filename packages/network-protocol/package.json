@@ -8,10 +8,10 @@
   },
   "scripts": {
     "format": "biome format --fix ./src",
-    "types": "tsgo",
+    "types": "tsc",
     "test": "bun test"
   },
   "dependencies": {
-    "arktype": "^2.2.0"
+    "arktype": "^2.2.5"
   }
 }

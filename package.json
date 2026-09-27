@@ -6,21 +6,18 @@
 		"packages/*"
 	],
 	"scripts": {
-		"types": "tsgo --project packages/network-protocol && tsgo --project web && tsgo --project server",
+		"types": "tsc --project packages/network-protocol && tsc --project web && tsc --project server",
 		"format": "biome format --fix packages/network-protocol/src web/src server/src",
 		"check": "biome check packages/network-protocol/src web/src server/src",
 		"build": "(cd web && bun run --bun build)",
 		"start:server": "(cd server && bun start)"
 	},
-	"peerDependencies": {
-		"@typescript/native-preview": "^7.0.0-dev.20260322.1"
-	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.8",
-		"@types/bun": "1.3.11",
-		"typescript": "^5.9.3"
+		"@biomejs/biome": "^2.5.14",
+		"@types/bun": "1.4.2",
+		"typescript": "^7.0.2"
 	},
 	"dependencies": {
-		"@preact/signals": "^2.8.2"
+		"@preact/signals": "^2.11.2"
 	}
 }

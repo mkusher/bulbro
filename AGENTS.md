@@ -7,5 +7,5 @@
 
 1. Follow instructions for the task
 2. Write code with any formatting, rely on `bun format` after to fix it
-3. Run `tsgo` and `bun test` after for verifications
+3. Run `bun run types` and `bun test` after for verifications
 4. Always use `bun` and never other runtimes, package managers
