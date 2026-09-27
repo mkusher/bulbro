@@ -158,7 +158,8 @@ describe("ChasingBehavior", () => {
 			const player =
 				createTestBulbro(
 					{
-						x: 150,
+						// Bodies touch: drawn half-widths 28 + 15
+						x: 140,
 						y: 100,
 					},
 				);
@@ -195,17 +196,27 @@ describe("ChasingBehavior", () => {
 			expect(
 				attackEvent,
 			).toBeDefined();
-			const shotEvent =
-				events.find(
+			// Baby's fist is a melee weapon: it thrusts instead of shooting
+			expect(
+				attackEvent?.type ===
+					"enemyAttacked" &&
+					attackEvent
+						.strike
+						?.type,
+			).toBe(
+				"thrust",
+			);
+			expect(
+				events.some(
 					(
 						e,
 					) =>
 						e.type ===
 						"shot",
-				);
-			expect(
-				shotEvent,
-			).toBeDefined();
+				),
+			).toBe(
+				false,
+			);
 		});
 
 		it("should not attack when player is out of range", () => {

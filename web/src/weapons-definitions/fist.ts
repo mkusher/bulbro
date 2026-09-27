@@ -20,4 +20,9 @@ export const fist: Weapon =
 				range: 150,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "thrust",
+				duration: 180,
+			},
 	};

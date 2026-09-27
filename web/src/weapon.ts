@@ -45,6 +45,66 @@ export type StatsBonus =
 	Partial<Stats>;
 
 /**
+ * Melee swing: the weapon sweeps an arc around its owner.
+ */
+export type SwingStrikeConfig =
+	{
+		type: "swing";
+		/** Swept angle in degrees */
+		arc: number;
+		/** Duration of the sweep in ms */
+		duration: number;
+	};
+
+/**
+ * Melee thrust: the weapon lunges straight at the target and pulls back.
+ */
+export type ThrustStrikeConfig =
+	{
+		type: "thrust";
+		/** Duration of the lunge (out and back) in ms */
+		duration: number;
+	};
+
+/**
+ * A single melee strike.
+ */
+export type SingleStrikeConfig =
+	| SwingStrikeConfig
+	| ThrustStrikeConfig;
+
+/**
+ * Melee combo: consecutive attacks cycle through the listed strikes.
+ */
+export type ComboStrikeConfig =
+	{
+		type: "combo";
+		strikes: SingleStrikeConfig[];
+	};
+
+/**
+ * How a melee weapon strikes.
+ */
+export type StrikeConfig =
+	| SingleStrikeConfig
+	| ComboStrikeConfig;
+
+/**
+ * Ranged attack: the weapon fires a projectile flying at `shotSpeed`.
+ */
+export type ShotAttackConfig =
+	{
+		type: "shot";
+	};
+
+/**
+ * How a weapon attacks: fires a projectile or strikes in melee.
+ */
+export type AttackConfig =
+	| ShotAttackConfig
+	| StrikeConfig;
+
+/**
  * Weapon model.
  */
 export interface Weapon {
@@ -54,6 +114,7 @@ export interface Weapon {
 	statsBonus: StatsBonus;
 	shotSpeed: number;
 	basePrice: number;
+	attack: AttackConfig;
 }
 
 export const toWeaponState =

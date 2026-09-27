@@ -387,6 +387,12 @@ export class ShotMovementEventGenerator
 					hitEnemy.beHit(
 						shot,
 						now,
+						{
+							strength:
+								shot.knockback,
+							direction:
+								shot.direction,
+						},
 					),
 				);
 			if (

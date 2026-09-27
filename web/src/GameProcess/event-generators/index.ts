@@ -1,6 +1,7 @@
 export type { EventGenerator } from "./EventGenerator";
 export { EnemyBehaviorEventGenerator } from "./EnemyBehaviorEventGenerator";
 export { EnemySpawnEventsGenerator } from "./EnemySpawnEventsGenerator";
+export { MeleeStrikeEventGenerator } from "./MeleeStrikeEventGenerator";
 export { MaterialsMovementEventsGenerator } from "./MaterialsMovementEventsGenerator";
 export { PlayerHealEventGenerator } from "./PlayerHealEventGenerator";
 export { PlayerMovementEventGenerator } from "./PlayerMovementEventGenerator";

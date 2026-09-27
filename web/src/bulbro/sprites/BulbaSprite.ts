@@ -254,6 +254,7 @@ export class BulbaSprite extends GameSprite {
 		}
 		this.#weaponsSprite.update(
 			player,
+			now,
 		);
 
 		this.#overheadHealthBar.update(

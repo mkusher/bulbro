@@ -6,9 +6,9 @@
 		"packages/*"
 	],
 	"scripts": {
-		"types": "tsgo --project web && tsgo --project server",
-		"format": "biome format --fix web/src server/src",
-		"check": "biome check web/src server/src",
+		"types": "tsgo --project packages/network-protocol && tsgo --project web && tsgo --project server",
+		"format": "biome format --fix packages/network-protocol/src web/src server/src",
+		"check": "biome check packages/network-protocol/src web/src server/src",
 		"build": "(cd web && bun run --bun build)",
 		"start:server": "(cd server && bun start)"
 	},

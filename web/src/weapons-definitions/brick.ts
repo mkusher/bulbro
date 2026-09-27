@@ -21,4 +21,10 @@ export const brick: Weapon =
 				damage: 30,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "swing",
+				arc: 110,
+				duration: 320,
+			},
 	};

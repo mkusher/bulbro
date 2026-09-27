@@ -10,13 +10,17 @@ import {
 	isInRange,
 	isWeaponReadyToShoot,
 	minWeaponRange,
-	shoot,
 } from "../game-formulas";
 import {
 	direction,
 	distance,
 } from "../geometry";
 import type { WaveState } from "../waveState";
+import {
+	attack,
+	attackDescription,
+	attackSideEvents,
+} from "../weapon/Attack";
 import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyState } from "./EnemyState";
@@ -228,55 +232,54 @@ export class KeepkingDistanceBehaviors
 							target &&
 							currentEnemy.ragingDirection
 						) {
-							const shot =
-								shoot(
+							const performed =
+								attack(
 									currentEnemy,
 									"enemy",
 									weapon,
 									{
-										x:
-											currentEnemy
-												.position
-												.x +
-											currentEnemy
-												.ragingDirection
-												.x *
-												1000,
-										y:
-											currentEnemy
-												.position
-												.y +
-											currentEnemy
-												.ragingDirection
-												.y *
-												1000,
+										id: target.id,
+										aimAt:
+											{
+												x:
+													currentEnemy
+														.position
+														.x +
+													currentEnemy
+														.ragingDirection
+														.x *
+														1000,
+												y:
+													currentEnemy
+														.position
+														.y +
+													currentEnemy
+														.ragingDirection
+														.y *
+														1000,
+											},
 									},
+									now,
 								);
-
-							const attackEvent: EnemyEvent =
+							if (
+								!performed
+							)
+								return;
+							baseEvents.push(
 								{
 									type: "enemyAttacked",
 									enemyId:
 										currentEnemy.id,
-									weaponId:
+									...attackDescription(
 										weapon.id,
-									targetId:
 										target.id,
-									shot,
-								};
-							baseEvents.push(
-								attackEvent,
-							);
-
-							const shotEvent: EnemyEvent =
-								{
-									type: "shot",
-									shot,
-									weaponId:
-										weapon.id,
-								};
-							baseEvents.push(
-								shotEvent,
+										performed,
+									),
+								},
+								...attackSideEvents(
+									weapon.id,
+									performed,
+								),
 							);
 						}
 					}

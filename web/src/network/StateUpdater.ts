@@ -587,6 +587,15 @@ export class StateUpdater {
 					localPlayerId
 				);
 
+			// Keep strike progress of remote players only
+			case "strikeSwept":
+				return (
+					event.attackerType ===
+						"player" &&
+					event.attackerId !==
+						localPlayerId
+				);
+
 			// Keep material and shot events from remote player
 			case "materialCollected":
 				return (
@@ -650,6 +659,15 @@ export class StateUpdater {
 				return (
 					event.bulbroId !==
 					localPlayerId
+				);
+
+			// Strike progress of enemies and remote players
+			case "strikeSwept":
+				return !(
+					event.attackerType ===
+						"player" &&
+					event.attackerId ===
+						localPlayerId
 				);
 
 			// Enemy events - include all

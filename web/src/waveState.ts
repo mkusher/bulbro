@@ -676,9 +676,10 @@ export function addShot(
 						return p.applyEvent(
 							withEventMeta(
 								p.hit(
-									weaponId,
-									undefined,
-									shot,
+									{
+										weaponId,
+										shot,
+									},
 								),
 								deltaTime,
 								now,
@@ -1040,6 +1041,34 @@ export function updateState(
 				state,
 				action,
 			);
+		}
+		case "strikeSwept": {
+			return action.attackerType ===
+				"player"
+				? {
+						...state,
+						players:
+							state.players.map(
+								(
+									player,
+								) =>
+									player.applyEvent(
+										action,
+									),
+							),
+					}
+				: {
+						...state,
+						enemies:
+							state.enemies.map(
+								(
+									enemy,
+								) =>
+									enemy.applyEvent(
+										action,
+									),
+							),
+					};
 		}
 		case "bulbroInitializedForWave": {
 			return handleBulbroInitializedForWave(

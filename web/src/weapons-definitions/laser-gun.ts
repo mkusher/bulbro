@@ -20,4 +20,8 @@ export const laserGun: Weapon =
 				knockback: 0,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "shot",
+			},
 	};

@@ -4,6 +4,7 @@ import type {
 	Position,
 } from "@/geometry";
 import type { ShotState } from "@/shot/ShotState";
+import type { MeleeStrike } from "@/weapon/MeleeStrike";
 import type {
 	DeltaTime,
 	NowTime,
@@ -39,6 +40,7 @@ export type GameEventInternal =
 	| MoveShotEvent
 	| ShotMovedEvent
 	| ShotExpiredEvent
+	| StrikeSweptEvent
 	| ShopRerolledEvent
 	| ShopPurchasedEvent
 	| TickEvent
@@ -73,6 +75,8 @@ export type AttackDescription =
 		weaponId: string;
 		targetId?: string;
 		shot?: ShotState;
+		/** Melee strike started by this attack */
+		strike?: MeleeStrike;
 	};
 // Event type interfaces in alphabetical order
 export type BulbroAttackedEvent =
@@ -119,6 +123,19 @@ export type BulbroReceivedHitEvent =
 		damage: number;
 	};
 
+/** A melee strike was swept up to `sweptUntil`, touching `targetIds`. */
+export type StrikeSweptEvent =
+	{
+		type: "strikeSwept";
+		attackerType:
+			| "player"
+			| "enemy";
+		attackerId: string;
+		weaponId: string;
+		sweptUntil: number;
+		targetIds: string[];
+	};
+
 export type BulbroInitializedForWaveEvent =
 	{
 		type: "bulbroInitializedForWave";
@@ -156,6 +173,13 @@ export type EnemyReceivedHitEvent =
 		enemyId: string;
 		damage: number;
 		newHealthPoints: number;
+		knockback?: KnockbackDescription;
+	};
+
+export type KnockbackDescription =
+	{
+		direction: Direction;
+		strength: number;
 	};
 
 export type EnemySpawnedEvent =

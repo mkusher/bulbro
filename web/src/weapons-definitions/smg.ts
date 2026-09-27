@@ -20,4 +20,8 @@ export const smg: Weapon =
 				range: 400,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "shot",
+			},
 	};

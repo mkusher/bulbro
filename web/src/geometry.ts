@@ -454,10 +454,115 @@ export function segmentAabbHitTime(
 	return enter;
 }
 
+/** Whether a circle touches a line segment. */
 export function circleIntersectsLine(
 	circle: Circle,
 	line: LineSegment,
-) {}
+): boolean {
+	const dx =
+		line
+			.end
+			.x -
+		line
+			.start
+			.x;
+	const dy =
+		line
+			.end
+			.y -
+		line
+			.start
+			.y;
+	const lengthSquared =
+		dx *
+			dx +
+		dy *
+			dy;
+	// Parameter of the segment point closest to the circle center
+	const t =
+		lengthSquared ===
+		0
+			? 0
+			: Math.min(
+					1,
+					Math.max(
+						0,
+						((circle.x -
+							line
+								.start
+								.x) *
+							dx +
+							(circle.y -
+								line
+									.start
+									.y) *
+								dy) /
+							lengthSquared,
+					),
+				);
+	return (
+		Math.hypot(
+			line
+				.start
+				.x +
+				dx *
+					t -
+				circle.x,
+			line
+				.start
+				.y +
+				dy *
+					t -
+				circle.y,
+		) <=
+		circle.radius
+	);
+}
+/**
+ * Distance from the center to the edge, in the given direction, of the ellipse
+ * inscribed in a box of the given size.
+ */
+export function ellipseRadiusToward(
+	size: Size,
+	direction: Direction,
+): number {
+	const a =
+		size.width /
+		2;
+	const b =
+		size.height /
+		2;
+	const length =
+		Math.hypot(
+			direction.x,
+			direction.y,
+		);
+	if (
+		length ===
+		0
+	)
+		return Math.min(
+			a,
+			b,
+		);
+	const cos =
+		direction.x /
+		length;
+	const sin =
+		direction.y /
+		length;
+	return (
+		(a *
+			b) /
+		Math.hypot(
+			b *
+				cos,
+			a *
+				sin,
+		)
+	);
+}
+
 /**
  * Creates an axis-aligned rectangle centered at the given point, with the specified size.
  */

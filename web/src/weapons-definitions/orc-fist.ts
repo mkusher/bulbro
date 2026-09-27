@@ -16,4 +16,9 @@ export const orcFist: Weapon =
 		statsBonus:
 			{},
 		basePrice: 5,
+		attack:
+			{
+				type: "thrust",
+				duration: 250,
+			},
 	};

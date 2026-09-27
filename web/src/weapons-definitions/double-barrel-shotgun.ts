@@ -24,4 +24,8 @@ export const doubleBarrelShotgun: Weapon =
 				knockback: 16,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "shot",
+			},
 	};

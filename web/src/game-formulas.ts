@@ -357,6 +357,67 @@ export function findClosestEnemyInRange(
 	);
 }
 
+type Attacker =
+	{
+		stats: Pick<
+			Stats,
+			| "damage"
+			| "range"
+			| "knockback"
+		>;
+	};
+
+/** Damage of a single attack (shot or melee strike) made with the weapon. */
+export function calculateAttackDamage(
+	attacker: Attacker,
+	weapon: WeaponState,
+) {
+	return (
+		(attacker
+			.stats
+			.damage ??
+			0) +
+		(weapon
+			.statsBonus
+			.damage ??
+			0)
+	);
+}
+
+/** Maximum distance an attack made with the weapon reaches. */
+export function calculateAttackRange(
+	attacker: Attacker,
+	weapon: WeaponState,
+) {
+	return (
+		(attacker
+			.stats
+			.range ??
+			0) +
+		(weapon
+			.statsBonus
+			.range ??
+			0)
+	);
+}
+
+/** Knockback strength of an attack made with the weapon. */
+export function calculateAttackKnockback(
+	attacker: Attacker,
+	weapon: WeaponState,
+) {
+	return (
+		(attacker
+			.stats
+			.knockback ??
+			0) +
+		(weapon
+			.statsBonus
+			.knockback ??
+			0)
+	);
+}
+
 export function shoot(
 	player:
 		| BulbroState
@@ -416,34 +477,6 @@ export function shoot(
 			barrelPosition,
 			targetPosition,
 		);
-	const playerDamage =
-		player
-			.stats
-			.damage ??
-		0;
-	const playerRange =
-		player
-			.stats
-			.range ??
-		0;
-	const weaponDamage =
-		weapon
-			.statsBonus
-			.damage ??
-		0;
-	const weaponRange =
-		weapon
-			.statsBonus
-			.range ??
-		0;
-	const knockback =
-		player
-			.stats
-			.knockback +
-		(weapon
-			.statsBonus
-			.knockback ??
-			0);
 	return new ShotState(
 		{
 			id,
@@ -451,11 +484,15 @@ export function shoot(
 			shooterId:
 				player.id,
 			damage:
-				playerDamage +
-				weaponDamage,
+				calculateAttackDamage(
+					player,
+					weapon,
+				),
 			range:
-				playerRange +
-				weaponRange,
+				calculateAttackRange(
+					player,
+					weapon,
+				),
 			position:
 				barrelPosition,
 			startPosition:
@@ -464,7 +501,11 @@ export function shoot(
 				shotDirection,
 			speed:
 				weapon.shotSpeed,
-			knockback,
+			knockback:
+				calculateAttackKnockback(
+					player,
+					weapon,
+				),
 			weaponType:
 				weapon.type,
 		},

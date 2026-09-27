@@ -21,4 +21,8 @@ export const pistol: Weapon =
 				knockback: 5,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "shot",
+			},
 	};

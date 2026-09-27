@@ -1,6 +1,7 @@
 {
 	"name": "bulbro-server",
 	"dependencies": {
+		"@bulbro/network-protocol": "workspace:*",
 		"@hono/prometheus": "^1.0.2",
 		"arktype": "^2.2.0",
 		"hono": "^4.12.8",

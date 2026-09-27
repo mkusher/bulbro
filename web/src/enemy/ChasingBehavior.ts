@@ -5,10 +5,7 @@ import type {
 } from "@/time";
 import {
 	findClosest,
-	findClosestPlayerInRange,
-	isInRange,
 	isWeaponReadyToShoot,
-	shoot,
 } from "../game-formulas";
 import {
 	type Direction,
@@ -20,6 +17,12 @@ import {
 	Movement,
 } from "../movement/Movement";
 import type { WaveState } from "../waveState";
+import {
+	attack,
+	attackDescription,
+	attackSideEvents,
+	findClosestPlayerInEnemyAttackRange,
+} from "../weapon/Attack";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyState } from "./EnemyState";
 import { KnockbackMovement } from "./KnockbackMovement";
@@ -166,53 +169,45 @@ export class ChasingBehavior
 					)
 				) {
 					const target =
-						findClosestPlayerInRange(
+						findClosestPlayerInEnemyAttackRange(
 							enemy,
 							weapon,
 							waveState.players,
 						);
 					if (
-						target &&
-						isInRange(
-							enemy,
-							target,
-							weapon,
-						)
+						target
 					) {
-						const shot =
-							shoot(
+						const performed =
+							attack(
 								enemy,
 								"enemy",
 								weapon,
-								target.position,
+								{
+									id: target.id,
+									aimAt:
+										target.position,
+								},
+								now,
 							);
-
-						// Generate attack event
-						const attackEvent: EnemyEvent =
+						if (
+							!performed
+						)
+							return;
+						baseEvents.push(
 							{
 								type: "enemyAttacked",
 								enemyId:
 									enemy.id,
-								weaponId:
+								...attackDescription(
 									weapon.id,
-								targetId:
 									target.id,
-								shot,
-							};
-						baseEvents.push(
-							attackEvent,
-						);
-
-						// Generate shot fired event
-						const shotEvent: EnemyEvent =
-							{
-								type: "shot",
-								shot,
-								weaponId:
-									weapon.id,
-							};
-						baseEvents.push(
-							shotEvent,
+									performed,
+								),
+							},
+							...attackSideEvents(
+								weapon.id,
+								performed,
+							),
 						);
 					}
 				}

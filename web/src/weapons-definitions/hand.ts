@@ -20,4 +20,9 @@ export const hand: Weapon =
 				attackSpeed: 1.01,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "thrust",
+				duration: 220,
+			},
 	};

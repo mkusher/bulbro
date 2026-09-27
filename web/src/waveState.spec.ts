@@ -258,6 +258,10 @@ function createTestWeaponDefinition(
 			},
 		shotSpeed: 200,
 		basePrice: 5,
+		attack:
+			{
+				type: "shot",
+			},
 	};
 }
 

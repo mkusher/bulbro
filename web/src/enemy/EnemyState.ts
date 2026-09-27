@@ -3,17 +3,21 @@ import type {
 	NowTime,
 } from "@/time";
 import { toWeaponState } from "@/weapon";
+import {
+	applyAttackToWeapons,
+	applyStrikeSweptToWeapons,
+} from "@/weapon/Attack";
 import type {
 	EnemyDiedEvent,
 	EnemyEvent,
 	EnemyReceivedHitEvent,
 	GameEvent,
+	KnockbackDescription,
 } from "../game-events/GameEvents";
 import type {
 	Direction,
 	Position,
 } from "../geometry";
-import type { ShotState } from "../shot/ShotState";
 import type {
 	WaveState,
 	WeaponState,
@@ -244,8 +248,11 @@ export class EnemyState
 
 	/** Returns a received hit or death event for the Enemy. */
 	beHit(
-		shot: ShotState,
+		hit: {
+			damage: number;
+		},
 		now: NowTime,
+		knockback?: KnockbackDescription,
 	):
 		| EnemyReceivedHitEvent
 		| EnemyDiedEvent {
@@ -253,7 +260,7 @@ export class EnemyState
 			Math.max(
 				this
 					.healthPoints -
-					shot.damage,
+					hit.damage,
 				0,
 			);
 
@@ -268,7 +275,7 @@ export class EnemyState
 					this
 						.id,
 				damage:
-					shot.damage,
+					hit.damage,
 				position:
 					{
 						x: this
@@ -292,6 +299,13 @@ export class EnemyState
 					.healthPoints -
 				newHealthPoints,
 			newHealthPoints,
+			...(knockback &&
+			knockback.strength >
+				0
+				? {
+						knockback,
+					}
+				: {}),
 		};
 	}
 
@@ -330,42 +344,52 @@ export class EnemyState
 								: this
 										.#props
 										.lastHorizontalDirection,
-						knockback:
-							undefined,
 					},
 				);
 
-			case "enemyAttacked": {
+			case "enemyAttacked":
 				if (
 					event.enemyId !==
 					this
 						.id
 				)
 					return this;
-				const weapons =
-					this.weapons.map(
-						(
-							ws,
-						) =>
-							ws.id ===
-							event.weaponId
-								? {
-										...ws,
-										lastStrikedAt:
-											event.occurredAt,
-									}
-								: ws,
-					);
 				return new EnemyState(
 					{
 						...this
 							.#props,
-						weapons,
+						weapons:
+							applyAttackToWeapons(
+								this
+									.weapons,
+								event,
+							),
 						ragingStartedAt:
 							undefined,
 					},
 				);
-			}
+
+			case "strikeSwept":
+				if (
+					event.attackerType !==
+						"enemy" ||
+					event.attackerId !==
+						this
+							.id
+				)
+					return this;
+				return new EnemyState(
+					{
+						...this
+							.#props,
+						weapons:
+							applyStrikeSweptToWeapons(
+								this
+									.weapons,
+								event,
+							),
+					},
+				);
 
 			case "enemyReceivedHit":
 				if (
@@ -387,6 +411,16 @@ export class EnemyState
 							),
 						lastHitAt:
 							event.occurredAt,
+						knockback:
+							event.knockback
+								? {
+										...event.knockback,
+										startedAt:
+											event.occurredAt,
+									}
+								: this
+										.#props
+										.knockback,
 					},
 				);
 

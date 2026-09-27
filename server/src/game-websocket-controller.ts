@@ -1,61 +1,8 @@
+import { WebsocketMessage } from "@bulbro/network-protocol";
 import { type } from "arktype";
 import type { Logger } from "pino";
 import { registry } from "./games-registry";
 import { websocketConnections } from "./websocket-connections";
-
-const Point =
-	type(
-		{
-			x: "number",
-			y: "number",
-		},
-	);
-export const HostStateUpdate =
-	type(
-		{
-			type: "'game-state-updated-by-host'",
-			gameId:
-				"string",
-			version:
-				"number",
-			state:
-				"object",
-		},
-	);
-export const PlayerStateUpdate =
-	type(
-		{
-			type: "'game-state-updated-by-guest'",
-			gameId:
-				"string",
-			state:
-				"object",
-			version:
-				"number",
-		},
-	);
-export const PlayerPositionUpdated =
-	type(
-		{
-			type: "'game-state-position-updated'",
-			gameId:
-				"string",
-			playerId:
-				"string",
-			position:
-				Point,
-			direction:
-				Point,
-			version:
-				"number",
-		},
-	);
-export const Message =
-	HostStateUpdate.or(
-		PlayerStateUpdate,
-	).or(
-		PlayerPositionUpdated,
-	);
 
 export class WebsocketGameController {
 	#logger: Logger;
@@ -69,7 +16,7 @@ export class WebsocketGameController {
 		type: string;
 	}) {
 		const message =
-			Message(
+			WebsocketMessage(
 				wsMessage,
 			);
 		if (

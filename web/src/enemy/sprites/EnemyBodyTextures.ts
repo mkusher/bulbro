@@ -5,7 +5,11 @@ import type {
 	Size,
 } from "@/geometry";
 
-export const ENEMY_BODY_SCALE = 0.3;
+import { ENEMY_BODY_SCALE } from "../EnemyBody";
+
+export {
+	ENEMY_BODY_SCALE,
+};
 const OUTLINE_RADIUS =
 	3 /
 	ENEMY_BODY_SCALE;

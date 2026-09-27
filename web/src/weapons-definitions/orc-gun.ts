@@ -19,4 +19,8 @@ export const orcSlowGun: Weapon =
 				attackSpeed: 5,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "shot",
+			},
 	};

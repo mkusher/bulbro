@@ -21,4 +21,9 @@ export const knife: Weapon =
 				knockback: 2,
 			},
 		basePrice: 5,
+		attack:
+			{
+				type: "thrust",
+				duration: 200,
+			},
 	};

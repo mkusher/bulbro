@@ -787,3 +787,150 @@ export const FullyLoadedBulbro =
 					},
 			},
 	};
+
+export const MeleeStrikeVsCrowd =
+	{
+		render:
+			(
+				args: any,
+			) => {
+				const bulbroPosition =
+					{
+						x: 400,
+						y: 300,
+					};
+				const weapon =
+					weapons.find(
+						(
+							w,
+						) =>
+							w.id ===
+							args.weapon,
+					)!;
+				const bulbro =
+					spawnBulbro(
+						"player-1",
+						"normal",
+						bulbroPosition,
+						0,
+						0,
+						{
+							...wellRoundedBulbro,
+							weapons:
+								[
+									weapon,
+								],
+						},
+					);
+				const enemies =
+					Array.from(
+						{
+							length: 8,
+						},
+						(
+							_,
+							i,
+						) => {
+							const angle =
+								(i /
+									8) *
+								Math.PI *
+								2;
+							return spawnEnemy(
+								`enemy-${i}`,
+								{
+									x:
+										bulbroPosition.x +
+										Math.cos(
+											angle,
+										) *
+											260,
+									y:
+										bulbroPosition.y +
+										Math.sin(
+											angle,
+										) *
+											260,
+								},
+								babyEnemy,
+							);
+						},
+					);
+				const gameState: WaveState =
+					createGameState(
+						{
+							players:
+								[
+									bulbro,
+								],
+							enemies,
+						},
+					);
+
+				return (
+					<div
+						style={{
+							height:
+								"100vh",
+							width:
+								"100%",
+						}}
+					>
+						<StorybookGameScene
+							initialState={
+								gameState
+							}
+							backgroundColor={
+								0x2a4d3a
+							}
+							debug={
+								args.debug
+							}
+							enableKeyboard={
+								args.enableKeyboard
+							}
+							showPlayerStats={
+								args.showPlayerStats
+							}
+							showGameStats={
+								args.showGameStats
+							}
+							showTouchControls={
+								args.showTouchControls
+							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
+							}
+						/>
+					</div>
+				);
+			},
+		args: {
+			weapon:
+				"sword",
+			debug: false,
+			enableKeyboard: true,
+			showPlayerStats: false,
+			showGameStats: false,
+			showTouchControls: false,
+			showCoordinateGrid: false,
+		},
+		argTypes:
+			{
+				weapon:
+					{
+						options:
+							[
+								"sword",
+								"brick",
+								"knife",
+								"fist",
+								"hand",
+							],
+						control:
+							{
+								type: "select",
+							},
+					},
+			},
+	};

@@ -1,5 +1,6 @@
 import type { EnemyState } from "@/enemy";
 import type {
+	AttackDescription,
 	BulbroAttackedEvent,
 	BulbroCollectedMaterialEvent,
 	BulbroDiedEvent,
@@ -11,6 +12,13 @@ import type {
 	GameEvent,
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
+import {
+	applyAttackToWeapons,
+	applyStrikeSweptToWeapons,
+	attack,
+	attackDescription,
+	attackSideEvents,
+} from "@/weapon/Attack";
 import type {
 	DeltaTime,
 	NowTime,
@@ -22,7 +30,6 @@ import {
 	getHpRegenerationPerSecond,
 	isInRange,
 	isWeaponReadyToShoot,
-	shoot,
 } from "../game-formulas";
 import {
 	addition,
@@ -359,44 +366,44 @@ export class BulbroState
 							),
 						);
 					if (
-						target &&
-						isInRange(
+						!target ||
+						!isInRange(
 							this,
 							target,
 							weapon,
 						)
 					) {
-						const shot =
-							shoot(
-								this,
-								"player",
-								weapon,
-								target.position,
-							);
-
-						// Generate attack event using player's hit method
-						const attackEvent =
-							this.hit(
+						return;
+					}
+					const performed =
+						attack(
+							this,
+							"player",
+							weapon,
+							{
+								id: target.id,
+								aimAt:
+									target.position,
+							},
+							now,
+						);
+					if (
+						!performed
+					)
+						return;
+					baseEvents.push(
+						this.hit(
+							attackDescription(
 								weapon.id,
 								target.id,
-								shot,
-							);
-						baseEvents.push(
-							attackEvent,
-						);
-
-						// Generate shot fired event
-						const shotEvent =
-							{
-								type: "shot" as const,
-								shot,
-								weaponId:
-									weapon.id,
-							};
-						baseEvents.push(
-							shotEvent,
-						);
-					}
+								performed,
+							),
+						),
+						...attackSideEvents(
+							weapon.id,
+							performed,
+						),
+					);
 				}
 			},
 		);
@@ -501,18 +508,14 @@ export class BulbroState
 
 	/** Returns an attack event for the Bulbro. */
 	hit(
-		weaponId: string,
-		targetId?: string,
-		shot?: any,
+		description: AttackDescription,
 	): BulbroAttackedEvent {
 		return {
 			type: "bulbroAttacked",
 			bulbroId:
 				this
 					.id,
-			weaponId,
-			targetId,
-			shot,
+			...description,
 		};
 	}
 
@@ -703,6 +706,8 @@ export class BulbroState
 									...ws,
 									lastStrikedAt:
 										event.occurredAt,
+									strike:
+										undefined,
 								}),
 							),
 					},
@@ -741,35 +746,47 @@ export class BulbroState
 					},
 				);
 
-			case "bulbroAttacked": {
+			case "bulbroAttacked":
 				if (
 					event.bulbroId !==
 					this
 						.id
 				)
 					return this;
-				const weapons =
-					this.weapons.map(
-						(
-							ws,
-						) =>
-							ws.id ===
-							event.weaponId
-								? {
-										...ws,
-										lastStrikedAt:
-											event.occurredAt,
-									}
-								: ws,
-					);
 				return new BulbroState(
 					{
 						...this
 							.#props,
-						weapons,
+						weapons:
+							applyAttackToWeapons(
+								this
+									.weapons,
+								event,
+							),
 					},
 				);
-			}
+
+			case "strikeSwept":
+				if (
+					event.attackerType !==
+						"player" ||
+					event.attackerId !==
+						this
+							.id
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						weapons:
+							applyStrikeSweptToWeapons(
+								this
+									.weapons,
+								event,
+							),
+					},
+				);
 
 			case "bulbroReceivedHit":
 				if (

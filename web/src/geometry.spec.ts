@@ -2,7 +2,10 @@ import {
 	expect,
 	it,
 } from "bun:test";
-import { segmentAabbHitTime } from "./geometry";
+import {
+	ellipseRadiusToward,
+	segmentAabbHitTime,
+} from "./geometry";
 
 it.each(
 	[
@@ -109,5 +112,54 @@ it.each(
 		),
 	).toBe(
 		expected,
+	);
+});
+
+it("ellipseRadiusToward gives the inscribed ellipse radius in a direction", () => {
+	const size =
+		{
+			width: 120,
+			height: 90,
+		};
+	expect(
+		ellipseRadiusToward(
+			size,
+			{
+				x: 1,
+				y: 0,
+			},
+		),
+	).toBeCloseTo(
+		60,
+	);
+	expect(
+		ellipseRadiusToward(
+			size,
+			{
+				x: 0,
+				y:
+					-3,
+			},
+		),
+	).toBeCloseTo(
+		45,
+	);
+	const diagonal =
+		ellipseRadiusToward(
+			size,
+			{
+				x: 1,
+				y: 1,
+			},
+		);
+	expect(
+		diagonal,
+	).toBeGreaterThan(
+		45,
+	);
+	expect(
+		diagonal,
+	).toBeLessThan(
+		60,
 	);
 });
