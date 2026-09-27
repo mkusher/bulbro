@@ -2,7 +2,10 @@ import {
 	expect,
 	test,
 } from "bun:test";
-import { GamesRegistry } from "./games-registry";
+import {
+	canStartLobby,
+	GamesRegistry,
+} from "./games-registry";
 
 test("keeps room membership while a known player disconnects and reconnects", () => {
 	const rooms =
@@ -83,6 +86,134 @@ test("keeps room membership while a known player disconnects and reconnects", ()
 					p,
 				) =>
 					p.id,
+			),
+	).toEqual(
+		[
+			"host",
+			"guest",
+		],
+	);
+});
+
+test("requires two distinct connected and ready members before starting", () => {
+	const rooms =
+		new GamesRegistry();
+	const lobby =
+		rooms.registerLobby(
+			{
+				id: "host",
+				username:
+					"Host",
+			},
+		);
+	const ready =
+		(
+			id: string,
+		) => ({
+			id,
+			bulbro:
+				{
+					id: "bulbro",
+					name: "Bulbro",
+					statBonuses:
+						{},
+					style:
+						{
+							faceType:
+								"normal",
+							wearingItems:
+								[],
+						},
+					weapons:
+						[],
+				},
+		});
+	expect(
+		canStartLobby(
+			lobby,
+		),
+	).toBe(
+		false,
+	);
+	expect(
+		rooms.markReady(
+			lobby.id,
+			ready(
+				"stranger",
+			),
+		),
+	).toBeUndefined();
+	rooms.markConnected(
+		lobby.id,
+		"host",
+	);
+	rooms.markReady(
+		lobby.id,
+		ready(
+			"host",
+		),
+	);
+	expect(
+		canStartLobby(
+			rooms.find(
+				lobby.id,
+			)!,
+		),
+	).toBe(
+		false,
+	);
+	rooms.addPlayer(
+		lobby.id,
+		{
+			id: "guest",
+			username:
+				"Guest",
+		},
+	);
+	rooms.markReady(
+		lobby.id,
+		ready(
+			"guest",
+		),
+	);
+	expect(
+		canStartLobby(
+			rooms.find(
+				lobby.id,
+			)!,
+		),
+	).toBe(
+		false,
+	);
+	rooms.markConnected(
+		lobby.id,
+		"guest",
+	);
+	expect(
+		canStartLobby(
+			rooms.find(
+				lobby.id,
+			)!,
+		),
+	).toBe(
+		true,
+	);
+	rooms.markReady(
+		lobby.id,
+		ready(
+			"guest",
+		),
+	);
+	expect(
+		rooms
+			.find(
+				lobby.id,
+			)
+			?.readyPlayers.map(
+				(
+					player,
+				) =>
+					player.id,
 			),
 	).toEqual(
 		[

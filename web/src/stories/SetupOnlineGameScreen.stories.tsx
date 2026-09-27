@@ -100,6 +100,8 @@ function MockedSetupOnlineGame({
 			{
 				...mockLobbyBase,
 				players,
+				readyPlayers:
+					[],
 			};
 
 		currentLobby.value =

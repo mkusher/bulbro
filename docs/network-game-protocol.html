@@ -10,7 +10,7 @@
     body { margin: 0; }
     header { background: #15233f; color: white; padding: 3rem max(1.25rem, calc((100vw - 1100px)/2)); }
     header h1 { margin: 0 0 .5rem; font-size: clamp(2rem, 4vw, 3rem); }
-    header p { max-width: 780px; margin: 0; color: #d9e4fa; }
+    header p { max-width: 850px; margin: 0; color: #d9e4fa; }
     main { max-width: 1100px; padding: 1.5rem 1.25rem 4rem; margin: auto; }
     nav, section { background: white; border: 1px solid #dce3ef; border-radius: 12px; margin: 0 0 1.2rem; padding: 1.25rem 1.5rem; box-shadow: 0 2px 10px #17233b08; }
     nav a { margin-right: 1rem; display: inline-block; }
@@ -20,148 +20,99 @@
     a { color: #1753a6; }
     code { background: #edf2fa; border-radius: 4px; padding: .1em .3em; overflow-wrap: anywhere; }
     .note { border-left: 4px solid #4176c8; padding: .5rem 1rem; background: #f0f5fd; }
-    .critical { border-left-color: #c63445; background: #fff1f1; }
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: .5rem; margin: 1rem 0; }
+    .step { flex: 1 1 190px; min-width: 180px; padding: .8rem 1rem; border: 1px solid #bdd0ed; border-radius: 8px; background: #f0f5fd; }
+    .step strong { display: block; margin-bottom: .3rem; }
+    .step.server { border-color: #9bc9ae; background: #edf8f0; }
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 650px; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
     th, td { text-align: left; vertical-align: top; border-bottom: 1px solid #e3e9f2; padding: .65rem .7rem; }
     th { background: #f1f5fb; }
-    .diagram { overflow-x: auto; border: 1px solid #dce3ef; border-radius: 8px; background: #fbfcff; padding: .5rem; }
-    svg { display: block; min-width: 780px; width: 100%; height: auto; font: 14px system-ui, sans-serif; }
-    svg .lane { stroke: #c8d4e7; stroke-dasharray: 4 5; }
-    svg .box { fill: #e9f1ff; stroke: #87a6d8; }
-    svg .server { fill: #e5f5ed; stroke: #81baa0; }
-    svg .arrow { stroke: #365b91; stroke-width: 2; marker-end: url(#arrow); }
-    svg .warn { stroke: #c63445; marker-end: url(#redarrow); }
-    svg .label { fill: #17233b; font-size: 13px; }
-    svg .small { fill: #52627e; font-size: 12px; }
-    .severity { font-weight: 700; white-space: nowrap; }
-    .blocker { color: #ad2637; }
-    .high { color: #a65313; }
-    .medium { color: #785f11; }
-    ol li { margin: .45rem 0; }
+    .status { font-weight: 700; white-space: nowrap; }
+    .open { color: #785f11; }
+    .done { color: #247044; }
     @media print { :root { background: white; } header { padding: 1rem; } main { padding: 1rem; } nav, section { box-shadow: none; break-inside: avoid; } a { color: #17233b; } }
   </style>
 </head>
 <body>
 <header>
   <h1>Network game protocol</h1>
-  <p>Implementation review of the browser client and Bun server, as of 27 September 2026. This describes the code as written, including messages that currently fail validation.</p>
+  <p>Current browser and Bun server behavior as of 27 September 2026. This page describes the two-player network mode and distinguishes enforced rules from remaining limitations.</p>
 </header>
 <main>
-  <nav aria-label="Contents"><a href="#overview">Overview</a><a href="#setup">Lobby and start</a><a href="#live">Live game</a><a href="#messages">Message catalog</a><a href="#gaps">Gaps</a><a href="#sources">Source map</a></nav>
+  <nav aria-label="Contents"><a href="#overview">Overview</a><a href="#setup">Lobby and start</a><a href="#live">Live game</a><a href="#messages">Message catalog</a><a href="#gaps">Remaining gaps</a><a href="#sources">Source map</a></nav>
 
   <section id="overview">
     <h2>Overview</h2>
-    <p>The browser uses JSON over HTTP at <code>/api/</code> to create a user, create or join a lobby, report readiness, and start a game. It opens one WebSocket at <code>/ws</code> per lobby connection, sends <code>{"type":"auth","userId":"…"}</code>, and reuses that socket for lobby notifications and game traffic. The server holds lobbies and user-to-socket mappings in process memory. It relays live messages; it does not simulate the game or keep an authoritative wave state.</p>
-    <p>The host creates the initial <code>WaveState</code> and sends it via HTTP. Each browser then simulates a local wave. Live synchronization uses alternating host and guest event batches, plus independent position messages. The client filters and applies events by role. Both sides now use the same event-batch schema from <a href="../packages/network-protocol/src/index.ts"><code>@bulbro/network-protocol</code></a>.</p>
-    <p class="note"><strong>Scope:</strong> The UI assumes one host and one guest. The registry accepts an arbitrary number of players, while game startup and state processing select a single remote player.</p>
+    <p>The browser creates a username-based identity with <code>POST /api/users</code>. The server returns an ID and a signed, 24-hour JWT containing <code>id</code>, <code>authenticatedAt</code>, and <code>expires</code>. Subsequent game HTTP requests use <code>Authorization: Bearer &lt;token&gt;</code>. The lobby WebSocket at <code>/ws</code> starts with <code>{"type":"auth","token":"…"}</code>; the server verifies the token and binds its ID to that socket. This is a server-issued anonymous identity, not a password or external account login.</p>
+    <p>The signing key comes from <code>JWT_SECRET</code>, or from a random value generated at server startup when that variable is absent. The browser keeps its token in memory. The server keeps lobbies and socket mappings in memory. Each lobby has one host, at most one guest, a <code>players</code> list with connection status, and an upserted <code>readyPlayers</code> list. The host creates the initial wave state; both browsers simulate the wave locally. The server validates and relays live messages but does not simulate the game or store authoritative wave state.</p>
+    <p class="note"><strong>Scope:</strong> This mode requires exactly two distinct players to start. Each browser treats its own player as local and the other as remote. Live event and position messages share the schemas in <a href="../packages/network-protocol/src/index.ts"><code>@bulbro/network-protocol</code></a>.</p>
   </section>
 
   <section id="setup">
     <h2>Lobby and game start</h2>
-    <div class="diagram" role="img" aria-label="Sequence diagram: host and guest create users and lobby, authenticate WebSockets, report ready, then host starts the game">
-      <svg viewBox="0 0 1000 650" xmlns="http://www.w3.org/2000/svg">
-        <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#365b91"/></marker><marker id="redarrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c63445"/></marker></defs>
-        <rect class="box" x="35" y="12" width="170" height="38" rx="7"/><text x="120" y="37" text-anchor="middle">Host browser</text>
-        <rect class="server" x="415" y="12" width="170" height="38" rx="7"/><text x="500" y="37" text-anchor="middle">Bun server</text>
-        <rect class="box" x="795" y="12" width="170" height="38" rx="7"/><text x="880" y="37" text-anchor="middle">Guest browser</text>
-        <path class="lane" d="M120 52 V635 M500 52 V635 M880 52 V635"/>
-        <path class="arrow" d="M120 84 H495"/><text class="label" x="250" y="76">POST /api/users</text>
-        <path class="arrow" d="M500 112 H125"/><text class="small" x="260" y="104">user ID returned</text>
-        <path class="arrow" d="M120 145 H495"/><text class="label" x="220" y="137">POST /api/game-lobby</text>
-        <path class="arrow" d="M500 174 H125"/><text class="small" x="254" y="166">lobby + ID returned</text>
-        <path class="arrow" d="M120 205 H495"/><text class="label" x="256" y="197">WS /ws: auth(userId)</text>
-        <path class="arrow" d="M500 231 H125"/><text class="small" x="243" y="223">connection: true</text>
-        <path class="arrow" d="M880 85 H505"/><text class="label" x="645" y="77">POST /api/users</text>
-        <path class="arrow" d="M500 112 H875"/><text class="small" x="635" y="104">user ID returned</text>
-        <path class="arrow" d="M880 265 H505"/><text class="label" x="585" y="257">POST /api/game-lobby/:id/join-requests</text>
-        <path class="arrow" d="M500 293 H875"/><text class="small" x="630" y="285">lobby returned</text>
-        <path class="arrow" d="M500 320 H125"/><text class="label" x="255" y="312">WS player-joined</text>
-        <path class="arrow" d="M880 347 H505"/><text class="label" x="640" y="339">WS auth(userId)</text>
-        <path class="arrow" d="M500 373 H875"/><text class="small" x="635" y="365">connection: true</text>
-        <path class="arrow" d="M120 410 H495"/><text class="label" x="200" y="402">POST /api/game-lobby/:id/ready</text>
-        <path class="arrow" d="M880 444 H505"/><text class="label" x="570" y="436">POST /api/game-lobby/:id/ready</text>
-        <path class="arrow" d="M500 471 H125"/><text class="label" x="245" y="463">WS player-ready</text>
-        <path class="arrow" d="M120 510 H495"/><text class="label" x="198" y="502">POST /api/game/:id/start {state}</text>
-        <path class="arrow" d="M500 540 H875"/><text class="label" x="611" y="532">WS game-started {initialState}</text>
-        <path class="arrow" d="M500 569 H125"/><text class="small" x="250" y="561">HTTP response {id,state}</text>
-        <text class="small" x="500" y="615" text-anchor="middle">Both browsers switch the existing socket to the in-game listener.</text>
-      </svg>
+    <div class="flow" aria-label="Network game setup sequence">
+      <div class="step"><strong>1. Create identities</strong>Each tab posts a username and receives its own user ID and JWT.</div>
+      <div class="step server"><strong>2. Create or join</strong>The host creates a lobby. The guest joins by lobby ID. The server returns the full lobby, including earlier ready selections.</div>
+      <div class="step"><strong>3. Authenticate sockets</strong>Each tab sends its JWT over WebSocket. The server marks that known player connected and notifies the other tab.</div>
+      <div class="step server"><strong>4. Ready and start</strong>Both members submit a Bulbro. The host sends initial state once both are connected and ready; the guest receives <code>game-started</code>.</div>
     </div>
-    <p>Join and readiness notifications go to <em>other</em> players with registered sockets. The HTTP caller receives the lobby response. On game start, only non-host sockets receive <code>game-started</code>; the host proceeds locally after its HTTP call. <code>serverStartTime</code> and the full <code>lobby</code> are sent to the guest but are not consumed by its lobby message schema.</p>
+    <p>Room creation and joining bind the supplied player ID to the bearer token. Joining a full room returns <code>409</code>; an existing member may rejoin. Readiness requires membership and replaces any earlier selection by the same ID. A late joiner receives existing readiness in the HTTP lobby response. The client also merges readiness notifications by ID so a delayed response does not discard a newer selection.</p>
+    <p>The start route accepts only the host and requires two distinct room members, both ready and connected, with registered sockets. The initial state's two player IDs must match the room. Missing rooms return <code>404</code>; unmet start conditions return <code>409</code>; mismatched state IDs return <code>400</code>. The host enters the game only after a successful HTTP response, and places its own player first for local controls even if the guest readied first.</p>
+    <p>On a socket close, the player stays in the room with <code>status:"offline"</code>, and the other tab receives <code>player-disconnected</code>. A newly authenticated socket for that player changes the status to <code>connected</code> and sends <code>player-connected</code>. The lobby listener remains active during play, so the lobby and in-game views can show remote connection changes.</p>
   </section>
 
   <section id="live">
     <h2>Live game flow</h2>
-    <div class="diagram" role="img" aria-label="Sequence diagram: host event batch is validated and relayed to guest, while position updates are relayed independently">
-      <svg viewBox="0 0 1000 450" xmlns="http://www.w3.org/2000/svg">
-        <defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#365b91"/></marker><marker id="redarrow2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c63445"/></marker></defs>
-        <rect class="box" x="35" y="12" width="170" height="38" rx="7"/><text x="120" y="37" text-anchor="middle">Host browser</text>
-        <rect class="server" x="415" y="12" width="170" height="38" rx="7"/><text x="500" y="37" text-anchor="middle">WebSocket relay</text>
-        <rect class="box" x="795" y="12" width="170" height="38" rx="7"/><text x="880" y="37" text-anchor="middle">Guest browser</text>
-        <path class="lane" d="M120 52 V440 M500 52 V440 M880 52 V440"/>
-        <path d="M120 90 H495" stroke="#365b91" stroke-width="2" marker-end="url(#arrow2)"/><text class="label" x="192" y="82">host events, version 1, sentAt</text>
-        <rect x="375" y="104" width="250" height="48" rx="6" fill="#e5f5ed" stroke="#81baa0"/><text class="label" x="500" y="125" text-anchor="middle">Shared schema validates events</text><text class="small" x="500" y="143" text-anchor="middle">Server relays the message</text>
-        <path d="M500 165 H875" stroke="#365b91" stroke-width="2" marker-end="url(#arrow2)"/><text class="small" x="630" y="157">event batch to guest</text>
-        <path d="M120 188 H495" stroke="#365b91" stroke-width="2" marker-end="url(#arrow2)"/><text class="label" x="205" y="180">position + direction</text>
-        <path d="M500 213 H875" stroke="#365b91" stroke-width="2" marker-end="url(#arrow2)"/><text class="small" x="610" y="205">relayed to other player ID</text>
-        <path d="M880 250 H505" stroke="#365b91" stroke-width="2" marker-end="url(#arrow2)"/><text class="label" x="640" y="242">position + direction</text>
-        <path d="M500 275 H125" stroke="#365b91" stroke-width="2" marker-end="url(#arrow2)"/><text class="small" x="236" y="267">relayed to other player ID</text>
-        <rect x="220" y="315" width="560" height="94" rx="7" fill="#f0f5fd" stroke="#aac0e4"/>
-        <text class="label" x="500" y="338" text-anchor="middle">Event exchange:</text>
-        <text class="small" x="500" y="362" text-anchor="middle">host events v1 → guest applies events and ticks → guest events v2</text>
-        <text class="small" x="500" y="384" text-anchor="middle">→ host applies events and ticks → host events v3 → …</text>
-      </svg>
+    <div class="flow" aria-label="Live game message relay">
+      <div class="step"><strong>Host or guest</strong>Sends an event batch or position update with a game ID and version.</div>
+      <div class="step server"><strong>Server relay</strong>Validates the shared wire schema, room membership, sender role, and position player ID.</div>
+      <div class="step"><strong>Other player</strong>Receives the message, merges role-filtered events or position, and continues local simulation.</div>
     </div>
-    <p>At wave start the host sends the first event batch. A receiver rejects old versions, flushes queued local events, applies role-filtered local and remote events, ticks its wave, and sends the next version. Position updates are produced by a throttled signal, nominally every 20 ms, with a separate sequence counter. The client tries to preserve its own player and shots while merging remote changes.</p>
-    <p class="note"><strong>Shared wire shape:</strong> Both event-batch messages require <code>gameId</code>, <code>version</code>, <code>events: object[]</code>, and <code>sentAt</code>. Position messages use the same package. The server validates and relays these messages but still does not inspect individual game events or maintain an authoritative game state.</p>
+    <p>At wave start the host sends the first event batch. Host and guest then exchange versioned batches of queued events. Position updates travel independently, nominally every 20 ms. The server forwards accepted messages to the other registered room player; a guest cannot send a host batch, a host cannot send a guest batch, and a position packet's <code>playerId</code> must equal the socket's verified ID.</p>
+    <p>The client chooses the remote control target by finding the room member whose ID differs from the local user ID. It filters incoming events by host or guest role and tries to preserve local player and shot state while applying remote changes. The server validates message shape, not individual game events or game physics.</p>
   </section>
 
   <section id="messages">
     <h2>Message catalog</h2>
     <h3>HTTP JSON</h3>
-    <div class="table-wrap"><table><thead><tr><th>Request</th><th>Body</th><th>Response or effect</th></tr></thead><tbody>
-      <tr><td><code>POST /api/users</code></td><td><code>{username}</code></td><td><code>{user:{id,username,createdAt}}</code>; ID is generated but no user record is stored.</td></tr>
-      <tr><td><code>POST /api/game-lobby</code></td><td><code>{host:{id,username}}</code></td><td><code>{lobby}</code>; creates lobby with host in <code>players</code>.</td></tr>
-      <tr><td><code>POST /api/game-lobby/:id/join-requests</code></td><td><code>{player:{id,username}}</code></td><td><code>{lobby}</code>; upserts player by ID; sends <code>player-joined</code> to other sockets.</td></tr>
-      <tr><td><code>POST /api/game-lobby/:id/ready</code></td><td><code>{player:{id,bulbro}}</code></td><td><code>{lobby}</code>; appends to <code>readyPlayers</code>; sends <code>player-ready</code> to other sockets.</td></tr>
-      <tr><td><code>POST /api/game/:id/start</code></td><td><code>{state: Record&lt;string,unknown&gt;}</code></td><td><code>{id,state}</code>; sends <code>game-started</code> to non-host sockets.</td></tr>
-      <tr><td><code>PUT /api/game/:id/host</code><br><code>PUT /api/game/:id/player</code></td><td><code>{state}</code></td><td>Legacy full-state relay endpoints. No client call sites were found.</td></tr>
+    <div class="table-wrap"><table><thead><tr><th>Request</th><th>Body</th><th>Response and authorization</th></tr></thead><tbody>
+      <tr><td><code>POST /api/users</code></td><td><code>{username}</code></td><td><code>{user:{id,username,createdAt},token,authenticatedAt,expires}</code>. No bearer token is required; no user record is stored.</td></tr>
+      <tr><td><code>POST /api/game-lobby</code></td><td><code>{host:{id,username}}</code></td><td>Bearer ID must equal host ID. Returns a lobby with the host initially offline.</td></tr>
+      <tr><td><code>POST /api/game-lobby/:id/join-requests</code></td><td><code>{player:{id,username}}</code></td><td>Bearer ID must equal player ID. Returns the full lobby; a new third player receives <code>409</code>.</td></tr>
+      <tr><td><code>POST /api/game-lobby/:id/ready</code></td><td><code>{player:{id,bulbro}}</code></td><td>Only that room member may set readiness. Returns the full lobby and notifies the other socket.</td></tr>
+      <tr><td><code>POST /api/game/:id/start</code></td><td><code>{state}</code>, including two matching player IDs</td><td>Host only. Returns <code>{id,state}</code> and sends <code>game-started</code> to the guest when start conditions pass.</td></tr>
+      <tr><td><code>PUT /api/game/:id/host</code><br><code>PUT /api/game/:id/player</code></td><td><code>{state}</code></td><td>Legacy full-state relay routes with bearer and role checks. The current browser game has no call sites for them.</td></tr>
     </tbody></table></div>
     <h3>WebSocket JSON</h3>
-    <div class="table-wrap"><table><thead><tr><th>Direction / type</th><th>Payload</th><th>Handling</th></tr></thead><tbody>
-      <tr><td>Client → server <code>auth</code></td><td><code>userId</code></td><td>Registers socket by supplied ID; replies with <code>connection {connected:true}</code>.</td></tr>
-      <tr><td>Server → clients <code>player-joined</code></td><td><code>lobby</code></td><td>Client adds missing players from the lobby.</td></tr>
-      <tr><td>Server → clients <code>player-ready</code></td><td><code>readyPlayer</code></td><td>Client appends player to local ready list.</td></tr>
-      <tr><td>Server → clients <code>player-disconnected</code></td><td><code>player</code> with <code>status:"offline"</code></td><td>Client removes that player locally.</td></tr>
-      <tr><td>Server → guest <code>game-started</code></td><td><code>lobby, initialState, serverStartTime</code></td><td>Guest restores wave state and starts local simulation.</td></tr>
-      <tr><td>Client → relay <code>game-state-updated-by-host</code><br><code>game-state-updated-by-guest</code></td><td><code>gameId, version, events[], sentAt</code></td><td>Validated against the shared schema and relayed to other lobby players.</td></tr>
-      <tr><td>Client → relay <code>game-state-position-updated</code></td><td><code>gameId, playerId, position{x,y}, direction{x,y}, version, sentAt</code></td><td>Server forwards to all lobby players except the claimed <code>playerId</code>.</td></tr>
+    <div class="table-wrap"><table><thead><tr><th>Direction and type</th><th>Payload</th><th>Handling</th></tr></thead><tbody>
+      <tr><td>Client → server <code>auth</code></td><td><code>{token}</code></td><td>Verifies JWT, binds the socket to its user ID, and replies with <code>connection {connected:true}</code>. Expired sessions are closed.</td></tr>
+      <tr><td>Server → clients <code>player-joined</code></td><td><code>{lobby}</code></td><td>Other members receive the full player and ready lists.</td></tr>
+      <tr><td>Server → clients <code>player-ready</code></td><td><code>{readyPlayer}</code></td><td>Other members upsert that player's selection.</td></tr>
+      <tr><td>Server → clients <code>player-connected</code><br><code>player-disconnected</code></td><td><code>{player}</code> with connection status</td><td>Other members update the known player's status in lobby and game views.</td></tr>
+      <tr><td>Server → guest <code>game-started</code></td><td><code>{lobby,initialState,serverStartTime}</code></td><td>Guest restores wave state and starts local simulation.</td></tr>
+      <tr><td>Client ↔ relay <code>game-state-updated-by-host</code><br><code>game-state-updated-by-guest</code></td><td><code>{gameId,version,events:object[],sentAt}</code></td><td>Validated by the shared schema and forwarded only from the proper role to the other member.</td></tr>
+      <tr><td>Client ↔ relay <code>game-state-position-updated</code></td><td><code>{gameId,playerId,position,direction,version,sentAt}</code></td><td>Forwarded only when <code>playerId</code> matches the verified socket identity.</td></tr>
     </tbody></table></div>
-    <p>Server WebSocket errors are untyped objects such as <code>{"error":"Invalid message"}</code>. The lobby listener throws on them; the game listener logs and ignores them. The server accepts extra properties on a validated message, but required fields must match.</p>
+    <p>Socket errors are still untyped objects such as <code>{"error":"Unauthorized"}</code>. The lobby listener ignores messages outside its schema; the in-game listener logs unknown messages.</p>
   </section>
 
   <section id="gaps">
-    <h2>Potential gaps and recommended fixes</h2>
-    <p class="note"><strong>Resolved:</strong> The live event-batch schema mismatch was fixed by moving the wire definitions into <a href="../packages/network-protocol/src/index.ts"><code>@bulbro/network-protocol</code></a>. A <a href="../server/src/game-websocket-controller.spec.ts">server relay test</a> checks both host-to-guest and guest-to-host event delivery.</p>
-    <div class="table-wrap"><table><thead><tr><th>Priority</th><th>Finding and impact</th><th>Suggested fix</th></tr></thead><tbody>
-      <tr><td class="severity high">High</td><td><strong>Identity and role are assertions from the caller.</strong> WebSocket <code>auth</code> trusts any <code>userId</code>; HTTP has no authentication; relay infers sender from message <code>type</code> or <code>playerId</code>, without checking the bound socket or lobby membership. A caller can impersonate a player, start a lobby's game, or inject updates. <a href="../server/src/websocket-connection.ts">Socket registration</a> · <a href="../server/src/game-websocket-controller.ts">Relay</a> · <a href="../server/src/router.ts">HTTP routes</a></td><td>Issue a server-verifiable session credential; bind it to the socket; authorize each operation against membership and host role.</td></tr>
-      <tr><td class="severity high">High</td><td><strong>Ready state is incomplete and unbounded.</strong> <code>markReady</code> appends duplicates and accepts an ID absent from <code>players</code>. Existing <code>readyPlayers</code> is returned in HTTP lobby responses but omitted from the client lobby schema, so a late joiner misses earlier readiness. The start route does not check both players are ready. <a href="../server/src/games-registry.ts">Registry</a> · <a href="../web/src/network/LobbySocketMessages.ts">Client lobby schema</a></td><td>Require lobby membership, upsert by player ID, include ready players in client state, and enforce start preconditions server-side.</td></tr>
-      <tr><td class="severity high">High</td><td><strong>Two-player assumptions are not enforced.</strong> The server accepts more players, but <code>NetworkGameConnection</code> picks the first non-host with a non-null assertion, and <code>StateUpdater</code> merges exactly one remote player. A solo host or third player can break or diverge. <a href="../server/src/games-registry.ts">Registry</a> · <a href="../web/src/network/NetworkGameConnection.ts">Game connection</a></td><td>Enforce exactly two participants for this mode, or extend the client model to support all participants.</td></tr>
-      <tr><td class="severity high">High</td><td><strong>Guest remote control targets the guest ID.</strong> Both roles set <code>remotePlayerId</code> to the first non-host. For the guest, that is its own ID; host movement events therefore do not update the guest's remote direction control. <a href="../web/src/network/NetworkGameConnection.ts">Game connection</a> · <a href="../web/src/network/RemoteControl.ts">Remote control</a></td><td>Select the player whose ID differs from the local user's ID.</td></tr>
-      <tr><td class="severity medium">Medium</td><td><strong>First position packet is discarded.</strong> The sender starts position versions at <code>0</code>; <code>StateUpdater</code> initializes <code>lastPositionVersion</code> to <code>0</code> and rejects versions less than or equal to it. <a href="../web/src/network/StateSync.ts">Sender</a> · <a href="../web/src/network/StateUpdater.ts">Receiver</a></td><td>Initialize the receiver to <code>-1</code> or start the sender at <code>1</code>.</td></tr>
-      <tr><td class="severity medium">Medium</td><td><strong>Position freshness compares unrelated clocks.</strong> Position <code>sentAt</code> uses the sender's elapsed wave time, while the receiver compares it with its own elapsed wave time. Different start times can suppress valid positions. Event batches use <code>Date.now()</code>; once one is processed, its epoch timestamp makes later elapsed-time position packets appear stale. <a href="../web/src/network/StateSync.ts">Sender</a> · <a href="../web/src/network/StateUpdater.ts">Receiver</a></td><td>Use per-sender sequence numbers for ordering; define timestamps in one clock domain if needed for diagnostics.</td></tr>
-      <tr><td class="severity medium">Medium</td><td><strong>Reconnect and close handling can lose the active socket.</strong> Reconnect is not invoked by the game flow. Reauth for the same ID replaces <code>byUser</code>, but closing the old socket removes the ID's new mapping; old mappings can also remain when one socket authenticates as another ID. Offline status has no matching online restoration. <a href="../web/src/network/websocket/WebsocketConnection.ts">Client socket</a> · <a href="../server/src/websocket-connections.ts">Server socket map</a></td><td>Remove mappings only if they still point to the closing socket; define reconnect, reauth, resync, and online transitions.</td></tr>
-      <tr><td class="severity medium">Medium</td><td><strong>Event delivery has no recovery.</strong> Events are flushed before the asynchronous send; no acknowledgement, retry, snapshot, or replay path is used. A dropped socket or malformed batch can strand the ping-pong loop and lose events. <a href="../web/src/network/StateSync.ts">State sync</a> · <a href="../web/src/game-events/InMemoryGameEventQueue.ts">Event queue</a></td><td>Add acknowledged sequence numbers, buffered resend, and a snapshot/resync path after interruption.</td></tr>
-      <tr><td class="severity medium">Medium</td><td><strong>HTTP success can hide a missing game.</strong> <code>startGame</code>, <code>hostUpdate</code>, and <code>playerUpdate</code> return without an error when the lobby does not exist; routes still return success. The host checks only the HTTP call's completion, not <code>res.ok</code>. <a href="../server/src/game-controller.ts">Server controller</a> · <a href="../web/src/network/start-game.ts">Client start</a></td><td>Return explicit 404/409 responses and make the host await and check a successful start before moving to the game screen.</td></tr>
+    <h2>Remaining gaps</h2>
+    <p class="note">JWTs establish a server-issued session ID, but anyone can create a new username-based identity. Room and socket state live only in this server process. The server does not provide authoritative simulation, replay, or recovery after a connection interruption.</p>
+    <div class="table-wrap"><table><thead><tr><th>Status</th><th>Behavior and impact</th><th>Possible next step</th></tr></thead><tbody>
+      <tr><td class="status open">Open</td><td><strong>First position packet is discarded.</strong> Position versions start at <code>0</code>, while the receiver starts at <code>0</code> and rejects versions less than or equal to its last version.</td><td>Start the receiver at <code>-1</code> or the sender at <code>1</code>.</td></tr>
+      <tr><td class="status open">Open</td><td><strong>Position freshness uses incompatible clocks.</strong> Position packets use elapsed wave time. Event batches use <code>Date.now()</code>, and the receiver compares both against one freshness field, so valid positions can be suppressed.</td><td>Order position packets by sender sequence; use one clock domain only for diagnostics.</td></tr>
+      <tr><td class="status open">Open</td><td><strong>Automatic reconnect and resync are absent.</strong> The server safely replaces sockets and restores online status on a new authenticated socket, but the current game flow does not invoke reconnect or restore missed state.</td><td>Reconnect with a retained valid token and request an authoritative snapshot before resuming play.</td></tr>
+      <tr><td class="status open">Open</td><td><strong>Live event delivery has no recovery.</strong> Events are flushed before send, with no acknowledgement, retry, replay, or snapshot path. Interruption can strand the alternating batch loop.</td><td>Add acknowledged versions, buffered resend, and snapshot-based resync.</td></tr>
+      <tr><td class="status open">Open</td><td><strong>Legacy full-state routes are separate from the live protocol.</strong> They are authorized but unused by the browser, and their payload shape differs from event batches.</td><td>Remove them or define and test a separate full-state message contract.</td></tr>
     </tbody></table></div>
-    <p>These are code-review findings, not runtime measurements. The first-position version mismatch follows directly from the counters. Other failure modes depend on timing or caller behavior and should be confirmed with end-to-end tests when fixed.</p>
   </section>
 
   <section id="sources">
     <h2>Source map</h2>
-    <p><strong>Server:</strong> <a href="../server/src/router.ts">HTTP routes</a>, <a href="../server/src/index.ts">WebSocket endpoint</a>, <a href="../server/src/games-registry.ts">lobby storage</a>, <a href="../server/src/game-lobby-controller.ts">lobby notifications</a>, <a href="../server/src/game-controller.ts">game start and legacy state relay</a>, <a href="../server/src/game-websocket-controller.ts">live relay validation</a>, <a href="../server/src/websocket-connection.ts">socket authentication</a>.</p>
-    <p><strong>Client and shared package:</strong> <a href="../web/src/network/currentUser.ts">user creation</a>, <a href="../web/src/network/currentLobby.ts">lobby API and notifications</a>, <a href="../web/src/network/start-game.ts">startup</a>, <a href="../web/src/network/LobbyConnection.ts">socket lifecycle</a>, <a href="../web/src/network/StateSync.ts">outbound and inbound sync</a>, <a href="../web/src/network/StateUpdater.ts">state application</a>, <a href="../packages/network-protocol/src/index.ts">shared live message schema</a>.</p>
+    <p><strong>Server:</strong> <a href="../server/src/auth.ts">JWT handling</a>, <a href="../server/src/router.ts">HTTP routes</a>, <a href="../server/src/games-registry.ts">lobby registry</a>, <a href="../server/src/game-lobby-controller.ts">lobby notifications</a>, <a href="../server/src/game-controller.ts">game start and legacy relay</a>, <a href="../server/src/game-websocket-controller.ts">live relay</a>, <a href="../server/src/websocket-connection.ts">socket authentication</a>, <a href="../server/src/websocket-connections.ts">socket mappings</a>.</p>
+    <p><strong>Client and shared package:</strong> <a href="../web/src/network/currentUser.ts">user session</a>, <a href="../web/src/network/currentLobby.ts">lobby API and readiness</a>, <a href="../web/src/network/LobbySocketMessages.ts">lobby wire schema</a>, <a href="../web/src/network/start-game.ts">startup</a>, <a href="../web/src/network/gameParticipants.ts">player selection</a>, <a href="../web/src/network/StateSync.ts">event exchange</a>, <a href="../web/src/network/StateUpdater.ts">state application</a>, <a href="../packages/network-protocol/src/index.ts">live wire schema</a>.</p>
   </section>
 </main>
 </body>

@@ -114,6 +114,13 @@ export function SetupOnlineGame() {
 		useState(
 			false,
 		);
+	const [
+		startError,
+		setStartError,
+	] =
+		useState(
+			"",
+		);
 	const router =
 		useRouter();
 	const share: ShareData =
@@ -162,10 +169,29 @@ export function SetupOnlineGame() {
 			setIsStarting(
 				true,
 			);
+			setStartError(
+				"",
+			);
 			startNetworkGameAsHost(
 				selectedDifficulty,
+				router.toGame,
+			).catch(
+				(
+					error,
+				) => {
+					setStartError(
+						error instanceof
+							Error
+							? error.message
+							: String(
+									error,
+								),
+					);
+					setIsStarting(
+						false,
+					);
+				},
 			);
-			router.toGame();
 		};
 
 	const shareLobby =
@@ -390,6 +416,13 @@ export function SetupOnlineGame() {
 							</div>
 						</CardContent>
 						<CardFooter className="grid">
+							{startError && (
+								<p role="alert">
+									{
+										startError
+									}
+								</p>
+							)}
 							{isHost ? (
 								<Button
 									onClick={
