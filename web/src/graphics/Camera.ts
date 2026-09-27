@@ -15,6 +15,8 @@ export interface Camera {
 	init(
 		size: Size,
 	): Promise<void>;
+	/** Removes automatic rendering from the ticker when this wave ends. */
+	detach(): void;
 	zoom(
 		scale: number,
 	): void;

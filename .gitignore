@@ -47,3 +47,4 @@ PLAN.md
 
 .playwright/*
 .playwright-cli/*
+debug

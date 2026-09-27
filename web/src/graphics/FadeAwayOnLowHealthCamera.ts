@@ -84,6 +84,10 @@ export class FadeAwayOnLowHealthCamera
 		);
 	}
 
+	detach(): void {
+		this.#camera.detach();
+	}
+
 	zoom(
 		scale: number,
 	) {

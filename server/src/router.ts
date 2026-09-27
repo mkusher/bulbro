@@ -135,6 +135,21 @@ export const configureApi =
 							},
 						);
 					}
+					if (
+						!id
+					) {
+						c.status(
+							400,
+						);
+						return c.json(
+							{
+								errors:
+									[
+										"id should be provided",
+									],
+							},
+						);
+					}
 					const lobby =
 						await joinLobby(
 							id,

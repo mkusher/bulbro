@@ -73,6 +73,16 @@ export class PixiAppCamera
 		}
 	}
 
+	detach(): void {
+		this.#app.ticker?.remove(
+			this
+				.#app
+				.render,
+			this
+				.#app,
+		);
+	}
+
 	zoom(
 		scale: number,
 	) {

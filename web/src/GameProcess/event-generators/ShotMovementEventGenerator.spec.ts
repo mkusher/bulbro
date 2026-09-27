@@ -1056,3 +1056,149 @@ describe("ShotMovementEventGenerator", () => {
 		);
 	});
 });
+
+for (const count of [
+	2,
+	99,
+	100,
+	150,
+]) {
+	it(`selects nearest hit across cell boundaries with ${count} enemies`, () => {
+		const enemies =
+			[
+				createEnemy(
+					"far",
+					260,
+					100,
+				),
+				createEnemy(
+					"near",
+					190,
+					100,
+				),
+			];
+		while (
+			enemies.length <
+			count
+		)
+			enemies.push(
+				createEnemy(
+					`filler-${enemies.length}`,
+					2000,
+					2000,
+				),
+			);
+		const state =
+			makeState(
+				{
+					enemies,
+					shots:
+						[
+							createPlayerShot(
+								"s",
+								100,
+								100,
+							),
+						],
+				},
+			);
+		const events =
+			new ShotMovementEventGenerator().generate(
+				state,
+				dt(
+					500,
+				),
+				nowTime(
+					1000,
+				),
+			);
+		expect(
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"enemyReceivedHit",
+			),
+		).toMatchObject(
+			{
+				enemyId:
+					"near",
+			},
+		);
+		expect(
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"shotExpired",
+			),
+		).toMatchObject(
+			{
+				position:
+					{
+						x: 130,
+						y: 100,
+					},
+			},
+		);
+	});
+	it(`includes hitboxes whose centers are in neighboring cells with ${count} enemies`, () => {
+		const enemies =
+			[
+				createEnemy(
+					"target",
+					190,
+					100,
+				),
+			];
+		while (
+			enemies.length <
+			count
+		)
+			enemies.push(
+				createEnemy(
+					`filler-${enemies.length}`,
+					2000,
+					2000,
+				),
+			);
+		const events =
+			new ShotMovementEventGenerator().generate(
+				makeState(
+					{
+						enemies,
+						shots:
+							[
+								createPlayerShot(
+									"s",
+									130,
+									60,
+								),
+							],
+					},
+				),
+				dt(
+					16,
+				),
+				nowTime(
+					1000,
+				),
+			);
+		expect(
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"enemyReceivedHit",
+			),
+		).toMatchObject(
+			{
+				enemyId:
+					"target",
+			},
+		);
+	});
+}

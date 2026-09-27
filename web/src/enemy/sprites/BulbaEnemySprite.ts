@@ -1,10 +1,11 @@
 import * as PIXI from "pixi.js";
-import {
-	ColorOverlayFilter,
-	OutlineFilter,
-} from "pixi-filters";
+import { ColorOverlayFilter } from "pixi-filters";
 import { ConvolutionFilter } from "pixi-filters/convolution";
-import { Assets } from "@/Assets";
+import {
+	ENEMY_BODY_SCALE,
+	getEnemyBodyTextures,
+	type EnemyBodyTextures,
+} from "./EnemyBodyTextures";
 import type {
 	Direction,
 	Position,
@@ -32,7 +33,8 @@ type PhysicalRectangle =
 		offset?: Position;
 	};
 
-const DEFAULT_SCALING = 0.3;
+const DEFAULT_SCALING =
+	ENEMY_BODY_SCALE;
 const CYCLE_LENGTH = 20;
 const DEATH_ROTATIONS = 2;
 
@@ -45,14 +47,29 @@ export class BulbaEnemySprite extends GameSprite {
 	#swingContainer!: PIXI.Container;
 	#scalingContainer!: PIXI.Container;
 	#bodySprite!: PIXI.Sprite;
-	#outlineFilter!: OutlineFilter;
+	#bodyTextures!: EnemyBodyTextures;
+	#initialization?: Promise<void>;
+	#activeFilters?: PIXI.Filter[];
+	#hitMatrix =
+		new Float32Array(
+			[
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+			],
+		);
+	#lastHitFactor?: number;
 	#hitFilter!: ConvolutionFilter;
 	#rageFilter!: ColorOverlayFilter;
 	#normalFilters!: PIXI.Filter[];
 	#hitFilters!: PIXI.Filter[];
 	#rageFilters!: PIXI.Filter[];
-	readonly #deadFilters: PIXI.Filter[] =
-		[];
 	#debugSprite?: DebugSprite;
 	#enemySprites!: EnemySprites;
 	#shadow: ShadowSprite;
@@ -108,17 +125,31 @@ export class BulbaEnemySprite extends GameSprite {
 		this.init();
 	}
 
-	async init(): Promise<void> {
-		const texture =
-			await this.#buildBodyTexture(
+	init(): Promise<void> {
+		return (this.#initialization ??=
+			this.#initialize());
+	}
+	async #initialize(): Promise<void> {
+		this.#bodyTextures =
+			await getEnemyBodyTextures(
 				this
 					.#defaultFrame,
 			);
-
 		this.#bodySprite =
 			new PIXI.Sprite(
-				texture,
+				this
+					.#bodyTextures
+					.normal,
 			);
+		this.#bodySprite.position.set(
+			this
+				.#bodyTextures
+				.padding,
+			-this
+				.#bodyTextures
+				.padding,
+		);
+
 		this.#bodySprite.scale.x =
 			-Math.abs(
 				this
@@ -172,12 +203,6 @@ export class BulbaEnemySprite extends GameSprite {
 				.#swingContainer,
 		);
 
-		this.#outlineFilter =
-			new OutlineFilter(
-				3,
-				0x000000,
-				1.0,
-			);
 		this.#hitFilter =
 			new ConvolutionFilter();
 		this.#rageFilter =
@@ -187,26 +212,18 @@ export class BulbaEnemySprite extends GameSprite {
 			);
 
 		this.#normalFilters =
-			[
-				this
-					.#outlineFilter,
-			];
+			[];
 		this.#hitFilters =
 			[
-				this
-					.#outlineFilter,
 				this
 					.#hitFilter,
 			];
 		this.#rageFilters =
 			[
 				this
-					.#outlineFilter,
-				this
 					.#rageFilter,
 			];
-
-		this.#enemyRootContainer.filters =
+		this.#activeFilters =
 			this.#normalFilters;
 
 		this.#enemySprites =
@@ -415,77 +432,81 @@ export class BulbaEnemySprite extends GameSprite {
 		this.#swingContainer.rotation =
 			state.rotation;
 
-		switch (
-			state.effect
+		const dead =
+			state.kind ===
+			"dead";
+		const texture =
+			dead
+				? this
+						.#bodyTextures
+						.dead
+				: this
+						.#bodyTextures
+						.normal;
+		if (
+			this
+				.#bodySprite
+				.texture !==
+			texture
 		) {
-			case "hit": {
+			this.#bodySprite.texture =
+				texture;
+			const padding =
+				dead
+					? 0
+					: this
+							.#bodyTextures
+							.padding;
+			this.#bodySprite.position.set(
+				padding,
+				-padding,
+			);
+		}
+		let filters =
+			this
+				.#normalFilters;
+		if (
+			state.effect ===
+			"hit"
+		) {
+			if (
+				this
+					.#lastHitFactor !==
+				state.hitFactor
+			) {
 				const f =
 					state.hitFactor;
+				this.#hitMatrix[1] =
+					this.#hitMatrix[3] =
+					this.#hitMatrix[5] =
+					this.#hitMatrix[7] =
+						f;
 				this.#hitFilter.matrix =
-					new Float32Array(
-						[
-							0,
-							f,
-							0,
-							f,
-							1,
-							f,
-							0,
-							f,
-							0,
-						],
-					);
-				this.#enemyRootContainer.filters =
-					this.#hitFilters;
-				break;
+					this.#hitMatrix;
+				this.#lastHitFactor =
+					f;
 			}
-			case "rage": {
-				this.#enemyRootContainer.filters =
-					state.showRageOverlay
-						? this
-								.#rageFilters
-						: this
-								.#normalFilters;
-				break;
-			}
-			default: {
-				this.#enemyRootContainer.filters =
-					state.kind ===
-					"dead"
-						? this
-								.#deadFilters
-						: this
-								.#normalFilters;
-			}
+			filters =
+				this
+					.#hitFilters;
+		} else if (
+			state.effect ===
+				"rage" &&
+			state.showRageOverlay
+		) {
+			filters =
+				this
+					.#rageFilters;
 		}
-	}
-
-	async #buildBodyTexture(
-		rectangle: PhysicalRectangle,
-	): Promise<PIXI.Texture> {
-		const source =
-			await Assets.get(
-				"allEnemies",
-			);
-		return new PIXI.Texture(
-			{
-				source,
-				frame:
-					new PIXI.Rectangle(
-						rectangle
-							.position
-							.x,
-						rectangle
-							.position
-							.y,
-						rectangle
-							.size
-							.width,
-						rectangle
-							.size
-							.height,
-					),
-			},
-		);
+		if (
+			filters !==
+			this
+				.#activeFilters
+		) {
+			this.#enemyRootContainer.filters =
+				filters;
+			this.#activeFilters =
+				filters;
+		}
 	}
 }

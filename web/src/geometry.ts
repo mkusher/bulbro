@@ -323,85 +323,135 @@ export function rectIntersectsLine(
 	rect: Rectangle,
 	line: LineSegment,
 ): boolean {
-	// If either endpoint inside, it's intersecting
-	if (
-		rectContainsPoint(
-			rect,
-			line.start,
-		) ||
-		rectContainsPoint(
-			rect,
-			line.end,
-		)
-	) {
-		return true;
-	}
-	// Check intersection with each rectangle side
-	const topLeft: Point =
-		{
-			x: rect.x,
-			y: rect.y,
-		};
-	const topRight: Point =
-		{
-			x:
-				rect.x +
+	return (
+		segmentAabbHitTime(
+			line
+				.start
+				.x,
+			line
+				.start
+				.y,
+			line
+				.end
+				.x -
+				line
+					.start
+					.x,
+			line
+				.end
+				.y -
+				line
+					.start
+					.y,
+			rect.x,
+			rect.y,
+			rect.x +
 				rect.width,
-			y: rect.y,
-		};
-	const bottomLeft: Point =
-		{
-			x: rect.x,
-			y:
-				rect.y +
+			rect.y +
 				rect.height,
-		};
-	const bottomRight: Point =
-		{
-			x:
-				rect.x +
-				rect.width,
-			y:
-				rect.y +
-				rect.height,
-		};
+		) !==
+		Infinity
+	);
+}
+
+/** First contact along a segment in [0, 1], or Infinity for a miss. Edges are inclusive. */
+export function segmentAabbHitTime(
+	x: number,
+	y: number,
+	dx: number,
+	dy: number,
+	minX: number,
+	minY: number,
+	maxX: number,
+	maxY: number,
+): number {
+	let enter = 0;
+	let exit = 1;
 	if (
-		segmentsIntersect(
-			line,
-			{
-				start:
-					topLeft,
-				end: topRight,
-			},
-		) ||
-		segmentsIntersect(
-			line,
-			{
-				start:
-					topRight,
-				end: bottomRight,
-			},
-		) ||
-		segmentsIntersect(
-			line,
-			{
-				start:
-					bottomRight,
-				end: bottomLeft,
-			},
-		) ||
-		segmentsIntersect(
-			line,
-			{
-				start:
-					bottomLeft,
-				end: topLeft,
-			},
-		)
+		dx ===
+		0
 	) {
-		return true;
+		if (
+			x <
+				minX ||
+			x >
+				maxX
+		)
+			return Infinity;
+	} else {
+		const a =
+			(minX -
+				x) /
+			dx;
+		const b =
+			(maxX -
+				x) /
+			dx;
+		enter =
+			Math.max(
+				enter,
+				Math.min(
+					a,
+					b,
+				),
+			);
+		exit =
+			Math.min(
+				exit,
+				Math.max(
+					a,
+					b,
+				),
+			);
+		if (
+			enter >
+			exit
+		)
+			return Infinity;
 	}
-	return false;
+	if (
+		dy ===
+		0
+	) {
+		if (
+			y <
+				minY ||
+			y >
+				maxY
+		)
+			return Infinity;
+	} else {
+		const a =
+			(minY -
+				y) /
+			dy;
+		const b =
+			(maxY -
+				y) /
+			dy;
+		enter =
+			Math.max(
+				enter,
+				Math.min(
+					a,
+					b,
+				),
+			);
+		exit =
+			Math.min(
+				exit,
+				Math.max(
+					a,
+					b,
+				),
+			);
+		if (
+			enter >
+			exit
+		)
+			return Infinity;
+	}
+	return enter;
 }
 
 export function circleIntersectsLine(

@@ -59,6 +59,10 @@ export class AutoCenterOnPlayerCamera
 		);
 	}
 
+	detach(): void {
+		this.#camera.detach();
+	}
+
 	zoom(
 		scale: number,
 	) {

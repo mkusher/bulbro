@@ -177,6 +177,8 @@ export class BaseWaveProcess
 				.tick,
 		);
 
+		this.#camera.detach();
+
 		this.#resolvers.resolve(
 			type,
 		);
