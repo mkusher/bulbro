@@ -75,6 +75,14 @@ export const PlayerJoined =
 				LobbySchema,
 		},
 	);
+export const LobbySnapshot =
+	type(
+		{
+			type: "'lobby-snapshot'",
+			lobby:
+				LobbySchema,
+		},
+	);
 export const PlayerReady =
 	type(
 		{
@@ -111,6 +119,9 @@ export const WebsocketMessage =
 	Connected.or(
 		PlayerJoined,
 	)
+		.or(
+			LobbySnapshot,
+		)
 		.or(
 			PlayerReady,
 		)
