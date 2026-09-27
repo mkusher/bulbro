@@ -535,6 +535,7 @@ export class StateUpdater {
 
 			// Filter out material events by remote player
 			case "materialCollected":
+			case "consumableCollected":
 				return (
 					event.playerId ===
 					localPlayerId
@@ -598,6 +599,7 @@ export class StateUpdater {
 
 			// Keep material and shot events from remote player
 			case "materialCollected":
+			case "consumableCollected":
 				return (
 					event.playerId !==
 					localPlayerId
@@ -612,6 +614,7 @@ export class StateUpdater {
 			// Keep other system events
 			case "materialSpawned":
 			case "materialMoved":
+			case "consumableMoved":
 			case "tick":
 			case "heal":
 				return true;
@@ -681,6 +684,7 @@ export class StateUpdater {
 
 			// Material events - include if collected by remote player
 			case "materialCollected":
+			case "consumableCollected":
 				return (
 					event.playerId !==
 					localPlayerId
@@ -709,6 +713,7 @@ export class StateUpdater {
 
 			// System events - include all
 			case "materialMoved":
+			case "consumableMoved":
 			case "tick":
 			case "heal":
 				return true;

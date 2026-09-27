@@ -856,6 +856,30 @@ export class BulbroState
 					},
 				);
 
+			case "consumableCollected": {
+				if (
+					event.playerId !==
+					this
+						.id
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						healthPoints:
+							Math.min(
+								this
+									.healthPoints +
+									event.hp,
+								this
+									.stats
+									.maxHp,
+							),
+					},
+				);
+			}
+
 			case "bulbroHealed": {
 				if (
 					event.bulbroId !==

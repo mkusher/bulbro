@@ -1,6 +1,9 @@
 import type { EnemyCharacter } from "../enemy";
 import { orcFist } from "../weapons-definitions/orc-fist";
-import { baseStats } from "./base";
+import {
+	baseConsumableDropChance,
+	baseStats,
+} from "./base";
 
 export const babyEnemy: EnemyCharacter =
 	{
@@ -25,6 +28,8 @@ export const babyEnemy: EnemyCharacter =
 			[
 				orcFist,
 			],
+		consumableDropChance:
+			baseConsumableDropChance,
 		behaviors:
 			"chasing",
 	};

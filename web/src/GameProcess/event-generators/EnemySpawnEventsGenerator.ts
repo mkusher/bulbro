@@ -13,6 +13,7 @@ import {
 	ColoradoBeetleSpawner,
 	HedgehogSpawner,
 	RoachSpawner,
+	TreeSpawner,
 	WildBoarSpawner,
 } from "../../Spawner/enemy-spawners";
 import type { EventGenerator } from "./EventGenerator";
@@ -37,6 +38,7 @@ const spawners: SpawnerLogic[] =
 		new HedgehogSpawner(),
 		new WildBoarSpawner(),
 		new BadgerSpawner(),
+		new TreeSpawner(),
 	];
 
 export class EnemySpawnEventsGenerator

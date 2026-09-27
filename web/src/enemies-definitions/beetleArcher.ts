@@ -1,5 +1,8 @@
 import type { EnemyCharacter } from "../enemy";
-import { baseStats } from "./base";
+import {
+	baseConsumableDropChance,
+	baseStats,
+} from "./base";
 import { aphidGun } from "@/weapons-definitions";
 
 export const beetleArcher: EnemyCharacter =
@@ -27,6 +30,8 @@ export const beetleArcher: EnemyCharacter =
 			[
 				aphidGun,
 			],
+		consumableDropChance:
+			baseConsumableDropChance,
 		behaviors:
 			"keeping-distance",
 	};

@@ -77,6 +77,48 @@ export type ReadyPlayer =
 export type Lobby =
 	typeof Lobby.infer;
 
+export function canStartLobby(
+	lobby: Lobby,
+) {
+	return (
+		lobby
+			.players
+			.length ===
+			2 &&
+		lobby.players.some(
+			(
+				player,
+			) =>
+				player.id ===
+				lobby.hostId,
+		) &&
+		new Set(
+			lobby.players.map(
+				(
+					player,
+				) =>
+					player.id,
+			),
+		)
+			.size ===
+			2 &&
+		lobby.players.every(
+			(
+				player,
+			) =>
+				player.status ===
+					"connected" &&
+				lobby.readyPlayers.some(
+					(
+						readyPlayer,
+					) =>
+						readyPlayer.id ===
+						player.id,
+				),
+		)
+	);
+}
+
 export class GamesRegistry {
 	#registry =
 		new Map<

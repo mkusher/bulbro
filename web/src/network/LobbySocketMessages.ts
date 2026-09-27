@@ -9,6 +9,14 @@ export const PlayerAttendee =
 				"string",
 		},
 	);
+export const ReadyPlayerAttendee =
+	type(
+		{
+			id: "string",
+			bulbro:
+				"object",
+		},
+	);
 export const LobbySchema =
 	type(
 		{
@@ -19,11 +27,15 @@ export const LobbySchema =
 				"string",
 			players:
 				PlayerAttendee.array(),
+			readyPlayers:
+				ReadyPlayerAttendee.array(),
 		},
 	);
 
 export type PlayerAttendee =
 	typeof PlayerAttendee.infer;
+export type ReadyPlayerAttendee =
+	typeof ReadyPlayerAttendee.infer;
 export type Lobby =
 	typeof LobbySchema.infer;
 
@@ -68,7 +80,7 @@ export const PlayerReady =
 		{
 			type: "'player-ready'",
 			readyPlayer:
-				"object",
+				ReadyPlayerAttendee,
 		},
 	);
 export const PlayerDisconnected =

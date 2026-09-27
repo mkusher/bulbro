@@ -5,6 +5,7 @@ import type {
 	EnemyAttackedEvent,
 	EnemyDiedEvent,
 	GameEvent,
+	ConsumableCollectedEvent,
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
 import type { WaveState } from "@/waveState";
@@ -57,6 +58,7 @@ class AudioController {
 				);
 				break;
 			case "materialCollected":
+			case "consumableCollected":
 				this.#handleMaterialCollected(
 					event,
 				);
@@ -78,7 +80,9 @@ class AudioController {
 	 * Handle material collected sound
 	 */
 	#handleMaterialCollected(
-		_event: MaterialCollectedEvent,
+		_event:
+			| MaterialCollectedEvent
+			| ConsumableCollectedEvent,
 	): void {
 		audioEngine.playEffect(
 			"collectCoins",

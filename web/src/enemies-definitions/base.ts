@@ -22,3 +22,6 @@ export const baseStats =
 
 export type EnemyStats =
 	typeof baseStats;
+
+/** Default chance for a regular enemy to drop a consumable on death */
+export const baseConsumableDropChance = 0.01;

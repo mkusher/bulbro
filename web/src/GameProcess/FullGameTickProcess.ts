@@ -20,6 +20,7 @@ import type { EventGenerator } from "./event-generators";
 import {
 	EnemyBehaviorEventGenerator,
 	EnemySpawnEventsGenerator,
+	ConsumablesMovementEventsGenerator,
 	MaterialsMovementEventsGenerator,
 	MeleeStrikeEventGenerator,
 	PlayerHealEventGenerator,
@@ -66,6 +67,7 @@ export class FullGameTickProcess
 				new MeleeStrikeEventGenerator(),
 				new ShotMovementEventGenerator(),
 				new MaterialsMovementEventsGenerator(),
+				new ConsumablesMovementEventsGenerator(),
 				new EnemySpawnEventsGenerator(),
 			];
 	}

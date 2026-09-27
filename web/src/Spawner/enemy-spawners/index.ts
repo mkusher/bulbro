@@ -7,3 +7,4 @@ export { HedgehogSpawner } from "./HedgehogSpawner";
 export { WildBoarSpawner } from "./WildBoarSpawner";
 export { BadgerSpawner } from "./BadgerSpawner";
 export { BeetleArcherSpawner } from "./BeetleArcherSpawner";
+export { TreeSpawner } from "./TreeSpawner";

@@ -85,6 +85,8 @@ export async function createLobby(
 				toGame,
 			),
 		);
+	readyPlayers.value =
+		newLobby.readyPlayers as Player[];
 }
 
 export const currentLobby =
@@ -111,6 +113,31 @@ export const readyPlayers =
 	>(
 		[],
 	);
+
+function mergeReadyPlayers(
+	current: Player[],
+	incoming: Player[],
+) {
+	const byId =
+		new Map(
+			current.map(
+				(
+					player,
+				) => [
+					player.id,
+					player,
+				],
+			),
+		);
+	for (const player of incoming)
+		byId.set(
+			player.id,
+			player,
+		);
+	return [
+		...byId.values(),
+	];
+}
 
 export async function joinLobby(
 	id: string,
@@ -175,6 +202,8 @@ export async function joinLobby(
 				toGame,
 			),
 		);
+	readyPlayers.value =
+		newLobby.readyPlayers as Player[];
 }
 
 export async function markAsReady(
@@ -213,11 +242,36 @@ export async function markAsReady(
 				"Could not mark ready",
 		);
 
+	const body =
+		await res.json();
+	const updated =
+		LobbySchema(
+			body.lobby,
+		);
+	if (
+		updated instanceof
+		type.errors
+	)
+		throw updated;
 	readyPlayers.value =
-		[
-			player,
-			...readyPlayers.value,
-		];
+		mergeReadyPlayers(
+			readyPlayers.value,
+			updated.readyPlayers as Player[],
+		);
+	if (
+		currentLobby
+			.value
+			?.id ===
+		updated.id
+	)
+		currentLobby.value =
+			currentLobby.value.syncLobby(
+				{
+					...updated,
+					readyPlayers:
+						readyPlayers.value,
+				},
+			);
 }
 
 export function startGame() {
@@ -269,11 +323,20 @@ export function processLobbySocketMessage(
 					!lobby
 				)
 					return;
-				currentLobby.value =
-					lobby.addPlayers(
+				readyPlayers.value =
+					mergeReadyPlayers(
+						readyPlayers.value,
 						receivedMessage
 							.lobby
-							.players,
+							.readyPlayers as Player[],
+					);
+				currentLobby.value =
+					lobby.syncLobby(
+						{
+							...receivedMessage.lobby,
+							readyPlayers:
+								readyPlayers.value,
+						},
 					);
 				return;
 			}
@@ -285,10 +348,19 @@ export function processLobbySocketMessage(
 					"player ready",
 				);
 				readyPlayers.value =
-					[
-						...readyPlayers.value,
-						receivedMessage.readyPlayer as Player,
-					];
+					mergeReadyPlayers(
+						readyPlayers.value,
+						[
+							receivedMessage.readyPlayer as Player,
+						],
+					);
+				if (
+					currentLobby.value
+				)
+					currentLobby.value =
+						currentLobby.value.upsertReadyPlayer(
+							receivedMessage.readyPlayer,
+						);
 				return;
 			}
 			case "player-disconnected": {

@@ -22,8 +22,10 @@ import {
 import {
 	Player,
 	ReadyPlayer,
+	canStartLobby,
 	registry,
 } from "./games-registry";
+import { websocketConnections } from "./websocket-connections";
 
 async function identity(
 	c: Context,
@@ -375,6 +377,26 @@ export const configureApi =
 						},
 						403,
 					);
+				if (
+					!canStartLobby(
+						lobby,
+					) ||
+					!lobby.players.every(
+						(
+							player,
+						) =>
+							websocketConnections.get(
+								player.id,
+							),
+					)
+				)
+					return c.json(
+						{
+							error:
+								"Both players must be connected and ready",
+						},
+						409,
+					);
 				const state =
 					GameState(
 						(
@@ -390,6 +412,46 @@ export const configureApi =
 						{
 							error:
 								"Invalid state",
+						},
+						400,
+					);
+				const players =
+					type(
+						{
+							players:
+								type(
+									{
+										id: "string",
+									},
+								).array(),
+						},
+					)(
+						state,
+					);
+				if (
+					players instanceof
+						type.errors ||
+					players
+						.players
+						.length !==
+						2 ||
+					!lobby.players.every(
+						(
+							member,
+						) =>
+							players.players.some(
+								(
+									player,
+								) =>
+									player.id ===
+									member.id,
+							),
+					)
+				)
+					return c.json(
+						{
+							error:
+								"Game state players do not match lobby",
 						},
 						400,
 					);
