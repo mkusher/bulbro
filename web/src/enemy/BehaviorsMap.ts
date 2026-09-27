@@ -2,6 +2,7 @@ import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviorsType } from "./EnemyCharacter";
 import { KeepkingDistanceBehaviors } from "./KeepingDistanceBehaviors";
 import { RageRunningBehaviors } from "./RageRunningBehaviors";
+import { StationaryBehavior } from "./StationaryBehavior";
 
 export function getBehaviors(
 	behavior?: typeof EnemyBehaviorsType.infer,
@@ -23,6 +24,12 @@ export function getBehaviors(
 		"keeping-distance"
 	) {
 		return new KeepkingDistanceBehaviors();
+	}
+	if (
+		behavior ===
+		"stationary"
+	) {
+		return new StationaryBehavior();
 	}
 	return new ChasingBehavior();
 }

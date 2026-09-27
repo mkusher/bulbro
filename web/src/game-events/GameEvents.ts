@@ -21,6 +21,7 @@ export type BulbroEvent =
 	| BulbroMovedEvent
 	| BulbroReceivedHitEvent
 	| BulbroInitializedForWaveEvent
+	| ConsumableCollectedEvent
 	| HealEvent
 	| MaterialCollectedEvent;
 export type EnemyEvent =
@@ -35,6 +36,7 @@ export type EnemyEvent =
 export type GameEventInternal =
 	| BulbroEvent
 	| EnemyEvent
+	| ConsumableMovedEvent
 	| MaterialMovedEvent
 	| MaterialSpawnedEvent
 	| MoveShotEvent
@@ -159,6 +161,8 @@ export type EnemyDiedEvent =
 			x: number;
 			y: number;
 		};
+		/** Set when the enemy dropped a consumable on death */
+		consumableId?: string;
 	};
 
 export type EnemyMovedEvent =
@@ -212,6 +216,20 @@ export type MaterialCollectedEvent =
 		materialId: string;
 		playerId: string;
 	};
+
+export type ConsumableCollectedEvent =
+	{
+		type: "consumableCollected";
+		consumableId: string;
+		playerId: string;
+		hp: number;
+	};
+
+export type ConsumableMovedEvent =
+	{
+		type: "consumableMoved";
+		consumableId: string;
+	} & MoveDescription;
 
 export type MaterialMovedEvent =
 	{

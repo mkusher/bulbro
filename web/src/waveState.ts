@@ -19,6 +19,8 @@ import {
 	EnemyState,
 } from "./enemy/EnemyState";
 import type {
+	ConsumableCollectedEvent,
+	ConsumableMovedEvent,
 	EnemyMovedEvent,
 	GameEvent,
 	MaterialCollectedEvent,
@@ -412,6 +414,10 @@ export function handleMaterialCollected(
 }
 
 const materialPickupSpeed = 600;
+/** Consumables are only attracted when a player (almost) touches them */
+export const CONSUMABLE_PICKUP_RANGE = 50;
+/** Pickups closer than this to the player center are collected */
+const PICKUP_COLLECTION_THRESHOLD = 3;
 
 // Issue 4: module-level constant — avoids allocating a new shape object every frame per material
 const MATERIAL_SHAPE =
@@ -420,6 +426,151 @@ const MATERIAL_SHAPE =
 		width: 16,
 		height: 16,
 	};
+
+type PickupStep =
+	| {
+			type: "collected";
+			playerId: string;
+	  }
+	| {
+			type: "moved";
+			to: Position;
+	  };
+
+/**
+ * Moves a pickup towards the closest alive player within the range,
+ * or collects it when it reaches the player.
+ */
+function stepPickup(
+	pickup: {
+		position: Position;
+	},
+	alivePlayers: BulbroState[],
+	pickupRange: (
+		player: BulbroState,
+	) => number,
+	mapSize: Size,
+	deltaTime: DeltaTime,
+):
+	| PickupStep
+	| undefined {
+	const player =
+		findClosest(
+			pickup,
+			alivePlayers,
+		);
+
+	if (
+		!player
+	)
+		return undefined;
+
+	// Issue 4: compute distance once and reuse for both the range check and movement
+	const distToPlayer =
+		distance(
+			player.position,
+			pickup.position,
+		);
+
+	if (
+		distToPlayer >
+		pickupRange(
+			player,
+		)
+	)
+		return undefined;
+
+	const mover =
+		new Movement(
+			{
+				position:
+					pickup.position,
+				shape:
+					MATERIAL_SHAPE,
+			},
+			mapSize,
+		);
+
+	const directionToPlayer =
+		direction(
+			pickup.position,
+			player.position,
+		);
+	const maxMovementDistance =
+		(materialPickupSpeed *
+			deltaTime) /
+		1000;
+
+	// Don't overshoot the player position
+	const actualMovementDistance =
+		Math.min(
+			maxMovementDistance,
+			distToPlayer,
+		);
+	const adjustedSpeed =
+		actualMovementDistance /
+		(deltaTime /
+			1000);
+
+	const newPosition =
+		mover.getPositionAfterMove(
+			directionToPlayer,
+			adjustedSpeed,
+			deltaTime,
+		);
+
+	if (
+		newPosition.x ===
+			pickup
+				.position
+				.x &&
+		newPosition.y ===
+			pickup
+				.position
+				.y
+	)
+		return undefined;
+
+	// Check if pickup is very close to player center (within collection threshold)
+	const distanceAfterMove =
+		distance(
+			newPosition,
+			player.position,
+		);
+	if (
+		distanceAfterMove <=
+		PICKUP_COLLECTION_THRESHOLD
+	) {
+		return {
+			type: "collected",
+			playerId:
+				player.id,
+		};
+	}
+	return {
+		type: "moved",
+		to: newPosition,
+	};
+}
+
+function getAlivePlayers(
+	state: WaveState,
+) {
+	return state.players.filter(
+		(
+			p,
+		) =>
+			p.isAlive(),
+	);
+}
+
+const materialPickupRange =
+	(
+		player: BulbroState,
+	) =>
+		player
+			.stats
+			.pickupRange;
 
 export function generateMaterialMovementEvents(
 	state: WaveState,
@@ -436,11 +587,8 @@ export function generateMaterialMovementEvents(
 
 	// Issue 4: hoist alive-players filter outside the material loop
 	const alivePlayers =
-		state.players.filter(
-			(
-				p,
-			) =>
-				p.isAlive(),
+		getAlivePlayers(
+			state,
 		);
 
 	for (const object of state.objects) {
@@ -450,123 +598,204 @@ export function generateMaterialMovementEvents(
 		)
 			continue;
 
-		const player =
-			findClosest(
+		const step =
+			stepPickup(
 				object,
 				alivePlayers,
+				materialPickupRange,
+				state.mapSize,
+				deltaTime,
 			);
-
 		if (
-			!player
-		)
-			continue;
-
-		// Issue 4: compute distance once and reuse for both the range check and movement
-		const distToPlayer =
-			distance(
-				player.position,
-				object.position,
-			);
-
-		if (
-			distToPlayer <=
-			player
-				.stats
-				.pickupRange
+			step?.type ===
+			"collected"
 		) {
-			const mover =
-				new Movement(
-					{
-						position:
+			events.push(
+				{
+					type: "materialCollected",
+					materialId:
+						object.id,
+					playerId:
+						step.playerId,
+				},
+			);
+		} else if (
+			step?.type ===
+			"moved"
+		) {
+			events.push(
+				{
+					type: "materialMoved",
+					materialId:
+						object.id,
+					from: object.position,
+					to: step.to,
+					direction:
+						direction(
 							object.position,
-						shape:
-							MATERIAL_SHAPE,
-					},
-					state.mapSize,
-				);
-
-			const directionToPlayer =
-				direction(
-					object.position,
-					player.position,
-				);
-			const maxMovementDistance =
-				(materialPickupSpeed *
-					deltaTime) /
-				1000;
-
-			// Don't overshoot the player position
-			const actualMovementDistance =
-				Math.min(
-					maxMovementDistance,
-					distToPlayer,
-				);
-			const adjustedSpeed =
-				actualMovementDistance /
-				(deltaTime /
-					1000);
-
-			const newPosition =
-				mover.getPositionAfterMove(
-					directionToPlayer,
-					adjustedSpeed,
-					deltaTime,
-				);
-
-			if (
-				newPosition.x !==
-					object
-						.position
-						.x ||
-				newPosition.y !==
-					object
-						.position
-						.y
-			) {
-				// Check if material is very close to player center (within collection threshold)
-				const distanceAfterMove =
-					distance(
-						newPosition,
-						player.position,
-					);
-				const collectionThreshold = 3; // Nearly touching player center
-
-				if (
-					distanceAfterMove <=
-					collectionThreshold
-				) {
-					// Generate material collected event instead of movement
-					events.push(
-						{
-							type: "materialCollected",
-							materialId:
-								object.id,
-							playerId:
-								player.id,
-						},
-					);
-				} else {
-					// Generate movement event if position changed and no collision
-					events.push(
-						{
-							type: "materialMoved",
-							materialId:
-								object.id,
-							from: object.position,
-							to: newPosition,
-							direction:
-								direction(
-									object.position,
-									newPosition,
-								),
-						},
-					);
-				}
-			}
+							step.to,
+						),
+				},
+			);
 		}
 	}
 
 	return events;
+}
+
+const consumablePickupRange =
+	() =>
+		CONSUMABLE_PICKUP_RANGE;
+
+export function generateConsumableMovementEvents(
+	state: WaveState,
+	deltaTime: DeltaTime,
+): (
+	| ConsumableMovedEvent
+	| ConsumableCollectedEvent
+)[] {
+	const events: (
+		| ConsumableMovedEvent
+		| ConsumableCollectedEvent
+	)[] =
+		[];
+
+	const alivePlayers =
+		getAlivePlayers(
+			state,
+		);
+
+	for (const object of state.objects) {
+		if (
+			object.type !==
+			"consumable"
+		)
+			continue;
+
+		const step =
+			stepPickup(
+				object,
+				alivePlayers,
+				consumablePickupRange,
+				state.mapSize,
+				deltaTime,
+			);
+		if (
+			step?.type ===
+			"collected"
+		) {
+			events.push(
+				{
+					type: "consumableCollected",
+					consumableId:
+						object.id,
+					playerId:
+						step.playerId,
+					hp: object.hp,
+				},
+			);
+		} else if (
+			step?.type ===
+			"moved"
+		) {
+			events.push(
+				{
+					type: "consumableMoved",
+					consumableId:
+						object.id,
+					from: object.position,
+					to: step.to,
+					direction:
+						direction(
+							object.position,
+							step.to,
+						),
+				},
+			);
+		}
+	}
+
+	return events;
+}
+
+export function handleConsumableMoved(
+	state: WaveState,
+	action: Extract<
+		GameEvent,
+		{
+			type: "consumableMoved";
+		}
+	>,
+): WaveState {
+	return {
+		...state,
+		objects:
+			state.objects.map(
+				(
+					object,
+				) =>
+					object.type ===
+						"consumable" &&
+					object.id ===
+						action.consumableId
+						? {
+								...object,
+								position:
+									action.to,
+							}
+						: object,
+			),
+	};
+}
+
+export function handleConsumableCollected(
+	state: WaveState,
+	action: Extract<
+		GameEvent,
+		{
+			type: "consumableCollected";
+		}
+	>,
+): WaveState {
+	const exists =
+		state.objects.some(
+			(
+				object,
+			) =>
+				object.type ===
+					"consumable" &&
+				object.id ===
+					action.consumableId,
+		);
+	// Already collected (e.g. by another player in the same tick)
+	if (
+		!exists
+	)
+		return state;
+	return {
+		...state,
+		objects:
+			state.objects.filter(
+				(
+					object,
+				) =>
+					!(
+						object.type ===
+							"consumable" &&
+						object.id ===
+							action.consumableId
+					),
+			),
+		players:
+			state.players.map(
+				(
+					player,
+				) =>
+					player.applyEvent(
+						action,
+					),
+			),
+	};
 }
 
 const enemiesBodiesDisappearAfter = 2000;
@@ -1106,6 +1335,18 @@ export function updateState(
 				action,
 			);
 		}
+		case "consumableMoved": {
+			return handleConsumableMoved(
+				state,
+				action,
+			);
+		}
+		case "consumableCollected": {
+			return handleConsumableCollected(
+				state,
+				action,
+			);
+		}
 		case "moveShot": {
 			// moveShot is now handled in TickProcess.#generateShotMovementEvents
 			// and collision events are generated directly (enemyReceivedHit, bulbroReceivedHit, etc.)
@@ -1169,6 +1410,31 @@ export function updateState(
 								) =>
 									e.toMaterial(),
 							),
+						...(action.consumableId &&
+						!state.objects.some(
+							(
+								o,
+							) =>
+								o.id ===
+								action.consumableId,
+						)
+							? state.enemies
+									.filter(
+										(
+											e,
+										) =>
+											e.id ===
+											action.enemyId,
+									)
+									.map(
+										(
+											e,
+										) =>
+											e.toConsumable(
+												action.consumableId!,
+											),
+									)
+							: []),
 					],
 			};
 		}

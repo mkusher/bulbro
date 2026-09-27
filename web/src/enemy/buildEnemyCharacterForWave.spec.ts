@@ -44,6 +44,7 @@ describe("buildEnemyCharacterForWave", () => {
 						},
 					weapons:
 						[],
+					consumableDropChance: 0.01,
 				};
 		},
 	);

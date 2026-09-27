@@ -1,6 +1,9 @@
 import { orcFist } from "@/weapons-definitions/orc-fist";
 import type { EnemyCharacter } from "../enemy";
-import { baseStats } from "./base";
+import {
+	baseConsumableDropChance,
+	baseStats,
+} from "./base";
 
 export const beetleWarrior: EnemyCharacter =
 	{
@@ -26,6 +29,8 @@ export const beetleWarrior: EnemyCharacter =
 			[
 				orcFist,
 			],
+		consumableDropChance:
+			baseConsumableDropChance,
 		behaviors:
 			"rage-running",
 	};

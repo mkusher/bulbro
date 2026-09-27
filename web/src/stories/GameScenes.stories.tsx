@@ -4,6 +4,7 @@ import { wellRoundedBulbro } from "../characters-definitions/well-rounded";
 import {
 	aphidEnemy,
 	beetleWarrior,
+	tree,
 } from "../enemies-definitions";
 import { babyEnemy } from "../enemies-definitions/baby";
 import { spawnEnemy } from "../enemy";
@@ -330,6 +331,111 @@ export const BulbroVsAphid =
 		...defaults,
 	};
 
+export const BulbroVsTree =
+	{
+		render:
+			(
+				args: any,
+			) => {
+				const bulbroPosition =
+					{
+						x: args.bulbroX,
+						y: args.bulbroY,
+					};
+				const enemyPosition =
+					{
+						x: args.enemyX,
+						y: args.enemyY,
+					};
+
+				const selectedBulbro =
+					bulbros.find(
+						(
+							b,
+						) =>
+							b.id ===
+							args.bulbroType,
+					) ||
+					wellRoundedBulbro;
+
+				const bulbro =
+					spawnBulbro(
+						"player-1",
+						"normal",
+						bulbroPosition,
+						0,
+						0,
+						{
+							...selectedBulbro,
+							weapons:
+								[
+									...selectedBulbro.defaultWeapons,
+								],
+						},
+					);
+
+				const enemy =
+					spawnEnemy(
+						"enemy-1",
+						enemyPosition,
+						tree,
+					);
+
+				const gameState: WaveState =
+					createGameState(
+						{
+							players:
+								[
+									bulbro,
+								],
+							enemies:
+								[
+									enemy,
+								],
+						},
+					);
+
+				return (
+					<div
+						style={{
+							height:
+								"100vh",
+							width:
+								"100%",
+						}}
+					>
+						<StorybookGameScene
+							initialState={
+								gameState
+							}
+							backgroundColor={
+								0x2a4d3a
+							}
+							debug={
+								args.debug
+							}
+							enableKeyboard={
+								args.enableKeyboard
+							}
+							showPlayerStats={
+								args.showPlayerStats
+							}
+							showGameStats={
+								args.showGameStats
+							}
+							showTouchControls={
+								args.showTouchControls
+							}
+							showCoordinateGrid={
+								args.showCoordinateGrid
+							}
+						/>
+					</div>
+				);
+			},
+		...defaults,
+	};
+
 export const BulbroVsBeetleWarrior =
 	{
 		render:
@@ -506,6 +612,14 @@ export const BulbroVsMultipleEnemies =
 								y: 400,
 							},
 							aphidEnemy,
+						),
+						spawnEnemy(
+							"tree-1",
+							{
+								x: 400,
+								y: 500,
+							},
+							tree,
 						),
 					];
 

@@ -98,25 +98,22 @@ it.each(
 			Infinity,
 		],
 	],
-)(
-	"segment (%s,%s) + (%s,%s) has contact %s",
-	(x, y, dx, dy, expected) => {
-		expect(
-			segmentAabbHitTime(
-				x,
-				y,
-				dx,
-				dy,
-				10,
-				10,
-				20,
-				20,
-			),
-		).toBe(
-			expected,
-		);
-	},
-);
+)("segment (%s,%s) + (%s,%s) has contact %s", (x, y, dx, dy, expected) => {
+	expect(
+		segmentAabbHitTime(
+			x,
+			y,
+			dx,
+			dy,
+			10,
+			10,
+			20,
+			20,
+		),
+	).toBe(
+		expected,
+	);
+});
 
 it("ellipseRadiusToward gives the inscribed ellipse radius in a direction", () => {
 	const size =

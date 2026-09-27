@@ -21,4 +21,7 @@ export const tree: EnemyCharacter =
 			},
 		weapons:
 			[],
+		consumableDropChance: 1,
+		behaviors:
+			"stationary",
 	};

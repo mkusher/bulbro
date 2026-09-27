@@ -1,6 +1,9 @@
 import { aphidGun } from "@/weapons-definitions/aphid-gun";
 import type { EnemyCharacter } from "../enemy";
-import { baseStats } from "./base";
+import {
+	baseConsumableDropChance,
+	baseStats,
+} from "./base";
 
 export const aphidEnemy: EnemyCharacter =
 	{
@@ -25,6 +28,8 @@ export const aphidEnemy: EnemyCharacter =
 			[
 				aphidGun,
 			],
+		consumableDropChance:
+			baseConsumableDropChance,
 		behaviors:
 			"keeping-distance",
 	};
