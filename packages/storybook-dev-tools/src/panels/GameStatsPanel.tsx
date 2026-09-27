@@ -488,7 +488,7 @@ function PlayerCard({
 										>
 											•{" "}
 											{
-												weapon.name
+												weapon.type
 											}
 										</div>
 									),
