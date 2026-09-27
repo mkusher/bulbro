@@ -6,8 +6,8 @@
 		"packages/*"
 	],
 	"scripts": {
-		"types": "tsc --project packages/network-protocol && tsc --project web && tsc --project server",
-		"format": "biome format --fix packages/network-protocol/src web/src server/src",
+		"types": "tsc --project packages/network-protocol && tsc --project packages/storybook-dev-tools && tsc --project web && tsc --project server",
+		"format": "biome format --fix packages/network-protocol/src packages/storybook-dev-tools/src web/src server/src",
 		"check": "biome check packages/network-protocol/src web/src server/src",
 		"build": "(cd web && bun run --bun build)",
 		"start:server": "(cd server && bun start)"

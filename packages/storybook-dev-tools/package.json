@@ -20,10 +20,15 @@
 		"dev-tools"
 	],
 	"peerDependencies": {
+		"storybook": "^10.6.0",
 		"preact": "^10.29.8",
 		"@preact/signals": "^2.11.2"
 	},
 	"devDependencies": {
+		"storybook": "^10.6.0",
 		"typescript": "^7.0.2"
+	},
+	"scripts": {
+		"types": "tsc"
 	}
 }

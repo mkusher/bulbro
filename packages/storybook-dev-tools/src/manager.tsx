@@ -5,7 +5,7 @@
 import {
 	addons,
 	types,
-} from "@storybook/manager-api";
+} from "storybook/manager-api";
 import { GameControlsPanel } from "./panels/GameControlsPanel";
 import { GameStatsPanel } from "./panels/GameStatsPanel";
 
@@ -30,7 +30,6 @@ addons.register(
 				type: types.PANEL,
 				render:
 					GameControlsPanel,
-				icon: "play",
 			},
 		);
 
@@ -43,7 +42,6 @@ addons.register(
 				type: types.PANEL,
 				render:
 					GameStatsPanel,
-				icon: "document",
 			},
 		);
 	},

@@ -24,8 +24,8 @@ their workspace (e.g. `web/`).
 ```bash
 bun install              # Install all dependencies
 bun run build            # Build web client (outputs to server/public)
-bun types                # Type-check with tsc (network protocol + web + server)
-bun format               # Format with Biome (web/src + server/src)
+bun types                # Type-check with tsc (all workspaces)
+bun format               # Format with Biome (all workspace source files)
 bun check                # Lint + format check with Biome
 bun start:server         # Start the server
 ```

@@ -25,7 +25,7 @@ Monitor comprehensive game state in real-time:
 
 ### 1. Add to Project
 
-The plugin is already configured in the monorepo at `packages/storybook-dev-tools`.
+The addon lives at `packages/storybook-dev-tools`. It is not enabled in the web Storybook configuration.
 
 ### 2. Register in Storybook Config
 
