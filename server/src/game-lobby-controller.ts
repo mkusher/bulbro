@@ -9,7 +9,7 @@ export async function joinLobby(
 	id: string,
 	player: Player,
 ) {
-	const lobby =
+	let lobby =
 		registry.addPlayer(
 			id,
 			player,
@@ -19,6 +19,19 @@ export async function joinLobby(
 		!lobby
 	) {
 		return;
+	}
+	// A player can already have an authenticated socket when joining another lobby.
+	if (
+		websocketConnections.get(
+			player.id,
+		)
+	) {
+		lobby =
+			registry.markConnected(
+				id,
+				player.id,
+			) ??
+			lobby;
 	}
 
 	await sendUpdatesToPlayers(
@@ -150,6 +163,18 @@ export async function markAsConnected(
 			!lobby
 		)
 			continue;
+		websocketConnections
+			.get(
+				playerId,
+			)
+			?.send(
+				JSON.stringify(
+					{
+						type: "lobby-snapshot",
+						lobby,
+					},
+				),
+			);
 		const player =
 			lobby.players.find(
 				(

@@ -50,6 +50,10 @@ export default {
 		"Rozłączony",
 	"setup.share":
 		"Udostępnij pokój",
+	"setup.yourStatus":
+		"Twój status",
+	"setup.otherPlayerStatus":
+		"Status drugiego gracza",
 
 	"setup.single.title":
 		"Rozpocznij grę jednoosobową",

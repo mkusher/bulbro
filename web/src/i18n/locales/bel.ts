@@ -50,6 +50,10 @@ export default {
 		"Адлучаны",
 	"setup.share":
 		"Падзяліцца лобі",
+	"setup.yourStatus":
+		"Ваш стан",
+	"setup.otherPlayerStatus":
+		"Стан іншага гульца",
 
 	"setup.single.title":
 		"Пачаць гульню адзінокага гульца",

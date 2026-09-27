@@ -263,15 +263,17 @@ export async function markAsReady(
 			.value
 			?.id ===
 		updated.id
-	)
+	) {
+		let lobby =
+			currentLobby.value;
+		for (const player of readyPlayers.value)
+			lobby =
+				lobby.upsertReadyPlayer(
+					player,
+				);
 		currentLobby.value =
-			currentLobby.value.syncLobby(
-				{
-					...updated,
-					readyPlayers:
-						readyPlayers.value,
-				},
-			);
+			lobby;
+	}
 }
 
 export function startGame() {
@@ -310,17 +312,22 @@ export function processLobbySocketMessage(
 				);
 				return;
 			}
+			case "lobby-snapshot":
 			case "player-joined": {
 				logger.info(
 					{
 						receivedMessage,
 					},
-					"player joined",
+					"lobby updated",
 				);
 				const lobby =
 					currentLobby.value;
 				if (
-					!lobby
+					!lobby ||
+					lobby.id !==
+						receivedMessage
+							.lobby
+							.id
 				)
 					return;
 				readyPlayers.value =

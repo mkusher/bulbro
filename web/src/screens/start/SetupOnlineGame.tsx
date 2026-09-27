@@ -1,9 +1,6 @@
 import { computed } from "@preact/signals";
 import { ShareIcon } from "lucide-react";
-import {
-	useEffect,
-	useState,
-} from "preact/hooks";
+import { useState } from "preact/hooks";
 import type { Bulbro } from "@/bulbro";
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -42,10 +39,7 @@ import {
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
-import {
-	audioEngine,
-	bgmEnabled,
-} from "@/audio";
+import { t } from "@/i18n";
 import { useStartBgm } from "@/audio/useStartBgm";
 import { Failed } from "../Failed";
 
@@ -70,7 +64,9 @@ function getShareUrl() {
 const shareMessage =
 	computed(
 		() => ({
-			text: `Join lobby`,
+			text: t(
+				"lobby.title",
+			),
 			url: getShareUrl(),
 		}),
 	);
@@ -241,6 +237,25 @@ export function SetupOnlineGame() {
 	const isHost =
 		iam.id ===
 		lobby.hostId;
+	const canStart =
+		lobby
+			.players
+			.length ===
+			2 &&
+		lobby.players.every(
+			(
+				player,
+			) =>
+				player.status ===
+					"connected" &&
+				readyPlayers.value.some(
+					(
+						ready,
+					) =>
+						ready.id ===
+						player.id,
+				),
+		);
 	return (
 		<SplashBanner>
 			<MainContainer
@@ -251,7 +266,9 @@ export function SetupOnlineGame() {
 					<Card>
 						<CardHeader>
 							<CardTitle>
-								Lobby
+								{t(
+									"lobby.title",
+								)}
 							</CardTitle>
 							<CardDescription>
 								<form
@@ -261,9 +278,9 @@ export function SetupOnlineGame() {
 									}
 								>
 									<label>
-										ID
-										for
-										joining:{" "}
+										{t(
+											"lobby.idForJoining",
+										)}{" "}
 										<input
 											type="text"
 											className="bg-gray-200 rounded-xs w-2xs can-select px-2 py-1"
@@ -279,6 +296,9 @@ export function SetupOnlineGame() {
 											size="icon"
 											className="size-8"
 											type="submit"
+											aria-label={t(
+												"setup.share",
+											)}
 											disabled={
 												!canShare
 											}
@@ -288,35 +308,65 @@ export function SetupOnlineGame() {
 									) : null}
 								</form>
 								<p>
-									Status:
-									Connected{" "}
+									{t(
+										"setup.yourStatus",
+									)}
+									:{" "}
+									{lobby.players.find(
+										(
+											p,
+										) =>
+											p.id ===
+											iam.id,
+									)
+										?.status ===
+									"connected"
+										? t(
+												"setup.connected",
+											)
+										: t(
+												"setup.disconnected",
+											)}{" "}
 									{isLocalReady
-										? "Ready"
-										: "Not ready"}
+										? t(
+												"setup.ready",
+											)
+										: t(
+												"setup.notReady",
+											)}
 								</p>
 								<p>
-									Another
-									player
-									status:{" "}
+									{t(
+										"setup.otherPlayerStatus",
+									)}
+									:{" "}
 									{anotherPlayer?.status ===
 									"connected"
-										? "Connected"
-										: "Disconnected"}{" "}
+										? t(
+												"setup.connected",
+											)
+										: t(
+												"setup.disconnected",
+											)}{" "}
 									{isAnotherPlayerReady
-										? "Ready"
-										: "Not ready"}
+										? t(
+												"setup.ready",
+											)
+										: t(
+												"setup.notReady",
+											)}
 								</p>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="grid gap-6">
 							<h2>
-								Hi,{" "}
-								{
-									currentUser
-										.value
-										.username
-								}
-								!
+								{t(
+									"greeting",
+									{
+										username:
+											iam.username,
+									},
+								)}
 							</h2>
 							<div className="flex flex-col xl:flex-row gap-3 flex-wrap">
 								{!isLocalReady ? (
@@ -351,7 +401,9 @@ export function SetupOnlineGame() {
 										/>
 										<div className="grid">
 											<Button type="submit">
-												Ready
+												{t(
+													"setup.ready",
+												)}
 											</Button>
 										</div>
 									</form>
@@ -378,7 +430,9 @@ export function SetupOnlineGame() {
 										anotherPlayerBulbro ? (
 											<>
 												<p>
-													Ready
+													{t(
+														"setup.ready",
+													)}
 												</p>
 												<BulbroCard
 													bulbro={
@@ -388,18 +442,16 @@ export function SetupOnlineGame() {
 											</>
 										) : (
 											<p>
-												Not
-												Ready
+												{t(
+													"setup.notReady",
+												)}
 											</p>
 										)
 									) : (
 										<h1>
-											Waiting
-											for
-											a
-											player
-											to
-											connect...
+											{t(
+												"setup.waitingForPlayer",
+											)}
 										</h1>
 									)}
 								</div>
@@ -429,26 +481,19 @@ export function SetupOnlineGame() {
 										onStart
 									}
 									disabled={
-										readyPlayers
-											.value
-											.length <
-											2 ||
-										anotherPlayer?.status !==
-											"connected" ||
+										!canStart ||
 										isStarting
 									}
 								>
-									Start
-									game
+									{t(
+										"setup.startGame",
+									)}
 								</Button>
 							) : (
 								<p>
-									Waiting
-									for
-									the
-									game
-									to
-									start...
+									{t(
+										"setup.waitingForStart",
+									)}
 								</p>
 							)}
 						</CardFooter>

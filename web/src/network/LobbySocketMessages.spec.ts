@@ -88,4 +88,46 @@ test("preserves ready players in a late joiner's lobby snapshot", () => {
 		).toBe(
 			"host",
 		);
+	const snapshot =
+		parseMessage(
+			JSON.stringify(
+				{
+					type: "lobby-snapshot",
+					lobby:
+						{
+							...lobby,
+							players:
+								lobby.players.map(
+									(
+										player,
+									) => ({
+										...player,
+										status:
+											"connected",
+									}),
+								),
+						},
+				},
+			),
+		);
+	expect(
+		snapshot.type,
+	).toBe(
+		"lobby-snapshot",
+	);
+	if (
+		snapshot.type ===
+		"lobby-snapshot"
+	)
+		expect(
+			snapshot.lobby.players.every(
+				(
+					player,
+				) =>
+					player.status ===
+					"connected",
+			),
+		).toBe(
+			true,
+		);
 });

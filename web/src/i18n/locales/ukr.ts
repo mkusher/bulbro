@@ -50,6 +50,10 @@ export default {
 		"Відключено",
 	"setup.share":
 		"Поділитися лобі",
+	"setup.yourStatus":
+		"Ваш стан",
+	"setup.otherPlayerStatus":
+		"Стан іншого гравця",
 
 	"setup.single.title":
 		"Почати гру одного гравця",

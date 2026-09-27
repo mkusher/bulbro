@@ -50,6 +50,10 @@ export default {
 		"Disconnected",
 	"setup.share":
 		"Share lobby",
+	"setup.yourStatus":
+		"Your status",
+	"setup.otherPlayerStatus":
+		"Other player's status",
 
 	"setup.single.title":
 		"Start single player run",
