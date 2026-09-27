@@ -31,11 +31,10 @@ Instead of yarn use bun
 Instead of pnpm use bun
 
 For tests use bun
-For typescript instead of tsc use tsgo
+For TypeScript type checking use `bun run types` (`tsc`)
 
 # Project structure
 
 Project consists of
 - web game with 2 entry points for web and telegrap mini app
 - server which is responsible for signaling for lobby and in-game. In-game signaling should be also implemented using webrtc for actual data messages and server then is only needed to establish and re-establish connections
-

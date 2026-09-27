@@ -12,32 +12,35 @@ describe("live game protocol", () => {
 			"game-state-updated-by-host",
 			"game-state-updated-by-guest",
 		] as const,
-	)("accepts %s event batches and preserves their payload", (messageType) => {
-		const message =
-			{
-				type: messageType,
-				gameId:
-					"game-1",
-				version: 1,
-				events:
-					[
-						{
-							type: "tick",
-							occurredAt: 12,
-							deltaTime: 16,
-						},
-					],
-				sentAt: 100,
-			};
+	)(
+		"accepts %s event batches and preserves their payload",
+		(messageType) => {
+			const message =
+				{
+					type: messageType,
+					gameId:
+						"game-1",
+					version: 1,
+					events:
+						[
+							{
+								type: "tick",
+								occurredAt: 12,
+								deltaTime: 16,
+							},
+						],
+					sentAt: 100,
+				};
 
-		expect(
-			WebsocketMessage(
+			expect(
+				WebsocketMessage(
+					message,
+				),
+			).toEqual(
 				message,
-			),
-		).toEqual(
-			message,
-		);
-	});
+			);
+		},
+	);
 
 	test("rejects the former state-object shape", () => {
 		const result =
