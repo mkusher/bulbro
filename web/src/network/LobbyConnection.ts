@@ -148,6 +148,52 @@ export class LobbyConnection
 			.players;
 	}
 
+	get readyPlayers() {
+		return this
+			.#lobby
+			.readyPlayers;
+	}
+
+	syncLobby(
+		lobby: Lobby,
+	) {
+		return new LobbyConnection(
+			this
+				.#logger,
+			this
+				.#userId,
+			lobby,
+			this
+				.#processMessage,
+			this
+				.#connection,
+			this
+				.#unsubscribe,
+		);
+	}
+
+	upsertReadyPlayer(
+		readyPlayer: Lobby["readyPlayers"][number],
+	) {
+		return this.syncLobby(
+			{
+				...this
+					.#lobby,
+				readyPlayers:
+					[
+						...this.#lobby.readyPlayers.filter(
+							(
+								player,
+							) =>
+								player.id !==
+								readyPlayer.id,
+						),
+						readyPlayer,
+					],
+			},
+		);
+	}
+
 	addPlayers(
 		players: PlayerAttendee[],
 	) {

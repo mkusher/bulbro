@@ -15,6 +15,7 @@ import type { Lobby } from "./LobbySocketMessages";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
+import { remotePlayerIdFor } from "./gameParticipants";
 
 export class NetworkGameConnection {
 	#logger: Logger;
@@ -45,15 +46,12 @@ export class NetworkGameConnection {
 		this.#lobby =
 			lobby;
 		this.#remotePlayerId =
-			this.#lobby.players.find(
-				(
-					p,
-				) =>
-					p.id !==
-					this
-						.#lobby
-						.hostId,
-			)!.id;
+			remotePlayerIdFor(
+				lobby,
+				currentUser
+					.value
+					.id,
+			);
 		this.#gameProcess =
 			gameProcess;
 		this.#inGameCommunicationChannel =

@@ -13,26 +13,33 @@ import {
 } from "@/waveState";
 import { apiUrl } from "./clientConfig";
 import {
+	currentNetworkGame,
 	readyPlayers,
 	startGame as startGameFromLobby,
 } from "./currentLobby";
 import { currentUser } from "./currentUser";
 import { authorizationHeaders } from "./currentUser";
+import { orderPlayersLocalFirst } from "./gameParticipants";
 
 export async function startNetworkGameAsHost(
 	selectedDifficulty: Difficulty,
+	onStarted?: () => void,
 ) {
+	const players =
+		orderPlayersLocalFirst(
+			readyPlayers.value,
+			currentUser
+				.value
+				.id,
+		);
 	const game =
 		startGameFromLobby();
 	if (
 		!game
-	) {
+	)
 		throw new Error(
 			"Game hasn't started",
 		);
-	}
-	const players =
-		readyPlayers.value;
 	const controls =
 		game.createControls();
 
@@ -47,6 +54,7 @@ export async function startNetworkGameAsHost(
 	}
 
 	markAsLoading();
+	let started = false;
 
 	try {
 		const {
@@ -63,6 +71,8 @@ export async function startNetworkGameAsHost(
 			game.id,
 			waveState.value,
 		);
+		started = true;
+		onStarted?.();
 		game.onStart(
 			{
 				waveInitPromise,
@@ -74,6 +84,21 @@ export async function startNetworkGameAsHost(
 			await wavePromise;
 		waveResult.value =
 			result;
+	} catch (error) {
+		if (
+			!started
+		) {
+			await gameProcess.waveProcess
+				?.stop(
+					"fail",
+				)
+				.catch(
+					() => {},
+				);
+			currentNetworkGame.value =
+				null;
+		}
+		throw error;
 	} finally {
 		isLoading.value = false;
 	}
@@ -104,7 +129,20 @@ export async function sendGameStartedRequest(
 			},
 		);
 
-	return res.ok;
+	if (
+		!res.ok
+	) {
+		const body =
+			await res
+				.json()
+				.catch(
+					() => ({}),
+				);
+		throw new Error(
+			body.error ??
+				`Game start failed (${res.status})`,
+		);
+	}
 }
 
 export async function startNetworkGameAsGuest(

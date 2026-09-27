@@ -314,11 +314,12 @@ function RemoteNetworkGame({
 		setError(
 			"",
 		);
-		setStage(
-			"game",
-		);
 		startNetworkGameAsHost(
 			0,
+			() =>
+				setStage(
+					"game",
+				),
 		).catch(
 			(
 				cause,
