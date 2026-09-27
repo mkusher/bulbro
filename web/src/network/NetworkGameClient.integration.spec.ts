@@ -9,14 +9,18 @@ import { type } from "arktype";
 import { BulbroState } from "@/bulbro/BulbroState";
 import { baseStats } from "@/characters-definitions/base";
 import type { PlayerControl } from "@/controls";
+import { babyEnemy } from "@/enemies-definitions/baby";
+import {
+	EnemyState,
+	spawnEnemy,
+} from "@/enemy/EnemyState";
+import { RageRunningBehaviors } from "@/enemy/RageRunningBehaviors";
 import type { WaveProcess } from "@/GameProcess";
 import { PlayerMovementEventGenerator } from "@/GameProcess/event-generators/PlayerMovementEventGenerator";
-import {
-	type GameEvent,
-	type GameEventQueue,
-	withEventMetaMultiple,
-} from "@/game-events/GameEvents";
+import { withEventMetaMultiple } from "@/game-events/GameEvents";
+import { InMemoryGameEventQueue } from "@/game-events/InMemoryGameEventQueue";
 import type { Logger } from "@/logger";
+import { ShotState } from "@/shot/ShotState";
 import {
 	deltaTime,
 	nowTime,
@@ -27,6 +31,7 @@ import {
 } from "@/waveState";
 import type { User } from "./currentUser";
 import { WebsocketMessage } from "./InGameCommunicationChannel";
+import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
@@ -130,8 +135,8 @@ function initialState(): WaveState {
 	};
 }
 
-// The production channel still serializes and validates every delivered packet.
-// Explicit delivery keeps the state-update ping-pong finite in each assertion.
+// The production channel serializes and validates every delivered packet.
+// Explicit delivery makes each simulated network exchange deterministic.
 class WireConnection {
 	readonly sent: string[] =
 		[];
@@ -170,19 +175,6 @@ class WireConnection {
 				data: packet,
 			} as MessageEvent<string>,
 		);
-	}
-
-	firstPacket() {
-		const packet =
-			this
-				.sent[0];
-		if (
-			!packet
-		)
-			throw new Error(
-				"No packet was sent",
-			);
-		return packet;
 	}
 
 	latest(
@@ -283,25 +275,8 @@ function makeClient(
 			isHost,
 			remoteId,
 		);
-	let pending: GameEvent[] =
-		[];
-	const queue: GameEventQueue =
-		{
-			addEvent(
-				event,
-			) {
-				pending.push(
-					event,
-				);
-			},
-			flush() {
-				const result =
-					pending;
-				pending =
-					[];
-				return result;
-			},
-		};
+	const queue =
+		new InMemoryGameEventQueue();
 	const process =
 		{
 			now: () =>
@@ -338,6 +313,15 @@ function makeClient(
 						nowTime(
 							1000,
 						),
+					).filter(
+						(
+							event,
+						) =>
+							isLocallyAuthoritativeEvent(
+								event,
+								isHost,
+								localId,
+							),
 					);
 				state.value =
 					events.reduce(
@@ -393,6 +377,8 @@ function makeClient(
 		connection,
 		sync,
 		remoteControl,
+		process,
+		queue,
 	};
 }
 
@@ -429,8 +415,9 @@ describe("network game client integration", () => {
 		host.sync.start();
 		guest.sync.start();
 
-		guest.connection.deliver(
-			host.connection.firstPacket(),
+		guest.process.tick();
+		await Bun.sleep(
+			60,
 		);
 		const guestUpdate =
 			guest.connection.latest(
@@ -444,7 +431,7 @@ describe("network game client integration", () => {
 		expect(
 			guestUpdate.version,
 		).toBe(
-			2,
+			1,
 		);
 		if (
 			guestUpdate.type !==
@@ -519,11 +506,9 @@ describe("network game client integration", () => {
 		host.sync.start();
 		guest.sync.start();
 
-		guest.connection.deliver(
-			host.connection.firstPacket(),
-		);
+		guest.process.tick();
 		await Bun.sleep(
-			5,
+			60,
 		);
 		host.connection.deliver(
 			JSON.stringify(
@@ -532,6 +517,10 @@ describe("network game client integration", () => {
 				),
 			),
 		);
+		host.process.tick();
+		await Bun.sleep(
+			60,
+		);
 		const hostUpdate =
 			host.connection.latest(
 				"game-state-updated-by-host",
@@ -539,7 +528,7 @@ describe("network game client integration", () => {
 		expect(
 			hostUpdate.version,
 		).toBe(
-			3,
+			1,
 		);
 		if (
 			hostUpdate.type !==
@@ -582,6 +571,345 @@ describe("network game client integration", () => {
 				.x,
 		).toBeGreaterThan(
 			100,
+		);
+	});
+
+	it("keeps both players aligned over repeated exchanges without extra receive ticks", async () => {
+		const host =
+			makeClient(
+				true,
+			);
+		const guest =
+			makeClient(
+				false,
+			);
+		activeClients.push(
+			host,
+			guest,
+		);
+		await host.remoteControl.start();
+		await guest.remoteControl.start();
+		host.sync.start();
+		guest.sync.start();
+
+		for (
+			let turn = 0;
+			turn <
+			3;
+			turn++
+		) {
+			guest.process.tick();
+			await Bun.sleep(
+				60,
+			);
+			const guestUpdate =
+				guest.connection.latest(
+					"game-state-updated-by-guest",
+				);
+			host.connection.deliver(
+				JSON.stringify(
+					guestUpdate,
+				),
+			);
+			host.process.tick();
+			await Bun.sleep(
+				60,
+			);
+			const hostUpdate =
+				host.connection.latest(
+					"game-state-updated-by-host",
+				);
+			guest.connection.deliver(
+				JSON.stringify(
+					hostUpdate,
+				),
+			);
+			expect(
+				host.state.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						guestId,
+				)
+					?.position,
+			).toEqual(
+				guest.state.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						guestId,
+				)
+					?.position,
+			);
+			expect(
+				guest.state.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						hostId,
+				)
+					?.position,
+			).toEqual(
+				host.state.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						hostId,
+				)
+					?.position,
+			);
+			const beforeDuplicate =
+				host
+					.state
+					.value;
+			host.connection.deliver(
+				JSON.stringify(
+					guestUpdate,
+				),
+			);
+			expect(
+				host
+					.state
+					.value,
+			).toBe(
+				beforeDuplicate,
+			);
+		}
+	});
+
+	it("accepts the first position packet after a state batch", async () => {
+		const host =
+			makeClient(
+				true,
+			);
+		const guest =
+			makeClient(
+				false,
+			);
+		activeClients.push(
+			host,
+			guest,
+		);
+		host.sync.start();
+		guest.sync.start();
+		host.process.tick();
+		await Bun.sleep(
+			60,
+		);
+		guest.connection.deliver(
+			JSON.stringify(
+				host.connection.latest(
+					"game-state-updated-by-host",
+				),
+			),
+		);
+		guest.connection.deliver(
+			JSON.stringify(
+				{
+					type: "game-state-position-updated",
+					gameId,
+					playerId:
+						hostId,
+					position:
+						{
+							x: 140,
+							y: 100,
+						},
+					direction:
+						{
+							x: 1,
+							y: 0,
+						},
+					version: 0,
+					sentAt: 1000,
+				},
+			),
+		);
+		expect(
+			guest.state.value.players.find(
+				(
+					p,
+				) =>
+					p.id ===
+					hostId,
+			)
+				?.position,
+		).toEqual(
+			{
+				x: 140,
+				y: 100,
+			},
+		);
+	});
+
+	it("hydrates host world events on the guest after JSON transport", async () => {
+		const host =
+			makeClient(
+				true,
+			);
+		const guest =
+			makeClient(
+				false,
+			);
+		activeClients.push(
+			host,
+			guest,
+		);
+		host.sync.start();
+		guest.sync.start();
+		const enemy =
+			spawnEnemy(
+				"enemy-1",
+				{
+					x: 400,
+					y: 400,
+				},
+				{
+					...babyEnemy,
+					behaviors:
+						"rage-running",
+				},
+			);
+		host.queue.addEvent(
+			{
+				type: "spawnEnemy",
+				enemy,
+				deltaTime:
+					deltaTime(
+						16,
+					),
+				occurredAt:
+					nowTime(
+						1000,
+					),
+			},
+		);
+		await Bun.sleep(
+			60,
+		);
+		guest.connection.deliver(
+			JSON.stringify(
+				host.connection.latest(
+					"game-state-updated-by-host",
+				),
+			),
+		);
+		const spawning =
+			guest.state.value.objects.find(
+				(
+					object,
+				) =>
+					object.type ===
+					"spawning-enemy",
+			);
+		expect(
+			spawning?.enemy,
+		).toBeInstanceOf(
+			EnemyState,
+		);
+		expect(
+			spawning
+				?.enemy
+				.behaviors,
+		).toBeInstanceOf(
+			RageRunningBehaviors,
+		);
+	});
+
+	it("hydrates a relayed projectile before the guest simulates another frame", async () => {
+		const host =
+			makeClient(
+				true,
+			);
+		const guest =
+			makeClient(
+				false,
+			);
+		activeClients.push(
+			host,
+			guest,
+		);
+		host.sync.start();
+		guest.sync.start();
+		const shot =
+			new ShotState(
+				{
+					id: "shot-1",
+					shooterId:
+						"enemy-1",
+					shooterType:
+						"enemy",
+					position:
+						{
+							x: 100,
+							y: 100,
+						},
+					startPosition:
+						{
+							x: 100,
+							y: 100,
+						},
+					direction:
+						{
+							x: 1,
+							y: 0,
+						},
+					damage: 1,
+					speed: 100,
+					range: 300,
+					knockback: 0,
+					weaponType:
+						"pistol",
+				},
+			);
+		host.queue.addEvent(
+			{
+				type: "shot",
+				shot,
+				weaponId:
+					"weapon-1",
+				deltaTime:
+					deltaTime(
+						16,
+					),
+				occurredAt:
+					nowTime(
+						1000,
+					),
+			},
+		);
+		await Bun.sleep(
+			60,
+		);
+		guest.connection.deliver(
+			JSON.stringify(
+				host.connection.latest(
+					"game-state-updated-by-host",
+				),
+			),
+		);
+		expect(
+			guest
+				.state
+				.value
+				.shots[0],
+		).toBeInstanceOf(
+			ShotState,
+		);
+		expect(
+			guest.state.value.shots[0]?.move(
+				{
+					x: 110,
+					y: 100,
+				},
+			)
+				.type,
+		).toBe(
+			"shotMoved",
 		);
 	});
 });

@@ -16,6 +16,7 @@ import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
 import { remotePlayerIdFor } from "./gameParticipants";
+import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
 
 export class NetworkGameConnection {
 	#logger: Logger;
@@ -54,6 +55,18 @@ export class NetworkGameConnection {
 			);
 		this.#gameProcess =
 			gameProcess;
+		this.#gameProcess.setEventFilter(
+			(
+				event,
+			) =>
+				isLocallyAuthoritativeEvent(
+					event,
+					isHost,
+					currentUser
+						.value
+						.id,
+				),
+		);
 		this.#inGameCommunicationChannel =
 			inGameCommunicationChannel;
 		this.#isHost =
@@ -96,7 +109,10 @@ export class NetworkGameConnection {
 
 		wavePromise.finally(
 			() => {
-				this.#stateSync.stop();
+				this.#stateSync?.stop();
+				this.#gameProcess.setEventFilter(
+					null,
+				);
 			},
 		);
 	}

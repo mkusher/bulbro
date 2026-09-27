@@ -53,6 +53,13 @@ export type WavePromises =
 	};
 
 export interface GameProcess {
+	setEventFilter(
+		filter:
+			| ((
+					event: GameEvent,
+			  ) => boolean)
+			| null,
+	): void;
 	start(
 		players: Player[],
 		playerControls: PlayerControl[],

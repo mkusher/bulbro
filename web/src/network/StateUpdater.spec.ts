@@ -27,6 +27,7 @@ import type {
 	WaveState,
 	WeaponState,
 } from "@/waveState";
+import { updateState } from "@/waveState";
 import type { User } from "./currentUser";
 import { StateUpdater } from "./StateUpdater";
 
@@ -500,6 +501,11 @@ describe("StateUpdater", () => {
 						],
 				};
 
+			currentState.value =
+				localEvents.reduce(
+					updateState,
+					currentState.value,
+				);
 			stateUpdater.processMessage(
 				secondRemoteMessage,
 				localEvents,

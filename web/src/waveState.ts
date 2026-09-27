@@ -17,6 +17,7 @@ import { ChasingBehavior } from "./enemy/ChasingBehavior";
 import {
 	DEATH_DURATION,
 	EnemyState,
+	type EnemyStateProps,
 } from "./enemy/EnemyState";
 import type {
 	ConsumableCollectedEvent,
@@ -52,7 +53,7 @@ import { Movement } from "./movement/Movement";
 import type { MapObject } from "./object";
 import { movePosition } from "./physics";
 import type { Player } from "./player";
-import type { ShotState } from "./shot/ShotState";
+import { ShotState } from "./shot/ShotState";
 import { hasSecondPassedAfter } from "./time";
 import { getWaveDuration } from "./waveDuration";
 import type { WeaponState } from "./weapon/WeaponState";
@@ -1654,7 +1655,11 @@ export function fromJSON(
 										EnemyState
 											? o.enemy
 											: new EnemyState(
-													o.enemy,
+													{
+														...(o.enemy as EnemyStateProps),
+														behaviors:
+															undefined,
+													},
 												),
 								}
 							: o,
@@ -1668,7 +1673,11 @@ export function fromJSON(
 						EnemyState
 							? e
 							: new EnemyState(
-									e,
+									{
+										...(e as EnemyStateProps),
+										behaviors:
+											undefined,
+									},
 								),
 				),
 			players:
@@ -1681,6 +1690,18 @@ export function fromJSON(
 							? p
 							: new BulbroState(
 									p,
+								),
+				),
+			shots:
+				state.shots.map(
+					(
+						shot,
+					) =>
+						shot instanceof
+						ShotState
+							? shot
+							: new ShotState(
+									shot,
 								),
 				),
 		};

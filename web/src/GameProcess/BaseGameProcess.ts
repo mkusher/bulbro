@@ -40,6 +40,23 @@ export class BaseGameProcess
 	#debug: boolean;
 	#playerControls: PlayerControl[] =
 		[];
+	#eventFilter:
+		| ((
+				event: GameEvent,
+		  ) => boolean)
+		| null =
+		null;
+
+	setEventFilter(
+		filter:
+			| ((
+					event: GameEvent,
+			  ) => boolean)
+			| null,
+	) {
+		this.#eventFilter =
+			filter;
+	}
 
 	constructor(
 		debug: boolean,
@@ -161,6 +178,8 @@ export class BaseGameProcess
 				.#debug,
 			this
 				.#createTickProcess,
+			this
+				.#eventFilter,
 		);
 	}
 
