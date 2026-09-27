@@ -17,6 +17,25 @@ const UserSchema =
 export type User =
 	typeof UserSchema.infer;
 
+export const sessionToken =
+	signal<
+		| string
+		| null
+	>(
+		null,
+	);
+export function authorizationHeaders() {
+	if (
+		!sessionToken.value
+	)
+		throw new Error(
+			"Sign in before joining a network game",
+		);
+	return {
+		Authorization: `Bearer ${sessionToken.value}`,
+	};
+}
+
 export async function createUser() {
 	const url =
 		new URL(
@@ -28,8 +47,6 @@ export async function createUser() {
 		...user
 	} =
 		currentUser.value;
-	currentUser.value =
-		user;
 	const res =
 		await fetch(
 			url,
@@ -43,6 +60,20 @@ export async function createUser() {
 		);
 	const body =
 		await res.json();
+	if (
+		!res.ok ||
+		typeof body.token !==
+			"string"
+	) {
+		currentUser.value =
+			{
+				...currentUser.value,
+				isGuest: true,
+			};
+		throw new Error(
+			"Sign in failed",
+		);
+	}
 
 	const newUser =
 		UserSchema(
@@ -63,6 +94,8 @@ export async function createUser() {
 
 	currentUser.value =
 		newUser;
+	sessionToken.value =
+		body.token;
 }
 
 const guest =

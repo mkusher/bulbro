@@ -115,9 +115,11 @@ test("relays event batches from host to guest and guest to host", () => {
 		};
 
 	controller.routeMessage(
+		hostId,
 		hostMessage,
 	);
 	controller.routeMessage(
+		guestId,
 		guestMessage,
 	);
 
@@ -134,5 +136,77 @@ test("relays event batches from host to guest and guest to host", () => {
 		[
 			guestMessage,
 		],
+	);
+});
+
+test("rejects unknown senders and forged roles", () => {
+	const received: object[] =
+		[];
+	websocketConnections.add(
+		guestId,
+		{
+			sendObject:
+				(
+					message: object,
+				) =>
+					received.push(
+						message,
+					),
+		} as unknown as WebsocketConnection,
+	);
+	const logger =
+		{
+			info: () => {},
+			error:
+				() => {},
+		} as unknown as Logger;
+	const controller =
+		new WebsocketGameController(
+			logger,
+		);
+	const update =
+		{
+			type: "game-state-updated-by-host",
+			gameId:
+				lobby.id,
+			version: 1,
+			events:
+				[],
+			sentAt: 100,
+		};
+	controller.routeMessage(
+		crypto.randomUUID(),
+		update,
+	);
+	controller.routeMessage(
+		guestId,
+		update,
+	);
+	controller.routeMessage(
+		hostId,
+		{
+			type: "game-state-position-updated",
+			gameId:
+				lobby.id,
+			playerId:
+				guestId,
+			position:
+				{
+					x: 0,
+					y: 0,
+				},
+			direction:
+				{
+					x: 0,
+					y: 0,
+				},
+			version: 1,
+			sentAt: 100,
+		},
+	);
+	expect(
+		received,
+	).toEqual(
+		[],
 	);
 });

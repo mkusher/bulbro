@@ -135,6 +135,52 @@ export async function markAsDisconnected(
 	}
 }
 
+export async function markAsConnected(
+	playerId: string,
+) {
+	for (const id of registry.findGamesForPlayer(
+		playerId,
+	)) {
+		const lobby =
+			registry.markConnected(
+				id,
+				playerId,
+			);
+		if (
+			!lobby
+		)
+			continue;
+		const player =
+			lobby.players.find(
+				(
+					p,
+				) =>
+					p.id ===
+					playerId,
+			);
+		await sendUpdatesToPlayers(
+			lobby.players
+				.filter(
+					(
+						p,
+					) =>
+						p.id !==
+						playerId,
+				)
+				.map(
+					(
+						p,
+					) =>
+						p.id,
+				),
+			{
+				type: "player-connected",
+				player,
+			},
+		);
+	}
+}
+
 async function sendUpdatesToPlayers(
 	players: string[],
 	message: object,

@@ -12,9 +12,15 @@ export class WebsocketGameController {
 		this.#logger =
 			logger;
 	}
-	routeMessage(wsMessage: {
-		type: string;
-	}) {
+	routeMessage(
+		userId: string,
+		wsMessage: {
+			type: string;
+			[
+				key: string
+			]: unknown;
+		},
+	) {
 		const message =
 			WebsocketMessage(
 				wsMessage,
@@ -47,6 +53,37 @@ export class WebsocketGameController {
 					);
 					return;
 				}
+				if (
+					!game.players.some(
+						(
+							p,
+						) =>
+							p.id ===
+							userId,
+					)
+				)
+					return;
+				if (
+					message.type ===
+						"game-state-updated-by-host" &&
+					userId !==
+						game.hostId
+				)
+					return;
+				if (
+					message.type ===
+						"game-state-updated-by-guest" &&
+					userId ===
+						game.hostId
+				)
+					return;
+				if (
+					message.type ===
+						"game-state-position-updated" &&
+					message.playerId !==
+						userId
+				)
+					return;
 				this.#logger.info(
 					{
 						messageType:
@@ -56,29 +93,13 @@ export class WebsocketGameController {
 					},
 					"Received a message",
 				);
-				const playerId =
-					message.type ===
-					"game-state-updated-by-host"
-						? game.hostId
-						: message.type ===
-								"game-state-updated-by-guest"
-							? game.players.find(
-									(
-										p,
-									) =>
-										p.id !==
-										game.hostId,
-								)!
-									.id
-							: message.playerId;
-
 				const players =
 					game.players.filter(
 						(
 							p,
 						) =>
 							p.id !==
-							playerId,
+							userId,
 					);
 
 				for (const player of players) {

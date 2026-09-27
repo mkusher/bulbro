@@ -1,6 +1,7 @@
 import type { GameProcess } from "@/GameProcess";
 import type { Logger } from "@/logger";
 import { wsUrl } from "./clientConfig";
+import { sessionToken } from "./currentUser";
 import { isLocalPlayerHost } from "./currentLobby";
 import {
 	type Lobby,
@@ -75,21 +76,22 @@ export class LobbyConnection
 				(
 					e,
 				) => {
-					const message =
-						parseMessage(
-							e.data,
+					try {
+						this.#processMessage(
+							parseMessage(
+								e.data,
+							),
 						);
-					return this.#processMessage(
-						message,
-					);
+					} catch {
+						// Game messages are handled by the game channel.
+					}
 				},
 			);
 
 		this.#connection.sendObject(
 			{
-				userId:
-					this
-						.#userId,
+				token:
+					sessionToken.value,
 				type: "auth",
 			},
 		);
@@ -101,7 +103,6 @@ export class LobbyConnection
 	createGame(
 		gameProcess: GameProcess,
 	) {
-		this.#unsubscribe();
 		return new NetworkGameConnection(
 			this
 				.#logger,
@@ -116,6 +117,11 @@ export class LobbyConnection
 			gameProcess,
 			isLocalPlayerHost.value,
 		);
+	}
+
+	close() {
+		this.#unsubscribe();
+		this.#connection?.close();
 	}
 
 	get id() {
@@ -158,14 +164,15 @@ export class LobbyConnection
 	}
 	addPlayer(
 		player: PlayerAttendee,
-	) {
+	): LobbyConnection {
 		if (
 			this.hasPlayer(
 				player,
 			)
-		) {
-			return this;
-		}
+		)
+			return this.updatePlayer(
+				player,
+			);
 		return new LobbyConnection(
 			this
 				.#logger,
@@ -181,6 +188,44 @@ export class LobbyConnection
 							.players,
 						player,
 					],
+			},
+			this
+				.#processMessage,
+			this
+				.#connection,
+			this
+				.#unsubscribe,
+		);
+	}
+	updatePlayer(
+		player: PlayerAttendee,
+	): LobbyConnection {
+		if (
+			!this.hasPlayer(
+				player,
+			)
+		)
+			return this.addPlayer(
+				player,
+			);
+		return new LobbyConnection(
+			this
+				.#logger,
+			this
+				.#userId,
+			{
+				...this
+					.#lobby,
+				players:
+					this.players.map(
+						(
+							p,
+						) =>
+							p.id ===
+							player.id
+								? player
+								: p,
+					),
 			},
 			this
 				.#processMessage,

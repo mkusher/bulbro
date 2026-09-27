@@ -37,11 +37,11 @@ export function OnlineGameTab() {
 				</CardDescription>
 			</CardHeader>
 			<form
-				onSubmit={(
+				onSubmit={async (
 					e,
 				) => {
 					e.preventDefault();
-					createUser();
+					await createUser();
 					router.toFindLobby();
 				}}
 			>

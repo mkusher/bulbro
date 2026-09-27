@@ -4,6 +4,11 @@ import {
 } from "preact/hooks";
 import { TouchscreenJoystick } from "@/controls/TouchscreenJoystick";
 import {
+	currentLobby,
+	currentNetworkGame,
+} from "@/network/currentLobby";
+import { currentUser } from "@/network/currentUser";
+import {
 	currentGameCanvas,
 	isLoading as isLoadingSignal,
 	isRound as isRoundSignal,
@@ -25,6 +30,17 @@ export function InGame() {
 		isRoundSignal.value;
 	const isLoading =
 		isLoadingSignal.value;
+	const remotePlayer =
+		currentNetworkGame.value &&
+		currentLobby.value?.players.find(
+			(
+				p,
+			) =>
+				p.id !==
+				currentUser
+					.value
+					.id,
+		);
 
 	if (
 		isLoading
@@ -80,6 +96,18 @@ export function InGame() {
 		<MainContainer
 			noPadding
 		>
+			{remotePlayer && (
+				<p className="absolute top-2 left-2 z-10 rounded bg-black/70 px-3 py-1 text-white">
+					{
+						remotePlayer.username
+					}
+					:{" "}
+					{remotePlayer.status ===
+					"connected"
+						? "Connected"
+						: "Disconnected"}
+				</p>
+			)}
 			<TouchscreenJoystick />
 			<ShowRound
 				canvas={
