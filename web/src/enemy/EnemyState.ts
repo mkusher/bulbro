@@ -18,6 +18,11 @@ import type {
 	Direction,
 	Position,
 } from "../geometry";
+import {
+	CONSUMABLE_HEAL_AMOUNT,
+	type Consumable,
+	consumableIdFor,
+} from "../object/ConsumableState";
 import type {
 	WaveState,
 	WeaponState,
@@ -82,6 +87,8 @@ export type EnemyStateProps =
 		readonly behaviors?: EnemyBehaviors;
 		readonly ragingStartedAt?: number;
 		readonly ragingDirection?: Direction;
+		/** Chance (0..1) to drop a consumable on death */
+		readonly consumableDropChance?: number;
 	};
 
 export class EnemyState
@@ -154,6 +161,14 @@ export class EnemyState
 		return this
 			.#props
 			.behaviors!;
+	}
+	get consumableDropChance() {
+		return (
+			this
+				.#props
+				.consumableDropChance ??
+			0
+		);
 	}
 	get ragingStartedAt() {
 		return this
@@ -253,6 +268,7 @@ export class EnemyState
 		},
 		now: NowTime,
 		knockback?: KnockbackDescription,
+		random: () => number = Math.random,
 	):
 		| EnemyReceivedHitEvent
 		| EnemyDiedEvent {
@@ -269,8 +285,21 @@ export class EnemyState
 			0
 		) {
 			// Enemy dies
+			const dropsConsumable =
+				random() <
+				this
+					.consumableDropChance;
 			return {
 				type: "enemyDied",
+				...(dropsConsumable
+					? {
+							consumableId:
+								consumableIdFor(
+									this
+										.id,
+								),
+						}
+					: {}),
 				enemyId:
 					this
 						.id,
@@ -480,6 +509,19 @@ export class EnemyState
 		);
 	}
 
+	toConsumable(
+		consumableId: string,
+	): Consumable {
+		return {
+			type: "consumable",
+			id: consumableId,
+			position:
+				this
+					.position,
+			hp: CONSUMABLE_HEAL_AMOUNT,
+		};
+	}
+
 	toMaterial() {
 		return {
 			type: "material",
@@ -565,6 +607,8 @@ export function spawnEnemy(
 				getBehaviors(
 					character.behaviors,
 				),
+			consumableDropChance:
+				character.consumableDropChance,
 		},
 	);
 }

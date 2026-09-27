@@ -1,4 +1,5 @@
 export type { EventGenerator } from "./EventGenerator";
+export { ConsumablesMovementEventsGenerator } from "./ConsumablesMovementEventsGenerator";
 export { EnemyBehaviorEventGenerator } from "./EnemyBehaviorEventGenerator";
 export { EnemySpawnEventsGenerator } from "./EnemySpawnEventsGenerator";
 export { MeleeStrikeEventGenerator } from "./MeleeStrikeEventGenerator";

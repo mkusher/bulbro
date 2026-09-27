@@ -36,7 +36,9 @@ import {
 } from "./time";
 import { uuid } from "./uuid";
 import {
+	CONSUMABLE_PICKUP_RANGE,
 	createInitialState,
+	generateConsumableMovementEvents,
 	generateMaterialMovementEvents,
 	handleBulbroAttacked,
 	handleBulbroHealed,
@@ -134,10 +136,12 @@ function createTestEnemy(
 	id: string,
 	x = 400,
 	y = 400,
+	consumableDropChance = 0,
 ): EnemyState {
 	return new EnemyState(
 		{
 			id,
+			consumableDropChance,
 			type: "potatoBeetleBaby",
 			position:
 				{
@@ -1727,6 +1731,365 @@ describe("waveState", () => {
 				collectEvent.playerId,
 			).toBe(
 				"player1",
+			);
+		});
+	});
+
+	describe("consumables", () => {
+		const consumableAt =
+			(
+				x: number,
+				y: number,
+			) => ({
+				type: "consumable" as const,
+				id: "consumable1",
+				position:
+					{
+						x,
+						y,
+					},
+				hp: 3,
+			});
+		const collect =
+			(
+				playerId: string,
+			): GameEvent => ({
+				type: "consumableCollected",
+				consumableId:
+					"consumable1",
+				playerId,
+				hp: 3,
+				deltaTime:
+					deltaTime(
+						16,
+					),
+				occurredAt:
+					nowTime(
+						Date.now(),
+					),
+			});
+		it("should drop a consumable when the drop roll succeeds", () => {
+			const enemy =
+				createTestEnemy(
+					"enemy1",
+					400,
+					400,
+					0.5,
+				);
+			const event =
+				enemy.beHit(
+					{
+						damage: 1000,
+					},
+					nowTime(
+						0,
+					),
+					undefined,
+					() =>
+						0.4,
+				);
+			expect(
+				event.type,
+			).toBe(
+				"enemyDied",
+			);
+			expect(
+				event.type ===
+					"enemyDied" &&
+					event.consumableId,
+			).toBe(
+				"enemy1-consumable",
+			);
+		});
+
+		it("should not drop a consumable when the drop roll fails", () => {
+			const enemy =
+				createTestEnemy(
+					"enemy1",
+					400,
+					400,
+					0.5,
+				);
+			const event =
+				enemy.beHit(
+					{
+						damage: 1000,
+					},
+					nowTime(
+						0,
+					),
+					undefined,
+					() =>
+						0.6,
+				);
+			expect(
+				event.type,
+			).toBe(
+				"enemyDied",
+			);
+			expect(
+				event.type ===
+					"enemyDied"
+					? event.consumableId
+					: "none",
+			).toBeUndefined();
+		});
+
+		it("should add a consumable at the enemy position when enemyDied carries one", () => {
+			const newState =
+				updateState(
+					state,
+					{
+						type: "enemyDied",
+						enemyId:
+							"enemy1",
+						damage: 1000,
+						position:
+							{
+								x: 400,
+								y: 400,
+							},
+						consumableId:
+							"enemy1-consumable",
+						deltaTime:
+							deltaTime(
+								16,
+							),
+						occurredAt:
+							nowTime(
+								Date.now(),
+							),
+					},
+				);
+			const consumables =
+				newState.objects.filter(
+					(
+						o,
+					) =>
+						o.type ===
+						"consumable",
+				);
+			expect(
+				consumables,
+			).toEqual(
+				[
+					{
+						type: "consumable",
+						id: "enemy1-consumable",
+						position:
+							{
+								x: 400,
+								y: 400,
+							},
+						hp: 3,
+					},
+				],
+			);
+		});
+
+		it("should not attract consumables outside touch range", () => {
+			state.objects =
+				[
+					consumableAt(
+						100 +
+							CONSUMABLE_PICKUP_RANGE +
+							5,
+						100,
+					),
+				];
+			expect(
+				generateConsumableMovementEvents(
+					state,
+					deltaTime(
+						16,
+					),
+				),
+			).toEqual(
+				[],
+			);
+		});
+
+		it("should attract consumables within touch range", () => {
+			state.objects =
+				[
+					consumableAt(
+						100 +
+							CONSUMABLE_PICKUP_RANGE -
+							5,
+						100,
+					),
+				];
+			const events =
+				generateConsumableMovementEvents(
+					state,
+					deltaTime(
+						16,
+					),
+				);
+			expect(
+				events.length,
+			).toBe(
+				1,
+			);
+			const event =
+				events[0]!;
+			expect(
+				event.type,
+			).toBe(
+				"consumableMoved",
+			);
+			if (
+				event.type ===
+				"consumableMoved"
+			) {
+				expect(
+					event
+						.to
+						.x,
+				).toBeLessThan(
+					event
+						.from
+						.x,
+				);
+			}
+		});
+
+		it("should collect consumables touching a player", () => {
+			state.objects =
+				[
+					consumableAt(
+						100.5,
+						100,
+					),
+				];
+			const events =
+				generateConsumableMovementEvents(
+					state,
+					deltaTime(
+						16,
+					),
+				);
+			expect(
+				events.length,
+			).toBe(
+				1,
+			);
+			expect(
+				events[0],
+			).toMatchObject(
+				{
+					type: "consumableCollected",
+					consumableId:
+						"consumable1",
+					playerId:
+						"player1",
+					hp: 3,
+				},
+			);
+		});
+
+		it("should heal only the collecting player by 3 HP", () => {
+			state.objects =
+				[
+					consumableAt(
+						100,
+						100,
+					),
+				];
+			const newState =
+				updateState(
+					state,
+					collect(
+						"player1",
+					),
+				);
+			expect(
+				newState.objects,
+			).toEqual(
+				[],
+			);
+			expect(
+				newState
+					.players[0]!
+					.healthPoints,
+			).toBe(
+				83,
+			);
+			expect(
+				newState
+					.players[1]!
+					.healthPoints,
+			).toBe(
+				80,
+			);
+		});
+
+		it("should not heal above max HP", () => {
+			state.players[0] =
+				new BulbroState(
+					{
+						...player1.toJSON(),
+						healthPoints: 99,
+					},
+				);
+			state.objects =
+				[
+					consumableAt(
+						100,
+						100,
+					),
+				];
+			const newState =
+				updateState(
+					state,
+					collect(
+						"player1",
+					),
+				);
+			expect(
+				newState
+					.players[0]!
+					.healthPoints,
+			).toBe(
+				100,
+			);
+		});
+
+		it("should ignore a collection of an already collected consumable", () => {
+			state.objects =
+				[
+					consumableAt(
+						100,
+						100,
+					),
+				];
+			const once =
+				updateState(
+					state,
+					collect(
+						"player1",
+					),
+				);
+			const twice =
+				updateState(
+					once,
+					collect(
+						"player2",
+					),
+				);
+			expect(
+				twice
+					.players[0]!
+					.healthPoints,
+			).toBe(
+				83,
+			);
+			expect(
+				twice
+					.players[1]!
+					.healthPoints,
+			).toBe(
+				80,
 			);
 		});
 	});

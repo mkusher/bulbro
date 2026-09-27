@@ -19,7 +19,11 @@ import {
 	type EnemySprite,
 } from "../enemy/Sprite";
 import { classicMapSize } from "../game-canvas";
-import type { Material } from "../object";
+import type {
+	Consumable,
+	Material,
+} from "../object";
+import { ConsumableSprite } from "../object/ConsumableSprite";
 import { MaterialSprite } from "../object/MaterialSprite";
 import { SpawningEnemySprite } from "../object/SpawningEnemySprite";
 import type { SpawningEnemy } from "../object/SpawningEnemyState";
@@ -75,6 +79,11 @@ export abstract class BaseScene<
 	#materialSprites: Map<
 		string,
 		MaterialSprite
+	> =
+		new Map();
+	#consumableSprites: Map<
+		string,
+		ConsumableSprite
 	> =
 		new Map();
 	#spawningSprites: Map<
@@ -493,6 +502,8 @@ export abstract class BaseScene<
 		// Issue 6: single pass over objects instead of two separate filter calls
 		const materials: Material[] =
 			[];
+		const consumables: Consumable[] =
+			[];
 		const spawnings: SpawningEnemy[] =
 			[];
 		for (const object of state.objects) {
@@ -501,6 +512,13 @@ export abstract class BaseScene<
 				"material"
 			)
 				materials.push(
+					object,
+				);
+			else if (
+				object.type ===
+				"consumable"
+			)
+				consumables.push(
 					object,
 				);
 			else if (
@@ -514,6 +532,10 @@ export abstract class BaseScene<
 		this.#updateMaterials(
 			deltaTime,
 			materials,
+		);
+		this.#updateConsumables(
+			deltaTime,
+			consumables,
 		);
 		this.#updateSpawnings(
 			deltaTime,
@@ -653,6 +675,75 @@ export abstract class BaseScene<
 				)!;
 			sprite.update(
 				material,
+				deltaTime,
+			);
+		}
+	}
+
+	#updateConsumables(
+		deltaTime: DeltaTime,
+		consumables: Consumable[],
+	) {
+		// Issue 5: build ID set once for O(1) stale-sprite lookup
+		const consumableIds =
+			new Set(
+				consumables.map(
+					(
+						m,
+					) =>
+						m.id,
+				),
+			);
+
+		// Remove stale sprites
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#consumableSprites) {
+			if (
+				!consumableIds.has(
+					id,
+				)
+			) {
+				sprite.remove();
+				this.#consumableSprites.delete(
+					id,
+				);
+			}
+		}
+
+		// Create/update sprites
+		for (const consumable of consumables) {
+			if (
+				!this.#consumableSprites.has(
+					consumable.id,
+				)
+			) {
+				const sprite =
+					new ConsumableSprite(
+						this
+							.#debug,
+					);
+				sprite.init(
+					consumable,
+					this
+						.playingFieldTile
+						.container,
+					this
+						.#playingFieldLayer,
+				);
+				this.#consumableSprites.set(
+					consumable.id,
+					sprite,
+				);
+			}
+			const sprite =
+				this.#consumableSprites.get(
+					consumable.id,
+				)!;
+			sprite.update(
+				consumable,
 				deltaTime,
 			);
 		}
