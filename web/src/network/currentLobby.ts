@@ -145,7 +145,7 @@ export async function joinLobby(
 ) {
 	const url =
 		new URL(
-			`game-lobby/${id}/join-requests`,
+			`game-lobby/${encodeURIComponent(id)}/join-requests`,
 			apiUrl,
 		);
 	const iam =

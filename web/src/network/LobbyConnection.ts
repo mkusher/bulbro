@@ -1,5 +1,6 @@
 import type { GameProcess } from "@/GameProcess";
 import type { Logger } from "@/logger";
+import { signal } from "@preact/signals";
 import { wsUrl } from "./clientConfig";
 import { sessionToken } from "./currentUser";
 import { isLocalPlayerHost } from "./currentLobby";
@@ -12,6 +13,14 @@ import {
 import { NetworkGameConnection } from "./NetworkGameConnection";
 import { WebsocketConnection } from "./websocket/WebsocketConnection";
 import { WebsocketInGameCommunicationChannel } from "./websocket/WebsocketInGameCommunicationChannel";
+
+export const lobbyConnectionError =
+	signal<
+		| string
+		| null
+	>(
+		null,
+	);
 
 export class LobbyConnection
 	implements
@@ -61,6 +70,8 @@ export class LobbyConnection
 	}
 
 	async #startLobbyWebsocket() {
+		lobbyConnectionError.value =
+			null;
 		this.#connection =
 			new WebsocketConnection(
 				wsUrl,
@@ -70,6 +81,19 @@ export class LobbyConnection
 							"websocket-connection",
 					},
 				),
+			);
+		void this.#connection
+			.connect()
+			.catch(
+				(
+					cause,
+				) => {
+					lobbyConnectionError.value =
+						cause instanceof
+						Error
+							? cause.message
+							: "Could not connect to game server";
+				},
 			);
 		this.#unsubscribe =
 			this.#connection.onMessage(

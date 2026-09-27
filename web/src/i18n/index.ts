@@ -28,18 +28,6 @@ export const locale =
 				.locale,
 	);
 
-effect(
-	() => {
-		if (
-			locale.value
-		) {
-			loadLocale(
-				locale.value,
-			);
-		}
-	},
-);
-
 export const allLocales =
 	[
 		...staticLocales,
@@ -60,6 +48,29 @@ const cache =
 		string,
 		IntlMessageFormat
 	>();
+
+effect(
+	() => {
+		if (
+			locale.value
+		) {
+			void loadLocale(
+				locale.value,
+			).catch(
+				(
+					error,
+				) => {
+					logger.error(
+						{
+							error,
+						},
+						"Could not load locale",
+					);
+				},
+			);
+		}
+	},
+);
 
 function getFormatter(
 	key: string,

@@ -7,6 +7,7 @@ import {
 } from "preact-iso";
 import { logger } from "./logger";
 import { FindLobby } from "./screens/FindLobby";
+import { JoinLobby } from "./screens/JoinLobby";
 import { InGame } from "./screens/Game";
 import { StartScreen } from "./screens/StartScreen";
 import { GameGlobalSettings } from "./screens/start/GameGlobalSettings";
@@ -58,6 +59,12 @@ export function Game() {
 					path="/find-lobby"
 					component={
 						FindLobby
+					}
+				/>
+				<Route
+					path="/lobby/:id"
+					component={
+						JoinLobby
 					}
 				/>
 				<Route

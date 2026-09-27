@@ -36,7 +36,13 @@ export function useRouter() {
 export function getJoinLobbyUrl(
 	lobbyId: string,
 ) {
-	return `https://bulbro.lol/lobby/${lobbyId}`;
+	return new URL(
+		`/lobby/${encodeURIComponent(lobbyId)}`,
+		window
+			.location
+			.origin,
+	)
+		.href;
 }
 
 export function getTgJoinLobbyUrl(
