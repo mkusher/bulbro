@@ -66,6 +66,7 @@ export interface RoundState {
 	duration: number;
 	wave: number;
 	difficulty: number;
+	/** Unix timestamps in milliseconds, separate from elapsed event times. */
 	startedAt?: number;
 	endedAt?: number;
 }
@@ -957,19 +958,7 @@ export function addShot(
 
 export function updateRound(
 	round: RoundState,
-	action: Extract<
-		GameEvent,
-		{
-			type: "tick";
-		}
-	>,
 ) {
-	const {
-		occurredAt:
-			now,
-	} =
-		action;
-
 	const isRunning =
 		round.isRunning &&
 		getTimeLeft(
@@ -984,7 +973,7 @@ export function updateRound(
 		endedAt:
 			!isRunning
 				? (round.endedAt ??
-					now)
+					Date.now())
 				: round.endedAt,
 	};
 }
@@ -1545,7 +1534,6 @@ export function updateState(
 			const round =
 				updateRound(
 					state.round,
-					action,
 				);
 			// Check if all players are dead to end the round
 			const alivePlayersCount =
@@ -1590,7 +1578,7 @@ export function updateState(
 						endedAt:
 							!isRunning &&
 							round.isRunning
-								? action.occurredAt
+								? Date.now()
 								: round.endedAt,
 					},
 			};
@@ -1600,26 +1588,38 @@ export function updateState(
 	}
 }
 
+/** Elapsed round time in milliseconds, frozen once the round ends. */
+export function getRoundElapsedTime(
+	round: RoundState,
+): number {
+	if (
+		round.startedAt ==
+		null
+	)
+		return 0;
+	return (
+		(round.endedAt ??
+			Date.now()) -
+		round.startedAt
+	);
+}
+
 export const getTimeLeft =
 	(
 		round: RoundState,
 	) => {
-		const now =
-			Date.now();
-		const duration =
+		if (
+			round.startedAt ==
+			null
+		)
+			return 0;
+		return (
 			round.duration *
-			1000;
-		return round.endedAt &&
-			round.startedAt
-			? duration -
-					round.endedAt +
-					round.startedAt
-			: round.startedAt !=
-					null
-				? duration -
-					now +
-					round.startedAt
-				: 0;
+				1000 -
+			getRoundElapsedTime(
+				round,
+			)
+		);
 	};
 
 export const waveState =
