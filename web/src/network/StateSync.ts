@@ -160,39 +160,33 @@ export class StateSync {
 		const playerId =
 			this
 				.#localPlayerId;
+		const emptyPosition =
+			zeroPoint();
 		const playerPosition =
 			throttle(
 				computed(
-					() => {
-						const player =
-							this.#currentState.value.players.find(
-								(
-									p,
-								) =>
-									p.id ===
-									playerId,
-							);
-						return {
-							position:
-								player?.position ??
-								zeroPoint(),
-							direction:
-								this
-									.#localPlayerControl
-									.direction,
-						};
-					},
+					() =>
+						this.#currentState.value.players.find(
+							(
+								p,
+							) =>
+								p.id ===
+								playerId,
+						)
+							?.position ??
+						emptyPosition,
 				),
 				20,
 			);
 		this.#localDispose =
 			effect(
 				() => {
-					const {
-						position,
-						direction,
-					} =
+					const position =
 						playerPosition.value;
+					const direction =
+						this
+							.#localPlayerControl
+							.direction;
 					if (
 						!this
 							.#isStarted

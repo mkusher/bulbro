@@ -1,0 +1,14 @@
+{
+	"name": "@bulbro/network-integration-tests",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"types": "tsc --project tsconfig.json"
+	},
+	"dependencies": {
+		"@bulbro/network-protocol": "workspace:*",
+		"@preact/signals": "^2.11.2",
+		"arktype": "^2.2.5",
+		"pino": "^10.3.1"
+	}
+}

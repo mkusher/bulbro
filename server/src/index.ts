@@ -12,6 +12,7 @@ import { logger as honoLogger } from "hono/logger";
 import { requestId } from "hono/request-id";
 import { markAsDisconnected } from "./game-lobby-controller";
 import { WebsocketGameController } from "./game-websocket-controller";
+import { registry } from "./games-registry";
 import { logger as baseLogger } from "./logger";
 import { configureApi } from "./router";
 import { WebsocketConnection } from "./websocket-connection";
@@ -118,6 +119,12 @@ const wsApp =
 									"websocket-game-controller",
 							},
 						),
+						{
+							rooms:
+								registry,
+							connections:
+								websocketConnections,
+						},
 					);
 				return {
 					onOpen(
