@@ -1,5 +1,14 @@
 import {
+	finalizeWaveStats,
+	gameStats,
+	lastWaveStats,
+	resetGameStats,
+	startWaveTracking,
+} from "./gameStats";
+import {
 	beforeEach,
+	afterEach,
+	spyOn,
 	describe,
 	expect,
 	it,
@@ -40,6 +49,9 @@ import {
 	createInitialState,
 	generateConsumableMovementEvents,
 	generateMaterialMovementEvents,
+	getTimeLeft,
+	getRoundElapsedTime,
+	nextWave,
 	handleBulbroAttacked,
 	handleBulbroHealed,
 	handleEnemyAttacked,
@@ -270,6 +282,347 @@ function createTestWeaponDefinition(
 }
 
 describe("waveState", () => {
+	describe("wave timing", () => {
+		const epoch = 1_800_000_000_000;
+		let clock: ReturnType<
+			typeof spyOn<
+				typeof Date,
+				"now"
+			>
+		>;
+		const tick =
+			(
+				elapsed: number,
+			): Extract<
+				GameEvent,
+				{
+					type: "tick";
+				}
+			> => ({
+				type: "tick",
+				deltaTime:
+					deltaTime(
+						16,
+					),
+				occurredAt:
+					nowTime(
+						elapsed,
+					),
+			});
+		beforeEach(
+			() => {
+				clock =
+					spyOn(
+						Date,
+						"now",
+					).mockReturnValue(
+						epoch,
+					);
+				resetGameStats();
+			},
+		);
+		afterEach(
+			() => {
+				clock.mockRestore();
+				resetGameStats();
+			},
+		);
+		const createWave =
+			() =>
+				createInitialState(
+					[
+						createTestPlayer(
+							"timing-player",
+						),
+					],
+					{
+						width: 800,
+						height: 600,
+					},
+					1,
+					1,
+				);
+		const finalize =
+			(
+				state: WaveState,
+			) =>
+				finalizeWaveStats(
+					getRoundElapsedTime(
+						state.round,
+					),
+				);
+
+		it("records a 20-second timeout using the same clock as the start", () => {
+			const initial =
+				createWave();
+			clock.mockReturnValue(
+				epoch +
+					20_000,
+			);
+			const completed =
+				updateState(
+					initial,
+					tick(
+						20_000,
+					),
+				);
+			expect(
+				completed
+					.round
+					.isRunning,
+			).toBe(
+				false,
+			);
+			expect(
+				completed
+					.round
+					.endedAt,
+			).toBe(
+				epoch +
+					20_000,
+			);
+			expect(
+				getTimeLeft(
+					completed.round,
+				),
+			).toBe(
+				0,
+			);
+			finalize(
+				completed,
+			);
+			expect(
+				lastWaveStats
+					.value
+					?.survivalTime,
+			).toBe(
+				20,
+			);
+		});
+
+		it("records an early death with elapsed tick timestamps", () => {
+			const initial =
+				createWave();
+			initial.players =
+				initial.players.map(
+					(
+						player,
+					) =>
+						player.applyEvent(
+							withEventMeta(
+								player.beHit(
+									player.healthPoints,
+									nowTime(
+										7_500,
+									),
+								),
+								deltaTime(
+									16,
+								),
+								nowTime(
+									7_500,
+								),
+							),
+						),
+				);
+			clock.mockReturnValue(
+				epoch +
+					7_500,
+			);
+			const completed =
+				updateState(
+					initial,
+					tick(
+						7_500,
+					),
+				);
+			expect(
+				completed
+					.round
+					.isRunning,
+			).toBe(
+				false,
+			);
+			expect(
+				completed
+					.round
+					.endedAt,
+			).toBe(
+				epoch +
+					7_500,
+			);
+			expect(
+				getTimeLeft(
+					completed.round,
+				),
+			).toBe(
+				12_500,
+			);
+			finalize(
+				completed,
+			);
+			expect(
+				lastWaveStats
+					.value
+					?.survivalTime,
+			).toBe(
+				7,
+			);
+		});
+
+		it("excludes shop time and resets the clock for the next wave", () => {
+			const initial =
+				createWave();
+			clock.mockReturnValue(
+				epoch +
+					20_000,
+			);
+			const first =
+				updateState(
+					initial,
+					tick(
+						20_000,
+					),
+				);
+			finalize(
+				first,
+			);
+			clock.mockReturnValue(
+				epoch +
+					80_000,
+			);
+			const second =
+				nextWave(
+					first,
+					tick(
+						0,
+					),
+				);
+			expect(
+				second
+					.round
+					.endedAt,
+			).toBeUndefined();
+			startWaveTracking(
+				2,
+			);
+			clock.mockReturnValue(
+				epoch +
+					105_000,
+			);
+			const completed =
+				updateState(
+					second,
+					tick(
+						25_000,
+					),
+				);
+			finalize(
+				completed,
+			);
+			expect(
+				lastWaveStats
+					.value
+					?.survivalTime,
+			).toBe(
+				25,
+			);
+			expect(
+				gameStats
+					.value
+					.totalSurvivalTime,
+			).toBe(
+				45,
+			);
+		});
+
+		it("preserves the completion time on later ticks", () => {
+			const initial =
+				createWave();
+			clock.mockReturnValue(
+				epoch +
+					20_000,
+			);
+			const completed =
+				updateState(
+					initial,
+					tick(
+						20_000,
+					),
+				);
+			clock.mockReturnValue(
+				epoch +
+					30_000,
+			);
+			const later =
+				updateState(
+					completed,
+					tick(
+						30_000,
+					),
+				);
+			expect(
+				later
+					.round
+					.endedAt,
+			).toBe(
+				epoch +
+					20_000,
+			);
+			expect(
+				getTimeLeft(
+					later.round,
+				),
+			).toBe(
+				0,
+			);
+		});
+
+		it("treats zero timestamps as valid for completed rounds", () => {
+			clock.mockReturnValue(
+				0,
+			);
+			const initial =
+				createWave();
+			initial.players =
+				[];
+			const completed =
+				updateState(
+					initial,
+					tick(
+						0,
+					),
+				);
+			clock.mockReturnValue(
+				5_000,
+			);
+			expect(
+				completed
+					.round
+					.endedAt,
+			).toBe(
+				0,
+			);
+			expect(
+				getTimeLeft(
+					completed.round,
+				),
+			).toBe(
+				20_000,
+			);
+			finalize(
+				completed,
+			);
+			expect(
+				lastWaveStats
+					.value
+					?.survivalTime,
+			).toBe(
+				0,
+			);
+		});
+	});
+
 	let state: WaveState;
 	let player1: BulbroState;
 	let player2: BulbroState;
