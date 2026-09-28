@@ -19,6 +19,7 @@
 		"format": "biome format --fix src",
 		"storybook": "storybook dev -p 6006 --host 10.13.13.1 --no-open",
 		"bench": "bun test bench",
+		"sounds": "bun scripts/generate-sounds.ts",
 		"types": "tsc",
 		"build-storybook": "storybook build"
 	},

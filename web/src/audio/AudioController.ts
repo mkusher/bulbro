@@ -1,4 +1,5 @@
 import type { Signal } from "@preact/signals";
+import type { SoundName } from "@/AudioAssets";
 import type {
 	BulbroAttackedEvent,
 	BulbroReceivedHitEvent,
@@ -9,7 +10,10 @@ import type {
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
 import type { WaveState } from "@/waveState";
-import { fromWeaponState } from "@/weapon";
+import {
+	fromWeaponState,
+	type Weapon,
+} from "@/weapon";
 import { audioEngine } from "./AudioEngine";
 
 /**
@@ -90,13 +94,24 @@ class AudioController {
 	}
 
 	/**
-	 * Handle enemy died sound
+	 * Handle enemy died sound: trees break, creatures scream
 	 */
 	#handleEnemyDied(
-		_event: EnemyDiedEvent,
+		event: EnemyDiedEvent,
 	): void {
+		const enemy =
+			this.#waveStateSignal.value?.enemies.find(
+				(
+					e,
+				) =>
+					e.id ===
+					event.enemyId,
+			);
 		audioEngine.playEffect(
-			"scream",
+			enemy?.type ===
+				"tree"
+				? "treeBreak"
+				: "scream",
 		);
 	}
 
@@ -160,17 +175,12 @@ class AudioController {
 		)
 			return;
 
-		const weapon =
-			fromWeaponState(
-				weaponState,
-			);
-		const weaponType =
-			weapon.id;
-
-		// Map weapon type to sound
-		this.#playWeaponSound(
-			weaponType,
-			"player",
+		audioEngine.playEffect(
+			weaponSound(
+				fromWeaponState(
+					weaponState,
+				),
+			),
 		);
 	}
 
@@ -223,103 +233,45 @@ class AudioController {
 		)
 			return;
 
-		const weapon =
-			fromWeaponState(
-				weaponState,
-			);
-
-		// Map enemy weapon to sound based on class
-		if (
-			weapon.classes.includes(
-				"gun",
-			)
-		) {
-			audioEngine.playEffect(
-				"laser",
-			);
-		} else if (
-			weapon.classes.includes(
-				"unarmed",
-			)
-		) {
-			audioEngine.playEffect(
-				"kick",
-			);
-		} else if (
-			weapon.classes.includes(
-				"blade",
-			) ||
-			weapon.classes.includes(
-				"blunt",
-			)
-		) {
-			// Melee weapons use kick sound
-			audioEngine.playEffect(
-				"kick",
-			);
-		}
+		audioEngine.playEffect(
+			weaponSound(
+				fromWeaponState(
+					weaponState,
+				),
+			),
+		);
 	}
+}
 
-	/**
-	 * Play sound for player weapon attack
-	 */
-	#playWeaponSound(
-		weaponType: string,
-		_source: string,
-	): void {
-		switch (
-			weaponType
-		) {
-			case "pistol":
-			case "ak47":
-			case "smg":
-			case "doubleBarrelShotgun":
-				audioEngine.playEffect(
-					"gunshot",
-				);
-				break;
-			case "laserGun":
-				audioEngine.playEffect(
-					"laser",
-				);
-				break;
-			case "fist":
-			case "hand":
-				audioEngine.playEffect(
-					"kick",
-				);
-				break;
-			case "knife":
-			case "sword":
-				// Melee weapons use kick sound
-				audioEngine.playEffect(
-					"kick",
-				);
-				break;
-			case "brick":
-				// Impact weapon
-				audioEngine.playEffect(
-					"kick",
-				);
-				break;
-			case "orcGun":
-				// Enemy gun sound
-				audioEngine.playEffect(
-					"laser",
-				);
-				break;
-			case "enemyGun":
-				audioEngine.playEffect(
-					"laser",
-				);
-				break;
-			case "enemyFist":
-				audioEngine.playEffect(
-					"kick",
-				);
-				break;
-		}
+/**
+ * Map a weapon to its attack sound: specific weapons first,
+ * then fall back to weapon classes.
+ */
+export function weaponSound(
+	weapon: Weapon,
+): SoundName {
+	switch (
+		weapon.id
+	) {
+		case "laserGun":
+			return "laser";
+		case "orcGun":
+		case "aphidGun":
+			return "enemyShot";
 	}
+	if (
+		weapon.classes.includes(
+			"explosive",
+		)
+	)
+		return "explosion";
+	if (
+		weapon.classes.includes(
+			"gun",
+		)
+	)
+		return "gunshot";
+	return "kick";
 }
 
 // Export the class to be instantiated where waveState is available

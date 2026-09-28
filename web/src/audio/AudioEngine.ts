@@ -1,5 +1,8 @@
 import { effect } from "@preact/signals";
-import type { SoundName } from "@/AudioAssets";
+import {
+	type SoundName,
+	soundPitchVariation,
+} from "@/AudioAssets";
 import {
 	type AudioBufferMap,
 	preloadAllAudio,
@@ -193,6 +196,17 @@ class AudioEngine {
 			this.#context.createBufferSource();
 		source.buffer =
 			buffer;
+		const variation =
+			soundPitchVariation[
+				name
+			] ??
+			0;
+		source.playbackRate.value =
+			1 +
+			(Math.random() *
+				2 -
+				1) *
+				variation;
 		source.connect(
 			this
 				.#effectsGain,

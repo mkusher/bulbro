@@ -261,21 +261,24 @@ The track is designed for seamless looping:
 
 ## Sound Effects
 
-### Gunshot (`gunshot.mp3`)
-- **Size:** 5.4 KB
-- **Use:** Weapon fire
+Effects are generated procedurally by `scripts/generate-sounds.ts`
+(`bun run sounds [name...]`, requires `ffmpeg`). Each one layers
+physically-motivated components (transients, modal resonators for wood
+and metal, filtered noise, formant-synthesised alien voice, room reverb) and is
+rendered from a fixed seed, so regenerating is deterministic. On playback
+each effect gets a small random pitch shift (`soundPitchVariation` in
+`src/AudioAssets.ts`) so rapid repeats don't sound identical.
 
-### Laser (`laser.mp3`)
-- **Size:** 1.1 KB
-- **Use:** Laser weapon fire
-
-### Kick (`kick.mp3`)
-- **Size:** 1.1 KB
-- **Use:** Melee/impact sounds
-
-### Explosion (`explosion.mp3`)
-- **Size:** 18 KB
-- **Use:** Enemy destruction, explosions
+| File | Sound | Used for |
+|------|-------|----------|
+| `gunshot.mp3` | Supersonic crack, muzzle blast, low boom, action click, room tail | Player guns (pistol, SMG, AK-47, shotgun) |
+| `laser.mp3` | Descending ring-modulated zap with echo | Laser Gun only |
+| `enemy-shot.mp3` | Soft wet "thwop" projectile launch | Enemy guns (orc, aphid) |
+| `kick.mp3` | Skin slap, flesh thump, cloth rustle | Melee hits (fists, blades, blunt) |
+| `scream.mp3` | Alien wail: two dissonant trilling voices, vowel morph, ring-modulated and bit-crushed, diving in pitch | Creature death |
+| `tree-break.mp3` | Trunk crack, splintering, creak, fall thud, leaves | Tree destroyed |
+| `explosion.mp3` | Shock crack, blast, sub boom, rumble, debris | Explosive weapons (none yet) |
+| `chest-open.mp3` | Metal latch, creaking hinge, lid knock | Reserved for chests |
 
 ---
 
