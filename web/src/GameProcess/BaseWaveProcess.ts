@@ -26,8 +26,11 @@ import type {
 import { AudioEventsProcessor } from "./processors/AudioEventsProcessor";
 import { GameStatsProcessor } from "./processors/GameStatsProcessor";
 import { WaveStateProcessor } from "./processors/WaveStateProcessor";
+import type {
+	GameEvent,
+	GameEventQueue,
+} from "@/game-events/GameEvents";
 import { VoidGameEventQueue } from "@/game-events/VoidGameEventQueue";
-import type { GameEventQueue } from "@/game-events/GameEvents";
 
 export class BaseWaveProcess
 	implements
@@ -45,6 +48,9 @@ export class BaseWaveProcess
 	#playerControls: PlayerControl[];
 	#camera: Camera;
 	#eventQueue: GameEventQueue;
+	#eventFilter: (
+		event: GameEvent,
+	) => boolean;
 	#createTickProcess: TickProcessFactory;
 	#durationTracker =
 		new DurationTracker();
@@ -63,6 +69,11 @@ export class BaseWaveProcess
 		>,
 		debug: boolean,
 		createTickProcess: TickProcessFactory,
+		eventFilter:
+			| ((
+					event: GameEvent,
+			  ) => boolean)
+			| null = null,
 	) {
 		this.#logger =
 			baseLogger.child(
@@ -90,7 +101,13 @@ export class BaseWaveProcess
 		this.#playerControls =
 			playerControls;
 		this.#eventQueue =
-			new VoidGameEventQueue();
+			eventFilter
+				? new InMemoryGameEventQueue()
+				: new VoidGameEventQueue();
+		this.#eventFilter =
+			eventFilter ??
+			(() =>
+				true);
 		this.#createTickProcess =
 			createTickProcess;
 		this.#processors =
@@ -270,11 +287,16 @@ export class BaseWaveProcess
 						.#playerControls,
 				);
 			const events =
-				tickProcess.tick(
-					state,
-					delta,
-					now,
-				);
+				tickProcess
+					.tick(
+						state,
+						delta,
+						now,
+					)
+					.filter(
+						this
+							.#eventFilter,
+					);
 
 			// Add events to queue for network synchronization
 			for (const event of events) {

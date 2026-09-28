@@ -7,7 +7,7 @@ const backendHost =
 	process
 		.env
 		.BACKEND_HOST ??
-	"https://bulbro.lol";
+	"http://localhost:8080";
 
 export default defineConfig(
 	{

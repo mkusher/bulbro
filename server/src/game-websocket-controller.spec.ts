@@ -1,85 +1,112 @@
 import {
-	afterEach,
 	expect,
 	test,
 } from "bun:test";
 import type { Logger } from "pino";
 import { WebsocketGameController } from "./game-websocket-controller";
-import { registry } from "./games-registry";
-import type { WebsocketConnection } from "./websocket-connection";
-import { websocketConnections } from "./websocket-connections";
+import { GamesRegistry } from "./games-registry";
 
-const hostId =
-	crypto.randomUUID();
-const guestId =
-	crypto.randomUUID();
-const lobby =
-	registry.registerLobby(
+const logger =
+	{
+		info() {},
+		error() {},
+	} as unknown as Logger;
+
+function createRelay() {
+	const rooms =
+		new GamesRegistry();
+	const hostId =
+		"host";
+	const guestId =
+		"guest";
+	const lobby =
+		rooms.registerLobby(
+			{
+				id: hostId,
+				username:
+					"Host",
+			},
+		);
+	rooms.addPlayer(
+		lobby.id,
 		{
-			id: hostId,
+			id: guestId,
 			username:
-				"host",
+				"Guest",
 		},
 	);
-registry.addPlayer(
-	lobby.id,
-	{
-		id: guestId,
-		username:
-			"guest",
-	},
-);
 
-afterEach(
-	() => {
-		websocketConnections.remove(
-			hostId,
-		);
-		websocketConnections.remove(
-			guestId,
-		);
-	},
-);
-
-test("relays event batches from host to guest and guest to host", () => {
-	const hostReceived: object[] =
-		[];
-	const guestReceived: object[] =
-		[];
-	websocketConnections.add(
-		hostId,
-		{
-			sendObject:
-				(
+	const endpoints =
+		new Map<
+			string,
+			{
+				sendObject(
 					message: object,
-				) =>
-					hostReceived.push(
-						message,
-					),
-		} as unknown as WebsocketConnection,
-	);
-	websocketConnections.add(
-		guestId,
-		{
-			sendObject:
-				(
-					message: object,
-				) =>
-					guestReceived.push(
-						message,
-					),
-		} as unknown as WebsocketConnection,
-	);
-
-	const logger =
-		{
-			info: () => {},
-			error:
-				() => {},
-		} as unknown as Logger;
+				): void;
+			}
+		>();
 	const controller =
 		new WebsocketGameController(
 			logger,
+			{
+				rooms,
+				connections:
+					endpoints,
+			},
+		);
+
+	function connect(
+		userId: string,
+	) {
+		const inbox: object[] =
+			[];
+		endpoints.set(
+			userId,
+			{
+				sendObject(
+					message,
+				) {
+					// Use the same JSON boundary as a WebSocket connection.
+					inbox.push(
+						JSON.parse(
+							JSON.stringify(
+								message,
+							),
+						),
+					);
+				},
+			},
+		);
+		return inbox;
+	}
+
+	return {
+		rooms,
+		lobby,
+		hostId,
+		guestId,
+		controller,
+		connect,
+		endpoints,
+	};
+}
+
+test("relays event batches between isolated host and guest endpoints", () => {
+	const {
+		lobby,
+		hostId,
+		guestId,
+		controller,
+		connect,
+	} =
+		createRelay();
+	const hostReceived =
+		connect(
+			hostId,
+		);
+	const guestReceived =
+		connect(
+			guestId,
 		);
 	const hostMessage =
 		{
@@ -139,30 +166,22 @@ test("relays event batches from host to guest and guest to host", () => {
 	);
 });
 
-test("rejects unknown senders and forged roles", () => {
-	const received: object[] =
-		[];
-	websocketConnections.add(
+test("rejects unknown senders, forged roles, and forged positions", () => {
+	const {
+		lobby,
+		hostId,
 		guestId,
-		{
-			sendObject:
-				(
-					message: object,
-				) =>
-					received.push(
-						message,
-					),
-		} as unknown as WebsocketConnection,
-	);
-	const logger =
-		{
-			info: () => {},
-			error:
-				() => {},
-		} as unknown as Logger;
-	const controller =
-		new WebsocketGameController(
-			logger,
+		controller,
+		connect,
+	} =
+		createRelay();
+	const hostReceived =
+		connect(
+			hostId,
+		);
+	const guestReceived =
+		connect(
+			guestId,
 		);
 	const update =
 		{
@@ -174,8 +193,9 @@ test("rejects unknown senders and forged roles", () => {
 				[],
 			sentAt: 100,
 		};
+
 	controller.routeMessage(
-		crypto.randomUUID(),
+		"stranger",
 		update,
 	);
 	controller.routeMessage(
@@ -204,9 +224,105 @@ test("rejects unknown senders and forged roles", () => {
 			sentAt: 100,
 		},
 	);
+
 	expect(
-		received,
+		hostReceived,
 	).toEqual(
 		[],
+	);
+	expect(
+		guestReceived,
+	).toEqual(
+		[],
+	);
+});
+
+test("relays only within the named room and skips disconnected endpoints", () => {
+	const {
+		rooms,
+		lobby,
+		hostId,
+		guestId,
+		controller,
+		connect,
+		endpoints,
+	} =
+		createRelay();
+	const guestReceived =
+		connect(
+			guestId,
+		);
+	const otherHost =
+		"other-host";
+	const otherGuest =
+		"other-guest";
+	const otherLobby =
+		rooms.registerLobby(
+			{
+				id: otherHost,
+				username:
+					"Other host",
+			},
+		);
+	rooms.addPlayer(
+		otherLobby.id,
+		{
+			id: otherGuest,
+			username:
+				"Other guest",
+		},
+	);
+	const otherReceived =
+		connect(
+			otherGuest,
+		);
+	const update =
+		{
+			type: "game-state-updated-by-host",
+			gameId:
+				lobby.id,
+			version: 1,
+			events:
+				[],
+			sentAt: 100,
+		};
+
+	controller.routeMessage(
+		hostId,
+		update,
+	);
+	controller.routeMessage(
+		otherHost,
+		update,
+	);
+	expect(
+		guestReceived,
+	).toEqual(
+		[
+			update,
+		],
+	);
+	expect(
+		otherReceived,
+	).toEqual(
+		[],
+	);
+
+	endpoints.delete(
+		guestId,
+	);
+	controller.routeMessage(
+		hostId,
+		{
+			...update,
+			version: 2,
+		},
+	);
+	expect(
+		guestReceived,
+	).toEqual(
+		[
+			update,
+		],
 	);
 });

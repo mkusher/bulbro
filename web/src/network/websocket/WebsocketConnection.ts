@@ -118,6 +118,11 @@ export class WebsocketConnection {
 	#initConnection() {
 		this.#connectionEstablishmentResolvers =
 			Promise.withResolvers();
+		// The socket is opened in the constructor, before callers can await connect().
+		// Mark the promise handled even when a caller only queues a message.
+		void this.#connectionEstablishmentResolvers.promise?.catch(
+			() => {},
+		);
 		this.#ws =
 			new WebSocket(
 				this
@@ -151,6 +156,11 @@ export class WebsocketConnection {
 
 	#onClose =
 		() => {
+			this.#connectionEstablishmentResolvers.reject?.(
+				new Error(
+					`WebSocket closed before connecting to ${this.#url}`,
+				),
+			);
 			this.#logger.info(
 				"Websocket is getting closed",
 			);
@@ -179,7 +189,9 @@ export class WebsocketConnection {
 					.reject
 			) {
 				this.#connectionEstablishmentResolvers.reject(
-					ev,
+					new Error(
+						`WebSocket connection failed at ${this.#url}`,
+					),
 				);
 			}
 		};

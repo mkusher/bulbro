@@ -28,7 +28,6 @@ import type {
 	WeaponState,
 } from "../waveState";
 import { getBehaviors } from "./BehaviorsMap";
-import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyCharacter } from "./EnemyCharacter";
 import { ENEMY_SIZE } from "./index";
@@ -72,6 +71,7 @@ export type Knockback =
 
 export type EnemyStateProps =
 	{
+		readonly behaviorType?: import("./EnemyCharacter").EnemyCharacter["behaviors"];
 		readonly id: string;
 		readonly type: EnemyType;
 		readonly position: Position;
@@ -188,8 +188,15 @@ export class EnemyState
 			{
 				...props,
 				behaviors:
-					props.behaviors ??
-					new ChasingBehavior(),
+					props.behaviors &&
+					typeof props
+						.behaviors
+						.move ===
+						"function"
+						? props.behaviors
+						: getBehaviors(
+								props.behaviorType,
+							),
 			};
 	}
 
@@ -609,6 +616,8 @@ export function spawnEnemy(
 				),
 			consumableDropChance:
 				character.consumableDropChance,
+			behaviorType:
+				character.behaviors,
 		},
 	);
 }

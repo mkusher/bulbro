@@ -1,16 +1,44 @@
 import { WebsocketMessage } from "@bulbro/network-protocol";
 import { type } from "arktype";
 import type { Logger } from "pino";
-import { registry } from "./games-registry";
-import { websocketConnections } from "./websocket-connections";
+import type { GamesRegistry } from "./games-registry";
+
+export type GameRelayDependencies =
+	{
+		rooms: Pick<
+			GamesRegistry,
+			"find"
+		>;
+		connections: {
+			get(
+				userId: string,
+			):
+				| {
+						sendObject(
+							message: object,
+						): void;
+				  }
+				| undefined;
+		};
+	};
 
 export class WebsocketGameController {
 	#logger: Logger;
+	#rooms: GameRelayDependencies["rooms"];
+	#connections: GameRelayDependencies["connections"];
 	constructor(
 		logger: Logger,
+		{
+			rooms,
+			connections,
+		}: GameRelayDependencies,
 	) {
 		this.#logger =
 			logger;
+		this.#rooms =
+			rooms;
+		this.#connections =
+			connections;
 	}
 	routeMessage(
 		userId: string,
@@ -38,7 +66,7 @@ export class WebsocketGameController {
 			case "game-state-updated-by-guest":
 			case "game-state-position-updated": {
 				const game =
-					registry.find(
+					this.#rooms.find(
 						message.gameId,
 					);
 				if (
@@ -104,7 +132,7 @@ export class WebsocketGameController {
 
 				for (const player of players) {
 					const connection =
-						websocketConnections.get(
+						this.#connections.get(
 							player.id,
 						);
 					if (

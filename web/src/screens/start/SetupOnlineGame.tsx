@@ -6,6 +6,7 @@ import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import type { Difficulty } from "@/game-formulas";
 import { logger } from "@/logger";
+import { lobbyConnectionError } from "@/network/LobbyConnection";
 import {
 	currentLobby,
 	markAsReady,
@@ -468,11 +469,11 @@ export function SetupOnlineGame() {
 							</div>
 						</CardContent>
 						<CardFooter className="grid">
-							{startError && (
+							{(startError ||
+								lobbyConnectionError.value) && (
 								<p role="alert">
-									{
-										startError
-									}
+									{startError ||
+										lobbyConnectionError.value}
 								</p>
 							)}
 							{isHost ? (
