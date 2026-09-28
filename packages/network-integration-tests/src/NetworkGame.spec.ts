@@ -360,6 +360,7 @@ function createClient(
 		process,
 		queue,
 		sync,
+		updater,
 		remoteControl,
 	};
 }
@@ -401,7 +402,7 @@ afterEach(
 	},
 );
 
-test("host and guest converge through the in-memory server relay", async () => {
+async function createNetwork() {
 	const rooms =
 		new GamesRegistry();
 	const lobby =
@@ -434,7 +435,6 @@ test("host and guest converge through the in-memory server relay", async () => {
 		host,
 		guest,
 	);
-
 	const connections =
 		new Map<
 			string,
@@ -503,11 +503,67 @@ test("host and guest converge through the in-memory server relay", async () => {
 					packet,
 				),
 			);
-
 	await host.remoteControl.start();
 	await guest.remoteControl.start();
 	host.sync.start();
 	guest.sync.start();
+	return {
+		rooms,
+		lobby,
+		host,
+		guest,
+		connections,
+		relay,
+	};
+}
+
+function batches(
+	connection: InMemoryConnection,
+	type: string,
+) {
+	return connection.sent
+		.map(
+			(
+				packet,
+			) =>
+				JSON.parse(
+					packet,
+				) as {
+					type: string;
+					version?: number;
+				},
+		)
+		.filter(
+			(
+				message,
+			) =>
+				message.type ===
+				type,
+		);
+}
+
+function playerX(
+	state: WaveState,
+	playerId: string,
+) {
+	return state.players.find(
+		(
+			player,
+		) =>
+			player.id ===
+			playerId,
+	)
+		?.position
+		.x;
+}
+
+test("host and guest converge through the in-memory server relay", async () => {
+	const {
+		lobby,
+		host,
+		guest,
+	} =
+		await createNetwork();
 
 	guest.process.tick();
 	await waitFor(
@@ -773,6 +829,364 @@ test("host and guest converge through the in-memory server relay", async () => {
 			.length,
 	).toBe(
 		guestPositionPackets,
+	);
+	expect(
+		errors,
+	).toEqual(
+		[],
+	);
+});
+
+test("repeated exchanges converge and replayed event batches are ignored", async () => {
+	const {
+		host,
+		guest,
+		relay,
+	} =
+		await createNetwork();
+	for (
+		let turn = 1;
+		turn <=
+		3;
+		turn++
+	) {
+		guest.process.tick();
+		await waitFor(
+			() =>
+				batches(
+					guest.connection,
+					"game-state-updated-by-guest",
+				)
+					.length ===
+				turn,
+		);
+		await waitFor(
+			() =>
+				playerX(
+					host
+						.state
+						.value,
+					guestId,
+				) ===
+				playerX(
+					guest
+						.state
+						.value,
+					guestId,
+				),
+		);
+		await waitFor(
+			() =>
+				host
+					.remoteControl
+					.direction
+					.x ===
+					-1 &&
+				playerX(
+					host.updater.getLastSyncedState(),
+					guestId,
+				) ===
+					playerX(
+						guest
+							.state
+							.value,
+						guestId,
+					),
+		);
+
+		host.process.tick();
+		await waitFor(
+			() =>
+				batches(
+					host.connection,
+					"game-state-updated-by-host",
+				)
+					.length ===
+				turn,
+		);
+		await waitFor(
+			() =>
+				guest
+					.remoteControl
+					.direction
+					.x ===
+					1 &&
+				playerX(
+					guest.updater.getLastSyncedState(),
+					hostId,
+				) ===
+					playerX(
+						host
+							.state
+							.value,
+						hostId,
+					),
+		);
+		await waitFor(
+			() =>
+				playerX(
+					guest
+						.state
+						.value,
+					hostId,
+				) ===
+				playerX(
+					host
+						.state
+						.value,
+					hostId,
+				),
+		);
+		expect(
+			batches(
+				guest.connection,
+				"game-state-updated-by-guest",
+			).at(
+				-1,
+			)
+				?.version,
+		).toBe(
+			turn,
+		);
+		expect(
+			batches(
+				host.connection,
+				"game-state-updated-by-host",
+			).at(
+				-1,
+			)
+				?.version,
+		).toBe(
+			turn,
+		);
+	}
+
+	await Bun.sleep(
+		30,
+	);
+	const beforeReplay =
+		host
+			.state
+			.value;
+	const firstBatch =
+		guest.connection.sent.find(
+			(
+				packet,
+			) =>
+				JSON.parse(
+					packet,
+				)
+					.type ===
+				"game-state-updated-by-guest",
+		);
+	if (
+		!firstBatch
+	)
+		throw new Error(
+			"Guest sent no event batch",
+		);
+	const latestBatch =
+		guest.connection.sent
+			.filter(
+				(
+					packet,
+				) =>
+					JSON.parse(
+						packet,
+					)
+						.type ===
+					"game-state-updated-by-guest",
+			)
+			.at(
+				-1,
+			);
+	if (
+		!latestBatch
+	)
+		throw new Error(
+			"Guest sent no latest event batch",
+		);
+	relay.routeMessage(
+		guestId,
+		JSON.parse(
+			latestBatch,
+		),
+	);
+	relay.routeMessage(
+		guestId,
+		JSON.parse(
+			firstBatch,
+		),
+	);
+	await Bun.sleep(
+		1,
+	);
+	expect(
+		host
+			.state
+			.value,
+	).toBe(
+		beforeReplay,
+	);
+	expect(
+		playerX(
+			host
+				.state
+				.value,
+			guestId,
+		),
+	).toBe(
+		playerX(
+			guest
+				.state
+				.value,
+			guestId,
+		),
+	);
+	expect(
+		playerX(
+			guest
+				.state
+				.value,
+			hostId,
+		),
+	).toBe(
+		playerX(
+			host
+				.state
+				.value,
+			hostId,
+		),
+	);
+	expect(
+		errors,
+	).toEqual(
+		[],
+	);
+});
+
+test("a known guest resumes receiving movement after reconnecting", async () => {
+	const {
+		rooms,
+		lobby,
+		host,
+		guest,
+		connections,
+	} =
+		await createNetwork();
+	connections.delete(
+		guestId,
+	);
+	rooms.markDisconnected(
+		lobby.id,
+		guestId,
+	);
+
+	host.process.tick();
+	await waitFor(
+		() =>
+			batches(
+				host.connection,
+				"game-state-updated-by-host",
+			)
+				.length ===
+			1,
+	);
+	expect(
+		playerX(
+			guest
+				.state
+				.value,
+			hostId,
+		),
+	).toBe(
+		100,
+	);
+	expect(
+		rooms
+			.find(
+				lobby.id,
+			)
+			?.players.find(
+				(
+					player,
+				) =>
+					player.id ===
+					guestId,
+			)
+			?.status,
+	).toBe(
+		"offline",
+	);
+
+	connections.set(
+		guestId,
+		{
+			sendObject:
+				(
+					message,
+				) =>
+					guest.connection.deliver(
+						JSON.stringify(
+							message,
+						),
+					),
+		},
+	);
+	rooms.markConnected(
+		lobby.id,
+		guestId,
+	);
+	host.process.tick();
+	await waitFor(
+		() =>
+			batches(
+				host.connection,
+				"game-state-updated-by-host",
+			)
+				.length ===
+			2,
+	);
+	await waitFor(
+		() =>
+			playerX(
+				guest
+					.state
+					.value,
+				hostId,
+			) ===
+			playerX(
+				host
+					.state
+					.value,
+				hostId,
+			),
+	);
+	expect(
+		playerX(
+			guest
+				.state
+				.value,
+			hostId,
+		),
+	).toBeGreaterThan(
+		100,
+	);
+	expect(
+		rooms
+			.find(
+				lobby.id,
+			)
+			?.players.find(
+				(
+					player,
+				) =>
+					player.id ===
+					guestId,
+			)
+			?.status,
+	).toBe(
+		"connected",
 	);
 	expect(
 		errors,
