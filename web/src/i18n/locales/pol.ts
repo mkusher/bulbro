@@ -37,7 +37,7 @@ export default {
 	"setup.ready":
 		"Gotowy",
 	"setup.notReady":
-		"Nie gotowy",
+		"Niegotowy",
 	"setup.startGame":
 		"Rozpocznij grę",
 	"setup.waitingForPlayer":
@@ -85,9 +85,9 @@ export default {
 	"weapon.chooseHint":
 		"Wybierz broń z siatki, aby zobaczyć szczegóły",
 	"weapon.noStatBonuses":
-		"Brak bonusów statystyk",
+		"Brak bonusów do statystyk",
 	"weapon.statsBonuses":
-		"Bonusy statystyk",
+		"Bonusy do statystyk",
 
 	"difficulty.label":
 		"Trudność:",
@@ -106,7 +106,7 @@ export default {
 		"Broń",
 
 	"preround.prepareForWave":
-		"Przygotuj się do fali {wave}",
+		"Przygotuj się na falę {wave}",
 	"preround.startWave":
 		"Rozpocznij falę {wave}",
 	"preround.noPlayer":

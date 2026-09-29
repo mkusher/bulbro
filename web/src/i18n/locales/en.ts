@@ -28,9 +28,9 @@ export default {
 	"lobby.startNew":
 		"Start new lobby",
 	"lobby.joinById":
-		"Join lobby by id",
+		"Join lobby by ID",
 	"lobby.enterIdLabel":
-		"Enter lobby id:",
+		"Enter lobby ID:",
 	"lobby.idForJoining":
 		"ID for joining:",
 
@@ -87,7 +87,7 @@ export default {
 	"weapon.noStatBonuses":
 		"No stat bonuses",
 	"weapon.statsBonuses":
-		"Stats Bonuses",
+		"Stat Bonuses",
 
 	"difficulty.label":
 		"Difficulty:",

@@ -10,14 +10,14 @@ export default {
 	"start.local.singlePlayer":
 		"Пачаць гульню аднаму",
 	"start.local.coOp":
-		"Пачаць лакальны каапэратыў",
+		"Пачаць лакальны кааператыў",
 	"start.settings":
 		"Налады",
 
 	"online.title":
 		"Анлайн",
 	"online.description":
-		"Нічога асаблівага, анлайн гульня. Цяпер стварыце або далучыцеся да лобі",
+		"Нічога асаблівага, анлайн-гульня. Цяпер стварыце або далучыцеся да лобі",
 	"online.signUp":
 		"Зарэгістравацца",
 	"online.name":
@@ -47,7 +47,7 @@ export default {
 	"setup.connected":
 		"Падлучана",
 	"setup.disconnected":
-		"Адлучаны",
+		"Адлучана",
 	"setup.share":
 		"Падзяліцца лобі",
 	"setup.yourStatus":
@@ -56,18 +56,18 @@ export default {
 		"Стан іншага гульца",
 
 	"setup.single.title":
-		"Пачаць гульню адзінокага гульца",
+		"Пачаць адзіночную гульню",
 	"setup.single.start":
 		"Пачаць",
 	"setup.coop.title":
-		"Пачаць гульню лакальнага каапэратыву",
+		"Пачаць лакальную кааператыўную гульню",
 	"setup.coop.start":
 		"Пачаць",
 
 	"character.select":
 		"Выберыце персанажа",
 	"character.defaultWeapons":
-		"Звычайная зброя",
+		"Зброя па змаўчанні",
 	"character.availableWeapons":
 		"Даступная зброя",
 	"weapon.select":
@@ -85,21 +85,21 @@ export default {
 	"weapon.chooseHint":
 		"Выберыце зброю з сеткі, каб убачыць падрабязней",
 	"weapon.noStatBonuses":
-		"Няма бонусаў статыстыкі",
+		"Няма бонусаў да характарыстык",
 	"weapon.statsBonuses":
-		"Бонусы статыстыкі",
+		"Бонусы да характарыстык",
 
 	"difficulty.label":
 		"Складанасць:",
 
 	"shop.title":
-		"Крамница",
+		"Крама",
 	"shop.reroll":
 		"Перакінуць ${price}",
 	"shop.owned":
 		"Куплена",
 	"shop.locked":
-		"Заблякавана ${price}",
+		"Заблакавана ${price}",
 	"shop.price":
 		"${price}",
 	"shop.weapons":
@@ -121,9 +121,9 @@ export default {
 	"stats.enemies":
 		"Ворагі",
 	"stats.damage":
-		"Нанесенае пашкоджанне",
+		"Нанесеная шкода",
 	"stats.taken":
-		"Атрыманае пашкоджанне",
+		"Атрыманая шкода",
 	"stats.materials":
 		"Матэрыялы",
 	"stats.time":
@@ -136,20 +136,20 @@ export default {
 	"gameover.title":
 		"Гульня скончана",
 	"gameover.returnToMenu":
-		"Вярнуцца ѡ галоўнае меню",
+		"Вярнуцца ў галоўнае меню",
 
 	"settings.title":
 		"Налады",
 	"settings.backToMenu":
-		"Вярнуцца ѡ галоўнае меню",
+		"Вярнуцца ў галоўнае меню",
 	"settings.display":
 		"Дысплей",
 	"settings.sizeFor":
 		"Памер гульні для:",
 	"settings.landscape":
-		"Пейзаж",
+		"Альбомная",
 	"settings.portrait":
-		"Партрэт",
+		"Кніжная",
 	"settings.enterFullscreen":
 		"У поўнаэкранны рэжым",
 	"settings.exitFullscreen":
@@ -170,7 +170,7 @@ export default {
 	"audio.bgmVolume":
 		"Гучнасць фонавай музыкі",
 	"audio.playBgm":
-		"Гуць музыку",
+		"Іграць музыку",
 	"audio.stopBgm":
 		"Спыніць музыку",
 

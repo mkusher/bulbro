@@ -10,7 +10,7 @@ export default {
 	"start.local.singlePlayer":
 		"Почати гру одного гравця",
 	"start.local.coOp":
-		"Почати локальну гру кооперативу",
+		"Почати локальну кооперативну гру",
 	"start.settings":
 		"Налаштування",
 
@@ -60,14 +60,14 @@ export default {
 	"setup.single.start":
 		"Старт",
 	"setup.coop.title":
-		"Почати локальну гру кооперативу",
+		"Почати локальну кооперативну гру",
 	"setup.coop.start":
 		"Старт",
 
 	"character.select":
 		"Оберіть персонажа",
 	"character.defaultWeapons":
-		"Звичайна зброя",
+		"Зброя за замовчуванням",
 	"character.availableWeapons":
 		"Доступна зброя",
 	"weapon.select":
@@ -85,9 +85,9 @@ export default {
 	"weapon.chooseHint":
 		"Оберіть зброю з сітки, щоб побачити деталі",
 	"weapon.noStatBonuses":
-		"Немає бонусів статистики",
+		"Немає бонусів до характеристик",
 	"weapon.statsBonuses":
-		"Бонуси статистики",
+		"Бонуси до характеристик",
 
 	"difficulty.label":
 		"Складність:",
@@ -110,7 +110,7 @@ export default {
 	"preround.startWave":
 		"Почати хвилю {wave}",
 	"preround.noPlayer":
-		"Гравець не знайдено",
+		"Гравця не знайдено",
 	"preround.weaponClicked":
 		"Зброя натиснута:",
 
@@ -121,7 +121,7 @@ export default {
 	"stats.enemies":
 		"Вороги",
 	"stats.damage":
-		"Збиток",
+		"Шкода",
 	"stats.taken":
 		"Отримано",
 	"stats.materials":
@@ -147,9 +147,9 @@ export default {
 	"settings.sizeFor":
 		"Розмір гри для:",
 	"settings.landscape":
-		"Пейзаж",
+		"Альбомна",
 	"settings.portrait":
-		"Портрет",
+		"Книжкова",
 	"settings.enterFullscreen":
 		"У повноекранний режим",
 	"settings.exitFullscreen":
@@ -168,7 +168,7 @@ export default {
 	"audio.enableBgm":
 		"Увімкнути фонову музику",
 	"audio.bgmVolume":
-		"Гучність фоноової музики",
+		"Гучність фонової музики",
 	"audio.playBgm":
 		"Грати музику",
 	"audio.stopBgm":
