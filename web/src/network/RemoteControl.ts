@@ -5,7 +5,7 @@ import type {
 	GameEvent,
 } from "@/game-events/GameEvents";
 import { zeroPoint } from "@/geometry";
-import type { WebsocketMessage } from "./InGameCommunicationChannel";
+import type { LiveStateMessage } from "./InGameCommunicationChannel";
 
 export class RemoteRepeatLastKnownDirectionControl
 	implements
@@ -42,7 +42,7 @@ export class RemoteRepeatLastKnownDirectionControl
 	}
 
 	onMessage(
-		message: WebsocketMessage,
+		message: LiveStateMessage,
 	) {
 		if (
 			!this

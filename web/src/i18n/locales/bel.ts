@@ -109,6 +109,16 @@ export default {
 		"Падрыхтуйцеся да хвалі {wave}",
 	"preround.startWave":
 		"Пачаць хвалю {wave}",
+	"preround.ready":
+		"Гатовы",
+	"preround.notReady":
+		"Не гатовы",
+	"preround.waitingForPlayers":
+		"Чакаем іншых гульцоў…",
+	"preround.players":
+		"Гульцы",
+	"preround.you":
+		"вы",
 	"preround.noPlayer":
 		"Гулец не знойдзены",
 	"preround.weaponClicked":

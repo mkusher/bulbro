@@ -57,12 +57,87 @@ export const PlayerPositionUpdated =
 		},
 	);
 
+/**
+ * A player finished shopping. Sent by the client to the server and relayed to
+ * the other players. `wave` is the wave that should start next and `player`
+ * is the serialized player state after shopping.
+ */
+export const NextWavePlayerReady =
+	type(
+		{
+			type: "'next-wave-player-ready'",
+			gameId:
+				"string",
+			wave: "number.integer",
+			playerId:
+				"string",
+			player:
+				type(
+					{
+						id: "string",
+					},
+				),
+			sentAt:
+				"number",
+		},
+	);
+
+/**
+ * A player withdrew readiness to keep shopping. Sent by the client to the
+ * server and relayed to the other players.
+ */
+export const NextWavePlayerNotReady =
+	type(
+		{
+			type: "'next-wave-player-not-ready'",
+			gameId:
+				"string",
+			wave: "number.integer",
+			playerId:
+				"string",
+			sentAt:
+				"number",
+		},
+	);
+
+/**
+ * Sent by the server to every player once all players are ready and connected.
+ * `players` contains every player's state, host first.
+ */
+export const NextWaveStarted =
+	type(
+		{
+			type: "'next-wave-started'",
+			gameId:
+				"string",
+			wave: "number.integer",
+			players:
+				type(
+					{
+						id: "string",
+					},
+				).array(),
+			serverStartTime:
+				"number",
+		},
+	);
+
 export const WebsocketMessage =
 	HostStateUpdate.or(
 		PlayerStateUpdate,
-	).or(
-		PlayerPositionUpdated,
-	);
+	)
+		.or(
+			PlayerPositionUpdated,
+		)
+		.or(
+			NextWavePlayerReady,
+		)
+		.or(
+			NextWavePlayerNotReady,
+		)
+		.or(
+			NextWaveStarted,
+		);
 
 export type WebsocketMessage =
 	typeof WebsocketMessage.infer;

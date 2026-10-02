@@ -13,7 +13,7 @@ import {
 	type WaveState,
 } from "@/waveState";
 import type { User } from "./currentUser";
-import type { WebsocketMessage } from "./InGameCommunicationChannel";
+import type { LiveStateMessage } from "./InGameCommunicationChannel";
 
 function hydrateEvent(
 	event: GameEvent,
@@ -62,11 +62,10 @@ export class StateUpdater {
 	#waveProcess: WaveProcess;
 	#lastSyncedState: WaveState;
 	#isHost: boolean;
+	/** Sender sequence of the last applied position packet; -1 before the first */
 	#lastPositionVersion =
 		-1;
 	#lastStateVersion = 0;
-	#lastPositionUpdatedAt =
-		-Infinity;
 
 	constructor({
 		logger,
@@ -97,7 +96,7 @@ export class StateUpdater {
 
 	processMessage =
 		(
-			message: WebsocketMessage,
+			message: LiveStateMessage,
 			_localEvents: GameEvent[] = [],
 		) => {
 			if (
@@ -129,10 +128,29 @@ export class StateUpdater {
 					.#currentUser
 					.value
 					.id;
+			// Position packets are sent on every change, so once one arrived
+			// it is the freshest remote position and batches must not move the
+			// remote player back.
+			const hasPositionPackets =
+				this
+					.#lastPositionVersion >=
+				0;
 			const events =
 				(
 					message.events as GameEvent[]
 				)
+					.filter(
+						(
+							event,
+						) =>
+							!(
+								hasPositionPackets &&
+								event.type ===
+									"bulbroMoved" &&
+								event.bulbroId !==
+									localPlayerId
+							),
+					)
 					.filter(
 						(
 							event,
@@ -209,7 +227,7 @@ export class StateUpdater {
 
 	#handlePosition(
 		message: Extract<
-			WebsocketMessage,
+			LiveStateMessage,
 			{
 				type: "game-state-position-updated";
 			}
@@ -221,12 +239,10 @@ export class StateUpdater {
 					.#currentUser
 					.value
 					.id ||
+			// Ordered by the sender's sequence only; sentAt is diagnostic.
 			message.version <=
 				this
-					.#lastPositionVersion ||
-			message.sentAt <
-				this
-					.#lastPositionUpdatedAt
+					.#lastPositionVersion
 		)
 			return;
 		const state =
@@ -247,8 +263,6 @@ export class StateUpdater {
 			return;
 		this.#lastPositionVersion =
 			message.version;
-		this.#lastPositionUpdatedAt =
-			message.sentAt;
 		const now =
 			this.#waveProcess.now();
 		this.#currentState.value =
@@ -290,8 +304,6 @@ export class StateUpdater {
 		this.#lastPositionVersion =
 			-1;
 		this.#lastStateVersion = 0;
-		this.#lastPositionUpdatedAt =
-			-Infinity;
 		this.#lastSyncedState =
 			this.#currentState.value;
 	}

@@ -76,6 +76,14 @@ export class WebsocketConnection {
 		);
 
 		return () => {
+			this.#listeners =
+				this.#listeners.filter(
+					(
+						l,
+					) =>
+						l !==
+						listener,
+				);
 			this.#ws.removeEventListener(
 				"message",
 				listener,

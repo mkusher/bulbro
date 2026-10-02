@@ -109,6 +109,16 @@ export default {
 		"Przygotuj się na falę {wave}",
 	"preround.startWave":
 		"Rozpocznij falę {wave}",
+	"preround.ready":
+		"Gotowy",
+	"preround.notReady":
+		"Niegotowy",
+	"preround.waitingForPlayers":
+		"Czekamy na innych graczy…",
+	"preround.players":
+		"Gracze",
+	"preround.you":
+		"ty",
 	"preround.noPlayer":
 		"Nie znaleziono gracza",
 	"preround.weaponClicked":

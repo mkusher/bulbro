@@ -109,6 +109,16 @@ export default {
 		"Prepare for Wave {wave}",
 	"preround.startWave":
 		"Start Wave {wave}",
+	"preround.ready":
+		"Ready",
+	"preround.notReady":
+		"Not Ready",
+	"preround.waitingForPlayers":
+		"Waiting for other players…",
+	"preround.players":
+		"Players",
+	"preround.you":
+		"you",
 	"preround.noPlayer":
 		"No player found",
 	"preround.weaponClicked":

@@ -37,10 +37,10 @@
 <body>
 <header>
   <h1>Network game protocol</h1>
-  <p>Current browser and Bun server behavior as of 27 September 2026. This page describes the two-player network mode and distinguishes enforced rules from remaining limitations.</p>
+  <p>Current browser and Bun server behavior as of 2 October 2026. This page describes the two-player network mode and distinguishes enforced rules from remaining limitations.</p>
 </header>
 <main>
-  <nav aria-label="Contents"><a href="#overview">Overview</a><a href="#setup">Lobby and start</a><a href="#live">Live game</a><a href="#messages">Message catalog</a><a href="#gaps">Remaining gaps</a><a href="#sources">Source map</a></nav>
+  <nav aria-label="Contents"><a href="#overview">Overview</a><a href="#setup">Lobby and start</a><a href="#live">Live game</a><a href="#next-wave">Shop and next wave</a><a href="#messages">Message catalog</a><a href="#gaps">Remaining gaps</a><a href="#sources">Source map</a></nav>
 
   <section id="overview">
     <h2>Overview</h2>
@@ -69,8 +69,23 @@
       <div class="step server"><strong>Server relay</strong>Validates the shared wire schema, room membership, sender role, and position player ID.</div>
       <div class="step"><strong>Other player</strong>Receives the message, merges role-filtered events or position, and continues local simulation.</div>
     </div>
-    <p>The host's initial state arrives in the guest's <code>game-started</code> message. During play, each browser sends its queued events every 50 ms when the queue is nonempty. The host sends world events and its movement; the guest sends only its movement. Receiving a batch does not trigger an extra game tick or an automatic response. Position updates travel independently, nominally every 20 ms, with their own versions. The server forwards accepted messages to the other registered room player; a guest cannot send a host batch, a host cannot send a guest batch, and a position packet's <code>playerId</code> must equal the socket's verified ID.</p>
+    <p>The host's initial state arrives in the guest's <code>game-started</code> message. During play, each browser sends its queued events every 50 ms when the queue is nonempty. The host sends world events and its movement; the guest sends only its movement. Receiving a batch does not trigger an extra game tick or an automatic response. Position updates travel independently, at most every 20 ms when the position changes. The server forwards accepted messages to the other registered room player; a guest cannot send a host batch, a host cannot send a guest batch, and a position packet's <code>playerId</code> must equal the socket's verified ID.</p>
+    <p>Position packets carry a per-wave sender sequence in <code>version</code>, starting at <code>1</code>. The receiver accepts the first packet of a wave and afterwards only packets with a higher sequence than the last applied one, so late packets are dropped. After the first position packet of a wave, event batches no longer move the remote player; its position comes only from position packets, which are sent whenever it changes. <code>sentAt</code> on both batches and position packets is the sender's <code>Date.now()</code> and is used only for diagnostics, never for ordering.</p>
     <p>The client chooses the remote control target by finding the room member whose ID differs from the local user ID. It applies accepted remote events to the current state without replaying already-applied local events, and reconstructs enemy and shot runtime objects after JSON transport. The server validates message shape, not individual game events or game physics.</p>
+  </section>
+
+  <section id="next-wave">
+    <h2>Shop and next wave</h2>
+    <div class="flow" aria-label="Next wave readiness sequence">
+      <div class="step"><strong>1. Shop</strong>After a won wave each browser shows its own shop. Purchases and re-rolls change only the local player's state.</div>
+      <div class="step"><strong>2. Ready</strong>The Start button reads <em>Ready</em>. Pressing it locks the shop and sends <code>next-wave-player-ready</code> with the upcoming wave number and the local player's full post-shop state.</div>
+      <div class="step server"><strong>3. Collect</strong>The server stores the latest state per member for that wave and relays the readiness message to the other member, whose shop shows the player as ready. Pressing <em>Not Ready</em> sends <code>next-wave-player-not-ready</code>; the server drops the stored state, relays the message, and the shop unlocks.</div>
+      <div class="step server"><strong>4. Start</strong>Once every member is ready, marked connected, and has a registered socket, the server sends <code>next-wave-started</code> to everyone with all player states, host first.</div>
+      <div class="step"><strong>5. Simulate</strong>Each browser applies the next wave to the host-first players, so start positions match, reorders local first for controls, and starts a fresh event and position sync.</div>
+    </div>
+    <p>The shop lists every lobby member with a connection badge, taken from <code>player-connected</code> and <code>player-disconnected</code>, and a readiness badge. Readiness counts only for the wave after the local current wave, so a message for another wave never marks a player ready.</p>
+    <p>The server accepts readiness only from a room member for its own ID, with <code>player.id</code> equal to the socket identity, and only for the wave after the last started wave. The host's <code>POST /api/game/:id/start</code> sets the last started wave to <code>1</code>. Repeating readiness replaces the stored state. Withdrawn readiness follows the same membership and wave rules. After the wave starts, the server ignores it, so a <em>Not Ready</em> that loses the race still starts the wave. Starting a wave clears the stored readiness, so duplicate or stale messages cannot start it twice. When a member is offline, the wave waits; the server checks again when that member's socket authenticates. Clients cannot send <code>next-wave-started</code>; the server drops it. A client also ignores a start whose wave is not its current wave plus one.</p>
+    <p class="note"><strong>Trust:</strong> The server checks the shape and the player ID of the submitted state, but not its contents. A modified client can report arbitrary materials or weapons, the same trust level as live event batches.</p>
   </section>
 
   <section id="messages">
@@ -82,7 +97,6 @@
       <tr><td><code>POST /api/game-lobby/:id/join-requests</code></td><td><code>{player:{id,username}}</code></td><td>Bearer ID must equal player ID. Returns the full lobby; a new third player receives <code>409</code>.</td></tr>
       <tr><td><code>POST /api/game-lobby/:id/ready</code></td><td><code>{player:{id,bulbro}}</code></td><td>Only that room member may set readiness. Returns the full lobby and notifies the other socket.</td></tr>
       <tr><td><code>POST /api/game/:id/start</code></td><td><code>{state}</code>, including two matching player IDs</td><td>Host only. Returns <code>{id,state}</code> and sends <code>game-started</code> to the guest when start conditions pass.</td></tr>
-      <tr><td><code>PUT /api/game/:id/host</code><br><code>PUT /api/game/:id/player</code></td><td><code>{state}</code></td><td>Legacy full-state relay routes with bearer and role checks. The current browser game has no call sites for them.</td></tr>
     </tbody></table></div>
     <h3>WebSocket JSON</h3>
     <div class="table-wrap"><table><thead><tr><th>Direction and type</th><th>Payload</th><th>Handling</th></tr></thead><tbody>
@@ -93,6 +107,9 @@
       <tr><td>Server → guest <code>game-started</code></td><td><code>{lobby,initialState,serverStartTime}</code></td><td>Guest restores wave state and starts local simulation.</td></tr>
       <tr><td>Client ↔ relay <code>game-state-updated-by-host</code><br><code>game-state-updated-by-guest</code></td><td><code>{gameId,version,events:object[],sentAt}</code></td><td>Validated by the shared schema and forwarded only from the proper role to the other member.</td></tr>
       <tr><td>Client ↔ relay <code>game-state-position-updated</code></td><td><code>{gameId,playerId,position,direction,version,sentAt}</code></td><td>Forwarded only when <code>playerId</code> matches the verified socket identity.</td></tr>
+      <tr><td>Client → server → other members <code>next-wave-player-ready</code></td><td><code>{gameId,wave,playerId,player,sentAt}</code>; <code>wave</code> is an integer, <code>player</code> is the serialized player state with <code>id</code></td><td>Accepted only from the member itself for the wave after the last started one. Stored as that member's state for the wave and relayed with a server <code>sentAt</code>.</td></tr>
+      <tr><td>Client → server → other members <code>next-wave-player-not-ready</code></td><td><code>{gameId,wave,playerId,sentAt}</code></td><td>Accepted only from the member itself, before that wave starts. Removes the member's stored state and is relayed with a server <code>sentAt</code>.</td></tr>
+      <tr><td>Server → all members <code>next-wave-started</code></td><td><code>{gameId,wave,players,serverStartTime}</code>; <code>players</code> host first</td><td>Sent once per wave when all members are ready and connected. Clients restore the players and start the wave. Ignored when a client sends it.</td></tr>
     </tbody></table></div>
     <p>Socket errors are still untyped objects such as <code>{"error":"Unauthorized"}</code>. The lobby listener ignores messages outside its schema; the in-game listener logs unknown messages.</p>
   </section>
@@ -101,16 +118,16 @@
     <h2>Remaining gaps</h2>
     <p class="note">JWTs establish a server-issued session ID, but anyone can create a new username-based identity. Room and socket state live only in this server process. The server does not provide authoritative simulation, replay, or recovery after a connection interruption.</p>
     <div class="table-wrap"><table><thead><tr><th>Status</th><th>Behavior and impact</th><th>Possible next step</th></tr></thead><tbody>
+      <tr><td class="status open">Open</td><td><strong>Readiness is not restored after reconnect.</strong> A reloaded tab loses its local game state, and the server does not resend stored readiness to a reconnecting client.</td><td>Include next wave readiness in <code>lobby-snapshot</code>.</td></tr>
       <tr><td class="status open">Open</td><td><strong>Automatic reconnect and resync are absent.</strong> The server safely replaces sockets and restores online status on a new authenticated socket, but the current game flow does not invoke reconnect or restore missed state.</td><td>Reconnect with a retained valid token and request an authoritative snapshot before resuming play.</td></tr>
       <tr><td class="status open">Open</td><td><strong>Live event delivery has no recovery.</strong> Events are flushed before send, with no acknowledgement, retry, replay, or snapshot path. An interruption can leave the two simulations divergent.</td><td>Add acknowledged versions, buffered resend, and snapshot-based resync.</td></tr>
-      <tr><td class="status open">Open</td><td><strong>Legacy full-state routes are separate from the live protocol.</strong> They are authorized but unused by the browser, and their payload shape differs from event batches.</td><td>Remove them or define and test a separate full-state message contract.</td></tr>
     </tbody></table></div>
   </section>
 
   <section id="sources">
     <h2>Source map</h2>
-    <p><strong>Server:</strong> <a href="../server/src/auth.ts">JWT handling</a>, <a href="../server/src/router.ts">HTTP routes</a>, <a href="../server/src/games-registry.ts">lobby registry</a>, <a href="../server/src/game-lobby-controller.ts">lobby notifications</a>, <a href="../server/src/game-controller.ts">game start and legacy relay</a>, <a href="../server/src/game-websocket-controller.ts">live relay</a>, <a href="../server/src/websocket-connection.ts">socket authentication</a>, <a href="../server/src/websocket-connections.ts">socket mappings</a>.</p>
-    <p><strong>Client and shared package:</strong> <a href="../web/src/network/currentUser.ts">user session</a>, <a href="../web/src/network/currentLobby.ts">lobby API and readiness</a>, <a href="../web/src/network/LobbySocketMessages.ts">lobby wire schema</a>, <a href="../web/src/network/start-game.ts">startup</a>, <a href="../web/src/network/gameParticipants.ts">player selection</a>, <a href="../web/src/network/StateSync.ts">event exchange</a>, <a href="../web/src/network/StateUpdater.ts">state application</a>, <a href="../packages/network-protocol/src/index.ts">live wire schema</a>.</p>
+    <p><strong>Server:</strong> <a href="../server/src/auth.ts">JWT handling</a>, <a href="../server/src/router.ts">HTTP routes</a>, <a href="../server/src/games-registry.ts">lobby registry</a>, <a href="../server/src/game-lobby-controller.ts">lobby notifications</a>, <a href="../server/src/game-controller.ts">game start and next wave start</a>, <a href="../server/src/game-websocket-controller.ts">live relay</a>, <a href="../server/src/websocket-connection.ts">socket authentication</a>, <a href="../server/src/websocket-connections.ts">socket mappings</a>.</p>
+    <p><strong>Client and shared package:</strong> <a href="../web/src/network/currentUser.ts">user session</a>, <a href="../web/src/network/currentLobby.ts">lobby API and readiness</a>, <a href="../web/src/network/LobbySocketMessages.ts">lobby wire schema</a>, <a href="../web/src/network/start-game.ts">startup</a>, <a href="../web/src/network/gameParticipants.ts">player selection</a>, <a href="../web/src/network/StateSync.ts">event exchange</a>, <a href="../web/src/network/StateUpdater.ts">state application</a>, <a href="../web/src/network/NetworkGameConnection.ts">next wave readiness and start</a>, <a href="../web/src/screens/PreRound.tsx">shop screen</a>, <a href="../web/src/shop/NetworkPlayersStatus.tsx">player status panel</a>, <a href="../packages/network-protocol/src/index.ts">live wire schema</a>.</p>
   </section>
 </main>
 </body>
