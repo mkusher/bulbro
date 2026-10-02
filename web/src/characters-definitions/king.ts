@@ -11,10 +11,10 @@ export const king: Bulbro =
 		name: "King",
 		statBonuses:
 			{
-				maxHp: 30, // +30 HP
+				maxHp: 30, // +30 max HP
 				damage: 30, // +30% damage
-				armor: 10, // +10 armor
-				luck: 50, // +50% luck
+				armor: 10, // +10 armor (takes 40% less damage)
+				luck: 50, // +50 luck
 				pickupRange: 30, // +30% pickup range
 			},
 		style:

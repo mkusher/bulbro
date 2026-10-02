@@ -213,7 +213,7 @@ export class KeepkingDistanceBehaviors
 					const weaponTime =
 						weapon
 							.statsBonus
-							?.attackSpeed ??
+							?.cooldown ??
 						1;
 					const entityAttackSpeed =
 						currentEnemy

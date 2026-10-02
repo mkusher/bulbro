@@ -171,6 +171,8 @@ function createMockBulbro(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: sprite as any,
 			position,
@@ -182,7 +184,6 @@ function createMockBulbro(
 			healthPoints: 100,
 			lastMovedAt: 0,
 			lastHitAt: 0,
-			speed: 100,
 			level: 0,
 			totalExperience: 0,
 			materialsAvailable: 0,

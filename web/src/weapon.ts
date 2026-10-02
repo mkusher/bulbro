@@ -1,7 +1,9 @@
-import type { Stats } from "./bulbro";
 import { zeroPoint } from "./geometry";
 import { uuid } from "./uuid";
-import type { WeaponState } from "./weapon/WeaponState";
+import type {
+	WeaponState,
+	WeaponStats,
+} from "./weapon/WeaponState";
 import {
 	enemyWeapons,
 	fist,
@@ -37,12 +39,6 @@ export type WeaponClass =
 	| "support"
 	| "tool"
 	| "unarmed";
-
-/**
- * Partial stats bonuses that weapons can provide.
- */
-export type StatsBonus =
-	Partial<Stats>;
 
 /**
  * Melee swing: the weapon sweeps an arc around its owner.
@@ -111,7 +107,7 @@ export interface Weapon {
 	id: WeaponType;
 	name: string;
 	classes: WeaponClass[];
-	statsBonus: StatsBonus;
+	statsBonus: WeaponStats;
 	shotSpeed: number;
 	basePrice: number;
 	attack: AttackConfig;
@@ -184,3 +180,15 @@ export const isUnarmedWeapon =
 		).classes.includes(
 			"unarmed",
 		);
+
+/** Whether the weapon strikes in melee instead of firing projectiles. */
+export const isMeleeWeapon =
+	(
+		type: WeaponType,
+	): boolean =>
+		getWeaponByType(
+			type,
+		)
+			.attack
+			.type !==
+		"shot";

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bulbro skills (stats), levels and upgrades</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.55; color: #17233b; background: #f5f7fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #15233f; color: white; padding: 3rem max(1.25rem, calc((100vw - 1100px)/2)); }
+    header h1 { margin: 0 0 .5rem; font-size: clamp(2rem, 4vw, 3rem); }
+    header p { max-width: 850px; margin: 0; color: #d9e4fa; }
+    main { max-width: 1100px; padding: 1.5rem 1.25rem 4rem; margin: auto; }
+    nav, section { background: white; border: 1px solid #dce3ef; border-radius: 12px; margin: 0 0 1.2rem; padding: 1.25rem 1.5rem; box-shadow: 0 2px 10px #17233b08; }
+    nav a { margin-right: 1rem; display: inline-block; }
+    h2 { margin: 0 0 .8rem; font-size: 1.5rem; }
+    h3 { margin: 1.5rem 0 .5rem; }
+    p { margin: .5rem 0 1rem; }
+    a { color: #1753a6; }
+    code { background: #edf2fa; border-radius: 4px; padding: .1em .3em; overflow-wrap: anywhere; }
+    pre { background: #15233f; color: #e6edf9; border-radius: 8px; padding: 1rem; overflow-x: auto; font-size: .88rem; }
+    pre code { background: none; padding: 0; }
+    .note { border-left: 4px solid #4176c8; padding: .5rem 1rem; background: #f0f5fd; }
+    .warn { border-left: 4px solid #c8414b; padding: .5rem 1rem; background: #fdf0f1; }
+    .summary { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; }
+    .tile { flex: 1 1 150px; padding: .8rem 1rem; border-radius: 8px; border: 1px solid #dce3ef; }
+    .tile strong { display: block; font-size: 1.8rem; line-height: 1.1; }
+    .tile.ok { background: #edf8f0; border-color: #9bc9ae; }
+    .tile.partial { background: #fdf8e8; border-color: #e3cf8a; }
+    .tile.broken { background: #fdf0f1; border-color: #e6a5aa; }
+    .tile.unused { background: #f1f3f7; border-color: #c9d0dc; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; font-size: .94rem; }
+    th, td { text-align: left; vertical-align: top; border-bottom: 1px solid #e3e9f2; padding: .6rem .65rem; }
+    th { background: #f1f5fb; }
+    .status { font-weight: 700; white-space: nowrap; }
+    .s-ok { color: #247044; }
+    .s-partial { color: #785f11; }
+    .s-broken { color: #a3212b; }
+    .s-unused { color: #5c6678; }
+    .sev { font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; padding: .1em .45em; border-radius: 4px; white-space: nowrap; }
+    .sev.high { background: #fbdcdf; color: #a3212b; }
+    .sev.med { background: #f8ecc5; color: #785f11; }
+    .sev.low { background: #e3e9f2; color: #3a475e; }
+    ol.issues > li { margin-bottom: .9rem; }
+    .phase { border: 1px solid #bdd0ed; border-radius: 8px; background: #f7faff; padding: .8rem 1.1rem; margin: .8rem 0; }
+    .phase h3 { margin-top: .2rem; }
+    @media print { :root { background: white; } header { padding: 1rem; } main { padding: 1rem; } nav, section { box-shadow: none; break-inside: avoid; } a { color: #17233b; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Skills (stats), levels and upgrades</h1>
+  <p>How the Bulbro stat system works as of 28 September 2026, compared with Brotato's
+    <a href="https://brotato.wiki.spellsandguns.com/Upgrades" style="color:#9fc3ff">Upgrades</a>.
+    "Skills" here means the 16 primary stats plus 2 secondary stats every Bulbro has. Everything above
+    <a href="#plan" style="color:#9fc3ff">Phases</a> describes the current code.</p>
+</header>
+<main>
+  <nav aria-label="Contents">
+    <a href="#summary">Summary</a>
+    <a href="#model">How stats work</a>
+    <a href="#catalog">Stat catalog</a>
+    <a href="#characters">Characters</a>
+    <a href="#weapons">Weapons</a>
+    <a href="#levels">Levels &amp; XP</a>
+    <a href="#issues">Current issues</a>
+    <a href="#brotato">Brotato upgrades</a>
+    <a href="#missing">Missing vs Brotato</a>
+    <a href="#plan">Phases</a>
+    <a href="#sources">Source map</a>
+  </nav>
+
+  <section id="summary">
+    <h2>Summary</h2>
+    <div class="summary">
+      <div class="tile ok"><strong>13</strong>of 16 primary stats work as in Brotato<br><small>plus both secondary stats</small></div>
+      <div class="tile partial"><strong>2</strong>primary stats work partially<br><small>elementalDamage, luck</small></div>
+      <div class="tile unused"><strong>1</strong>primary stat has no effect<br><small>engineering</small></div>
+      <div class="tile broken"><strong>0</strong>levels do anything yet<br><small>XP and level are tracked, but there are no rewards</small></div>
+    </div>
+    <p>Stats are stat points summed from a list of stat sources, and the combat formulas give the points their meaning.
+      Damage, attack speed, crits, armor, dodge, life steal, HP regeneration, harvesting and range follow Brotato's formulas.
+      Level-up upgrades and items do not exist yet. They are meant to plug in as new stat sources (see <a href="#plan">Phases</a>).</p>
+  </section>
+
+  <section id="model">
+    <h2>How stats work</h2>
+    <ol>
+      <li><strong>Types.</strong> <code>Stats = MainStats &amp; SecondaryStats</code> (<code>web/src/bulbro/BulbroCharacter.ts</code>). <code>MainStats</code> holds the 16 Brotato primary stats; <code>SecondaryStats</code> holds <code>pickupRange</code> and <code>knockback</code>.</li>
+      <li><strong>Base values.</strong> <code>baseStats</code> (<code>web/src/game-formulas.ts</code>): <code>maxHp 10</code>, <code>speed 450</code>, <code>pickupRange 100</code>, everything else <code>0</code>.</li>
+      <li><strong>Stat points.</strong> Each stat is base + the sum of its points. The exceptions are <code>speed</code> and <code>pickupRange</code>, where points are a percentage of the base (<code>450 × (1 + points/100)</code>). The combat formulas decide what the other points mean; for example, 60 damage points means +60% damage. Max HP is at least 1.</li>
+      <li><strong>Stat sources.</strong> <code>BulbroState.statSources: StatSource[]</code>, where each source is <code>{ id, kind, bonuses }</code> and <code>kind</code> is <code>"character" | "harvestingGrowth" | "upgrade" | "item" | "level"</code>. <code>computeStats(sources)</code> produces <code>BulbroState.stats</code>, and <code>withStatSource(source)</code> adds a source or replaces the one with the same id, then recomputes. Today only <code>character</code> and <code>harvestingGrowth</code> sources are created.</li>
+      <li><strong>Display.</strong> The shared <code>percentageStats</code> set decides which stats are shown with a % sign (speed, damage, attack speed, crit, life steal, dodge, luck, pickup range).</li>
+      <li><strong>Enemies</strong> use a separate <code>EnemyStats</code> shape with flat values scaled per wave (<code>buildWaveStats</code>). Their <code>damage</code> is flat damage, not a percentage.</li>
+      <li><strong>Network sync.</strong> Clients exchange events, not state, so every random outcome is rolled in an event generator and carried in the event. Crits are baked into the damage of the shot or strike. A dodged hit produces no event. Life steal produces a heal event. Luck decides the <code>consumableId</code> on <code>enemyDied</code>. Reducers stay deterministic.</li>
+    </ol>
+  </section>
+
+  <section id="catalog">
+    <h2>Stat catalog</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Stat</th><th>Current behavior</th><th>Where</th><th>Status</th><th>Brotato meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>maxHp</code></td><td>10 + points, at least 1. Refilled at the start of each wave.</td><td><code>computeStats</code>, <code>BulbroState</code></td><td class="status s-ok">Works</td><td>Max HP; +1 per level-up.</td></tr>
+          <tr><td><code>hpRegeneration</code></td><td>(1 + (R−1)/2.25)/5 HP/s, none at R ≤ 0. Heals in 1-second chunks.</td><td><code>getHpRegenerationPerSecond</code>, <code>healByHpRegeneration</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>lifeSteal</code></td><td>A <code>lifeSteal</code>% chance per hit landed to heal 1 HP, at most 10 times per second and once per tick. It does not reset the regeneration timer.</td><td><code>BulbroState.stealLife</code>, shot and melee generators</td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>damage</code></td><td>Multiplies player damage by (1 + damage/100). The result is rounded, at least 1.</td><td><code>calculateAttackDamage</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>meleeDamage</code></td><td>Added to weapon damage × the weapon's melee scaling (default 100% for melee weapons).</td><td><code>calculateAttackDamage</code>, <code>getWeaponScaling</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>rangedDamage</code></td><td>Added to weapon damage × the weapon's ranged scaling (default 100% for guns).</td><td>same</td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>elementalDamage</code></td><td>Added via scaling, but only the laser gun scales with it (50%).</td><td>same</td><td class="status s-partial">Partial</td><td>Elemental weapons and burning.</td></tr>
+          <tr><td><code>attackSpeed</code></td><td>Cooldown ÷ (1 + AS/100) for positive values, × (1 + |AS|/100) for negative values, minimum 100 ms.</td><td><code>getAttackCooldown</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>critChance</code></td><td>Player + weapon crit chance. A crit multiplies damage by the weapon's <code>critMultiplier</code> (default ×2).</td><td><code>calculateAttackDamage</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>engineering</code></td><td>Nothing reads it.</td><td>—</td><td class="status s-unused">Unused</td><td>Structure (turret) damage.</td></tr>
+          <tr><td><code>range</code></td><td>Added to weapon range: fully for guns, 50% for players' melee weapons. Enemies get it fully.</td><td><code>calculateAttackRange</code>, <code>isInRange</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>armor</code></td><td>Damage taken × 15/(15+A), or × (15−A)/15 when negative. Rounded, at least 1.</td><td><code>damageAfterArmor</code>, <code>BulbroState.beHit</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>dodge</code></td><td>A <code>dodge</code>% chance (capped at 60%) to ignore a hit.</td><td><code>getDodgeChance</code>, <code>BulbroState.beHit</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>speed</code></td><td>450 × (1 + speed/100).</td><td>movement</td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>luck</code></td><td>The killer's luck scales the consumable drop chance × (1 + luck/100).</td><td><code>dropChanceWithLuck</code>, <code>EnemyState.beHit</code></td><td class="status s-partial">Partial</td><td>Also material and crate drops, and shop and upgrade rarity.</td></tr>
+          <tr><td><code>harvesting</code></td><td>When a wave is survived: +⌊harvesting⌋ materials and XP, then harvesting grows by 5%, rounded up (a <code>harvesting-growth</code> source). Negative harvesting takes materials and XP away instead (never a level, never below 0 materials) and does not grow. Pickups during the wave are not affected.</td><td><code>BulbroState.harvest</code>, <code>tick</code> in <code>updateState</code></td><td class="status s-ok">Works</td><td>Same.</td></tr>
+          <tr><td><code>pickupRange</code></td><td>100 × (1 + points/100).</td><td><code>waveState.ts</code></td><td class="status s-ok">Works</td><td>Secondary, from items.</td></tr>
+          <tr><td><code>knockback</code></td><td>Added to weapon knockback.</td><td><code>calculateAttackKnockback</code></td><td class="status s-ok">Works</td><td>Secondary, from items.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="characters">
+    <h2>Characters</h2>
+    <p>All bonuses take effect except engineering.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Character</th><th>Stat points</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Well Rounded</td><td>maxHp +5, speed +5%, harvesting +8</td><td>The only harvester.</td></tr>
+          <tr><td>Vampire</td><td>range +50, lifeSteal +10%, rangedDamage +3</td><td></td></tr>
+          <tr><td>Grandpa</td><td>speed −20%, pickupRange +50%</td><td></td></tr>
+          <tr><td>Medic</td><td>hpRegeneration +5 (~0.56 HP/s), maxHp +20, engineering +3</td><td>The only character with regeneration. Engineering has no effect.</td></tr>
+          <tr><td>Berserker</td><td>meleeDamage +5, damage +20%, attackSpeed +30%, maxHp +5, armor −5</td><td>Takes 33% more damage.</td></tr>
+          <tr><td>King</td><td>maxHp +30, damage +30%, armor +10, luck +50, pickupRange +30%</td><td>Takes 40% less damage.</td></tr>
+          <tr><td>Cyborg</td><td>maxHp +10, rangedDamage +4, engineering +5, attackSpeed +10%, range +25, armor +1</td><td>Engineering has no effect.</td></tr>
+          <tr><td>Evil</td><td>damage +60%, meleeDamage +6, critChance +15%, attackSpeed +25%, maxHp −5, armor −3, speed +10%</td><td>5 max HP; takes 20% more damage.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="weapons">
+    <h2>Weapons</h2>
+    <p>Weapon stats (<code>WeaponStats</code> in <code>web/src/weapon/WeaponState.ts</code>) are the weapon's own values. The wielder's stats are applied on top of them by the formulas. <code>cooldown</code> is in seconds, before attack speed is applied.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Weapon</th><th>Attack</th><th>Damage</th><th>Cooldown</th><th>Range</th><th>Crit</th><th>Scaling</th></tr></thead>
+        <tbody>
+          <tr><td>Fist</td><td>melee</td><td>8</td><td>0.78</td><td>150</td><td>0%</td><td>100% melee</td></tr>
+          <tr><td>Hand</td><td>melee</td><td>1</td><td>1.01</td><td>150</td><td>0%</td><td>50% melee</td></tr>
+          <tr><td>Knife</td><td>melee</td><td>6</td><td>1.01</td><td>150</td><td>20% ×2.5</td><td>80% melee</td></tr>
+          <tr><td>Sword</td><td>melee combo</td><td>25</td><td>0.9</td><td>80</td><td>10%</td><td>100% melee</td></tr>
+          <tr><td>Brick</td><td>melee</td><td>30</td><td>1.39</td><td>150</td><td>5%</td><td>100% melee</td></tr>
+          <tr><td>Pistol</td><td>shot</td><td>2</td><td>0.5</td><td>400</td><td>5%</td><td>100% ranged</td></tr>
+          <tr><td>SMG</td><td>shot</td><td>1</td><td>0.2</td><td>400</td><td>1%</td><td>50% ranged</td></tr>
+          <tr><td>AK-47</td><td>shot</td><td>2</td><td>0.3</td><td>500</td><td>5%</td><td>80% ranged</td></tr>
+          <tr><td>Double Barrel Shotgun</td><td>shot</td><td>12</td><td>1.37</td><td>350</td><td>3%</td><td>80% ranged</td></tr>
+          <tr><td>Laser Gun</td><td>shot</td><td>4</td><td>1.98</td><td>500</td><td>3%</td><td>100% ranged, 50% elemental</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="levels">
+    <h2>Levels and experience</h2>
+    <ul>
+      <li><strong>XP sources:</strong> each collected material gives +1 material and +1 XP regardless of harvesting, and harvesting gives XP at the end of a wave (<code>BulbroState.gainMaterials</code>).</li>
+      <li><strong>Co-op shares every pickup (intended).</strong> <code>materialCollected</code> carries the collecting <code>playerId</code>, but every player gets +1 material and +1 XP. Players level at the same rate from pickups and differ only by their own harvesting. Covered by tests in <code>BulbroState.spec.ts</code> and <code>waveState.spec.ts</code> ("co-op shared pickups").</li>
+      <li><strong>Curve</strong> (<code>web/src/bulbro/Levels.ts</code>): Bulbros start at level 0, and reaching level <em>n</em> takes (<em>n</em>+3)² more XP (16, 25, 36, …), as in Brotato. A level is reached exactly at its threshold.</li>
+      <li><strong>State:</strong> <code>BulbroState.level</code> follows the XP (<code>getLevelForExperience</code>) and never goes down. The in-wave XP bar uses the same functions.</li>
+      <li><strong>Rewards:</strong> none yet. There is no level-up event, no +1 max HP and no upgrade choice.</li>
+    </ul>
+  </section>
+
+  <section id="issues">
+    <h2>Current issues</h2>
+    <ol class="issues">
+      <li><span class="sev high">High</span> <strong>Levels give nothing.</strong> Level and XP are tracked, but there is no +1 max HP and no upgrade choice. This is covered by Phase 2.</li>
+      <li><span class="sev med">Medium</span> <strong>No feedback for crits, dodges or life steal.</strong> The mechanics work, but <code>HitIndicators</code> shows nothing special, so players can't tell their stats are working.</li>
+      <li><span class="sev med">Medium</span> <strong>No stats panel during a run.</strong> <code>BulbroStateStats</code> shows live <code>BulbroState.stats</code>, but only stories use it. The character selector shows the character's stats only. After upgrades and items, the shop needs a live stats view.</li>
+      <li><span class="sev med">Medium</span> <strong>Engineering has no effect</strong>, yet Medic (+3) and Cyborg (+5) have it. There are no structures.</li>
+      <li><span class="sev med">Medium</span> <strong>Elemental damage barely matters.</strong> Only the laser gun scales with it (50%), and there are no elemental weapons or burning.</li>
+      <li><span class="sev med">Medium</span> <strong>Luck only affects consumable drops.</strong> Material and crate drops and shop and upgrade rarity ignore it.</li>
+      <li><span class="sev med">Medium</span> <strong>Balance is untested.</strong> With no free baseline regeneration, only Medic regenerates. Character points, weapon crit and scaling values, and armor extremes (King −40%, Berserker +33% damage taken) are first guesses.</li>
+      <li><span class="sev low">Low</span> <strong>Harvesting in network games</strong> is applied in the <code>tick</code> reducer on the running→ended transition, so it should run once per state. This is covered by reducer tests but has not been verified in a live two-player game.</li>
+      <li><span class="sev low">Low</span> <strong>Enemy stats reuse player stat names with different meanings.</strong> Enemy <code>damage</code> is flat, and enemy <code>attackSpeed</code> of 1–2 points is only 1–2% faster.</li>
+      <li><span class="sev low">Low</span> <strong>HP regeneration heals in 1-second chunks</strong>.</li>
+    </ol>
+  </section>
+
+  <section id="brotato">
+    <h2>Brotato upgrades (reference)</h2>
+    <p>From the <a href="https://brotato.wiki.spellsandguns.com/Upgrades">Brotato wiki</a>: every level-up offers a choice of 4 upgrades, each raising one primary stat. Offered upgrades can be rerolled. Upgrades come in 4 tiers. Tier rarity depends on level and Luck in the same way as shop items. Some levels guarantee a tier:</p>
+    <ul>
+      <li>Level 1: 100% Tier I</li>
+      <li>Level 5: 100% Tier II</li>
+      <li>Levels 10, 15, 20: 100% Tier III</li>
+      <li>Level 25 and every 5th level after that: 100% Tier IV</li>
+    </ul>
+    <p>In Brotato, each level-up also grants +1 Max HP, and the upgrade choices appear at the end of the wave, before the shop, once per level gained.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Stat</th><th>Bulbro key</th><th>Tier I</th><th>Tier II</th><th>Tier III</th><th>Tier IV</th><th>Ready for upgrades</th></tr></thead>
+        <tbody>
+          <tr><td>Max HP</td><td><code>maxHp</code></td><td>Heart +3</td><td>+6</td><td>+9</td><td>+12</td><td class="s-ok">yes</td></tr>
+          <tr><td>HP Regeneration</td><td><code>hpRegeneration</code></td><td>Lungs +2</td><td>+3</td><td>+4</td><td>+5</td><td class="s-ok">yes</td></tr>
+          <tr><td>Life Steal</td><td><code>lifeSteal</code></td><td>Teeth +1</td><td>+2</td><td>+3</td><td>+4</td><td class="s-ok">yes</td></tr>
+          <tr><td>Damage</td><td><code>damage</code></td><td>Triceps +5</td><td>+8</td><td>+12</td><td>+16</td><td class="s-ok">yes</td></tr>
+          <tr><td>Melee Damage</td><td><code>meleeDamage</code></td><td>Forearms +2</td><td>+4</td><td>+6</td><td>+8</td><td class="s-ok">yes</td></tr>
+          <tr><td>Ranged Damage</td><td><code>rangedDamage</code></td><td>Shoulders +1</td><td>+2</td><td>+3</td><td>+4</td><td class="s-ok">yes</td></tr>
+          <tr><td>Elemental Damage</td><td><code>elementalDamage</code></td><td>Brain +1</td><td>+2</td><td>+3</td><td>+4</td><td class="s-partial">weak (laser gun only)</td></tr>
+          <tr><td>Attack Speed</td><td><code>attackSpeed</code></td><td>Reflexes +5</td><td>+10</td><td>+15</td><td>+20</td><td class="s-ok">yes</td></tr>
+          <tr><td>Crit Chance</td><td><code>critChance</code></td><td>Fingers +3</td><td>+5</td><td>+7</td><td>+9</td><td class="s-ok">yes</td></tr>
+          <tr><td>Engineering</td><td><code>engineering</code></td><td>Skull +2</td><td>+3</td><td>+4</td><td>+5</td><td class="s-unused">no (no structures)</td></tr>
+          <tr><td>Range</td><td><code>range</code></td><td>Eyes +15</td><td>+30</td><td>+45</td><td>+60</td><td class="s-ok">yes</td></tr>
+          <tr><td>Armor</td><td><code>armor</code></td><td>Chest +1</td><td>+2</td><td>+3</td><td>+4</td><td class="s-ok">yes</td></tr>
+          <tr><td>Dodge</td><td><code>dodge</code></td><td>Back +3</td><td>+6</td><td>+9</td><td>+12</td><td class="s-ok">yes</td></tr>
+          <tr><td>Speed</td><td><code>speed</code></td><td>Legs +3</td><td>+6</td><td>+9</td><td>+12</td><td class="s-ok">yes</td></tr>
+          <tr><td>Luck</td><td><code>luck</code></td><td>Nose +5</td><td>+10</td><td>+15</td><td>+20</td><td class="s-partial">partial (drops only)</td></tr>
+          <tr><td>Harvesting</td><td><code>harvesting</code></td><td>Hands +5</td><td>+8</td><td>+10</td><td>+12</td><td class="s-ok">yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="missing">
+    <h2>What is missing compared to Brotato</h2>
+    <h3>Level-up flow</h3>
+    <ul>
+      <li>+1 Max HP per level gained.</li>
+      <li>An end-of-wave "Level up" screen before the shop: 4 choices, one pick per level gained, and a reroll whose price grows with the wave.</li>
+      <li>Upgrade tiers (I–IV), rarity rolls driven by level and Luck, and guaranteed tiers at levels 5/10/15/20/25+.</li>
+      <li>Co-op handling: each player picks their own upgrades, and the picks are synced as events.</li>
+    </ul>
+    <h3>Stat mechanics</h3>
+    <ul>
+      <li>Engineering and structures; elemental weapons and effects (burning).</li>
+      <li>Luck on material and crate drops, and on shop and upgrade rarity.</li>
+    </ul>
+    <h3>Secondary stats (item-only in Brotato)</h3>
+    <p>Pickup range and knockback exist. Missing: XP gain %, consumable heal, materials-on-heal, piercing, bounce, explosion size/damage, free rerolls, shop price modifiers, enemy count/speed modifiers, harvesting growth modifiers, and structure stats.</p>
+    <h3>Items</h3>
+    <p>The shop only sells weapons (<code>ShopItemsGenerator.ts</code>). There is no passive item type, no item tiers, no item stacking or limits, and no trigger effects.</p>
+  </section>
+
+  <section id="plan">
+    <h2>Phases</h2>
+    <div class="phase">
+      <h3>Phase 0: stat foundation — done</h3>
+      <ul>
+        <li>Stat points model, <code>StatSource</code> list, <code>computeStats</code> and <code>withStatSource</code>.</li>
+        <li>Removed the duplicate <code>props.speed</code>; Brotato XP curve starting at level 0; renamed <code>getLevelForExperience</code>; <code>level</code> kept in sync with XP.</li>
+        <li><code>WeaponStats</code> with <code>cooldown</code> (renamed from weapon <code>attackSpeed</code>), crit chance and multiplier, and damage scaling.</li>
+      </ul>
+      <p class="note">Implementation note: characters were rebalanced into points (for example, Medic's regeneration went from 100 to 5), and each character's first source uses the id <code>"character"</code>. Specs build <code>BulbroState</code> with <code>statSources: []</code> and explicit <code>stats</code>, so calling <code>withStatSource</code> in those specs recomputes stats from base.</p>
+    </div>
+    <div class="phase">
+      <h3>Phase 1: stats in gameplay — done (except engineering and full luck)</h3>
+      <ul>
+        <li>Damage pipeline (scaling, damage %, crit), Brotato attack speed, armor, dodge, life steal, HP regeneration, harvesting, half range for melee weapons, and luck on consumable drops.</li>
+      </ul>
+      <p class="note">Implementation note: random rolls take an injectable <code>random</code> argument and happen in event generators, not reducers. The free baseline regeneration was removed on purpose. Harvesting runs in the <code>tick</code> reducer only when a wave is survived.</p>
+    </div>
+    <div class="phase">
+      <h3>Phase 2: level-up upgrades — next</h3>
+      <ul>
+        <li>Co-op pickups are shared, so players reach level-ups together; each player still picks their own upgrades.</li>
+        <li>An <code>upgrades-definitions/</code> module with the 16 Brotato upgrades × 4 tiers (table above). Leave engineering out until structures exist.</li>
+        <li>+1 max HP per level as a <code>level</code> stat source, and pending upgrades counted from the levels gained during the wave.</li>
+        <li>A level-up screen between the wave end and the shop: seeded choices (like <code>ShopItemsGenerator</code>), tier rolls by level and luck, reroll cost, and <code>upgradeSelected</code>/<code>upgradesRerolled</code> events that add <code>upgrade</code> stat sources.</li>
+        <li>Show live stats in the shop and level-up screen (<code>BulbroStateStats</code>).</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <h3>Phase 3: items</h3>
+      <ul>
+        <li>An item model (<code>id</code>, <code>tier</code>, <code>basePrice</code>, <code>bonuses: StatBonus</code>, optional limit and tags), sold in the shop next to weapons with prices from <code>itemPrice</code>. Each purchase adds an <code>item</code> stat source.</li>
+        <li>Start with pure stat items and trade-offs, then secondary-stat items, then trigger items.</li>
+        <li>Luck on shop rarity.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <h3>Later</h3>
+      <ul>
+        <li>Feedback for crits, dodges and life steal in <code>HitIndicators</code>.</li>
+        <li>Engineering with structures, and elemental weapons with burning.</li>
+        <li>A balance pass.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="sources">
+    <h2>Source map</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Area</th><th>Files</th></tr></thead>
+        <tbody>
+          <tr><td>Stat types</td><td><code>web/src/bulbro/BulbroCharacter.ts</code></td></tr>
+          <tr><td>Stat points, sources and all combat formulas</td><td><code>web/src/game-formulas.ts</code></td></tr>
+          <tr><td>Player state: hits, dodge, armor, regeneration, life steal, harvesting, XP</td><td><code>web/src/bulbro/BulbroState.ts</code></td></tr>
+          <tr><td>Level curve</td><td><code>web/src/bulbro/Levels.ts</code></td></tr>
+          <tr><td>Characters</td><td><code>web/src/characters-definitions/*.ts</code></td></tr>
+          <tr><td>Weapons</td><td><code>web/src/weapon/WeaponState.ts</code>, <code>web/src/weapons-definitions/*.ts</code>, <code>web/src/weapon/Attack.ts</code></td></tr>
+          <tr><td>Hit resolution and life steal</td><td><code>web/src/GameProcess/event-generators/ShotMovementEventGenerator.ts</code>, <code>MeleeStrikeEventGenerator.ts</code></td></tr>
+          <tr><td>Wave end harvesting</td><td><code>web/src/waveState.ts</code> (<code>tick</code> in <code>updateState</code>)</td></tr>
+          <tr><td>Enemy stats and drops</td><td><code>web/src/enemies-definitions/base.ts</code>, <code>web/src/enemy/EnemyState.ts</code></td></tr>
+          <tr><td>Shop</td><td><code>web/src/shop/ShopItemsGenerator.ts</code>, <code>web/src/shop/Shop.tsx</code></td></tr>
+          <tr><td>Stat UI</td><td><code>web/src/bulbro/BulbroStats.tsx</code>, <code>BulbroCard.tsx</code>, <code>BulbroTitle.tsx</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

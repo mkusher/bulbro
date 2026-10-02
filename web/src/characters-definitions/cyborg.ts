@@ -11,12 +11,12 @@ export const cyborg: Bulbro =
 		name: "Cyborg",
 		statBonuses:
 			{
-				maxHp: 10, // +15 HP
-				rangedDamage: 20, // +100% ranged damage (2x)
-				engineering: 5, // +150% engineering (2.5x)
-				attackSpeed: 4, // +40% attack speed
-				range: 5, // +75 range
-				armor: 1, // +5 armor
+				maxHp: 10, // +10 max HP
+				rangedDamage: 4, // +4 ranged damage
+				engineering: 5, // +5 engineering
+				attackSpeed: 10, // +10% attack speed
+				range: 25, // +25 range
+				armor: 1, // +1 armor
 			},
 		style:
 			{

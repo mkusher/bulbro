@@ -34,9 +34,24 @@ import {
 } from "../../weapon";
 import { TOUCH_MARGIN } from "../../weapon/Attack";
 import type { MeleeStrike } from "../../weapon/MeleeStrike";
+import type { WeaponState } from "../../weapon/WeaponState";
 import { EnemyBehaviorEventGenerator } from "./EnemyBehaviorEventGenerator";
 import { MeleeStrikeEventGenerator } from "./MeleeStrikeEventGenerator";
 import { PlayerWeaponEventGenerator } from "./PlayerWeaponEventGenerator";
+
+/** Crits are random: keep damage deterministic */
+function withoutCrits(
+	weapon: WeaponState,
+): WeaponState {
+	return {
+		...weapon,
+		statsBonus:
+			{
+				...weapon.statsBonus,
+				critChance: 0,
+			},
+	};
+}
 
 function createBulbro(
 	weapon: WeaponType = "sword",
@@ -47,10 +62,11 @@ function createBulbro(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id: "p1",
 			type: "normal",
 			position,
-			speed: 100,
 			level: 1,
 			totalExperience: 0,
 			materialsAvailable: 0,
@@ -66,9 +82,11 @@ function createBulbro(
 				},
 			weapons:
 				[
-					toWeaponState(
-						getWeaponByType(
-							weapon,
+					withoutCrits(
+						toWeaponState(
+							getWeaponByType(
+								weapon,
+							),
 						),
 					),
 				],
@@ -1124,6 +1142,115 @@ describe("sword", () => {
 			),
 		).toHaveLength(
 			strikes.length,
+		);
+	});
+});
+
+describe("life steal", () => {
+	it("heals the striking player once per tick when it steals life", () => {
+		const vampire =
+			createBulbro();
+		const player =
+			new BulbroState(
+				{
+					...vampire.toJSON(),
+					stats:
+						{
+							...vampire.stats,
+							lifeSteal: 100,
+						},
+				},
+			);
+		const {
+			state,
+			events,
+		} =
+			simulate(
+				makeState(
+					[
+						player,
+					],
+					[
+						createEnemy(
+							"e1",
+							1060,
+							1000,
+						),
+						createEnemy(
+							"e2",
+							1060,
+							1010,
+						),
+					],
+				),
+				5000,
+				30,
+			);
+		expect(
+			hitEnemyIds(
+				events,
+			),
+		).toEqual(
+			[
+				"e1",
+				"e2",
+			],
+		);
+		const heals =
+			events.filter(
+				(
+					e,
+				) =>
+					e.type ===
+						"bulbroHealed" &&
+					e.source ===
+						"lifeSteal",
+			);
+		expect(
+			heals,
+		).toHaveLength(
+			1,
+		);
+		expect(
+			state
+				.players[0]
+				?.healthPoints,
+		).toBe(
+			player.healthPoints +
+				1,
+		);
+	});
+
+	it("does not heal without life steal", () => {
+		const {
+			events,
+		} =
+			simulate(
+				makeState(
+					[
+						createBulbro(),
+					],
+					[
+						createEnemy(
+							"e1",
+							1060,
+							1000,
+						),
+					],
+				),
+				5000,
+				30,
+			);
+		expect(
+			events.some(
+				(
+					e,
+				) =>
+					e.type ===
+					"bulbroHealed",
+			),
+		).toBe(
+			false,
 		);
 	});
 });

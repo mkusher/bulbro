@@ -16,10 +16,14 @@ export const ak47: Weapon =
 		statsBonus:
 			{
 				damage: 2,
-				rangedDamage: 2,
 				range: 500,
-				attackSpeed: 0.3,
+				cooldown: 0.3,
 				knockback: 5,
+				critChance: 5,
+				scaling:
+					{
+						rangedDamage: 0.8,
+					},
 			},
 		basePrice: 5,
 		attack:

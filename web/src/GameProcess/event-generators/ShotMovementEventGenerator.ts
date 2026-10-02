@@ -95,6 +95,9 @@ export class ShotMovementEventGenerator
 			0
 		)
 			return events;
+		// Life steal heals a player at most once per tick
+		const lifeStolenBy =
+			new Set<string>();
 		const bounds =
 			{
 				x: 0,
@@ -382,10 +385,27 @@ export class ShotMovementEventGenerator
 			}
 			if (
 				hitEnemy
-			)
+			) {
+				const shooter =
+					shot.shooterType ===
+					"player"
+						? players.find(
+								(
+									p,
+								) =>
+									p.id ===
+									shot.shooterId,
+							)
+						: undefined;
 				events.push(
 					hitEnemy.beHit(
-						shot,
+						{
+							damage:
+								shot.damage,
+							luck: shooter
+								?.stats
+								.luck,
+						},
 						now,
 						{
 							strength:
@@ -395,15 +415,43 @@ export class ShotMovementEventGenerator
 						},
 					),
 				);
+				if (
+					shooter &&
+					!lifeStolenBy.has(
+						shooter.id,
+					)
+				) {
+					const heal =
+						shooter.stealLife(
+							now,
+						);
+					if (
+						heal
+					) {
+						events.push(
+							heal,
+						);
+						lifeStolenBy.add(
+							shooter.id,
+						);
+					}
+				}
+			}
 			if (
 				hitPlayer
-			)
-				events.push(
+			) {
+				const hit =
 					hitPlayer.beHit(
 						shot.damage,
 						now,
-					),
-				);
+					);
+				if (
+					hit
+				)
+					events.push(
+						hit,
+					);
+			}
 			if (
 				hitTime !==
 				Infinity

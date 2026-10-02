@@ -19,9 +19,14 @@ export const doubleBarrelShotgun: Weapon =
 				damage:
 					3 *
 					4,
-				attackSpeed: 1.37,
+				cooldown: 1.37,
 				range: 350,
 				knockback: 16,
+				critChance: 3,
+				scaling:
+					{
+						rangedDamage: 0.8,
+					},
 			},
 		basePrice: 5,
 		attack:

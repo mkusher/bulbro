@@ -17,7 +17,11 @@ export const hand: Weapon =
 				damage: 1,
 				range: 150,
 				knockback: 30,
-				attackSpeed: 1.01,
+				cooldown: 1.01,
+				scaling:
+					{
+						meleeDamage: 0.5,
+					},
 			},
 		basePrice: 5,
 		attack:

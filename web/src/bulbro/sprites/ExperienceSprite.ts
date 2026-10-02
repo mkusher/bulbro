@@ -3,7 +3,7 @@ import type { Size } from "../../geometry";
 import type { BulbroState } from "../BulbroState";
 import {
 	getExperienceForLevel,
-	getLeverForExperience,
+	getLevelForExperience,
 	getTotalExperienceForLevel,
 } from "../Levels";
 
@@ -132,7 +132,7 @@ export class ExperienceSprite {
 			player?.totalExperience ??
 			0;
 		const currentLevelByExp =
-			getLeverForExperience(
+			getLevelForExperience(
 				totalExperience,
 			);
 		const currentLevelExp =

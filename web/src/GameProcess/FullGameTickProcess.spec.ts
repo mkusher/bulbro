@@ -119,6 +119,8 @@ function createTestPlayer(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			level: 1,
@@ -128,7 +130,6 @@ function createTestPlayer(
 					x,
 					y,
 				},
-			speed: 200,
 			healthPoints: 80,
 			weapons,
 			stats:
@@ -183,7 +184,7 @@ function createTestWeapon(
 		statsBonus:
 			{
 				damage: 5,
-				attackSpeed: 1,
+				cooldown: 1,
 			},
 		shotSpeed: 200,
 		aimingDirection:
@@ -861,7 +862,7 @@ describe("FullGameTickProcess", () => {
 					statsBonus:
 						{
 							damage: 5,
-							attackSpeed: 1,
+							cooldown: 1,
 						},
 					shotSpeed: 200,
 					aimingDirection:
@@ -949,7 +950,7 @@ describe("FullGameTickProcess", () => {
 					statsBonus:
 						{
 							damage: 5,
-							attackSpeed: 1,
+							cooldown: 1,
 						},
 					shotSpeed: 200,
 					aimingDirection:
@@ -1160,6 +1161,8 @@ describe("FullGameTickProcess", () => {
 			const player =
 				new BulbroState(
 					{
+						statSources:
+							[],
 						id: "player1",
 						type: "normal",
 						level: 1,
@@ -1169,7 +1172,6 @@ describe("FullGameTickProcess", () => {
 								x: 100,
 								y: 100,
 							},
-						speed: 200,
 						healthPoints: 0,
 						weapons:
 							[
@@ -1268,7 +1270,7 @@ describe("FullGameTickProcess", () => {
 					statsBonus:
 						{
 							damage: 8,
-							attackSpeed: 1.5,
+							cooldown: 1.5,
 						},
 					shotSpeed: 250,
 					aimingDirection:

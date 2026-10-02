@@ -33,6 +33,8 @@ function createTestPlayer(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			level: 1,
@@ -42,7 +44,6 @@ function createTestPlayer(
 					x,
 					y,
 				},
-			speed: 200,
 			healthPoints,
 			weapons,
 			stats:
@@ -173,7 +174,7 @@ function createTestWeapon(
 		statsBonus:
 			{
 				damage: 5,
-				attackSpeed: 1,
+				cooldown: 1,
 			},
 		shotSpeed: 200,
 		aimingDirection:

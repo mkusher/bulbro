@@ -15,9 +15,15 @@ export const laserGun: Weapon =
 		statsBonus:
 			{
 				damage: 4,
-				attackSpeed: 1.98,
+				cooldown: 1.98,
 				range: 500,
 				knockback: 0,
+				critChance: 3,
+				scaling:
+					{
+						rangedDamage: 1,
+						elementalDamage: 0.5,
+					},
 			},
 		basePrice: 5,
 		attack:

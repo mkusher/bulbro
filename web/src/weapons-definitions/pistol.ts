@@ -17,8 +17,13 @@ export const pistol: Weapon =
 			{
 				damage: 2,
 				range: 400,
-				attackSpeed: 0.5,
+				cooldown: 0.5,
 				knockback: 5,
+				critChance: 5,
+				scaling:
+					{
+						rangedDamage: 1,
+					},
 			},
 		basePrice: 5,
 		attack:

@@ -204,7 +204,7 @@ export const createInitialState =
 		mapSize: Size,
 		difficulty: Difficulty,
 		wave = 1,
-		level = 1,
+		level = 0,
 		experience = 0,
 	): WaveState => {
 		return {
@@ -1569,9 +1569,26 @@ export function updateState(
 								DEATH_DURATION,
 					);
 			}
+			// Harvesting pays out once, when the wave is survived
+			const isWaveCompleted =
+				state
+					.round
+					.isRunning &&
+				!isRunning &&
+				alivePlayersCount >
+					0;
 			return {
 				...state,
 				enemies,
+				players:
+					isWaveCompleted
+						? state.players.map(
+								(
+									p,
+								) =>
+									p.harvest(),
+							)
+						: state.players,
 				round:
 					{
 						...round,

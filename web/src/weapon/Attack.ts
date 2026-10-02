@@ -7,6 +7,7 @@ import type {
 	StrikeSweptEvent,
 } from "@/game-events/GameEvents";
 import {
+	type AttackerType,
 	calculateAttackDamage,
 	calculateAttackKnockback,
 	calculateAttackRange,
@@ -32,9 +33,7 @@ import {
 } from "./MeleeStrike";
 import type { WeaponState } from "./WeaponState";
 
-export type AttackerType =
-	| "player"
-	| "enemy";
+export type { AttackerType } from "@/game-formulas";
 
 /** What a single use of a weapon produced: a flying shot or a melee strike. */
 export type Attack =
@@ -112,6 +111,7 @@ export function isPlayerInEnemyAttackRange(
 			enemy,
 			player,
 			weapon,
+			"enemy",
 		);
 	const towardsPlayer =
 		subtraction(
@@ -160,6 +160,7 @@ export function findClosestPlayerInEnemyAttackRange(
 				enemy,
 				target,
 				weapon,
+				"enemy",
 			)
 			? target
 			: undefined;
@@ -212,6 +213,7 @@ export function attack(
 		aimAt: Position;
 	},
 	now: NowTime,
+	random: () => number = Math.random,
 ):
 	| Attack
 	| undefined {
@@ -230,6 +232,7 @@ export function attack(
 				attackerType,
 				weapon,
 				target.aimAt,
+				random,
 			),
 		};
 	}
@@ -270,11 +273,14 @@ export function attack(
 							: calculateAttackRange(
 									attacker,
 									weapon,
+									attackerType,
 								),
 					damage:
 						calculateAttackDamage(
 							attacker,
 							weapon,
+							attackerType,
+							random,
 						),
 					knockback:
 						calculateAttackKnockback(
@@ -285,7 +291,7 @@ export function attack(
 						getAttackCooldown(
 							weapon
 								.statsBonus
-								.attackSpeed ??
+								.cooldown ??
 								1,
 							attacker
 								.stats

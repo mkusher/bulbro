@@ -106,6 +106,8 @@ function createTestBulbro(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			position:
@@ -113,7 +115,6 @@ function createTestBulbro(
 					x,
 					y,
 				},
-			speed: 100,
 			level: 1,
 			totalExperience: 0,
 			materialsAvailable: 0,
@@ -238,7 +239,7 @@ function createTestWeapon(
 		statsBonus:
 			{
 				damage: 5,
-				attackSpeed: 1,
+				cooldown: 1,
 			},
 		shotSpeed: 200,
 		aimingDirection:
@@ -270,7 +271,7 @@ function createTestWeaponDefinition(
 		statsBonus:
 			{
 				damage: 5,
-				attackSpeed: 1,
+				cooldown: 1,
 			},
 		shotSpeed: 200,
 		basePrice: 5,
@@ -415,7 +416,7 @@ describe("waveState", () => {
 									nowTime(
 										7_500,
 									),
-								),
+								)!,
 								deltaTime(
 									16,
 								),
@@ -1510,7 +1511,7 @@ describe("waveState", () => {
 					nowTime(
 						Date.now(),
 					),
-				);
+				)!;
 			const lowHealthPlayer =
 				player1.applyEvent(
 					withEventMeta(
@@ -1570,7 +1571,7 @@ describe("waveState", () => {
 					nowTime(
 						Date.now(),
 					),
-				);
+				)!;
 			const lowHealthPlayer2 =
 				player2.applyEvent(
 					withEventMeta(
@@ -2522,7 +2523,7 @@ describe("waveState", () => {
 				const deadPlayer1 =
 					player1.applyEvent(
 						withEventMeta(
-							deathEvent1,
+							deathEvent1!,
 							deltaTime(
 								16,
 							),
@@ -2534,7 +2535,7 @@ describe("waveState", () => {
 				const deadPlayer2 =
 					player2.applyEvent(
 						withEventMeta(
-							deathEvent2,
+							deathEvent2!,
 							deltaTime(
 								16,
 							),
@@ -2658,5 +2659,350 @@ describe("waveState", () => {
 				);
 			});
 		});
+	});
+});
+
+describe("wave end harvesting", () => {
+	function tick(
+		state: WaveState,
+	) {
+		return updateState(
+			state,
+			withEventMeta(
+				{
+					type: "tick",
+				} as TickEvent,
+				deltaTime(
+					16,
+				),
+				nowTime(
+					Date.now(),
+				),
+			),
+		);
+	}
+
+	function stateWithHarvesting(
+		harvesting: number,
+		secondsLeft: number,
+	): WaveState {
+		const player: Player =
+			{
+				id: "harvester",
+				bulbro:
+					{
+						...createTestPlayer(
+							"harvester",
+						)
+							.bulbro,
+						statBonuses:
+							{
+								harvesting,
+							},
+					},
+			};
+		const state =
+			createInitialState(
+				[
+					player,
+				],
+				{
+					width: 800,
+					height: 600,
+				},
+				0,
+			);
+		return {
+			...state,
+			round:
+				{
+					...state.round,
+					startedAt:
+						Date.now() -
+						(state
+							.round
+							.duration -
+							secondsLeft) *
+							1000,
+				},
+		};
+	}
+
+	it("harvests once when the wave is completed", () => {
+		const ended =
+			tick(
+				stateWithHarvesting(
+					10,
+					-1,
+				),
+			);
+		expect(
+			ended
+				.round
+				.isRunning,
+		).toBe(
+			false,
+		);
+		expect(
+			ended
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			10,
+		);
+		expect(
+			ended
+				.players[0]!
+				.totalExperience,
+		).toBe(
+			10,
+		);
+
+		const afterMoreTicks =
+			tick(
+				tick(
+					ended,
+				),
+			);
+		expect(
+			afterMoreTicks
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			10,
+		);
+	});
+
+	it("does not harvest while the wave is running", () => {
+		const running =
+			tick(
+				stateWithHarvesting(
+					10,
+					10,
+				),
+			);
+		expect(
+			running
+				.round
+				.isRunning,
+		).toBe(
+			true,
+		);
+		expect(
+			running
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			0,
+		);
+	});
+});
+
+describe("co-op shared pickups", () => {
+	function coopState(
+		harvesting: [
+			number,
+			number,
+		],
+	): WaveState {
+		const players =
+			harvesting.map(
+				(
+					value,
+					i,
+				): Player => {
+					const id = `player${i + 1}`;
+					const base =
+						createTestPlayer(
+							id,
+						);
+					return {
+						...base,
+						bulbro:
+							{
+								...base.bulbro,
+								statBonuses:
+									{
+										...base
+											.bulbro
+											.statBonuses,
+										harvesting:
+											value,
+									},
+							},
+					};
+				},
+			);
+		const state =
+			createInitialState(
+				players,
+				{
+					width: 800,
+					height: 600,
+				},
+				0,
+			);
+		return {
+			...state,
+			objects:
+				[
+					{
+						type: "material",
+						id: "material1",
+						position:
+							{
+								x: 100,
+								y: 100,
+							},
+						value: 1,
+					},
+				],
+		};
+	}
+
+	it("gives every player a material and experience for each pickup", () => {
+		const collected =
+			updateState(
+				coopState(
+					[
+						0,
+						0,
+					],
+				),
+				withEventMeta(
+					{
+						type: "materialCollected",
+						materialId:
+							"material1",
+						playerId:
+							"player1",
+					},
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				),
+			);
+		expect(
+			collected.objects,
+		).toHaveLength(
+			0,
+		);
+		for (const player of collected.players) {
+			expect(
+				player.materialsAvailable,
+			).toBe(
+				1,
+			);
+			expect(
+				player.totalExperience,
+			).toBe(
+				1,
+			);
+		}
+	});
+
+	it("harvests each player's own harvesting at wave end", () => {
+		const state =
+			coopState(
+				[
+					10,
+					0,
+				],
+			);
+		const ended =
+			updateState(
+				{
+					...state,
+					objects:
+						[],
+					round:
+						{
+							...state.round,
+							startedAt:
+								Date.now() -
+								(state
+									.round
+									.duration +
+									1) *
+									1000,
+						},
+				},
+				withEventMeta(
+					{
+						type: "tick",
+					} as TickEvent,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						Date.now(),
+					),
+				),
+			);
+		expect(
+			ended.players.map(
+				(
+					p,
+				) =>
+					p.materialsAvailable,
+			),
+		).toEqual(
+			[
+				10,
+				0,
+			],
+		);
+	});
+});
+
+describe("luck", () => {
+	it("scales the consumable drop chance by the killer's luck", () => {
+		const enemy =
+			createTestEnemy(
+				"lucky-drop",
+				400,
+				400,
+				0.4,
+			);
+		const roll =
+			() =>
+				0.6;
+		const unlucky =
+			enemy.beHit(
+				{
+					damage: 1000,
+					luck: 0,
+				},
+				nowTime(
+					0,
+				),
+				undefined,
+				roll,
+			);
+		const lucky =
+			enemy.beHit(
+				{
+					damage: 1000,
+					luck: 100,
+				},
+				nowTime(
+					0,
+				),
+				undefined,
+				roll,
+			);
+		expect(
+			unlucky.type ===
+				"enemyDied" &&
+				unlucky.consumableId,
+		).toBeFalsy();
+		expect(
+			lucky.type ===
+				"enemyDied" &&
+				lucky.consumableId,
+		).toBeTruthy();
 	});
 });

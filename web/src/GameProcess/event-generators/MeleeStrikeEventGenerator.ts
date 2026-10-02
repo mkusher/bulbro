@@ -48,6 +48,9 @@ export class MeleeStrikeEventGenerator
 	): GameEventInternal[] {
 		const events: GameEventInternal[] =
 			[];
+		// Life steal heals a player at most once per tick
+		const lifeStolenBy =
+			new Set<string>();
 		const strikingPlayers =
 			state.players.filter(
 				(
@@ -93,22 +96,53 @@ export class MeleeStrikeEventGenerator
 					(
 						enemy,
 						strike,
-					) =>
-						enemy.beHit(
-							strike,
-							now,
-							{
-								strength:
-									strike.knockback,
-								direction:
-									strikeKnockbackDirection(
-										strike,
-										player.position,
-										enemy.position,
-										now,
-									),
-							},
-						),
+					) => {
+						const hitEvents: GameEventInternal[] =
+							[
+								enemy.beHit(
+									{
+										damage:
+											strike.damage,
+										luck: player
+											.stats
+											.luck,
+									},
+									now,
+									{
+										strength:
+											strike.knockback,
+										direction:
+											strikeKnockbackDirection(
+												strike,
+												player.position,
+												enemy.position,
+												now,
+											),
+									},
+								),
+							];
+						if (
+							!lifeStolenBy.has(
+								player.id,
+							)
+						) {
+							const heal =
+								player.stealLife(
+									now,
+								);
+							if (
+								heal
+							) {
+								hitEvents.push(
+									heal,
+								);
+								lifeStolenBy.add(
+									player.id,
+								);
+							}
+						}
+						return hitEvents;
+					},
 				);
 			}
 		}
@@ -136,11 +170,18 @@ export class MeleeStrikeEventGenerator
 					(
 						player,
 						strike,
-					) =>
-						player.beHit(
-							strike.damage,
-							now,
-						),
+					) => {
+						const hit =
+							player.beHit(
+								strike.damage,
+								now,
+							);
+						return hit
+							? [
+									hit,
+								]
+							: [];
+					},
 				);
 			}
 		}
@@ -194,7 +235,7 @@ function sweep<
 	hit: (
 		target: T,
 		strike: MeleeStrike,
-	) => GameEventInternal,
+	) => GameEventInternal[],
 ) {
 	for (const weapon of striker.weapons) {
 		const strike =
@@ -229,7 +270,7 @@ function sweep<
 			);
 		for (const target of hits) {
 			events.push(
-				hit(
+				...hit(
 					target,
 					strike,
 				),

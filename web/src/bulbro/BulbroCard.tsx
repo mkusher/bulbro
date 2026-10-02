@@ -3,8 +3,14 @@ import {
 	CardContent,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import type { StatBonus } from "../game-formulas";
-import type { Bulbro } from "./BulbroCharacter";
+import {
+	percentageStats,
+	type StatBonus,
+} from "../game-formulas";
+import type {
+	Bulbro,
+	Stats,
+} from "./BulbroCharacter";
 import { BulbroDisplay } from "./BulbroDisplay";
 import { BulbroTitle } from "./BulbroTitle";
 
@@ -25,22 +31,6 @@ function StatBonusDisplay({
 }: {
 	bonuses: StatBonus;
 }) {
-	const percentageStats =
-		new Set(
-			[
-				"speed",
-				"damage",
-				"meleeDamage",
-				"rangedDamage",
-				"elementalDamage",
-				"attackSpeed",
-				"critChance",
-				"engineering",
-				"luck",
-				"pickupRange",
-			],
-		);
-
 	const statEntries =
 		Object.entries(
 			bonuses,
@@ -75,7 +65,7 @@ function StatBonusDisplay({
 						0;
 					const isPercentage =
 						percentageStats.has(
-							key,
+							key as keyof Stats,
 						);
 					const colorClass =
 						isPositive

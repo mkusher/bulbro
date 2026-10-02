@@ -60,6 +60,8 @@ function player(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			position:
@@ -67,7 +69,6 @@ function player(
 					x,
 					y: 100,
 				},
-			speed: 100,
 			level: 1,
 			totalExperience: 0,
 			materialsAvailable: 0,

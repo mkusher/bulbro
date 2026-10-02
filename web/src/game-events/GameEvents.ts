@@ -110,6 +110,10 @@ export type BulbroHealedEvent =
 		type: "bulbroHealed";
 		bulbroId: string;
 		hp: number;
+		/** What healed the Bulbro; regeneration when not set */
+		source?:
+			| "regeneration"
+			| "lifeSteal";
 	};
 
 export type BulbroMovedEvent =

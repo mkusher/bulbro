@@ -1,4 +1,7 @@
-import { calculateStats } from "../game-formulas";
+import {
+	calculateStats,
+	percentageStats,
+} from "../game-formulas";
 import type {
 	Bulbro,
 	Stats,
@@ -62,9 +65,10 @@ export function BulbroStats({
 									:
 								</span>
 								<span className="font-medium">
-									{
-										value
-									}
+									{formatStatValue(
+										key,
+										value,
+									)}
 								</span>
 							</div>
 						),
@@ -99,9 +103,10 @@ export function BulbroStats({
 										:
 									</span>
 									<span className="font-medium">
-										{
-											value
-										}
+										{formatStatValue(
+											key,
+											value,
+										)}
 									</span>
 								</div>
 							),
@@ -202,9 +207,10 @@ export function BulbroStateStats({
 									:
 								</span>
 								<span className="font-medium">
-									{
-										value
-									}
+									{formatStatValue(
+										key,
+										value,
+									)}
 								</span>
 							</div>
 						),
@@ -239,9 +245,10 @@ export function BulbroStateStats({
 										:
 									</span>
 									<span className="font-medium">
-										{
-											value
-										}
+										{formatStatValue(
+											key,
+											value,
+										)}
 									</span>
 								</div>
 							),
@@ -382,4 +389,35 @@ function formatStatName(
 				str.toUpperCase(),
 		)
 		.trim();
+}
+
+/** Stats shown as absolute values even though their points are percentages. */
+const absoluteDisplayStats =
+	new Set<
+		keyof Stats
+	>(
+		[
+			"speed",
+			"pickupRange",
+		],
+	);
+
+function formatStatValue(
+	key: keyof Stats,
+	value: number,
+): string {
+	const rounded =
+		Math.round(
+			value *
+				10,
+		) /
+		10;
+	return percentageStats.has(
+		key,
+	) &&
+		!absoluteDisplayStats.has(
+			key,
+		)
+		? `${rounded}%`
+		: `${rounded}`;
 }

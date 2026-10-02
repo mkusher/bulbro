@@ -1,3 +1,7 @@
+/**
+ * Experience needed to go from `level - 1` to `level` (Brotato: (level + 3)²).
+ * Bulbros start at level 0, so reaching level 1 takes 16 experience.
+ */
 export function getExperienceForLevel(
 	level: number,
 ) {
@@ -8,36 +12,27 @@ export function getExperienceForLevel(
 	);
 }
 
+/** Total experience needed to reach `level` from level 0. */
 export function getTotalExperienceForLevel(
 	level: number,
 ) {
-	return new Array(
-		level,
-	)
-		.fill(
-			0,
-		)
-		.map(
-			(
-				_,
+	let total = 0;
+	for (
+		let i = 1;
+		i <=
+		level;
+		i++
+	) {
+		total +=
+			getExperienceForLevel(
 				i,
-			) =>
-				getExperienceForLevel(
-					i,
-				),
-		)
-		.reduce(
-			(
-				a,
-				b,
-			) =>
-				a +
-				b,
-			0,
-		);
+			);
+	}
+	return total;
 }
 
-export function getLeverForExperience(
+/** Level reached with `experience` total experience. */
+export function getLevelForExperience(
 	experience: number,
 ) {
 	let level = 0;
@@ -45,7 +40,7 @@ export function getLeverForExperience(
 		getTotalExperienceForLevel(
 			level +
 				1,
-		) <
+		) <=
 		experience
 	) {
 		++level;

@@ -31,6 +31,8 @@ function createBulbro(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			position:
@@ -38,7 +40,6 @@ function createBulbro(
 					x: 100,
 					y: 100,
 				},
-			speed: 100,
 			level: 1,
 			totalExperience: 0,
 			materialsAvailable: 0,
@@ -360,6 +361,8 @@ describe("PlayerHealEventGenerator", () => {
 		const dead =
 			new BulbroState(
 				{
+					statSources:
+						[],
 					id: "p1",
 					type: "normal",
 					position:
@@ -367,7 +370,6 @@ describe("PlayerHealEventGenerator", () => {
 							x: 0,
 							y: 0,
 						},
-					speed: 100,
 					level: 1,
 					totalExperience: 0,
 					materialsAvailable: 0,

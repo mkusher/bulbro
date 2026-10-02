@@ -11,9 +11,9 @@ export const wellRoundedBulbro: Bulbro =
 		name: "Well Rounded",
 		statBonuses:
 			{
-				maxHp: 5, // +5 HP
+				maxHp: 5, // +5 max HP
 				speed: 5, // +5% speed
-				harvesting: 8, // +8 harvesting
+				harvesting: 8, // +8 materials and XP at the end of each wave
 			},
 		style:
 			{

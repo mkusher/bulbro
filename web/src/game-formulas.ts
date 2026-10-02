@@ -20,7 +20,9 @@ import {
 	type WaveState,
 	type WeaponState,
 } from "./waveState";
+import { isMeleeWeapon } from "./weapon";
 import { getWeaponSize } from "./weapon/sprites/WeaponSprite";
+import type { DamageScalingStat } from "./weapon/WeaponState";
 
 export const minWeaponRange = 25;
 
@@ -47,82 +49,145 @@ export const baseStats: Stats =
 		knockback: 0,
 	};
 
-// Stat bonus types - plain numeric values
+// Stat bonus types - plain numeric stat points
 export type StatBonus =
 	{
 		[K in keyof Stats]?: number;
 	};
 
-// Define which stats use percentage bonuses vs absolute values
-const percentageStats: Set<
-	keyof Stats
-> =
+/**
+ * Stats whose points are a percentage of the base value
+ * (e.g. speed: 450 × (1 + points / 100)). Every other stat is a plain
+ * sum of points on top of its base value, and the combat formulas give the
+ * points their meaning (e.g. damage: +points% damage).
+ */
+const percentOfBaseStats =
+	new Set<
+		keyof Stats
+	>(
+		[
+			"speed",
+			"pickupRange",
+		],
+	);
+
+/** Stats whose points are displayed as percentages. */
+export const percentageStats =
 	new Set<
 		keyof Stats
 	>(
 		[
 			"speed",
 			"damage",
-			"meleeDamage",
-			"rangedDamage",
-			"elementalDamage",
 			"attackSpeed",
 			"critChance",
-			"engineering",
+			"lifeSteal",
+			"dodge",
 			"luck",
 			"pickupRange",
 		],
 	);
 
-// Helper function to calculate final stats from base stats and bonuses
-export function calculateStats(
-	bonuses: StatBonus,
+/** Where a Bulbro's stat points come from. */
+export type StatSourceKind =
+	| "character"
+	| "harvestingGrowth"
+	| "upgrade"
+	| "item"
+	| "level";
+
+export type StatSource =
+	{
+		/** Unique within a Bulbro: a source with the same id replaces the previous one */
+		id: string;
+		kind: StatSourceKind;
+		bonuses: StatBonus;
+	};
+
+export const minMaxHp = 1;
+
+/** Sums stat points of all the sources and applies them to the base stats. */
+export function computeStats(
+	sources: StatSource[],
 ): Stats {
+	const points: StatBonus =
+		{};
+	for (const source of sources) {
+		for (const [
+			key,
+			bonus,
+		] of Object.entries(
+			source.bonuses,
+		)) {
+			if (
+				typeof bonus !==
+				"number"
+			)
+				continue;
+			const statKey =
+				key as keyof Stats;
+			points[
+				statKey
+			] =
+				(points[
+					statKey
+				] ??
+					0) +
+				bonus;
+		}
+	}
+
 	const finalStats =
 		{
 			...baseStats,
 		};
-
 	for (const [
 		key,
 		bonus,
 	] of Object.entries(
-		bonuses,
+		points,
 	)) {
-		if (
-			typeof bonus ===
-			"number"
-		) {
-			const statKey =
-				key as keyof Stats;
-			const baseValue =
-				baseStats[
-					statKey
-				];
-
-			if (
-				percentageStats.has(
-					statKey,
-				)
-			) {
-				finalStats[
-					statKey
-				] =
-					baseValue *
+		const statKey =
+			key as keyof Stats;
+		const baseValue =
+			baseStats[
+				statKey
+			];
+		finalStats[
+			statKey
+		] =
+			percentOfBaseStats.has(
+				statKey,
+			)
+				? baseValue *
 					(1 +
 						bonus /
-							100);
-			} else {
-				finalStats[
-					statKey
-				] =
-					baseValue +
+							100)
+				: baseValue +
 					bonus;
-			}
-		}
 	}
+	finalStats.maxHp =
+		Math.max(
+			minMaxHp,
+			finalStats.maxHp,
+		);
 
 	return finalStats;
+}
+
+/** Calculates stats from a single set of bonuses (e.g. a character's). */
+export function calculateStats(
+	bonuses: StatBonus,
+): Stats {
+	return computeStats(
+		[
+			{
+				id: "bonuses",
+				kind: "character",
+				bonuses,
+			},
+		],
+	);
 }
 
 export type Difficulty =
@@ -192,25 +257,30 @@ export const shouldSpawnEnemy =
 	};
 /**
  * Calculates the attack cooldown in milliseconds.
- * @param weaponTime - base time between attacks in seconds (from weapon.statsBonus.attackSpeed)
- * @param entityAttackSpeed - percentage improvement from entity stats (0 = no improvement, 50 = 50% faster)
+ * Positive attack speed divides the cooldown (+100 attacks twice as often),
+ * negative attack speed multiplies it (-50 makes attacks 1.5× slower).
+ * @param weaponCooldown - base time between attacks in seconds (from weapon.statsBonus.cooldown)
+ * @param attackSpeed - attack speed points of the attacker
  * @returns cooldown in milliseconds, minimum 100ms
  */
 export function getAttackCooldown(
-	weaponTime: number,
-	entityAttackSpeed: number,
+	weaponCooldown: number,
+	attackSpeed: number,
 ): number {
-	const improvement =
-		Math.min(
-			entityAttackSpeed,
-			90,
-		);
+	const baseCooldownMs =
+		weaponCooldown *
+		1000;
 	const cooldownMs =
-		weaponTime *
-		1000 *
-		(1 -
-			improvement /
-				100);
+		attackSpeed >=
+		0
+			? baseCooldownMs /
+				(1 +
+					attackSpeed /
+						100)
+			: baseCooldownMs *
+				(1 -
+					attackSpeed /
+						100);
 	return Math.max(
 		100,
 		cooldownMs,
@@ -220,14 +290,14 @@ export function getAttackCooldown(
 /**
  * Determines if a weapon is ready to shoot.
  * @param lastStrikedAt - timestamp of last attack
- * @param weaponTime - base time between attacks in seconds (from weapon)
- * @param entityAttackSpeed - percentage improvement from entity stats
+ * @param weaponCooldown - base time between attacks in seconds (from weapon)
+ * @param attackSpeed - attack speed points of the attacker
  * @param now - current time
  */
 export function isWeaponReadyToShoot(
 	lastStrikedAt: number,
-	weaponTime: number,
-	entityAttackSpeed: number,
+	weaponCooldown: number,
+	attackSpeed: number,
 	now: NowTime,
 ): boolean {
 	const elapsed =
@@ -235,8 +305,8 @@ export function isWeaponReadyToShoot(
 		lastStrikedAt;
 	const cooldown =
 		getAttackCooldown(
-			weaponTime,
-			entityAttackSpeed,
+			weaponCooldown,
+			attackSpeed,
 		);
 	return (
 		elapsed >=
@@ -347,53 +417,188 @@ export function findClosestEnemyInRange(
 	return findClosestInRange(
 		player,
 		enemies,
-		(weapon
-			.statsBonus
-			.range ??
-			0) +
-			player
-				.stats
-				.range,
+		calculateAttackRange(
+			player,
+			weapon,
+			"player",
+		),
 	);
 }
+
+export type AttackerType =
+	| "player"
+	| "enemy";
 
 type Attacker =
 	{
 		stats: Pick<
 			Stats,
 			| "damage"
+			| "meleeDamage"
+			| "rangedDamage"
+			| "elementalDamage"
+			| "critChance"
 			| "range"
 			| "knockback"
 		>;
 	};
 
-/** Damage of a single attack (shot or melee strike) made with the weapon. */
-export function calculateAttackDamage(
-	attacker: Attacker,
+export const defaultCritMultiplier = 2;
+/** Share of the range stat melee weapons get */
+export const meleeRangeStatFactor = 0.5;
+
+/** How much of each damage stat is added to the weapon's damage. */
+export function getWeaponScaling(
 	weapon: WeaponState,
-) {
+): Partial<
+	Record<
+		DamageScalingStat,
+		number
+	>
+> {
 	return (
-		(attacker
-			.stats
-			.damage ??
-			0) +
-		(weapon
+		weapon
 			.statsBonus
-			.damage ??
-			0)
+			.scaling ??
+		(isMeleeWeapon(
+			weapon.type,
+		)
+			? {
+					meleeDamage: 1,
+				}
+			: {
+					rangedDamage: 1,
+				})
 	);
 }
 
-/** Maximum distance an attack made with the weapon reaches. */
-export function calculateAttackRange(
+/**
+ * Damage of a single attack (shot or melee strike) made with the weapon.
+ *
+ * Players: (weapon damage + scaled melee/ranged/elemental damage) × (1 + damage%),
+ * then a crit roll (player's + weapon's crit chance) multiplies it by the weapon's
+ * crit multiplier. Result is rounded, at least 1 when the weapon deals damage.
+ *
+ * Enemies deal their flat damage stat plus the weapon's damage.
+ */
+export function calculateAttackDamage(
 	attacker: Attacker,
 	weapon: WeaponState,
+	attackerType: AttackerType,
+	random: () => number = Math.random,
 ) {
-	return (
+	const weaponStats =
+		weapon.statsBonus;
+	if (
+		attackerType ===
+		"enemy"
+	) {
+		return (
+			(attacker
+				.stats
+				.damage ??
+				0) +
+			(weaponStats.damage ??
+				0)
+		);
+	}
+
+	const scaling =
+		getWeaponScaling(
+			weapon,
+		);
+	let baseDamage =
+		weaponStats.damage ??
+		0;
+	for (const [
+		stat,
+		share,
+	] of Object.entries(
+		scaling,
+	) as [
+		DamageScalingStat,
+		number,
+	][]) {
+		baseDamage +=
+			(attacker
+				.stats[
+				stat
+			] ??
+				0) *
+			share;
+	}
+	if (
+		baseDamage <=
+		0
+	)
+		return 0;
+
+	const multiplied =
+		baseDamage *
+		Math.max(
+			0,
+			1 +
+				(attacker
+					.stats
+					.damage ??
+					0) /
+					100,
+		);
+	const critChance =
 		(attacker
 			.stats
-			.range ??
+			.critChance ??
 			0) +
+		(weaponStats.critChance ??
+			0);
+	const isCritical =
+		random() *
+			100 <
+		critChance;
+	const damage =
+		isCritical
+			? multiplied *
+				(weaponStats.critMultiplier ??
+					defaultCritMultiplier)
+			: multiplied;
+	return Math.max(
+		1,
+		Math.round(
+			damage,
+		),
+	);
+}
+
+/**
+ * Maximum distance an attack made with the weapon reaches.
+ * Players' melee weapons get only half of the range stat.
+ */
+export function calculateAttackRange(
+	attacker: {
+		stats: Pick<
+			Stats,
+			"range"
+		>;
+	},
+	weapon: WeaponState,
+	attackerType: AttackerType,
+) {
+	const rangeStat =
+		attacker
+			.stats
+			.range ??
+		0;
+	const rangeFromStats =
+		attackerType ===
+			"player" &&
+		isMeleeWeapon(
+			weapon.type,
+		)
+			? rangeStat *
+				meleeRangeStatFactor
+			: rangeStat;
+	return (
+		rangeFromStats +
 		(weapon
 			.statsBonus
 			.range ??
@@ -422,11 +627,10 @@ export function shoot(
 	player:
 		| BulbroState
 		| EnemyState,
-	shooterType:
-		| "player"
-		| "enemy",
+	shooterType: AttackerType,
 	weapon: WeaponState,
 	targetPosition: Position,
+	random: () => number = Math.random,
 ): ShotState {
 	const id =
 		uuidv4();
@@ -487,11 +691,14 @@ export function shoot(
 				calculateAttackDamage(
 					player,
 					weapon,
+					shooterType,
+					random,
 				),
 			range:
 				calculateAttackRange(
 					player,
 					weapon,
+					shooterType,
 				),
 			position:
 				barrelPosition,
@@ -513,38 +720,139 @@ export function shoot(
 }
 
 export function isInRange(
-	player:
+	attacker:
 		| BulbroState
 		| EnemyState,
-	enemy:
+	target:
 		| EnemyState
 		| BulbroState,
 	weapon: WeaponState,
+	attackerType: AttackerType,
 ) {
 	return (
 		distance(
-			player.position,
-			enemy.position,
+			attacker.position,
+			target.position,
 		) <=
-		(player
-			.stats
-			.range ??
-			0) +
-			(weapon
-				.statsBonus
-				.range ??
-				0)
+		calculateAttackRange(
+			attacker,
+			weapon,
+			attackerType,
+		)
 	);
 }
 
+/**
+ * HP healed per second by HP regeneration points.
+ * Brotato: 1 HP every 5 / (1 + (R - 1) / 2.25) seconds; no regeneration at R <= 0.
+ */
 export const getHpRegenerationPerSecond =
 	(
 		hpRegeneration: number,
 	) =>
-		hpRegeneration /
-			11.25 +
-		1 /
-			9;
+		hpRegeneration <=
+		0
+			? 0
+			: (1 +
+					(hpRegeneration -
+						1) /
+						2.25) /
+				5;
+
+/** Armor points needed to halve the damage taken */
+export const armorConstant = 15;
+
+/**
+ * Damage left after armor. Positive armor reduces the damage
+ * (× 15 / (15 + armor)), negative armor increases it (× (15 - armor) / 15).
+ * A hit always deals at least 1 damage.
+ */
+export function damageAfterArmor(
+	damage: number,
+	armor: number,
+) {
+	if (
+		damage <=
+		0
+	)
+		return 0;
+	const multiplier =
+		armor >=
+		0
+			? armorConstant /
+				(armorConstant +
+					armor)
+			: (armorConstant -
+					armor) /
+				armorConstant;
+	return Math.max(
+		1,
+		Math.round(
+			damage *
+				multiplier,
+		),
+	);
+}
+
+/** Dodge chance is capped at 60% */
+export const maxDodge = 60;
+
+/** Probability (0..1) to dodge a hit. */
+export function getDodgeChance(
+	dodge: number,
+) {
+	return (
+		Math.min(
+			Math.max(
+				dodge,
+				0,
+			),
+			maxDodge,
+		) /
+		100
+	);
+}
+
+/** Life steal heals at most 10 times per second */
+export const lifeStealCooldown = 100;
+/** HP healed by a single life steal */
+export const lifeStealHeal = 1;
+
+/** Probability (0..1) to heal on a hit. */
+export function getLifeStealChance(
+	lifeSteal: number,
+) {
+	return (
+		Math.min(
+			Math.max(
+				lifeSteal,
+				0,
+			),
+			100,
+		) /
+		100
+	);
+}
+
+/** Luck scales drop chances: +100 luck doubles them, -100 luck removes them. */
+export function dropChanceWithLuck(
+	chance: number,
+	luck: number,
+) {
+	return Math.min(
+		1,
+		Math.max(
+			0,
+			chance *
+				(1 +
+					luck /
+						100),
+		),
+	);
+}
+
+/** Harvesting grows by 5% at the end of every wave */
+export const harvestingGrowthPerWave = 0.05;
 
 export const knockbackSpeed = 25;
 export const knockbackTimeout = 200;

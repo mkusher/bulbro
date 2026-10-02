@@ -106,25 +106,34 @@ describe("ChasingBehavior", () => {
 			);
 		});
 
-		it("should reduce cooldown by entity attackSpeed percentage", () => {
+		it("should divide cooldown by positive attack speed", () => {
 			expect(
 				getAttackCooldown(
 					1,
 					50,
 				),
-			).toBe(
-				500,
+			).toBeCloseTo(
+				666.67,
+				1,
 			);
-		});
-
-		it("should cap improvement at 90% to prevent instant attacks", () => {
 			expect(
 				getAttackCooldown(
 					1,
 					100,
 				),
 			).toBe(
-				100,
+				500,
+			);
+		});
+
+		it("should multiply cooldown by negative attack speed", () => {
+			expect(
+				getAttackCooldown(
+					1,
+					-50,
+				),
+			).toBe(
+				1500,
 			);
 		});
 
@@ -341,7 +350,7 @@ describe("ChasingBehavior", () => {
 				baseEnemy
 					.weapons[0]!
 					.statsBonus
-					?.attackSpeed ??
+					?.cooldown ??
 				1;
 			const entityAttackSpeed =
 				baseEnemy
@@ -417,7 +426,7 @@ describe("ChasingBehavior", () => {
 				enemy
 					.weapons[0]!
 					.statsBonus
-					?.attackSpeed ??
+					?.cooldown ??
 				1;
 			const entityAttackSpeed =
 				enemy
@@ -433,9 +442,9 @@ describe("ChasingBehavior", () => {
 			expect(
 				cooldown,
 			).toBe(
-				weaponTime *
-					1000 *
-					(1 -
+				(weaponTime *
+					1000) /
+					(1 +
 						entityAttackSpeed /
 							100),
 			);
