@@ -7,6 +7,20 @@ export {
 	WebsocketMessage,
 } from "@bulbro/network-protocol";
 
+/**
+ * Messages exchanged while a wave is running.
+ */
+export type LiveStateMessage =
+	Exclude<
+		WebsocketMessage,
+		{
+			type:
+				| "next-wave-player-ready"
+				| "next-wave-player-not-ready"
+				| "next-wave-started";
+		}
+	>;
+
 export type ProcessMessage =
 	(
 		message: typeof WebsocketMessage.infer,

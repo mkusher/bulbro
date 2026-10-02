@@ -277,7 +277,7 @@ describe("StateUpdater", () => {
 		});
 
 		it("should handle conflicting remote player movements correctly", () => {
-			// First message: remote player moves right (later timestamp)
+			// First message: remote player moves right (later sequence)
 			const firstMessage =
 				{
 					type: "game-state-position-updated" as const,
@@ -295,8 +295,8 @@ describe("StateUpdater", () => {
 							x: 1,
 							y: 0,
 						}, // right direction vector
-					version: 1,
-					sentAt: 1100, // Later timestamp
+					version: 2,
+					sentAt: 1100,
 				};
 
 			stateUpdater.processMessage(
@@ -304,7 +304,8 @@ describe("StateUpdater", () => {
 				[],
 			);
 
-			// Second message: remote player moves down (earlier timestamp, should be ignored)
+			// Second message arrives late with an earlier sequence and is ignored
+			// even though its sentAt is later.
 			const secondMessage =
 				{
 					type: "game-state-position-updated" as const,
@@ -322,8 +323,8 @@ describe("StateUpdater", () => {
 							x: 0,
 							y: 1,
 						}, // down direction vector
-					version: 2,
-					sentAt: 1050, // Earlier timestamp than first message, should be ignored
+					version: 1,
+					sentAt: 1200,
 				};
 
 			stateUpdater.processMessage(
@@ -356,6 +357,80 @@ describe("StateUpdater", () => {
 					y: 0,
 				},
 			); // Direction should be right
+		});
+
+		it("keeps the position packet's remote position when a later batch arrives", () => {
+			stateUpdater.processMessage(
+				{
+					type: "game-state-position-updated",
+					gameId:
+						"test-game",
+					playerId:
+						REMOTE_PLAYER_ID,
+					position:
+						{
+							x: 300,
+							y: 200,
+						},
+					direction:
+						{
+							x: 1,
+							y: 0,
+						},
+					version: 1,
+					sentAt: 1000,
+				},
+				[],
+			);
+
+			// The batch carries an older movement of the remote player.
+			stateUpdater.processMessage(
+				{
+					type: "game-state-updated-by-guest",
+					gameId:
+						"test-game",
+					version: 1,
+					sentAt: 2000,
+					events:
+						[
+							{
+								type: "bulbroMoved",
+								bulbroId:
+									REMOTE_PLAYER_ID,
+								from: {
+									x: 200,
+									y: 200,
+								},
+								to: {
+									x: 250,
+									y: 200,
+								},
+								direction:
+									{
+										x: 1,
+										y: 0,
+									},
+							},
+						],
+				},
+				[],
+			);
+
+			expect(
+				currentState.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						REMOTE_PLAYER_ID,
+				)
+					?.position,
+			).toEqual(
+				{
+					x: 300,
+					y: 200,
+				},
+			);
 		});
 
 		it("should handle realistic movement sequence with local and remote events", () => {

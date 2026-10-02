@@ -119,11 +119,33 @@ export function canStartLobby(
 	);
 }
 
+/**
+ * Players' states submitted from the shop for the wave that starts next.
+ */
+export type NextWaveReadiness =
+	{
+		wave: number;
+		players: Map<
+			string,
+			object
+		>;
+	};
+
 export class GamesRegistry {
 	#registry =
 		new Map<
 			string,
 			Lobby
+		>();
+	#nextWaveReadiness =
+		new Map<
+			string,
+			NextWaveReadiness
+		>();
+	#startedWaves =
+		new Map<
+			string,
+			number
 		>();
 
 	registerLobby(
@@ -344,6 +366,207 @@ export class GamesRegistry {
 			lobby,
 		);
 		return lobby;
+	}
+
+	/**
+	 * The first wave was started by the host; next wave readiness starts over.
+	 */
+	markGameStarted(
+		id: string,
+	) {
+		this.#startedWaves.set(
+			id,
+			1,
+		);
+		this.#nextWaveReadiness.delete(
+			id,
+		);
+	}
+
+	/**
+	 * Stores a member's post-shop state for the given upcoming wave.
+	 * Returns undefined for unknown games, non-members, and stale waves.
+	 */
+	markReadyForNextWave(
+		id: string,
+		wave: number,
+		playerId: string,
+		player: object,
+	) {
+		const game =
+			this.#registry.get(
+				id,
+			);
+		if (
+			!game?.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					playerId,
+			)
+		)
+			return;
+		const startedWave =
+			this.#startedWaves.get(
+				id,
+			) ??
+			1;
+		if (
+			wave !==
+			startedWave +
+				1
+		)
+			return;
+		const readiness =
+			this.#nextWaveReadiness.get(
+				id,
+			) ?? {
+				wave,
+				players:
+					new Map(),
+			};
+		readiness.players.set(
+			playerId,
+			player,
+		);
+		this.#nextWaveReadiness.set(
+			id,
+			readiness,
+		);
+		return readiness;
+	}
+
+	/**
+	 * Forgets a member's post-shop state for the given upcoming wave.
+	 * Returns undefined for unknown games, non-members, and stale waves.
+	 */
+	markNotReadyForNextWave(
+		id: string,
+		wave: number,
+		playerId: string,
+	) {
+		const game =
+			this.#registry.get(
+				id,
+			);
+		if (
+			!game?.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					playerId,
+			)
+		)
+			return;
+		const startedWave =
+			this.#startedWaves.get(
+				id,
+			) ??
+			1;
+		if (
+			wave !==
+			startedWave +
+				1
+		)
+			return;
+		const readiness =
+			this.#nextWaveReadiness.get(
+				id,
+			) ?? {
+				wave,
+				players:
+					new Map(),
+			};
+		readiness.players.delete(
+			playerId,
+		);
+		this.#nextWaveReadiness.set(
+			id,
+			readiness,
+		);
+		return readiness;
+	}
+
+	/**
+	 * Returns the wave and players' states, host first, when every member is
+	 * ready and connected.
+	 */
+	nextWaveToStart(
+		id: string,
+	) {
+		const game =
+			this.#registry.get(
+				id,
+			);
+		const readiness =
+			this.#nextWaveReadiness.get(
+				id,
+			);
+		if (
+			!game ||
+			!readiness ||
+			game
+				.players
+				.length <
+				2 ||
+			!game.players.every(
+				(
+					p,
+				) =>
+					p.status ===
+						"connected" &&
+					readiness.players.has(
+						p.id,
+					),
+			)
+		)
+			return;
+		const players =
+			[
+				...game.players,
+			]
+				.sort(
+					(
+						a,
+						b,
+					) =>
+						Number(
+							b.id ===
+								game.hostId,
+						) -
+						Number(
+							a.id ===
+								game.hostId,
+						),
+				)
+				.flatMap(
+					(
+						p,
+					) =>
+						readiness.players.get(
+							p.id,
+						) ??
+						[],
+				);
+		return {
+			wave: readiness.wave,
+			players,
+		};
+	}
+
+	markNextWaveStarted(
+		id: string,
+		wave: number,
+	) {
+		this.#startedWaves.set(
+			id,
+			wave,
+		);
+		this.#nextWaveReadiness.delete(
+			id,
+		);
 	}
 
 	findGamesForPlayer(

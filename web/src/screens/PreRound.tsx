@@ -8,6 +8,12 @@ import {
 	rerollIncrease,
 } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
+import {
+	currentLobby,
+	currentNetworkGame,
+} from "@/network/currentLobby";
+import { currentUser } from "@/network/currentUser";
+import type { PreRoundNetworkProps } from "@/shop/PreRoundLayout";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { ShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
@@ -79,6 +85,60 @@ function generateShopItemsFromWaveState(): ShopItem[] {
 }
 
 /**
+ * Online players' connection and next wave readiness, or undefined offline.
+ */
+function useNetworkReadiness():
+	| PreRoundNetworkProps
+	| undefined {
+	const game =
+		currentNetworkGame.value;
+	const lobby =
+		currentLobby.value;
+	if (
+		!game ||
+		!lobby
+	)
+		return;
+	const localPlayerId =
+		currentUser
+			.value
+			.id;
+	const readyPlayerIds =
+		game
+			.readyForNextWave
+			.value;
+	return {
+		isLocalReady:
+			readyPlayerIds.includes(
+				localPlayerId,
+			),
+		onNotReady:
+			() =>
+				game.markNotReadyForNextWave(),
+		players:
+			lobby.players.map(
+				(
+					player,
+				) => ({
+					id: player.id,
+					username:
+						player.username,
+					connected:
+						player.status ===
+						"connected",
+					ready:
+						readyPlayerIds.includes(
+							player.id,
+						),
+					isLocal:
+						player.id ===
+						localPlayerId,
+				}),
+			),
+	};
+}
+
+/**
  * PreRound screen component.
  * Reads and writes the waveState signal directly.
  */
@@ -92,6 +152,8 @@ export function PreRound() {
 		);
 
 	useStartBgm();
+	const network =
+		useNetworkReadiness();
 
 	const state =
 		waveState.value;
@@ -113,6 +175,7 @@ export function PreRound() {
 		() => {
 			if (
 				!player ||
+				network?.isLocalReady ||
 				player.materialsAvailable <
 					rerollPrice
 			)
@@ -160,6 +223,7 @@ export function PreRound() {
 		) => {
 			if (
 				!player ||
+				network?.isLocalReady ||
 				player.materialsAvailable <
 					item.price
 			)
@@ -250,6 +314,14 @@ export function PreRound() {
 
 	const handleStartWave =
 		() => {
+			const game =
+				currentNetworkGame.value;
+			if (
+				game
+			) {
+				game.markReadyForNextWave();
+				return;
+			}
 			startWave(
 				waveState.value,
 			);
@@ -308,6 +380,9 @@ export function PreRound() {
 				shopItems.length
 					? rerollPrice
 					: 0
+			}
+			network={
+				network
 			}
 		/>
 	);

@@ -92,4 +92,105 @@ describe("live game protocol", () => {
 			message,
 		);
 	});
+
+	test("accepts next wave readiness with the full player state", () => {
+		const message =
+			{
+				type: "next-wave-player-ready" as const,
+				gameId:
+					"game-1",
+				wave: 2,
+				playerId:
+					"player-1",
+				player:
+					{
+						id: "player-1",
+						materialsAvailable: 12,
+						weapons:
+							[],
+					},
+				sentAt: 20,
+			};
+
+		expect(
+			WebsocketMessage(
+				message,
+			),
+		).toEqual(
+			message,
+		);
+	});
+
+	test("rejects next wave readiness with a fractional wave", () => {
+		expect(
+			WebsocketMessage(
+				{
+					type: "next-wave-player-ready",
+					gameId:
+						"game-1",
+					wave: 1.5,
+					playerId:
+						"player-1",
+					player:
+						{
+							id: "player-1",
+						},
+					sentAt: 20,
+				},
+			),
+		).toBeInstanceOf(
+			type.errors,
+		);
+	});
+
+	test("accepts withdrawn next wave readiness", () => {
+		const message =
+			{
+				type: "next-wave-player-not-ready" as const,
+				gameId:
+					"game-1",
+				wave: 2,
+				playerId:
+					"player-1",
+				sentAt: 20,
+			};
+
+		expect(
+			WebsocketMessage(
+				message,
+			),
+		).toEqual(
+			message,
+		);
+	});
+
+	test("accepts next wave start with every player's state", () => {
+		const message =
+			{
+				type: "next-wave-started" as const,
+				gameId:
+					"game-1",
+				wave: 2,
+				players:
+					[
+						{
+							id: "host",
+							healthPoints: 10,
+						},
+						{
+							id: "guest",
+							healthPoints: 5,
+						},
+					],
+				serverStartTime: 100,
+			};
+
+		expect(
+			WebsocketMessage(
+				message,
+			),
+		).toEqual(
+			message,
+		);
+	});
 });

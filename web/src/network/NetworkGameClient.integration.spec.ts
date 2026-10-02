@@ -178,9 +178,17 @@ class WireConnection {
 		);
 	}
 
-	latest(
-		typeName: WebsocketMessage["type"],
-	): WebsocketMessage {
+	latest<
+		T extends
+			WebsocketMessage["type"],
+	>(
+		typeName: T,
+	): Extract<
+		WebsocketMessage,
+		{
+			type: T;
+		}
+	> {
 		const packet =
 			[
 				...this
@@ -214,7 +222,12 @@ class WireConnection {
 			type.errors
 		)
 			throw message;
-		return message;
+		return message as Extract<
+			WebsocketMessage,
+			{
+				type: T;
+			}
+		>;
 	}
 }
 

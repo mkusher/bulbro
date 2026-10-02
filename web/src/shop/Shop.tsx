@@ -23,6 +23,8 @@ export interface ShopProps {
 	) => void;
 	onReroll?: () => void;
 	rerollPrice?: number;
+	/** Locks purchases and re-rolls, e.g. after the player is ready in an online game */
+	disabled?: boolean;
 }
 
 export function Shop({
@@ -31,6 +33,7 @@ export function Shop({
 	onPurchase,
 	onReroll,
 	rerollPrice,
+	disabled = false,
 }: ShopProps) {
 	const [
 		purchasedItems,
@@ -47,6 +50,7 @@ export function Shop({
 			item: ShopItem,
 		) => {
 			if (
+				!disabled &&
 				availableMaterials >=
 					item.price &&
 				!purchasedItems.has(
@@ -103,8 +107,9 @@ export function Shop({
 										onReroll
 									}
 									disabled={
+										disabled ||
 										availableMaterials <
-										rerollPrice
+											rerollPrice
 									}
 									size="sm"
 									variant="outline"
@@ -191,6 +196,7 @@ export function Shop({
 												)
 											}
 											disabled={
+												disabled ||
 												!affordable ||
 												purchased
 											}

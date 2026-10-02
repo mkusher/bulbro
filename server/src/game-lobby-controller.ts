@@ -1,3 +1,4 @@
+import { startNextWaveIfReady } from "./game-controller";
 import {
 	type Player,
 	type ReadyPlayer,
@@ -202,6 +203,10 @@ export async function markAsConnected(
 				type: "player-connected",
 				player,
 			},
+		);
+		// Both players may have been ready while one of them was offline.
+		startNextWaveIfReady(
+			id,
 		);
 	}
 }

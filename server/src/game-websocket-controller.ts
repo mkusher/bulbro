@@ -1,7 +1,37 @@
 import { WebsocketMessage } from "@bulbro/network-protocol";
 import { type } from "arktype";
 import type { Logger } from "pino";
+import {
+	markNotReadyForNextWave,
+	markReadyForNextWave,
+} from "./game-controller";
 import type { GamesRegistry } from "./games-registry";
+
+/**
+ * Collects shop readiness and starts the next wave.
+ */
+export type NextWaveCoordinator =
+	{
+		markReady(
+			gameId: string,
+			wave: number,
+			playerId: string,
+			player: object,
+		): boolean;
+		markNotReady(
+			gameId: string,
+			wave: number,
+			playerId: string,
+		): boolean;
+	};
+
+const defaultNextWave: NextWaveCoordinator =
+	{
+		markReady:
+			markReadyForNextWave,
+		markNotReady:
+			markNotReadyForNextWave,
+	};
 
 export type GameRelayDependencies =
 	{
@@ -20,19 +50,24 @@ export type GameRelayDependencies =
 				  }
 				| undefined;
 		};
+		nextWave?: NextWaveCoordinator;
 	};
 
 export class WebsocketGameController {
 	#logger: Logger;
 	#rooms: GameRelayDependencies["rooms"];
 	#connections: GameRelayDependencies["connections"];
+	#nextWave: NextWaveCoordinator;
 	constructor(
 		logger: Logger,
 		{
 			rooms,
 			connections,
+			nextWave = defaultNextWave,
 		}: GameRelayDependencies,
 	) {
+		this.#nextWave =
+			nextWave;
 		this.#logger =
 			logger;
 		this.#rooms =
@@ -62,6 +97,64 @@ export class WebsocketGameController {
 		switch (
 			message.type
 		) {
+			case "next-wave-player-ready": {
+				if (
+					message.playerId !==
+						userId ||
+					message
+						.player
+						.id !==
+						userId
+				)
+					return;
+				const accepted =
+					this.#nextWave.markReady(
+						message.gameId,
+						message.wave,
+						userId,
+						message.player,
+					);
+				this.#logger.info(
+					{
+						gameId:
+							message.gameId,
+						wave: message.wave,
+						playerId:
+							userId,
+						accepted,
+					},
+					"Player ready for the next wave",
+				);
+				return;
+			}
+			case "next-wave-player-not-ready": {
+				if (
+					message.playerId !==
+					userId
+				)
+					return;
+				const accepted =
+					this.#nextWave.markNotReady(
+						message.gameId,
+						message.wave,
+						userId,
+					);
+				this.#logger.info(
+					{
+						gameId:
+							message.gameId,
+						wave: message.wave,
+						playerId:
+							userId,
+						accepted,
+					},
+					"Player is not ready for the next wave",
+				);
+				return;
+			}
+			case "next-wave-started":
+				// Only the server announces wave starts.
+				return;
 			case "game-state-updated-by-host":
 			case "game-state-updated-by-guest":
 			case "game-state-position-updated": {

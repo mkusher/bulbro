@@ -1,5 +1,10 @@
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import type { Bulbro } from "@/bulbro/BulbroCharacter";
+import { t } from "@/i18n";
+import {
+	type NetworkPlayerStatus,
+	NetworkPlayersStatus,
+} from "@/shop/NetworkPlayersStatus";
 import {
 	PrevWaveStats,
 	type WaveStats,
@@ -28,6 +33,17 @@ export interface PreRoundPlayerProps {
 }
 
 /**
+ * Online game readiness. The wave starts once every player is ready.
+ */
+export interface PreRoundNetworkProps {
+	players: NetworkPlayerStatus[];
+	/** The local player already confirmed readiness; the shop is locked */
+	isLocalReady: boolean;
+	/** Withdraws readiness and unlocks the shop */
+	onNotReady?: () => void;
+}
+
+/**
  * Props for the PreRoundLayout component.
  * This is a pure presentation component with no internal state.
  */
@@ -50,6 +66,8 @@ export interface PreRoundLayoutProps {
 	onReroll?: () => void;
 	/** Current re-roll price */
 	rerollPrice?: number;
+	/** When set, the start button becomes "Ready" and players' states are shown */
+	network?: PreRoundNetworkProps;
 }
 
 /**
@@ -66,10 +84,14 @@ export function PreRoundLayout({
 	onStartWave,
 	onReroll,
 	rerollPrice,
+	network,
 }: PreRoundLayoutProps) {
 	const nextWave =
 		currentWave +
 		1;
+	const isLocalReady =
+		network?.isLocalReady ??
+		false;
 
 	return (
 		<div className="p-4 max-w-6xl mx-auto">
@@ -93,6 +115,15 @@ export function PreRoundLayout({
 						</p>
 					</div>
 				</Card>
+
+				{/* Online players' connection and readiness */}
+				{network && (
+					<NetworkPlayersStatus
+						players={
+							network.players
+						}
+					/>
+				)}
 
 				{/* Previous Wave Stats */}
 				{prevWaveStats && (
@@ -160,22 +191,48 @@ export function PreRoundLayout({
 					rerollPrice={
 						rerollPrice
 					}
+					disabled={
+						isLocalReady
+					}
 				/>
 
 				{/* Start Wave Button */}
-				<div className="flex justify-center">
+				<div className="flex flex-col items-center gap-1">
 					<Button
 						className="w-full max-w-md"
+						variant={
+							isLocalReady
+								? "secondary"
+								: "default"
+						}
 						onClick={
-							onStartWave
+							isLocalReady
+								? network?.onNotReady
+								: onStartWave
 						}
 					>
-						Start
-						Wave{" "}
-						{
-							nextWave
-						}
+						{network
+							? isLocalReady
+								? t(
+										"preround.notReady",
+									)
+								: t(
+										"preround.ready",
+									)
+							: t(
+									"preround.startWave",
+									{
+										wave: nextWave,
+									},
+								)}
 					</Button>
+					{isLocalReady && (
+						<p className="text-sm text-white/80">
+							{t(
+								"preround.waitingForPlayers",
+							)}
+						</p>
+					)}
 				</div>
 			</div>
 		</div>

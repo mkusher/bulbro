@@ -102,7 +102,13 @@ export class StateSync {
 					.#isStarted ||
 				message.gameId !==
 					this
-						.#gameId
+						.#gameId ||
+				message.type ===
+					"next-wave-player-ready" ||
+				message.type ===
+					"next-wave-player-not-ready" ||
+				message.type ===
+					"next-wave-started"
 			)
 				return;
 			if (
@@ -156,7 +162,8 @@ export class StateSync {
 					.#sendEvents,
 				persistDelay,
 			);
-		let positionVersion = 0;
+		// Position packets carry a per-wave sender sequence starting at 1.
+		let positionVersion = 1;
 		const playerId =
 			this
 				.#localPlayerId;
