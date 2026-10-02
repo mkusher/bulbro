@@ -4,7 +4,13 @@ import {
 	isFullscreen,
 	requestFullscreen,
 } from "@/fullscreen";
-import { t } from "@/i18n";
+import {
+	allLocales,
+	type Locale,
+	languageNames,
+	locale,
+	t,
+} from "@/i18n";
 import {
 	CentralCard,
 	MainContainer,
@@ -19,6 +25,7 @@ import {
 	CardHeader,
 } from "@/ui/shadcn/card";
 import { Label } from "@/ui/shadcn/label";
+import { updateLocale } from "@/userSettings";
 
 type Props =
 	{
@@ -67,6 +74,55 @@ export function GameGlobalSettingsLayout({
 						</CardHeader>
 						<CardContent className="grid gap-6">
 							<form className="flex flex-col gap-6">
+								<fieldset className="grid gap-3">
+									<legend className="text-lg font-semibold mb-2">
+										{t(
+											"settings.language",
+										)}
+									</legend>
+									<select
+										id="language"
+										aria-label={t(
+											"settings.language",
+										)}
+										className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
+										value={
+											locale.value ??
+											"en"
+										}
+										onChange={(
+											e,
+										) =>
+											updateLocale(
+												e
+													.currentTarget
+													.value as Locale,
+											)
+										}
+									>
+										{allLocales.map(
+											(
+												l,
+											) => (
+												<option
+													key={
+														l
+													}
+													value={
+														l
+													}
+												>
+													{
+														languageNames[
+															l
+														]
+													}
+												</option>
+											),
+										)}
+									</select>
+								</fieldset>
+
 								<AudioSettings />
 
 								<fieldset className="grid gap-3">
