@@ -13,21 +13,6 @@ const pixiAppSemaphore =
 		8,
 	);
 
-const sleep =
-	(
-		delay: number,
-	) =>
-		new Promise(
-			(
-				res,
-			) => {
-				setTimeout(
-					res,
-					delay,
-				);
-			},
-		);
-
 export type PixiAppProps =
 	{
 		width?: number;
@@ -126,9 +111,8 @@ export function PixiApp({
 						);
 					}
 
-					await sleep(
-						100,
-					);
+					// Capture in the same turn as rendering, before WebGL clears its drawing buffer.
+					app.render();
 
 					const dataUrl =
 						app.canvas.toDataURL();
