@@ -3,10 +3,10 @@ import type { SoundName } from "@/AudioAssets";
 import type {
 	BulbroAttackedEvent,
 	BulbroReceivedHitEvent,
+	ConsumableCollectedEvent,
 	EnemyAttackedEvent,
 	EnemyDiedEvent,
 	GameEvent,
-	ConsumableCollectedEvent,
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
 import type { WaveState } from "@/waveState";

@@ -1,17 +1,10 @@
 import {
-	finalizeWaveStats,
-	gameStats,
-	lastWaveStats,
-	resetGameStats,
-	startWaveTracking,
-} from "./gameStats";
-import {
-	beforeEach,
 	afterEach,
-	spyOn,
+	beforeEach,
 	describe,
 	expect,
 	it,
+	spyOn,
 } from "bun:test";
 import { BulbroState } from "./bulbro/BulbroState";
 import { baseStats } from "./characters-definitions/base";
@@ -35,6 +28,13 @@ import type {
 	TickEvent,
 } from "./game-events/GameEvents";
 import { withEventMeta } from "./game-events/GameEvents";
+import {
+	finalizeWaveStats,
+	gameStats,
+	lastWaveStats,
+	resetGameStats,
+	startWaveTracking,
+} from "./gameStats";
 import { zeroPoint } from "./geometry";
 import type { Material } from "./object/MaterialState";
 import type { Player } from "./player";
@@ -49,13 +49,13 @@ import {
 	createInitialState,
 	generateConsumableMovementEvents,
 	generateMaterialMovementEvents,
-	getTimeLeft,
 	getRoundElapsedTime,
-	nextWave,
+	getTimeLeft,
 	handleBulbroAttacked,
 	handleBulbroHealed,
 	handleEnemyAttacked,
 	movePlayer,
+	nextWave,
 	updateState,
 	type WaveState,
 	type WeaponState,

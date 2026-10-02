@@ -7,8 +7,8 @@ import {
 } from "preact-iso";
 import { logger } from "./logger";
 import { FindLobby } from "./screens/FindLobby";
-import { JoinLobby } from "./screens/JoinLobby";
 import { InGame } from "./screens/Game";
+import { JoinLobby } from "./screens/JoinLobby";
 import { StartScreen } from "./screens/StartScreen";
 import { GameGlobalSettings } from "./screens/start/GameGlobalSettings";
 import { SetupLocalCoOp } from "./screens/start/SetupLocalCoOp";

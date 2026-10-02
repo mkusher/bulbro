@@ -66,18 +66,11 @@ export function WeaponSlots({
 								key={
 									index
 								}
-								className={`flex flex-col items-center gap-0.5 p-1 rounded border ${
+								className={`relative flex flex-col items-center gap-0.5 p-1 rounded border ${
 									weapon
 										? "cursor-pointer hover:shadow-md transition-shadow border-border bg-card"
 										: "border-dashed border-muted"
 								}`}
-								onClick={() =>
-									weapon &&
-									onWeaponClick?.(
-										weapon,
-										index,
-									)
-								}
 							>
 								{weapon ? (
 									<>
@@ -110,6 +103,20 @@ export function WeaponSlots({
 										</span>
 									</div>
 								)}
+								{weapon &&
+									onWeaponClick && (
+										<button
+											type="button"
+											className="absolute inset-0 cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+											aria-label={`Select ${weapon.name}`}
+											onClick={() =>
+												onWeaponClick(
+													weapon,
+													index,
+												)
+											}
+										/>
+									)}
 							</div>
 						),
 					)}

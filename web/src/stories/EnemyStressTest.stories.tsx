@@ -1,3 +1,6 @@
+import { spawnEnemy } from "@/enemy/EnemyState";
+import { classicMapSize } from "@/game-canvas";
+import { findBulbroById } from "../characters-definitions";
 import {
 	aphidEnemy,
 	babyEnemy,
@@ -10,14 +13,11 @@ import {
 	tree,
 	wildBoar,
 } from "../enemies-definitions";
-import { findBulbroById } from "../characters-definitions";
-import { spawnEnemy } from "@/enemy/EnemyState";
-import { classicMapSize } from "@/game-canvas";
+import { StorybookGameScene } from "./StorybookGameScene";
 import {
 	createBulbroState,
 	createEnemyState,
 } from "./storyHelpers";
-import { StorybookGameScene } from "./StorybookGameScene";
 
 const MAP_W =
 	classicMapSize.width; // 2000

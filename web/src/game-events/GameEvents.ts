@@ -4,11 +4,11 @@ import type {
 	Position,
 } from "@/geometry";
 import type { ShotState } from "@/shot/ShotState";
-import type { MeleeStrike } from "@/weapon/MeleeStrike";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
+import type { MeleeStrike } from "@/weapon/MeleeStrike";
 
 // Base events without EventMeta
 

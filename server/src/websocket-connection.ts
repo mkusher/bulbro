@@ -1,9 +1,9 @@
 import { type } from "arktype";
 import type { WSContext } from "hono/ws";
 import type { Logger } from "pino";
-import { websocketConnections } from "./websocket-connections";
 import { verifyToken } from "./auth";
 import { markAsConnected } from "./game-lobby-controller";
+import { websocketConnections } from "./websocket-connections";
 
 export const AuthMessage =
 	type(
@@ -191,7 +191,7 @@ export class WebsocketConnection {
 						},
 					);
 				}
-				default:
+				default: {
 					if (
 						this
 							.#expires <=
@@ -225,6 +225,7 @@ export class WebsocketConnection {
 							type: string;
 						},
 					);
+				}
 			}
 		} catch (err) {
 			this.#logger.warn(

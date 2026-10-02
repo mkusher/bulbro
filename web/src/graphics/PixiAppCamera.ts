@@ -5,8 +5,8 @@ import type {
 	Size,
 } from "@/geometry";
 import type { WaveState } from "@/waveState";
-import { createPixiInitOptions } from "./PixiConfiguration";
 import type { Camera } from "./Camera";
+import { createPixiInitOptions } from "./PixiConfiguration";
 
 export class PixiAppCamera
 	implements
@@ -71,6 +71,7 @@ export class PixiAppCamera
 				.#app
 				.canvas;
 		}
+		return undefined;
 	}
 
 	detach(): void {

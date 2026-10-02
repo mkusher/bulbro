@@ -1,5 +1,10 @@
 import type { Signal } from "@preact/signals";
 import type { Logger } from "pino";
+import type {
+	GameEvent,
+	GameEventQueue,
+} from "@/game-events/GameEvents";
+import { VoidGameEventQueue } from "@/game-events/VoidGameEventQueue";
 import {
 	audioEngine,
 	bgmEnabled,
@@ -26,11 +31,6 @@ import type {
 import { AudioEventsProcessor } from "./processors/AudioEventsProcessor";
 import { GameStatsProcessor } from "./processors/GameStatsProcessor";
 import { WaveStateProcessor } from "./processors/WaveStateProcessor";
-import type {
-	GameEvent,
-	GameEventQueue,
-} from "@/game-events/GameEvents";
-import { VoidGameEventQueue } from "@/game-events/VoidGameEventQueue";
 
 export class BaseWaveProcess
 	implements

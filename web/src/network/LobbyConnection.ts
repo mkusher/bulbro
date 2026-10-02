@@ -1,9 +1,9 @@
+import { signal } from "@preact/signals";
 import type { GameProcess } from "@/GameProcess";
 import type { Logger } from "@/logger";
-import { signal } from "@preact/signals";
 import { wsUrl } from "./clientConfig";
-import { sessionToken } from "./currentUser";
 import { isLocalPlayerHost } from "./currentLobby";
+import { sessionToken } from "./currentUser";
 import {
 	type Lobby,
 	type PlayerAttendee,

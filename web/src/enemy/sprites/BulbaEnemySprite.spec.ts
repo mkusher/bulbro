@@ -10,15 +10,15 @@ import {
 } from "pixi.js";
 import { Assets } from "@/Assets";
 import { babyEnemy } from "@/enemies-definitions/baby";
-import { spawnEnemy } from "../EnemyState";
-import {
-	EnemySprites,
-	type EnemyAnimationState,
-} from "../EnemySprites";
 import {
 	deltaTime,
 	nowTime,
 } from "@/time";
+import {
+	type EnemyAnimationState,
+	EnemySprites,
+} from "../EnemySprites";
+import { spawnEnemy } from "../EnemyState";
 import { BulbaEnemySprite } from "./BulbaEnemySprite";
 import { potatoBeetleBaby } from "./EnemiesFrames";
 

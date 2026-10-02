@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
+import { Assets } from "@/Assets";
 import type {
 	Position,
 	Size,
 } from "@/geometry";
 import type { WaveState } from "@/waveState";
 import type { Camera } from "./Camera";
-import { Assets } from "@/Assets";
 
 /**
  * Decorator that darkens the screen when player health drops below 50%.

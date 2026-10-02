@@ -1,19 +1,19 @@
 import {
-	type Messages,
-	type Locale,
-	staticLocales,
-	dynamicLocales,
-} from "./locales";
-import {
 	computed,
 	effect,
 	signal,
 } from "@preact/signals";
 import IntlMessageFormat from "intl-messageformat";
-import bel from "./locales/bel";
-import en from "./locales/en";
 import { logger } from "@/logger";
 import { userSettings } from "@/userSettings";
+import {
+	dynamicLocales,
+	type Locale,
+	type Messages,
+	staticLocales,
+} from "./locales";
+import bel from "./locales/bel";
+import en from "./locales/en";
 
 export { languageNames } from "./languages";
 export type {

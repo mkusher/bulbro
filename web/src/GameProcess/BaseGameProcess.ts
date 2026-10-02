@@ -13,20 +13,20 @@ import {
 	deltaTime,
 	nowTime,
 } from "../time";
-import { FullGameTickProcess } from "./FullGameTickProcess";
-import { BaseWaveProcess } from "./BaseWaveProcess";
-import type {
-	GameProcess,
-	TickProcessFactory,
-	WaveProcess,
-	WavePromises,
-} from "./index";
 import {
 	createInitialState,
 	nextWave,
 	type WaveState,
 	waveState,
 } from "../waveState";
+import { BaseWaveProcess } from "./BaseWaveProcess";
+import { FullGameTickProcess } from "./FullGameTickProcess";
+import type {
+	GameProcess,
+	TickProcessFactory,
+	WaveProcess,
+	WavePromises,
+} from "./index";
 
 /**
  * Orchestrates game initialization, input, rendering, and round timing.

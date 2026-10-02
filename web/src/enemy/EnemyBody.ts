@@ -1,6 +1,6 @@
 import type { Size } from "@/geometry";
-import * as enemiesFrames from "./sprites/EnemiesFrames";
 import type { EnemyType } from "./sprites/EnemiesFrames";
+import * as enemiesFrames from "./sprites/EnemiesFrames";
 
 /** Scale at which enemy body frames are drawn. */
 export const ENEMY_BODY_SCALE = 0.3;

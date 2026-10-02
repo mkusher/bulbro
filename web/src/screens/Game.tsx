@@ -4,16 +4,16 @@ import {
 } from "preact/hooks";
 import { TouchscreenJoystick } from "@/controls/TouchscreenJoystick";
 import {
-	currentLobby,
-	currentNetworkGame,
-} from "@/network/currentLobby";
-import { currentUser } from "@/network/currentUser";
-import {
 	currentGameCanvas,
 	isLoading as isLoadingSignal,
 	isRound as isRoundSignal,
 	waveResult,
 } from "@/currentGameProcess";
+import {
+	currentLobby,
+	currentNetworkGame,
+} from "@/network/currentLobby";
+import { currentUser } from "@/network/currentUser";
 import { Failed } from "@/screens/Failed";
 import { PreRound } from "@/screens/PreRound";
 import { MainContainer } from "@/ui/Layout";

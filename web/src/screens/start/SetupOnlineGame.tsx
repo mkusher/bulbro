@@ -1,18 +1,20 @@
 import { computed } from "@preact/signals";
 import { ShareIcon } from "lucide-react";
 import { useState } from "preact/hooks";
+import { useStartBgm } from "@/audio/useStartBgm";
 import type { Bulbro } from "@/bulbro";
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import type { Difficulty } from "@/game-formulas";
+import { t } from "@/i18n";
 import { logger } from "@/logger";
-import { lobbyConnectionError } from "@/network/LobbyConnection";
 import {
 	currentLobby,
 	markAsReady,
 	readyPlayers,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import { lobbyConnectionError } from "@/network/LobbyConnection";
 import { startNetworkGameAsHost } from "@/network/start-game";
 import { createPlayer } from "@/player";
 import { isTgApp } from "@/tg-app";
@@ -40,8 +42,6 @@ import {
 import { WeaponSelector } from "@/ui/WeaponSelector";
 import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
-import { t } from "@/i18n";
-import { useStartBgm } from "@/audio/useStartBgm";
 import { Failed } from "../Failed";
 
 function getShareUrl() {

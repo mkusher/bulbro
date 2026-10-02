@@ -76,7 +76,7 @@ function Carousel({
 	className,
 	children,
 	...props
-}: React.ComponentProps<"div"> &
+}: React.ComponentProps<"section"> &
 	CarouselProps) {
 	const [
 		carouselRef,
@@ -226,7 +226,8 @@ function Carousel({
 				canScrollNext,
 			}}
 		>
-			<div
+			<section
+				role="region"
 				onKeyDownCapture={
 					handleKeyDown
 				}
@@ -234,7 +235,6 @@ function Carousel({
 					"relative",
 					className,
 				)}
-				role="region"
 				aria-roledescription="carousel"
 				data-slot="carousel"
 				{...props}
@@ -242,7 +242,7 @@ function Carousel({
 				{
 					children
 				}
-			</div>
+			</section>
 		</CarouselContext.Provider>
 	);
 }
@@ -290,6 +290,7 @@ function CarouselItem({
 		useCarousel();
 
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: A carousel slide is a content group, not a form fieldset.
 		<div
 			role="group"
 			aria-roledescription="slide"
@@ -406,10 +407,10 @@ function CarouselNext({
 }
 
 export {
-	type CarouselApi,
 	Carousel,
+	type CarouselApi,
 	CarouselContent,
 	CarouselItem,
-	CarouselPrevious,
 	CarouselNext,
+	CarouselPrevious,
 };

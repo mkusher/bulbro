@@ -15,12 +15,11 @@ import {
 import { logger as defaultLogger } from "../logger";
 import type { WaveState } from "../waveState";
 import { getTimeLeft } from "../waveState";
-import type { TickProcess } from "./index";
 import type { EventGenerator } from "./event-generators";
 import {
+	ConsumablesMovementEventsGenerator,
 	EnemyBehaviorEventGenerator,
 	EnemySpawnEventsGenerator,
-	ConsumablesMovementEventsGenerator,
 	MaterialsMovementEventsGenerator,
 	MeleeStrikeEventGenerator,
 	PlayerHealEventGenerator,
@@ -28,6 +27,7 @@ import {
 	PlayerWeaponEventGenerator,
 	ShotMovementEventGenerator,
 } from "./event-generators";
+import type { TickProcess } from "./index";
 
 /**
  * Encapsulates per-tick game updates: player movement, enemy movement, spawning, and rendering.

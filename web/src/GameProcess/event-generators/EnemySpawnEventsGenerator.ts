@@ -3,7 +3,6 @@ import type {
 	NowTime,
 } from "@/time";
 import type { GameEventInternal } from "../../game-events/GameEvents";
-import type { WaveState } from "../../waveState";
 import {
 	AphidSpawner,
 	BabySpawner,
@@ -16,6 +15,7 @@ import {
 	TreeSpawner,
 	WildBoarSpawner,
 } from "../../Spawner/enemy-spawners";
+import type { WaveState } from "../../waveState";
 import type { EventGenerator } from "./EventGenerator";
 
 type SpawnerLogic =

@@ -11,8 +11,8 @@ import {
 export type { BulbroSprite } from "./Sprite";
 
 export type {
-	Stats,
 	Bulbro,
+	Stats,
 };
 export {
 	BulbroState,

@@ -14,19 +14,19 @@ import { sword } from "./sword";
 
 export {
 	ak47,
+	// Enemy weapons
+	aphidGun,
 	brick,
 	doubleBarrelShotgun,
 	fist,
 	hand,
 	knife,
 	laserGun,
+	orcFist,
+	orcSlowGun,
 	pistol,
 	smg,
 	sword,
-	// Enemy weapons
-	aphidGun,
-	orcFist,
-	orcSlowGun,
 };
 
 export const weapons =

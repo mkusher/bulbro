@@ -1,8 +1,8 @@
 import { useLocation } from "preact-iso";
 import { isTgApp } from "@/tg-app";
-import { MainMenuComponent } from "./MainMenu";
 import { userSettings } from "@/userSettings";
 import { LanguageSelectionComponent } from "./LanguageSelection";
+import { MainMenuComponent } from "./MainMenu";
 
 export function StartScreen() {
 	const locale =

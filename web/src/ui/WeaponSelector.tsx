@@ -238,12 +238,6 @@ function WeaponThumbnail({
 	return (
 		<div
 			className={`${baseClasses} ${stateClasses}`}
-			onClick={
-				onSelect
-			}
-			title={
-				weapon.name
-			}
 		>
 			<WeaponDisplay
 				weapon={
@@ -278,6 +272,17 @@ function WeaponThumbnail({
 					weapon.name
 				}
 			</div>
+			<button
+				type="button"
+				className="absolute inset-0 z-10 cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+				aria-label={`Select ${weapon.name}`}
+				aria-pressed={
+					isSelected
+				}
+				onClick={
+					onSelect
+				}
+			/>
 		</div>
 	);
 }

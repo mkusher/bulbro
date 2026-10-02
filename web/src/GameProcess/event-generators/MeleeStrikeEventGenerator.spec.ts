@@ -3,9 +3,12 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import { BULBRO_BODY_SIZE } from "../../bulbro";
 import { BulbroState } from "../../bulbro/BulbroState";
 import { baseStats } from "../../characters-definitions/base";
 import { babyEnemy } from "../../enemies-definitions/baby";
+import { ChasingBehavior } from "../../enemy/ChasingBehavior";
+import { enemyBodySize } from "../../enemy/EnemyBody";
 import {
 	EnemyState,
 	spawnEnemy,
@@ -30,10 +33,7 @@ import {
 	type WeaponType,
 } from "../../weapon";
 import { TOUCH_MARGIN } from "../../weapon/Attack";
-import { BULBRO_BODY_SIZE } from "../../bulbro";
-import { enemyBodySize } from "../../enemy/EnemyBody";
 import type { MeleeStrike } from "../../weapon/MeleeStrike";
-import { ChasingBehavior } from "../../enemy/ChasingBehavior";
 import { EnemyBehaviorEventGenerator } from "./EnemyBehaviorEventGenerator";
 import { MeleeStrikeEventGenerator } from "./MeleeStrikeEventGenerator";
 import { PlayerWeaponEventGenerator } from "./PlayerWeaponEventGenerator";

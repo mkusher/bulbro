@@ -1,10 +1,10 @@
+import { t } from "@/i18n";
 import type { Bulbro } from "../bulbro";
 import { BulbroCard } from "../bulbro/BulbroDisplay";
 import { BulbroStats } from "../bulbro/BulbroStats";
 import { bulbros } from "../characters-definitions";
 import { BulbroThumbnail } from "./BulbroThumbnail";
 import { WithContainerWidth } from "./WithContainerWidth";
-import { t } from "@/i18n";
 
 type BulbroSelectorProps =
 	{
@@ -204,12 +204,6 @@ function BulbroThumbnailIcon({
 	return (
 		<div
 			className={`${baseClasses} ${stateClasses}`}
-			onClick={
-				onSelect
-			}
-			title={
-				bulbro.name
-			}
 		>
 			<BulbroThumbnail
 				bulbro={
@@ -237,6 +231,17 @@ function BulbroThumbnailIcon({
 					bulbro.name
 				}
 			</div>
+			<button
+				type="button"
+				className="absolute inset-0 z-10 cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+				aria-label={`Select ${bulbro.name}`}
+				aria-pressed={
+					isSelected
+				}
+				onClick={
+					onSelect
+				}
+			/>
 		</div>
 	);
 }

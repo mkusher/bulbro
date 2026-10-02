@@ -127,6 +127,7 @@ export function GameSceneControls({
 			{/* Main Controls */}
 			<div>
 				<button
+					type="button"
 					className={`px-2.5 py-1 mx-0.5 text-white border border-gray-500 rounded cursor-pointer text-xs ${
 						gameScene
 							.sceneState
@@ -151,6 +152,7 @@ export function GameSceneControls({
 						: "▶ Play"}
 				</button>
 				<button
+					type="button"
 					className="px-2.5 py-1 mx-0.5 bg-gray-700 text-white border border-gray-500 rounded cursor-pointer text-xs"
 					onClick={() =>
 						gameScene
@@ -194,6 +196,7 @@ export function GameSceneControls({
 					ticks
 				</span>
 				<button
+					type="button"
 					className="px-2.5 py-1 mx-0.5 bg-gray-700 text-white border border-gray-500 rounded cursor-pointer text-xs"
 					onClick={() =>
 						gameScene.step(
@@ -237,6 +240,7 @@ export function GameSceneControls({
 					sec
 				</span>
 				<button
+					type="button"
 					className="px-2.5 py-1 mx-0.5 bg-gray-700 text-white border border-gray-500 rounded cursor-pointer text-xs"
 					onClick={() =>
 						gameScene

@@ -1,18 +1,18 @@
 import { signal } from "@preact/signals";
 import type { PlayerControl } from "./controls";
+import type { GameProcess } from "./GameProcess";
+import { BaseGameProcess } from "./GameProcess/BaseGameProcess";
+import type { Difficulty } from "./game-formulas";
 import {
 	finalizeWaveStats,
 	resetGameStats,
 	startWaveTracking,
 } from "./gameStats";
-import { BaseGameProcess } from "./GameProcess/BaseGameProcess";
-import type { GameProcess } from "./GameProcess";
-import type { Difficulty } from "./game-formulas";
 import type { Player } from "./player";
 import {
-	waveState,
 	getRoundElapsedTime,
 	type WaveState,
+	waveState,
 } from "./waveState";
 
 export const currentGameProcess =

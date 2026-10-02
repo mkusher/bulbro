@@ -7,10 +7,10 @@ import { ENEMY_SIZE } from "../../enemy";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
 	distance,
-	rectContainsPoint,
-	segmentAabbHitTime,
 	type Position,
+	rectContainsPoint,
 	type Size,
+	segmentAabbHitTime,
 } from "../../geometry";
 import { movePosition } from "../../physics";
 import type { WaveState } from "../../waveState";
