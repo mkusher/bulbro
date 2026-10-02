@@ -14,17 +14,22 @@ export function WeaponStats({
 }: WeaponStatsProps) {
 	const stats =
 		weapon.statsBonus;
+	// Only numeric stats are rendered: passing nested objects (e.g. `scaling`)
+	// as JSX children makes Preact mutate them into VNodes, which corrupts the
+	// shared weapon definition and breaks JSON serialization.
 	const statEntries =
 		Object.entries(
 			stats,
 		).filter(
-			([
-				_,
-				value,
-			]) =>
-				value !==
-					undefined &&
-				value !==
+			(
+				entry,
+			): entry is [
+				string,
+				number,
+			] =>
+				typeof entry[1] ===
+					"number" &&
+				entry[1] !==
 					0,
 		);
 
@@ -75,9 +80,9 @@ export function WeaponStats({
 								:
 							</span>
 							<span
-								className={`font-medium ${(value as number) > 0 ? "text-green-600" : "text-red-600"}`}
+								className={`font-medium ${value > 0 ? "text-green-600" : "text-red-600"}`}
 							>
-								{(value as number) >
+								{value >
 								0
 									? "+"
 									: ""}
