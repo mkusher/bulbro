@@ -141,3 +141,19 @@ export const WebsocketMessage =
 
 export type WebsocketMessage =
 	typeof WebsocketMessage.infer;
+
+export {
+	Player,
+	Weapon,
+	Bulbro,
+	ReadyPlayer,
+	Lobby,
+	Connected,
+	PlayerJoined,
+	LobbySnapshot,
+	PlayerReady,
+	PlayerDisconnected,
+	PlayerConnected,
+	GameStarted,
+	LobbyWebsocketMessage,
+} from "./lobby";
