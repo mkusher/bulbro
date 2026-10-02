@@ -8,14 +8,14 @@ import { vampire } from "./vampire";
 import { wellRoundedBulbro } from "./well-rounded";
 
 export {
-	wellRoundedBulbro,
-	grandpa,
-	vampire,
-	medic,
 	berserker,
-	king,
 	cyborg,
 	evil,
+	grandpa,
+	king,
+	medic,
+	vampire,
+	wellRoundedBulbro,
 };
 
 export const bulbros =

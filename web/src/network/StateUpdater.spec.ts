@@ -11,6 +11,7 @@ import {
 } from "@preact/signals";
 import { BulbroState } from "@/bulbro/BulbroState";
 import { baseStats } from "@/characters-definitions/base";
+import type { WaveProcess } from "@/GameProcess";
 import type { GameEvent } from "@/game-events/GameEvents";
 import {
 	direction,
@@ -22,7 +23,6 @@ import {
 	deltaTime,
 	nowTime,
 } from "@/time";
-import type { WaveProcess } from "@/GameProcess";
 import type {
 	WaveState,
 	WeaponState,

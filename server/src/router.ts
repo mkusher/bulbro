@@ -20,9 +20,9 @@ import {
 	markPlayerReady,
 } from "./game-lobby-controller";
 import {
+	canStartLobby,
 	Player,
 	ReadyPlayer,
-	canStartLobby,
 	registry,
 } from "./games-registry";
 import { websocketConnections } from "./websocket-connections";

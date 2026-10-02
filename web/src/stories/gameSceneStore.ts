@@ -1,6 +1,8 @@
 import { signal } from "@preact/signals";
 import type * as PIXI from "pixi.js";
 import { createMainControls } from "@/controls";
+import { FullGameTickProcess } from "@/GameProcess/FullGameTickProcess";
+import { WaveStateProcessor } from "@/GameProcess/processors/WaveStateProcessor";
 import {
 	canvasSize,
 	classicMapSize,
@@ -10,8 +12,6 @@ import type { Camera } from "@/graphics/Camera";
 import { createGameCamera } from "@/graphics/GameCamera";
 import { StorybookSceneWithUi } from "@/graphics/StorybookSceneWithUi";
 import { logger as defaultLogger } from "@/logger";
-import { FullGameTickProcess } from "@/GameProcess/FullGameTickProcess";
-import { WaveStateProcessor } from "@/GameProcess/processors/WaveStateProcessor";
 import {
 	deltaTime,
 	nowTime,

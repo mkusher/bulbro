@@ -4,19 +4,19 @@ import {
 } from "@/controls";
 import type {
 	GameProcess,
+	WaveProcess,
 	WavePromises,
 } from "@/GameProcess";
 import type { Logger } from "@/logger";
-import type { WaveProcess } from "@/GameProcess";
 import { waveState } from "@/waveState";
 import { currentUser } from "./currentUser";
+import { remotePlayerIdFor } from "./gameParticipants";
 import type { InGameCommunicationChannel } from "./InGameCommunicationChannel";
 import type { Lobby } from "./LobbySocketMessages";
+import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
-import { remotePlayerIdFor } from "./gameParticipants";
-import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
 
 export class NetworkGameConnection {
 	#logger: Logger;

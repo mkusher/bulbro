@@ -2,11 +2,11 @@ import {
 	expect,
 	test,
 } from "bun:test";
-import type { Lobby } from "./LobbySocketMessages";
 import {
 	orderPlayersLocalFirst,
 	remotePlayerIdFor,
 } from "./gameParticipants";
+import type { Lobby } from "./LobbySocketMessages";
 
 const lobby: Lobby =
 	{

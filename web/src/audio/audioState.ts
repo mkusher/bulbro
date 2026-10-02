@@ -1,19 +1,19 @@
 import {
-	audioEnabled,
-	bgmEnabled,
-	effectsVolume,
-	bgmVolume,
-} from "@/userSettings";
-import {
 	computed,
 	signal,
 } from "@preact/signals";
+import {
+	audioEnabled,
+	bgmEnabled,
+	bgmVolume,
+	effectsVolume,
+} from "@/userSettings";
 
 export {
 	audioEnabled,
 	bgmEnabled,
-	effectsVolume,
 	bgmVolume,
+	effectsVolume,
 };
 
 export const isAudioEngineInitialized =

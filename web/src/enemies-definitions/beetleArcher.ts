@@ -1,9 +1,9 @@
+import { aphidGun } from "@/weapons-definitions";
 import type { EnemyCharacter } from "../enemy";
 import {
 	baseConsumableDropChance,
 	baseStats,
 } from "./base";
-import { aphidGun } from "@/weapons-definitions";
 
 export const beetleArcher: EnemyCharacter =
 	{

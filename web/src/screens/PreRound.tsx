@@ -1,30 +1,30 @@
 import { useState } from "preact/hooks";
+import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
 import { startWave } from "@/currentGameProcess";
+import { withEventMeta } from "@/game-events/GameEvents";
+import {
+	firstRerollPrice,
+	rerollIncrease,
+} from "@/game-formulas";
+import { recordReroll } from "@/gameStats";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { ShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import {
-	waveState,
+	deltaTime as dt,
+	nowTime,
+} from "@/time";
+import {
 	selectWeapons as selectWeaponsInState,
 	updateState,
+	waveState,
 } from "@/waveState";
 import {
 	fromWeaponState,
 	toWeaponState,
 	type Weapon,
 } from "@/weapon";
-import { useStartBgm } from "@/audio";
-import {
-	firstRerollPrice,
-	rerollIncrease,
-} from "@/game-formulas";
-import { recordReroll } from "@/gameStats";
-import { withEventMeta } from "@/game-events/GameEvents";
-import {
-	deltaTime as dt,
-	nowTime,
-} from "@/time";
 
 /**
  * Calculates the re-roll price for a given re-roll count and wave.

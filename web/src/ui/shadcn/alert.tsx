@@ -87,6 +87,6 @@ function AlertDescription({
 
 export {
 	Alert,
-	AlertTitle,
 	AlertDescription,
+	AlertTitle,
 };

@@ -12,6 +12,10 @@ import type {
 	GameEvent,
 	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
+import type {
+	DeltaTime,
+	NowTime,
+} from "@/time";
 import {
 	applyAttackToWeapons,
 	applyStrikeSweptToWeapons,
@@ -19,10 +23,6 @@ import {
 	attackDescription,
 	attackSideEvents,
 } from "@/weapon/Attack";
-import type {
-	DeltaTime,
-	NowTime,
-} from "@/time";
 import {
 	calculateStats,
 	calculateWeaponWorldOffset,

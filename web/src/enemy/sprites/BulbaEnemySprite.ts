@@ -1,11 +1,6 @@
 import * as PIXI from "pixi.js";
 import { ColorOverlayFilter } from "pixi-filters";
 import { ConvolutionFilter } from "pixi-filters/convolution";
-import {
-	ENEMY_BODY_SCALE,
-	getEnemyBodyTextures,
-	type EnemyBodyTextures,
-} from "./EnemyBodyTextures";
 import type {
 	Direction,
 	Position,
@@ -20,11 +15,16 @@ import type {
 	NowTime,
 } from "@/time";
 import {
-	EnemySprites,
 	type EnemyAnimationState,
+	EnemySprites,
 } from "../EnemySprites";
 import type { EnemyState } from "../EnemyState";
 import * as enemiesFrames from "./EnemiesFrames";
+import {
+	ENEMY_BODY_SCALE,
+	type EnemyBodyTextures,
+	getEnemyBodyTextures,
+} from "./EnemyBodyTextures";
 
 type PhysicalRectangle =
 	{
@@ -126,8 +126,15 @@ export class BulbaEnemySprite extends GameSprite {
 	}
 
 	init(): Promise<void> {
-		return (this.#initialization ??=
-			this.#initialize());
+		if (
+			!this
+				.#initialization
+		) {
+			this.#initialization =
+				this.#initialize();
+		}
+		return this
+			.#initialization;
 	}
 	async #initialize(): Promise<void> {
 		this.#bodyTextures =

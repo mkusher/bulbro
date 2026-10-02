@@ -17,8 +17,10 @@ import {
 	readyPlayers,
 	startGame as startGameFromLobby,
 } from "./currentLobby";
-import { currentUser } from "./currentUser";
-import { authorizationHeaders } from "./currentUser";
+import {
+	authorizationHeaders,
+	currentUser,
+} from "./currentUser";
 import { orderPlayersLocalFirst } from "./gameParticipants";
 
 export async function startNetworkGameAsHost(

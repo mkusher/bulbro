@@ -10,6 +10,7 @@ import { ENEMY_BODY_SCALE } from "../EnemyBody";
 export {
 	ENEMY_BODY_SCALE,
 };
+
 const OUTLINE_RADIUS =
 	3 /
 	ENEMY_BODY_SCALE;

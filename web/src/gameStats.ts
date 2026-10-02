@@ -1,6 +1,6 @@
 import { signal } from "@preact/signals";
-import type { WaveStats } from "@/shop/PrevWaveStats";
 import type { GameEvent } from "@/game-events/GameEvents";
+import type { WaveStats } from "@/shop/PrevWaveStats";
 
 /**
  * Total game stats accumulated across all waves.

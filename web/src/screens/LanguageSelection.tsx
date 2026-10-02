@@ -1,7 +1,7 @@
 import {
+	allLocales,
 	type Locale,
 	languageNames,
-	allLocales,
 } from "@/i18n";
 import { MainContainer } from "@/ui/Layout";
 import {
@@ -21,10 +21,7 @@ export function LanguageSelection() {
 	);
 }
 
-export type Props =
-	{};
-
-export function LanguageSelectionComponent({}: Props) {
+export function LanguageSelectionComponent() {
 	const locales =
 		allLocales;
 

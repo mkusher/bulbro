@@ -1,16 +1,16 @@
+import type { Logger } from "pino";
 import type { PlayerControl } from "../controls";
-import type { Difficulty } from "../game-formulas";
 import type {
 	GameEvent,
 	GameEventQueue,
 } from "../game-events/GameEvents";
+import type { Difficulty } from "../game-formulas";
 import type { Player } from "../player";
 import type {
 	DeltaTime,
 	NowTime,
 } from "../time";
 import type { WaveState } from "../waveState";
-import type { Logger } from "pino";
 
 export interface TickProcess {
 	tick(

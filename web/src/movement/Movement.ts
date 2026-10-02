@@ -126,7 +126,11 @@ export class Movement {
 		}
 
 		// Build new rectangle for collision if rectangle
-		let newRect;
+		let newRect:
+			| ReturnType<
+					typeof rectFromCenter
+			  >
+			| undefined;
 		if (
 			this
 				.obj

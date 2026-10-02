@@ -3,10 +3,10 @@ import {
 	signal,
 } from "@preact/signals";
 import {
-	isFullscreen as isTgFullscreen,
-	requestFullscreen as requestTgFullscreen,
 	exitFullscreen as exitTgFullscreen,
 	isTgApp,
+	isFullscreen as isTgFullscreen,
+	requestFullscreen as requestTgFullscreen,
 } from "./tg-app/";
 
 const isDocumentFullscreen =

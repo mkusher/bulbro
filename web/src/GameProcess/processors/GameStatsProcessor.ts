@@ -1,6 +1,6 @@
 import type { GameEvent } from "../../game-events/GameEvents";
-import type { GameEventsProcessor } from "../index";
 import { updateStatsFromEvents } from "../../gameStats";
+import type { GameEventsProcessor } from "../index";
 
 export class GameStatsProcessor
 	implements

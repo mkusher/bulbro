@@ -20,7 +20,6 @@ import {
 } from "@/time";
 import { WeaponsSprite } from "@/weapon/sprites/WeaponsSprite.ts";
 import type { BulbroState } from "../BulbroState";
-import { OverheadHealthBar } from "./OverheadHealthBar.ts";
 import { BodySprite } from "./BodySprite.ts";
 import {
 	FaceSprite,
@@ -30,6 +29,7 @@ import {
 	type LegState,
 	LegsSprite,
 } from "./LegsSprite.ts";
+import { OverheadHealthBar } from "./OverheadHealthBar.ts";
 
 export {
 	type FaceType,

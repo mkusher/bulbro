@@ -12,8 +12,8 @@ import {
 } from "./sprites/BulbaSprite";
 
 export {
-	faceTypes,
 	type FaceType,
+	faceTypes,
 };
 
 /**

@@ -1,8 +1,8 @@
 import type { Signal } from "@preact/signals";
 import { AudioController } from "../../audio/AudioController";
 import type { GameEvent } from "../../game-events/GameEvents";
-import type { GameEventsProcessor } from "../index";
 import type { WaveState } from "../../waveState";
+import type { GameEventsProcessor } from "../index";
 
 export class AudioEventsProcessor
 	implements

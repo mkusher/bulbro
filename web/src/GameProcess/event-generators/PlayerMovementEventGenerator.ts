@@ -5,8 +5,8 @@ import type {
 import type { PlayerControl } from "../../controls";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
-	zeroPoint,
 	type Direction,
+	zeroPoint,
 } from "../../geometry";
 import type { WaveState } from "../../waveState";
 import type { EventGenerator } from "./EventGenerator";
