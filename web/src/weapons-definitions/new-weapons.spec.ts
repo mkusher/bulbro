@@ -97,7 +97,30 @@ describe("new ranged weapons", () => {
 				);
 			const equipped =
 				player
-					.weapons[0]!;
+					.weapons[0];
+			if (
+				!equipped
+			)
+				throw new Error(
+					"Expected the weapon to be equipped",
+				);
+			if (
+				weapon
+					.statsBonus
+					.range ===
+					undefined ||
+				weapon
+					.statsBonus
+					.damage ===
+					undefined ||
+				weapon
+					.statsBonus
+					.knockback ===
+					undefined
+			)
+				throw new Error(
+					"Expected the weapon to define range, damage, and knockback",
+				);
 			const result =
 				attack(
 					player,
@@ -143,7 +166,7 @@ describe("new ranged weapons", () => {
 			).toBe(
 				weapon
 					.statsBonus
-					.damage!,
+					.damage,
 			);
 			expect(
 				result
@@ -159,7 +182,7 @@ describe("new ranged weapons", () => {
 			).toBeGreaterThanOrEqual(
 				weapon
 					.statsBonus
-					.range!,
+					.range,
 			);
 			expect(
 				result
@@ -168,7 +191,7 @@ describe("new ranged weapons", () => {
 			).toBe(
 				weapon
 					.statsBonus
-					.knockback!,
+					.knockback,
 			);
 			expect(
 				Number.isFinite(
