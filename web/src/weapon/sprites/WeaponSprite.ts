@@ -81,7 +81,7 @@ export const weapons: Record<
 					y: 10,
 				},
 			size: {
-				width: 220,
+				width: 240,
 				height: 195,
 			},
 		},
@@ -101,12 +101,12 @@ export const weapons: Record<
 			{
 				position:
 					{
-						x: 28,
-						y: 428,
+						x: 24,
+						y: 420,
 					},
 				size: {
-					width: 290,
-					height: 100,
+					width: 296,
+					height: 116,
 				},
 			},
 		sword:
@@ -117,7 +117,7 @@ export const weapons: Record<
 						y: 260,
 					},
 				size: {
-					width: 285,
+					width: 296,
 					height: 155,
 				},
 			},
@@ -140,14 +140,72 @@ export const weapons: Record<
 						y: 370,
 					},
 				size: {
-					width: 350,
-					height: 160,
+					width: 360,
+					height: 170,
 				},
 			},
 		brick:
-			empty,
+			{
+				position:
+					{
+						x: 16,
+						y: 576,
+					},
+				size: {
+					width: 210,
+					height: 140,
+				},
+			},
 		orcGun:
 			empty,
+		flareGun:
+			{
+				position:
+					{
+						x: 240,
+						y: 568,
+					},
+				size: {
+					width: 240,
+					height: 160,
+				},
+			},
+		grenade:
+			{
+				position:
+					{
+						x: 496,
+						y: 560,
+					},
+				size: {
+					width: 160,
+					height: 192,
+				},
+			},
+		machineGun:
+			{
+				position:
+					{
+						x: 672,
+						y: 584,
+					},
+				size: {
+					width: 336,
+					height: 168,
+				},
+			},
+		bazooka:
+			{
+				position:
+					{
+						x: 16,
+						y: 784,
+					},
+				size: {
+					width: 360,
+					height: 180,
+				},
+			},
 		aphidGun:
 			empty,
 		enemyFist:

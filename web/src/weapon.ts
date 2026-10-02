@@ -21,6 +21,10 @@ export type WeaponType =
 	| "sword"
 	| "laserGun"
 	| "brick"
+	| "flareGun"
+	| "grenade"
+	| "machineGun"
+	| "bazooka"
 	| "orcGun"
 	| "enemyFist"
 	| "aphidGun";
