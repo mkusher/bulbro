@@ -24,12 +24,19 @@ import {
 	attackSideEvents,
 } from "@/weapon/Attack";
 import {
-	calculateStats,
 	calculateWeaponWorldOffset,
+	computeStats,
+	damageAfterArmor,
 	findClosestEnemyInRange,
+	getDodgeChance,
 	getHpRegenerationPerSecond,
+	getLifeStealChance,
+	harvestingGrowthPerWave,
 	isInRange,
 	isWeaponReadyToShoot,
+	lifeStealCooldown,
+	lifeStealHeal,
+	type StatSource,
 } from "../game-formulas";
 import {
 	addition,
@@ -58,6 +65,10 @@ import type {
 	Stats,
 } from "./BulbroCharacter";
 import { BULBRO_SIZE } from "./index";
+import {
+	getLevelForExperience,
+	getTotalExperienceForLevel,
+} from "./Levels";
 import type { FaceType } from "./Sprite";
 
 type BulbroStateProperties =
@@ -65,12 +76,15 @@ type BulbroStateProperties =
 		readonly id: string;
 		readonly type: FaceType;
 		readonly position: Position;
-		readonly speed: number;
 		readonly level: number;
 		readonly totalExperience: number;
 		readonly materialsAvailable: number;
 		readonly healthPoints: number;
 		readonly stats: Stats;
+		/** Where the stat points come from; `stats` is computed from them */
+		readonly statSources: StatSource[];
+		/** When life steal healed the Bulbro the last time */
+		readonly lastLifeStealAt?: number;
 		readonly weapons: WeaponState[];
 		readonly lastMovedAt: number;
 		readonly lastHitAt: number;
@@ -108,7 +122,18 @@ export class BulbroState
 	get speed() {
 		return this
 			.#props
+			.stats
 			.speed;
+	}
+	get statSources() {
+		return this
+			.#props
+			.statSources;
+	}
+	get lastLifeStealAt() {
+		return this
+			.#props
+			.lastLifeStealAt;
 	}
 	get level() {
 		return this
@@ -337,20 +362,18 @@ export class BulbroState
 			(
 				weapon,
 			) => {
-				const weaponTime =
+				const weaponCooldown =
 					weapon
 						.statsBonus
-						.attackSpeed ??
+						.cooldown ??
 					1;
-				const entityAttackSpeed =
-					this
-						.stats
-						.attackSpeed;
 				if (
 					isWeaponReadyToShoot(
 						weapon.lastStrikedAt,
-						weaponTime,
-						entityAttackSpeed,
+						weaponCooldown,
+						this
+							.stats
+							.attackSpeed,
 						now,
 					)
 				) {
@@ -371,6 +394,7 @@ export class BulbroState
 							this,
 							target,
 							weapon,
+							"player",
 						)
 					) {
 						return;
@@ -519,18 +543,40 @@ export class BulbroState
 		};
 	}
 
-	/** Returns a received hit event for the Bulbro. */
+	/**
+	 * Returns a received hit or death event for the Bulbro,
+	 * or nothing when the hit was dodged. Armor reduces the damage.
+	 */
 	beHit(
 		damage: number,
 		now: NowTime,
+		random: () => number = Math.random,
 	):
 		| BulbroReceivedHitEvent
-		| BulbroDiedEvent {
+		| BulbroDiedEvent
+		| undefined {
+		if (
+			random() <
+			getDodgeChance(
+				this
+					.stats
+					.dodge,
+			)
+		) {
+			return undefined;
+		}
+		const damageTaken =
+			damageAfterArmor(
+				damage,
+				this
+					.stats
+					.armor,
+			);
 		const newHealthPoints =
 			Math.max(
 				this
 					.healthPoints -
-					damage,
+					damageTaken,
 				0,
 			);
 
@@ -547,7 +593,8 @@ export class BulbroState
 				bulbroId:
 					this
 						.id,
-				damage,
+				damage:
+					damageTaken,
 				position:
 					{
 						x: this
@@ -566,8 +613,211 @@ export class BulbroState
 			bulbroId:
 				this
 					.id,
-			damage,
+			damage:
+				damageTaken,
 		};
+	}
+
+	/**
+	 * Rolls life steal for a hit this Bulbro dealt: returns a heal event
+	 * with a chance of the life steal stat, at most 10 times per second.
+	 */
+	stealLife(
+		now: NowTime,
+		random: () => number = Math.random,
+	):
+		| BulbroHealedEvent
+		| undefined {
+		if (
+			!this.isAlive() ||
+			this
+				.healthPoints >=
+				this
+					.stats
+					.maxHp ||
+			now -
+				(this
+					.lastLifeStealAt ??
+					-Infinity) <
+				lifeStealCooldown ||
+			random() >=
+				getLifeStealChance(
+					this
+						.stats
+						.lifeSteal,
+				)
+		) {
+			return undefined;
+		}
+		return {
+			type: "bulbroHealed",
+			bulbroId:
+				this
+					.id,
+			hp: lifeStealHeal,
+			source:
+				"lifeSteal",
+		};
+	}
+
+	/** Replaces the stat source with the same id (or adds it) and recomputes stats. */
+	withStatSource(
+		source: StatSource,
+	) {
+		const statSources =
+			[
+				...this.statSources.filter(
+					(
+						s,
+					) =>
+						s.id !==
+						source.id,
+				),
+				source,
+			];
+		return new BulbroState(
+			{
+				...this
+					.#props,
+				statSources,
+				stats:
+					computeStats(
+						statSources,
+					),
+			},
+		);
+	}
+
+	/**
+	 * End of wave harvesting (Brotato): gives as many materials and experience
+	 * as the harvesting stat, then grows harvesting by 5% (rounded up).
+	 * Negative harvesting takes materials and experience away instead (never a
+	 * level) and does not grow.
+	 */
+	harvest() {
+		const harvesting =
+			Math.floor(
+				this
+					.stats
+					.harvesting,
+			);
+		if (
+			harvesting <
+			0
+		)
+			return this.loseMaterials(
+				-harvesting,
+			);
+		if (
+			harvesting ===
+			0
+		)
+			return this;
+		const growthSource =
+			this.statSources.find(
+				(
+					s,
+				) =>
+					s.id ===
+					harvestingGrowthStatSourceId,
+			);
+		const grown =
+			this.withStatSource(
+				{
+					id: harvestingGrowthStatSourceId,
+					kind: "harvestingGrowth",
+					bonuses:
+						{
+							harvesting:
+								(growthSource
+									?.bonuses
+									.harvesting ??
+									0) +
+								Math.ceil(
+									harvesting *
+										harvestingGrowthPerWave,
+								),
+						},
+				},
+			);
+		return grown.gainMaterials(
+			harvesting,
+		);
+	}
+
+	/**
+	 * Removes materials and the same amount of experience. Experience never
+	 * drops below the current level, so a level is never lost.
+	 */
+	loseMaterials(
+		amount: number,
+	) {
+		if (
+			amount <=
+			0
+		)
+			return this;
+		return new BulbroState(
+			{
+				...this
+					.#props,
+				materialsAvailable:
+					Math.max(
+						0,
+						this
+							.materialsAvailable -
+							amount,
+					),
+				totalExperience:
+					Math.max(
+						Math.min(
+							this
+								.totalExperience,
+							getTotalExperienceForLevel(
+								this
+									.level,
+							),
+						),
+						this
+							.totalExperience -
+							amount,
+					),
+			},
+		);
+	}
+
+	/** Adds materials and the same amount of experience, leveling up if needed. */
+	gainMaterials(
+		amount: number,
+	) {
+		if (
+			amount <=
+			0
+		)
+			return this;
+		const totalExperience =
+			this
+				.totalExperience +
+			amount;
+		return new BulbroState(
+			{
+				...this
+					.#props,
+				materialsAvailable:
+					this
+						.materialsAvailable +
+					amount,
+				totalExperience,
+				level:
+					Math.max(
+						this
+							.level,
+						getLevelForExperience(
+							totalExperience,
+						),
+					),
+			},
+		);
 	}
 
 	/** Returns a material collection event for the Bulbro. */
@@ -608,17 +858,18 @@ export class BulbroState
 			return this;
 		}
 
-		const timeSinceLastHit =
-			now -
-			this
-				.lastHitAt;
-
 		const hpPerSecond =
 			getHpRegenerationPerSecond(
 				this
 					.stats
 					.hpRegeneration,
 			);
+		if (
+			hpPerSecond <=
+			0
+		) {
+			return this;
+		}
 
 		return {
 			type: "bulbroHealed",
@@ -627,11 +878,10 @@ export class BulbroState
 					.id,
 			hp:
 				(hpPerSecond *
-					Math.min(
-						timeSinceLastHeal,
-						timeSinceLastHit,
-					)) /
+					timeSinceLastHeal) /
 				1000,
+			source:
+				"regeneration",
 		} as BulbroHealedEvent;
 	}
 	/** Returns this player as a MovableObject for collision logic. */
@@ -840,20 +1090,11 @@ export class BulbroState
 				return this;
 
 			case "materialCollected":
-				// Update materials count when material is collected
-				return new BulbroState(
-					{
-						...this
-							.#props,
-						materialsAvailable:
-							this
-								.materialsAvailable +
-							1,
-						totalExperience:
-							this
-								.totalExperience +
-							1,
-					},
+				// Co-op shares every pickup: whoever collects it, every Bulbro
+				// gets a material and experience. Harvesting does not change
+				// pickups; it pays out at the end of the wave (see harvest).
+				return this.gainMaterials(
+					1,
 				);
 
 			case "consumableCollected": {
@@ -887,7 +1128,7 @@ export class BulbroState
 						.id
 				)
 					return this;
-				const newHealth =
+				const healthPoints =
 					Math.min(
 						this
 							.healthPoints +
@@ -897,14 +1138,22 @@ export class BulbroState
 							.maxHp,
 					);
 				return new BulbroState(
-					{
-						...this
-							.#props,
-						healthPoints:
-							newHealth,
-						healedByHpRegenerationAt:
-							event.occurredAt,
-					},
+					event.source ===
+						"lifeSteal"
+						? {
+								...this
+									.#props,
+								healthPoints,
+								lastLifeStealAt:
+									event.occurredAt,
+							}
+						: {
+								...this
+									.#props,
+								healthPoints,
+								healedByHpRegenerationAt:
+									event.occurredAt,
+							},
 				);
 			}
 
@@ -974,8 +1223,14 @@ export class BulbroState
 	}
 }
 
+export const characterStatSourceId =
+	"character";
+export const harvestingGrowthStatSourceId =
+	"harvesting-growth";
+
 /**
  * Spawns a new BulbroState from a character definition.
+ * The level is at least the one reached with the given experience.
  */
 export function spawnBulbro(
 	id: string,
@@ -989,30 +1244,39 @@ export function spawnBulbro(
 		character.weapons.map(
 			toWeaponState,
 		);
+	const statSources: StatSource[] =
+		[
+			{
+				id: characterStatSourceId,
+				kind: "character",
+				bonuses:
+					character.statBonuses,
+			},
+		];
+	const stats =
+		computeStats(
+			statSources,
+		);
 	return new BulbroState(
 		{
 			id,
 			type: character
 				.style
 				.faceType,
-			level,
+			level:
+				Math.max(
+					level,
+					getLevelForExperience(
+						experience,
+					),
+				),
 			totalExperience:
 				experience,
 			position,
-			speed:
-				calculateStats(
-					character.statBonuses,
-				)
-					.speed,
 			healthPoints:
-				calculateStats(
-					character.statBonuses,
-				)
-					.maxHp,
-			stats:
-				calculateStats(
-					character.statBonuses,
-				),
+				stats.maxHp,
+			stats,
+			statSources,
 			weapons,
 			lastMovedAt: 0,
 			lastHitAt: 0,

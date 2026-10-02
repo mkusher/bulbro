@@ -31,6 +31,8 @@ function createBulbro(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			position:
@@ -38,7 +40,6 @@ function createBulbro(
 					x,
 					y,
 				},
-			speed: 100,
 			level: 1,
 			totalExperience: 0,
 			materialsAvailable: 0,
@@ -308,6 +309,8 @@ describe("PlayerWeaponEventGenerator", () => {
 		const player =
 			new BulbroState(
 				{
+					statSources:
+						[],
 					id: "p1",
 					type: "normal",
 					position:
@@ -315,7 +318,6 @@ describe("PlayerWeaponEventGenerator", () => {
 							x: 100,
 							y: 100,
 						},
-					speed: 100,
 					level: 1,
 					totalExperience: 0,
 					materialsAvailable: 0,
@@ -340,7 +342,7 @@ describe("PlayerWeaponEventGenerator", () => {
 									{
 										damage: 10,
 										range: 300,
-										attackSpeed: 1,
+										cooldown: 1,
 									},
 								lastStrikedAt: 0, // Ready immediately
 								shotSpeed: 300,
@@ -517,6 +519,8 @@ describe("PlayerWeaponEventGenerator", () => {
 			): BulbroState =>
 				new BulbroState(
 					{
+						statSources:
+							[],
 						id,
 						type: "normal",
 						position:
@@ -524,7 +528,6 @@ describe("PlayerWeaponEventGenerator", () => {
 								x,
 								y: 100,
 							},
-						speed: 100,
 						level: 1,
 						totalExperience: 0,
 						materialsAvailable: 0,
@@ -549,7 +552,7 @@ describe("PlayerWeaponEventGenerator", () => {
 										{
 											damage: 10,
 											range: 400,
-											attackSpeed: 1,
+											cooldown: 1,
 										},
 									lastStrikedAt: 0,
 									shotSpeed: 300,

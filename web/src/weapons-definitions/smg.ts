@@ -16,8 +16,13 @@ export const smg: Weapon =
 		statsBonus:
 			{
 				damage: 1,
-				attackSpeed: 0.2,
+				cooldown: 0.2,
 				range: 400,
+				critChance: 1,
+				scaling:
+					{
+						rangedDamage: 0.5,
+					},
 			},
 		basePrice: 5,
 		attack:

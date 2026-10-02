@@ -15,9 +15,12 @@ export const fist: Weapon =
 		statsBonus:
 			{
 				damage: 8,
-				meleeDamage: 1,
-				attackSpeed: 0.78,
+				cooldown: 0.78,
 				range: 150,
+				scaling:
+					{
+						meleeDamage: 1,
+					},
 			},
 		basePrice: 5,
 		attack:

@@ -34,12 +34,12 @@ function createFadeAwayState(
 	const player =
 		new BulbroState(
 			{
+				statSources:
+					[],
 				id: "player-1",
 				type: "normal",
 				position:
 					PLAYER_POSITION,
-				speed:
-					baseStats.speed,
 				level: 0,
 				totalExperience: 0,
 				materialsAvailable: 0,

@@ -16,9 +16,15 @@ export const knife: Weapon =
 		statsBonus:
 			{
 				damage: 6,
-				attackSpeed: 1.01,
+				cooldown: 1.01,
 				range: 150,
 				knockback: 2,
+				critChance: 20,
+				critMultiplier: 2.5,
+				scaling:
+					{
+						meleeDamage: 0.8,
+					},
 			},
 		basePrice: 5,
 		attack:

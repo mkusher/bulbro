@@ -3,7 +3,7 @@ import type { Size } from "../../../geometry";
 import type { BulbroState } from "../..";
 import {
 	getExperienceForLevel,
-	getLeverForExperience,
+	getLevelForExperience,
 	getTotalExperienceForLevel,
 } from "../../Levels";
 

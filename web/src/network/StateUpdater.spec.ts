@@ -66,6 +66,8 @@ function createTestBulbro(
 ): BulbroState {
 	return new BulbroState(
 		{
+			statSources:
+				[],
 			id,
 			type: "normal",
 			position:
@@ -73,7 +75,6 @@ function createTestBulbro(
 					x,
 					y,
 				},
-			speed: 100,
 			level: 1,
 			totalExperience: 0,
 			materialsAvailable: 0,

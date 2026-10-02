@@ -17,8 +17,13 @@ export const brick: Weapon =
 			{
 				range: 150,
 				knockback: 5,
-				attackSpeed: 1.39,
+				cooldown: 1.39,
 				damage: 30,
+				critChance: 5,
+				scaling:
+					{
+						meleeDamage: 1,
+					},
 			},
 		basePrice: 5,
 		attack:

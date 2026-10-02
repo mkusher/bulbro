@@ -16,9 +16,9 @@ export const medic: Bulbro =
 		name: "Medic",
 		statBonuses:
 			{
-				hpRegeneration: 100, // +100% HP regen (2x)
-				maxHp: 20, // +20 HP
-				engineering: 30, // +30% engineering
+				hpRegeneration: 5, // +5 HP regeneration (~0.56 HP/s)
+				maxHp: 20, // +20 max HP
+				engineering: 3, // +3 engineering
 			},
 		style:
 			{

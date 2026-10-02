@@ -11,7 +11,7 @@ export const aphidGun: Weapon =
 		shotSpeed: 275,
 		statsBonus:
 			{
-				attackSpeed: 2,
+				cooldown: 2,
 			},
 		basePrice: 5,
 		attack:

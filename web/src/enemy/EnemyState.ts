@@ -1,3 +1,4 @@
+import { dropChanceWithLuck } from "@/game-formulas";
 import type {
 	DeltaTime,
 	NowTime,
@@ -268,10 +269,14 @@ export class EnemyState
 		);
 	}
 
-	/** Returns a received hit or death event for the Enemy. */
+	/**
+	 * Returns a received hit or death event for the Enemy.
+	 * The attacker's luck scales the chance to drop a consumable.
+	 */
 	beHit(
 		hit: {
 			damage: number;
+			luck?: number;
 		},
 		now: NowTime,
 		knockback?: KnockbackDescription,
@@ -294,8 +299,12 @@ export class EnemyState
 			// Enemy dies
 			const dropsConsumable =
 				random() <
-				this
-					.consumableDropChance;
+				dropChanceWithLuck(
+					this
+						.consumableDropChance,
+					hit.luck ??
+						0,
+				);
 			return {
 				type: "enemyDied",
 				...(dropsConsumable

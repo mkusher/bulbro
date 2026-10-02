@@ -16,7 +16,7 @@ export const orcSlowGun: Weapon =
 			{
 				range: 2000,
 				damage: 5,
-				attackSpeed: 5,
+				cooldown: 5,
 			},
 		basePrice: 5,
 		attack:

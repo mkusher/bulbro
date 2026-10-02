@@ -153,7 +153,7 @@ export class ChasingBehavior
 				const weaponTime =
 					weapon
 						.statsBonus
-						?.attackSpeed ??
+						?.cooldown ??
 					1;
 				const entityAttackSpeed =
 					enemy

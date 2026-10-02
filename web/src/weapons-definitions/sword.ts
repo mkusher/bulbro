@@ -16,10 +16,14 @@ export const sword: Weapon =
 		statsBonus:
 			{
 				damage: 25,
-				meleeDamage: 15,
 				range: 80,
-				attackSpeed: 0.9,
+				cooldown: 0.9,
 				knockback: 8,
+				critChance: 10,
+				scaling:
+					{
+						meleeDamage: 1,
+					},
 			},
 		attack:
 			{
