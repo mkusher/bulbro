@@ -9,6 +9,7 @@
 		"@bulbro/network-protocol": "workspace:*",
 		"@preact/signals": "^2.11.2",
 		"arktype": "^2.2.5",
+		"hono": "^4.13.9",
 		"pino": "^10.3.1"
 	}
 }

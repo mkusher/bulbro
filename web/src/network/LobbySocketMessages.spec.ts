@@ -1,3 +1,5 @@
+import { wellRoundedBulbro } from "../characters-definitions";
+import { smg } from "../weapons-definitions";
 import {
 	expect,
 	test,
@@ -34,8 +36,11 @@ test("preserves ready players in a late joiner's lobby snapshot", () => {
 						id: "host",
 						bulbro:
 							{
-								id: "bulbro",
-								name: "Bulbro",
+								...wellRoundedBulbro,
+								weapons:
+									[
+										smg,
+									],
 							},
 					},
 				],
