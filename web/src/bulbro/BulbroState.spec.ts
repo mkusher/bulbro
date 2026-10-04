@@ -10,7 +10,11 @@ import {
 	deltaTime,
 	nowTime,
 } from "@/time";
-import { wellRoundedBulbro } from "../characters-definitions/";
+import {
+	berserker,
+	findBulbroById,
+	wellRoundedBulbro,
+} from "../characters-definitions/";
 import type { Bulbro } from "./BulbroCharacter";
 import {
 	BulbroState,
@@ -905,6 +909,36 @@ describe("weapon capacity", () => {
 				),
 		).toThrow(
 			"Weapon limit",
+		);
+	});
+});
+
+describe("BulbroState characterId", () => {
+	it("keeps the character id when the face type is shared", () => {
+		const state =
+			spawnBulbro(
+				"test",
+				"normal",
+				zeroPoint(),
+				0,
+				0,
+				berserker,
+			);
+		const restored =
+			new BulbroState(
+				JSON.parse(
+					JSON.stringify(
+						state,
+					),
+				),
+			);
+
+		expect(
+			findBulbroById(
+				restored.characterId,
+			),
+		).toBe(
+			berserker,
 		);
 	});
 });

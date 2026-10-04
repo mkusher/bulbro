@@ -57,6 +57,10 @@ export default {
 		"Cooldown",
 	"stat.critMultiplier":
 		"Critical Multiplier",
+	"stat.maxWeapons":
+		"Max Weapons",
+	"stat.startingWeapons":
+		"Starting Weapons",
 	"upgrade.heart":
 		"Heart",
 	"upgrade.lungs":

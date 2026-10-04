@@ -105,6 +105,8 @@ describe("live game protocol", () => {
 				player:
 					{
 						id: "player-1",
+						characterId:
+							"well-rounded",
 						materialsAvailable: 12,
 						weapons:
 							[],
@@ -129,6 +131,30 @@ describe("live game protocol", () => {
 					gameId:
 						"game-1",
 					wave: 1.5,
+					playerId:
+						"player-1",
+					player:
+						{
+							id: "player-1",
+							characterId:
+								"well-rounded",
+						},
+					sentAt: 20,
+				},
+			),
+		).toBeInstanceOf(
+			type.errors,
+		);
+	});
+
+	test("rejects next wave readiness without the player's character", () => {
+		expect(
+			WebsocketMessage(
+				{
+					type: "next-wave-player-ready",
+					gameId:
+						"game-1",
+					wave: 2,
 					playerId:
 						"player-1",
 					player:
@@ -175,10 +201,14 @@ describe("live game protocol", () => {
 					[
 						{
 							id: "host",
+							characterId:
+								"well-rounded",
 							healthPoints: 10,
 						},
 						{
 							id: "guest",
+							characterId:
+								"well-rounded",
 							healthPoints: 5,
 						},
 					],

@@ -51,7 +51,7 @@ function generateShopItemsFromWaveState(): ShopItem[] {
 
 	const bulbro =
 		findBulbroById(
-			player.type,
+			player.characterId,
 		);
 
 	return generateShopItems(
@@ -132,7 +132,7 @@ function useNetworkReadiness():
 						bulbroName:
 							bulbro &&
 							findBulbroById(
-								bulbro.type,
+								bulbro.characterId,
 							)
 								.name,
 						level:
@@ -312,7 +312,7 @@ function LevelUp({
 			}
 			playerName={
 				isLocalCoOp
-					? `P${waveState.value.players.indexOf(player) + 1}: ${findBulbroById(player.type).name}`
+					? `P${waveState.value.players.indexOf(player) + 1}: ${findBulbroById(player.characterId).name}`
 					: undefined
 			}
 		/>
@@ -548,7 +548,7 @@ export function PreRound() {
 
 	const bulbro =
 		findBulbroById(
-			player.type,
+			player.characterId,
 		);
 	const ownedWeapons =
 		player.weapons.map(

@@ -59,6 +59,10 @@ export default {
 		"Czas odnowienia",
 	"stat.critMultiplier":
 		"Mnożnik obrażeń krytycznych",
+	"stat.maxWeapons":
+		"Maksimum broni",
+	"stat.startingWeapons":
+		"Bronie startowe",
 	"upgrade.heart":
 		"Serce",
 	"upgrade.lungs":

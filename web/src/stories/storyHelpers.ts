@@ -175,6 +175,8 @@ function createMockBulbro(
 				[],
 			id,
 			type: sprite as any,
+			characterId:
+				"well-rounded",
 			position,
 			lastDirection:
 				{

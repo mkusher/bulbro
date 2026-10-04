@@ -13,6 +13,19 @@ const Point =
 		},
 	);
 
+/**
+ * Serialized player state shared between waves. Only the fields every client
+ * relies on are validated; the rest of the state is passed through as is.
+ */
+const SerializedPlayer =
+	type(
+		{
+			id: "string",
+			characterId:
+				"string",
+		},
+	);
+
 export const HostStateUpdate =
 	type(
 		{
@@ -77,11 +90,7 @@ export const NextWavePlayerReady =
 			playerId:
 				"string",
 			player:
-				type(
-					{
-						id: "string",
-					},
-				),
+				SerializedPlayer,
 			sentAt:
 				"number",
 		},
@@ -117,11 +126,7 @@ export const NextWaveStarted =
 				"string",
 			wave: "number.integer",
 			players:
-				type(
-					{
-						id: "string",
-					},
-				).array(),
+				SerializedPlayer.array(),
 			serverStartTime:
 				"number",
 		},

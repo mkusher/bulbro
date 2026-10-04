@@ -86,6 +86,8 @@ function ready(
 	wave = 2,
 	player: object = {
 		id: playerId,
+		characterId:
+			"well-rounded",
 		materialsAvailable: 3,
 	},
 ) {
@@ -267,9 +269,13 @@ describe("next wave readiness", () => {
 						[
 							{
 								id: hostId,
+								characterId:
+									"well-rounded",
 							},
 							{
 								id: guestId,
+								characterId:
+									"well-rounded",
 							},
 						],
 				},
@@ -283,6 +289,8 @@ describe("next wave readiness", () => {
 			2,
 			{
 				id: hostId,
+				characterId:
+					"well-rounded",
 				materialsAvailable: 10,
 			},
 		);
@@ -291,6 +299,8 @@ describe("next wave readiness", () => {
 			2,
 			{
 				id: hostId,
+				characterId:
+					"well-rounded",
 				materialsAvailable: 0,
 			},
 		);
@@ -307,6 +317,8 @@ describe("next wave readiness", () => {
 		).toContainEqual(
 			{
 				id: hostId,
+				characterId:
+					"well-rounded",
 				materialsAvailable: 0,
 			},
 		);
@@ -326,6 +338,8 @@ describe("next wave readiness", () => {
 			2,
 			{
 				id: guestId,
+				characterId:
+					"well-rounded",
 			},
 		);
 

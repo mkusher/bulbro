@@ -124,6 +124,8 @@ function createTestPlayer(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			level: 1,
 			totalExperience: 0,
 			position:
@@ -1168,6 +1170,8 @@ describe("FullGameTickProcess", () => {
 							[],
 						id: "player1",
 						type: "normal",
+						characterId:
+							"well-rounded",
 						level: 1,
 						totalExperience: 0,
 						position:

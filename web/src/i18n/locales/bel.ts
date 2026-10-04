@@ -59,6 +59,10 @@ export default {
 		"Час аднаўлення",
 	"stat.critMultiplier":
 		"Множнік крытычнай шкоды",
+	"stat.maxWeapons":
+		"Максімум зброі",
+	"stat.startingWeapons":
+		"Пачатковая зброя",
 	"upgrade.heart":
 		"Сэрца",
 	"upgrade.lungs":

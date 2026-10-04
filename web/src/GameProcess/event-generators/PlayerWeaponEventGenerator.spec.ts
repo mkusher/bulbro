@@ -35,6 +35,8 @@ function createBulbro(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position:
 				{
 					x,
@@ -313,6 +315,8 @@ describe("PlayerWeaponEventGenerator", () => {
 						[],
 					id: "p1",
 					type: "normal",
+					characterId:
+						"well-rounded",
 					position:
 						{
 							x: 100,
@@ -523,6 +527,8 @@ describe("PlayerWeaponEventGenerator", () => {
 							[],
 						id,
 						type: "normal",
+						characterId:
+							"well-rounded",
 						position:
 							{
 								x,

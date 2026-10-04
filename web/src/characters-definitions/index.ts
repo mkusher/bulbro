@@ -32,7 +32,9 @@ export const bulbros =
 
 export const findBulbroById =
 	(
-		id: string,
+		id:
+			| string
+			| undefined,
 	) => {
 		return (
 			bulbros.find(

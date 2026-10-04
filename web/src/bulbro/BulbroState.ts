@@ -80,6 +80,8 @@ type BulbroStateProperties =
 	{
 		readonly id: string;
 		readonly type: FaceType;
+		/** Id of the character definition the Bulbro was spawned from */
+		readonly characterId: string;
 		readonly position: Position;
 		readonly level: number;
 		readonly totalExperience: number;
@@ -120,6 +122,11 @@ export class BulbroState
 		return this
 			.#props
 			.type;
+	}
+	get characterId() {
+		return this
+			.#props
+			.characterId;
 	}
 	get position() {
 		return this
@@ -1468,6 +1475,8 @@ export function spawnBulbro(
 			type: character
 				.style
 				.faceType,
+			characterId:
+				character.id,
 			level:
 				startLevel,
 			totalExperience:
