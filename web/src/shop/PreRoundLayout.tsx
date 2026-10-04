@@ -1,5 +1,7 @@
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import type { Bulbro } from "@/bulbro/BulbroCharacter";
+import type { BulbroState } from "@/bulbro/BulbroState";
+import { BulbroStateStats } from "@/bulbro/BulbroStats";
 import { calculateStats } from "@/game-formulas";
 import { t } from "@/i18n";
 import {
@@ -24,6 +26,8 @@ import type { Weapon } from "@/weapon";
  */
 export interface PreRoundPlayerProps {
 	bulbro: Bulbro;
+	/** Live state of the player's bulbro; its current stats replace the class bonuses */
+	bulbroState?: BulbroState;
 	weapons: Weapon[];
 	materials: number;
 	maxWeaponSlots?: number;
@@ -138,13 +142,13 @@ export function PreRoundLayout({
 				{/* Two column layout for Bulbro and Weapon Slots */}
 				<div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3">
 					{/* Bulbro Description */}
-					<div className="overflow-visible">
+					<div className="overflow-visible flex flex-col gap-3">
 						<BulbroCard
 							bulbro={
 								player.bulbro
 							}
 							showDetails={
-								true
+								!player.bulbroState
 							}
 							displayWidth={
 								80
@@ -156,6 +160,13 @@ export function PreRoundLayout({
 								false
 							}
 						/>
+						{player.bulbroState && (
+							<BulbroStateStats
+								bulbroState={
+									player.bulbroState
+								}
+							/>
+						)}
 					</div>
 
 					{/* Weapon Slots */}

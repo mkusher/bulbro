@@ -1,5 +1,7 @@
 import { useState } from "preact/hooks";
+import { spawnBulbro } from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
+import { zeroPoint } from "@/geometry";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { ShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
@@ -9,6 +11,16 @@ import {
 	fist,
 	pistol,
 } from "@/weapons-definitions";
+
+const bulbroState =
+	spawnBulbro(
+		"player-1",
+		"normal",
+		zeroPoint(),
+		0,
+		0,
+		wellRoundedBulbro,
+	);
 
 export default {
 	title:
@@ -161,6 +173,7 @@ function NetworkPreRound({
 			player={{
 				bulbro:
 					wellRoundedBulbro,
+				bulbroState,
 				weapons,
 				materials,
 			}}
