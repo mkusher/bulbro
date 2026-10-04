@@ -530,7 +530,7 @@ describe("network game client integration", () => {
 					);
 				expect(
 					(
-						sent?.events as GameEvent[]
+						sent.events as GameEvent[]
 					).some(
 						(
 							event,
