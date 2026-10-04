@@ -11,6 +11,32 @@ import type { WaveState } from "@/waveState";
 import type { Camera } from "./Camera";
 
 /**
+ * The player the camera follows: the local player while alive, otherwise
+ * a living teammate so a dead player can spectate the rest of the wave.
+ */
+export function getFollowedPlayer(
+	state: WaveState,
+) {
+	const localPlayer =
+		state
+			.players[0];
+	if (
+		!localPlayer ||
+		localPlayer.isAlive()
+	)
+		return localPlayer;
+	return (
+		state.players.find(
+			(
+				p,
+			) =>
+				p.isAlive(),
+		) ??
+		localPlayer
+	);
+}
+
+/**
  * Decorator that adds automatic player centering functionality to a Camera.
  * Centers camera on player position, with map centering fallback for larger screens.
  */
@@ -83,8 +109,9 @@ export class AutoCenterOnPlayerCamera
 		state: WaveState,
 	) {
 		const playerPosition =
-			state
-				.players[0]
+			getFollowedPlayer(
+				state,
+			)
 				?.position ??
 			zeroPoint();
 		this.#moveCamera(

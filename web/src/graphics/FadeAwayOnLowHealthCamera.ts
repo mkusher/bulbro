@@ -130,9 +130,12 @@ export class FadeAwayOnLowHealthCamera
 			this
 				.#overlay
 		) {
+			// A dead player spectates a living teammate with a clear view
 			if (
 				ratio >
-				0.5
+					0.5 ||
+				(player &&
+					!player.isAlive())
 			) {
 				this.#overlay.alpha = 0;
 			} else {

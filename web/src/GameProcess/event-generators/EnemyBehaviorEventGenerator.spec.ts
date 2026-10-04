@@ -3,6 +3,8 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import { spawnBulbro } from "../../bulbro/BulbroState";
+import { wellRoundedBulbro } from "../../characters-definitions";
 import { EnemyState } from "../../enemy/EnemyState";
 import {
 	deltaTime as dt,
@@ -385,6 +387,141 @@ describe("EnemyBehaviorEventGenerator", () => {
 		).toHaveLength(
 			0,
 		);
+	});
+
+	describe("dead Bulbros", () => {
+		const bulbroAt =
+			(
+				id: string,
+				x: number,
+				y: number,
+			) =>
+				spawnBulbro(
+					id,
+					"normal",
+					{
+						x,
+						y,
+					},
+					0,
+					0,
+					wellRoundedBulbro,
+				);
+		const kill =
+			(
+				bulbro: ReturnType<
+					typeof bulbroAt
+				>,
+			) =>
+				bulbro.applyEvent(
+					{
+						type: "bulbroDied",
+						bulbroId:
+							bulbro.id,
+						damage: 100,
+						position:
+							bulbro.position,
+						occurredAt:
+							now,
+						deltaTime:
+							delta,
+					},
+				);
+
+		it("chases a living Bulbro instead of a closer dead one", () => {
+			const enemy =
+				createEnemy(
+					"e1",
+					400,
+					400,
+				);
+			const dead =
+				kill(
+					bulbroAt(
+						"dead",
+						300,
+						400,
+					),
+				);
+			const alive =
+				bulbroAt(
+					"alive",
+					1000,
+					400,
+				);
+			const events =
+				generator.generate(
+					makeState(
+						{
+							enemies:
+								[
+									enemy,
+								],
+							players:
+								[
+									dead,
+									alive,
+								],
+						},
+					),
+					delta,
+					now,
+				);
+			const moved =
+				events.find(
+					(
+						e,
+					) =>
+						e.type ===
+						"enemyMoved",
+				);
+			expect(
+				moved?.type ===
+					"enemyMoved" &&
+					moved
+						.to
+						.x,
+			).toBeGreaterThan(
+				400,
+			);
+		});
+
+		it("ignores dead Bulbros when nobody is alive", () => {
+			const enemy =
+				createEnemy(
+					"e1",
+					400,
+					400,
+				);
+			const events =
+				generator.generate(
+					makeState(
+						{
+							enemies:
+								[
+									enemy,
+								],
+							players:
+								[
+									kill(
+										bulbroAt(
+											"dead",
+											410,
+											400,
+										),
+									),
+								],
+						},
+					),
+					delta,
+					now,
+				);
+			expect(
+				events,
+			).toHaveLength(
+				0,
+			);
+		});
 	});
 
 	// ---------------------------------------------------------------------------
