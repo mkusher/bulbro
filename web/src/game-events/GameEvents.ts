@@ -49,6 +49,7 @@ export type GameEventInternal =
 	| UpgradeSelectedEvent
 	| UpgradesRerolledEvent
 	| TickEvent
+	| WaveEndedEvent
 	| UndefinedEvent;
 
 // Events with EventMeta
@@ -273,6 +274,15 @@ export type ShotExpiredEvent =
 export type TickEvent =
 	{
 		type: "tick";
+	};
+
+/**
+ * The host finished the wave. Guests end their wave on it instead of their
+ * own round timer, which may have started at a different moment.
+ */
+export type WaveEndedEvent =
+	{
+		type: "waveEnded";
 	};
 
 export type UndefinedEvent =

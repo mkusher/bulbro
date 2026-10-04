@@ -1603,6 +1603,43 @@ export function updateState(
 					},
 			};
 		}
+		case "waveEnded": {
+			if (
+				!state
+					.round
+					.isRunning
+			)
+				return state;
+			const isWaveCompleted =
+				state.players.some(
+					(
+						p,
+					) =>
+						p.isAlive(),
+				);
+			return {
+				...state,
+				players:
+					isWaveCompleted
+						? state.players.map(
+								(
+									p,
+								) =>
+									p.harvest(),
+							)
+						: state.players,
+				round:
+					{
+						...state.round,
+						isRunning: false,
+						endedAt:
+							state
+								.round
+								.endedAt ??
+							Date.now(),
+					},
+			};
+		}
 		default:
 			return state;
 	}

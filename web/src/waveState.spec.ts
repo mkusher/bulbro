@@ -2796,6 +2796,62 @@ describe("wave end harvesting", () => {
 			0,
 		);
 	});
+
+	it("ends the wave and harvests once on waveEnded from the host", () => {
+		const waveEnded =
+			(
+				state: WaveState,
+			) =>
+				updateState(
+					state,
+					withEventMeta(
+						{
+							type: "waveEnded",
+						},
+						deltaTime(
+							16,
+						),
+						nowTime(
+							Date.now(),
+						),
+					),
+				);
+		const ended =
+			waveEnded(
+				stateWithHarvesting(
+					10,
+					10,
+				),
+			);
+		expect(
+			ended
+				.round
+				.isRunning,
+		).toBe(
+			false,
+		);
+		expect(
+			ended
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			10,
+		);
+
+		const afterMoreEvents =
+			waveEnded(
+				tick(
+					ended,
+				),
+			);
+		expect(
+			afterMoreEvents
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			10,
+		);
+	});
 });
 
 describe("co-op shared pickups", () => {
