@@ -323,13 +323,22 @@ export type MoveShotEvent =
 		chance: number;
 	};
 
+/** A weapon or an item bought in the shop */
 export type ShopPurchasedEvent =
 	{
 		type: "shopPurchased";
 		playerId: string;
-		weaponId: string;
 		price: number;
-	};
+	} & (
+		| {
+				weaponId: string;
+				itemId?: undefined;
+		  }
+		| {
+				itemId: string;
+				weaponId?: undefined;
+		  }
+	);
 
 export type ShopRerolledEvent =
 	{

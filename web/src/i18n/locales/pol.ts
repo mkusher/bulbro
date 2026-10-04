@@ -169,6 +169,176 @@ export default {
 		"Wyjątkowa",
 	"weapon.rarity.legendary":
 		"Legendarna",
+	"items.title":
+		"Przedmioty",
+	"items.empty":
+		"Brak przedmiotów",
+	"item.name.acid":
+		"Kwas",
+	"item.name.alienMagic":
+		"Obca magia",
+	"item.name.alienTongue":
+		"Obcy język",
+	"item.name.alloy":
+		"Stop metali",
+	"item.name.banner":
+		"Sztandar",
+	"item.name.bat":
+		"Nietoperz",
+	"item.name.beanie":
+		"Czapka",
+	"item.name.bigArms":
+		"Wielkie ramiona",
+	"item.name.blindfold":
+		"Opaska na oczy",
+	"item.name.bloodLeech":
+		"Pijawka",
+	"item.name.boilingWater":
+		"Wrzątek",
+	"item.name.book":
+		"Książka",
+	"item.name.bowlerHat":
+		"Melonik",
+	"item.name.boxingGlove":
+		"Rękawica bokserska",
+	"item.name.brokenMouth":
+		"Rozbite usta",
+	"item.name.butterfly":
+		"Motyl",
+	"item.name.cake":
+		"Ciasto",
+	"item.name.cape":
+		"Peleryna",
+	"item.name.charcoal":
+		"Węgiel drzewny",
+	"item.name.clawTree":
+		"Drzewko z pazurami",
+	"item.name.clover":
+		"Koniczyna",
+	"item.name.coffee":
+		"Kawa",
+	"item.name.compass":
+		"Kompas",
+	"item.name.cyclopsWorm":
+		"Robak cyklop",
+	"item.name.defectiveSteroids":
+		"Wadliwe sterydy",
+	"item.name.ductTape":
+		"Taśma klejąca",
+	"item.name.energyBracelet":
+		"Bransoleta energetyczna",
+	"item.name.exoskeleton":
+		"Egzoszkielet",
+	"item.name.fertilizer":
+		"Nawóz",
+	"item.name.fin":
+		"Płetwa",
+	"item.name.freshMeat":
+		"Świeże mięso",
+	"item.name.fuelTank":
+		"Zbiornik paliwa",
+	"item.name.gamblingToken":
+		"Żeton do gry",
+	"item.name.glassCannon":
+		"Szklane działo",
+	"item.name.glasses":
+		"Okulary",
+	"item.name.gnome":
+		"Gnom",
+	"item.name.goatSkull":
+		"Kozia czaszka",
+	"item.name.gummyBerserker":
+		"Żelkowy berserker",
+	"item.name.headInjury":
+		"Uraz głowy",
+	"item.name.heavyBullets":
+		"Ciężkie pociski",
+	"item.name.hedgehog":
+		"Jeż",
+	"item.name.helmet":
+		"Hełm",
+	"item.name.injection":
+		"Zastrzyk",
+	"item.name.insanity":
+		"Szaleństwo",
+	"item.name.jetPack":
+		"Plecak odrzutowy",
+	"item.name.leatherVest":
+		"Skórzana kamizelka",
+	"item.name.lens":
+		"Soczewka",
+	"item.name.littleFrog":
+		"Żabka",
+	"item.name.littleMuscleyDude":
+		"Mały mięśniak",
+	"item.name.lostDuck":
+		"Zagubiona kaczka",
+	"item.name.luckyCharm":
+		"Talizman",
+	"item.name.mammoth":
+		"Mamut",
+	"item.name.mastery":
+		"Mistrzostwo",
+	"item.name.medal":
+		"Medal",
+	"item.name.metalPlate":
+		"Metalowa płyta",
+	"item.name.missile":
+		"Pocisk rakietowy",
+	"item.name.mushroom":
+		"Grzyb",
+	"item.name.mutation":
+		"Mutacja",
+	"item.name.nightGoggles":
+		"Gogle noktowizyjne",
+	"item.name.octopus":
+		"Ośmiornica",
+	"item.name.panda":
+		"Panda",
+	"item.name.peacefulBee":
+		"Pokojowa pszczoła",
+	"item.name.plant":
+		"Roślina",
+	"item.name.plasticExplosive":
+		"Plastik wybuchowy",
+	"item.name.poisonousTonic":
+		"Trujący tonik",
+	"item.name.potato":
+		"Ziemniak",
+	"item.name.propellerHat":
+		"Czapka ze śmigłem",
+	"item.name.reinforcedSteel":
+		"Wzmocniona stal",
+	"item.name.ritual":
+		"Rytuał",
+	"item.name.scope":
+		"Celownik",
+	"item.name.shadyPotion":
+		"Podejrzana mikstura",
+	"item.name.shmoop":
+		"Szmup",
+	"item.name.smallMagazine":
+		"Mały magazynek",
+	"item.name.sunglasses":
+		"Okulary przeciwsłoneczne",
+	"item.name.terrifiedOnion":
+		"Przerażona cebula",
+	"item.name.toxicSludge":
+		"Toksyczny szlam",
+	"item.name.tractor":
+		"Traktor",
+	"item.name.warriorHelmet":
+		"Hełm wojownika",
+	"item.name.wheat":
+		"Pszenica",
+	"item.name.wheelbarrow":
+		"Taczka",
+	"item.name.whetstone":
+		"Osełka",
+	"item.name.wings":
+		"Skrzydła",
+	"item.name.wolfHelmet":
+		"Wilczy hełm",
 
 	"start.tab.local":
 		"Lokalna",

@@ -5,12 +5,12 @@ import {
 } from "bun:test";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { seededRng } from "@/random";
-import { generateShopItems } from "./ShopItemsGenerator";
+import { generateWeaponShopItems } from "./ShopItemsGenerator";
 
 function weaponIds(
 	seed: number,
 ) {
-	return generateShopItems(
+	return generateWeaponShopItems(
 		wellRoundedBulbro,
 		{
 			maxItems: 4,
@@ -29,7 +29,7 @@ function weaponIds(
 	);
 }
 
-describe("generateShopItems", () => {
+describe("generateWeaponShopItems", () => {
 	it("picks distinct weapons within a single roll", () => {
 		const ids =
 			weaponIds(
@@ -80,7 +80,7 @@ describe("generateShopItems", () => {
 
 	it("keeps offering owned weapons", () => {
 		const items =
-			generateShopItems(
+			generateWeaponShopItems(
 				wellRoundedBulbro,
 			);
 		expect(

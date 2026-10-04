@@ -5,6 +5,7 @@ import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
+import { findItemById } from "@/items/Items";
 import {
 	currentLobby,
 	currentNetworkGame,
@@ -12,7 +13,10 @@ import {
 import { currentUser } from "@/network/currentUser";
 import type { PreRoundNetworkProps } from "@/shop/PreRoundLayout";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
-import type { ShopItem } from "@/shop/Shop";
+import {
+	isItemShopItem,
+	type ShopItem,
+} from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import {
 	deltaTime as dt,
@@ -57,12 +61,13 @@ function generateShopItemsFromWaveState(): ShopItem[] {
 	return generateShopItems(
 		bulbro,
 		{
-			excludeWeapons:
-				[],
 			maxItems: 4,
 			wave: state
 				.round
 				.wave,
+			luck: player
+				.stats
+				.luck,
 		},
 	);
 }
@@ -412,12 +417,6 @@ export function PreRound() {
 				);
 			if (
 				!purchasingPlayer ||
-				purchasingPlayer
-					.weapons
-					.length >=
-					purchasingPlayer
-						.stats
-						.maxWeapons ||
 				network?.isLocalReady ||
 				purchasingPlayer.materialsAvailable <
 					item.price
@@ -428,6 +427,54 @@ export function PreRound() {
 				nowTime(
 					Date.now(),
 				);
+
+			if (
+				isItemShopItem(
+					item,
+				)
+			) {
+				waveState.value =
+					updateState(
+						waveState.value,
+						withEventMeta(
+							{
+								type: "shopPurchased",
+								playerId:
+									purchasingPlayer.id,
+								itemId:
+									item
+										.item
+										.id,
+								price:
+									item.price,
+							},
+							dt(
+								0,
+							),
+							now,
+						),
+					);
+				setShopItems(
+					shopItems.filter(
+						(
+							i,
+						) =>
+							i !==
+							item,
+					),
+				);
+				return;
+			}
+
+			if (
+				purchasingPlayer
+					.weapons
+					.length >=
+				purchasingPlayer
+					.stats
+					.maxWeapons
+			)
+				return;
 
 			// Commit the cost and loadout together after both updates succeed.
 			const purchasedState =
@@ -572,6 +619,16 @@ export function PreRound() {
 					player
 						.stats
 						.maxWeapons,
+				items:
+					player.items.flatMap(
+						(
+							id,
+						) =>
+							findItemById(
+								id,
+							) ??
+							[],
+					),
 				materials:
 					player.materialsAvailable,
 				onWeaponClick:

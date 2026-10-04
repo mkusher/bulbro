@@ -169,6 +169,176 @@ export default {
 		"Выключная",
 	"weapon.rarity.legendary":
 		"Легендарная",
+	"items.title":
+		"Прадметы",
+	"items.empty":
+		"Пакуль няма прадметаў",
+	"item.name.acid":
+		"Кіслата",
+	"item.name.alienMagic":
+		"Іншапланетная магія",
+	"item.name.alienTongue":
+		"Іншапланетны язык",
+	"item.name.alloy":
+		"Сплаў",
+	"item.name.banner":
+		"Сцяг",
+	"item.name.bat":
+		"Кажан",
+	"item.name.beanie":
+		"Шапачка",
+	"item.name.bigArms":
+		"Вялікія рукі",
+	"item.name.blindfold":
+		"Павязка на вочы",
+	"item.name.bloodLeech":
+		"П’яўка",
+	"item.name.boilingWater":
+		"Кіпень",
+	"item.name.book":
+		"Кніга",
+	"item.name.bowlerHat":
+		"Кацялок",
+	"item.name.boxingGlove":
+		"Баксёрская пальчатка",
+	"item.name.brokenMouth":
+		"Разбіты рот",
+	"item.name.butterfly":
+		"Матылёк",
+	"item.name.cake":
+		"Торт",
+	"item.name.cape":
+		"Плашч",
+	"item.name.charcoal":
+		"Драўняны вугаль",
+	"item.name.clawTree":
+		"Кіпцюрастае дрэва",
+	"item.name.clover":
+		"Канюшына",
+	"item.name.coffee":
+		"Кава",
+	"item.name.compass":
+		"Компас",
+	"item.name.cyclopsWorm":
+		"Чарвяк-цыклоп",
+	"item.name.defectiveSteroids":
+		"Сапсаваныя стэроіды",
+	"item.name.ductTape":
+		"Скотч",
+	"item.name.energyBracelet":
+		"Энергетычны бранзалет",
+	"item.name.exoskeleton":
+		"Экзашкілет",
+	"item.name.fertilizer":
+		"Угнаенне",
+	"item.name.fin":
+		"Плаўнік",
+	"item.name.freshMeat":
+		"Свежае мяса",
+	"item.name.fuelTank":
+		"Паліўны бак",
+	"item.name.gamblingToken":
+		"Гульнявы жэтон",
+	"item.name.glassCannon":
+		"Шкляная гармата",
+	"item.name.glasses":
+		"Акуляры",
+	"item.name.gnome":
+		"Гном",
+	"item.name.goatSkull":
+		"Казліны чэрап",
+	"item.name.gummyBerserker":
+		"Мармеладны берсерк",
+	"item.name.headInjury":
+		"Траўма галавы",
+	"item.name.heavyBullets":
+		"Цяжкія кулі",
+	"item.name.hedgehog":
+		"Вожык",
+	"item.name.helmet":
+		"Шлем",
+	"item.name.injection":
+		"Ін’екцыя",
+	"item.name.insanity":
+		"Вар’яцтва",
+	"item.name.jetPack":
+		"Рэактыўны ранец",
+	"item.name.leatherVest":
+		"Скураная камізэлька",
+	"item.name.lens":
+		"Лінза",
+	"item.name.littleFrog":
+		"Жабка",
+	"item.name.littleMuscleyDude":
+		"Маленькі качок",
+	"item.name.lostDuck":
+		"Згубленая качка",
+	"item.name.luckyCharm":
+		"Талісман",
+	"item.name.mammoth":
+		"Мамант",
+	"item.name.mastery":
+		"Майстэрства",
+	"item.name.medal":
+		"Медаль",
+	"item.name.metalPlate":
+		"Металічная пласціна",
+	"item.name.missile":
+		"Ракета",
+	"item.name.mushroom":
+		"Грыб",
+	"item.name.mutation":
+		"Мутацыя",
+	"item.name.nightGoggles":
+		"Прыбор начнога бачання",
+	"item.name.octopus":
+		"Васьміног",
+	"item.name.panda":
+		"Панда",
+	"item.name.peacefulBee":
+		"Мірная пчала",
+	"item.name.plant":
+		"Расліна",
+	"item.name.plasticExplosive":
+		"Пластыт",
+	"item.name.poisonousTonic":
+		"Атрутны тонік",
+	"item.name.potato":
+		"Бульба",
+	"item.name.propellerHat":
+		"Шапка з прапелерам",
+	"item.name.reinforcedSteel":
+		"Узмоцненая сталь",
+	"item.name.ritual":
+		"Рытуал",
+	"item.name.scope":
+		"Прыцэл",
+	"item.name.shadyPotion":
+		"Падазронае зелле",
+	"item.name.shmoop":
+		"Шмуп",
+	"item.name.smallMagazine":
+		"Маленькі магазін",
+	"item.name.sunglasses":
+		"Сонечныя акуляры",
+	"item.name.terrifiedOnion":
+		"Перапалоханая цыбуля",
+	"item.name.toxicSludge":
+		"Таксічны глей",
+	"item.name.tractor":
+		"Трактар",
+	"item.name.warriorHelmet":
+		"Шлем воіна",
+	"item.name.wheat":
+		"Пшаніца",
+	"item.name.wheelbarrow":
+		"Тачка",
+	"item.name.whetstone":
+		"Тачыльны камень",
+	"item.name.wings":
+		"Крылы",
+	"item.name.wolfHelmet":
+		"Шлем ваўка",
 
 	"start.tab.local":
 		"Лакальная",

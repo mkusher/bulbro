@@ -41,10 +41,13 @@ at difficulty 0. They are not measured in play.
   6 materials on wave 1. In Brotato, tier-I weapons cost around 10–20 and the
   Sword costs 51. Wave 1 drops roughly 77 materials, so you can buy the whole
   4-item shop right away.
-- **Nothing else to spend on.** The shop sells only weapons: no items, no
-  weapon tiers, no merging. Once the 6 weapon slots are full, materials only
-  give XP. That makes Harvesting (Hands), Luck (Nose) and Well Rounded's
-  identity weak.
+- **Items are the only other sink.** The shop also sells 83 Brotato items
+  that only change stats ([Items.ts](../web/src/items/Items.ts)): each slot
+  offers a weapon 35% of the time, otherwise an item of a tier rolled from
+  the wave and luck. Items keep Brotato's prices, so they cost 3–20× more
+  than a weapon (wave 1: tier I 17–34, tier IV 100–122, a 5-price weapon 6).
+  There are still no weapon tiers or merging, and items with conditional
+  effects are not in yet.
 
 Estimated materials (and XP) per wave, solo, difficulty 0:
 
@@ -89,6 +92,10 @@ scaling stat:
   shotgun is a single 12-damage shot.
 - **Scaling differences.** Brotato's Brick scales 50% melee + 50%
   engineering; Bulbro's scales 100% melee.
+- **Flat damage items make this worse.** Items such as Mammoth (+20 melee),
+  Gnome (+10 melee) or Big Arms (+12 melee, +6 ranged) add flat damage to every
+  hit, so they help the fast weapons most. Attack speed items are wasted on a
+  Machine Gun at the cooldown floor.
 
 ### 3. Enemy damage scaling is uneven, and there are no i-frames
 
@@ -161,14 +168,15 @@ scaling stat:
 | Grandpa | −20% speed, +50% pickup range | Weakest; bad trade |
 
 Brotato characters always trade something away. Engineering does nothing yet,
-because there are no structures.
+because there are no structures. For the same reason the Skull upgrade and
+the Pencil, Toolbox and Cog items are left out, and the Engineering on other
+items is a wasted bonus.
 
 ## Suggested priority
 
 1. **Economy:** use the material's real value on pickup, raise weapon prices
    to Brotato levels (tier I around 10–20, Sword and Machine Gun around
-   30–50+), and add a sink such as duplicate weapons with merging or stat
-   items.
+   30–50+), and add weapon merging as a second sink next to stat items.
 2. **Weapons:** rebase them on Brotato's numbers (Pistol 12 dmg / 1.2s,
    SMG 3 / 0.17s, Laser 40 with 4× scaling). Alternatively, keep the fast feel
    but lower each weapon's scaling in proportion to its cooldown. Fix the
@@ -183,6 +191,7 @@ because there are no structures.
 
 ## Sources
 
+- [Brotato Wiki – Items](https://brotato.wiki.spellsandguns.com/Items)
 - [Brotato Wiki – Enemies](https://brotato.wiki.spellsandguns.com/Enemies)
 - [Brotato Wiki – Weapons](https://brotato.wiki.spellsandguns.com/Weapons)
 - [Brotato Wiki – Pistol](https://brotato.wiki.spellsandguns.com/Pistol)
