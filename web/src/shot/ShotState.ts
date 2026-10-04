@@ -33,6 +33,11 @@ type ShotStateProperties =
 		readonly knockback: number;
 		/** Type of weapon that fired this shot */
 		readonly weaponType: WeaponType;
+		/**
+		 * Radius of the explosion when the shot hits an enemy or reaches its
+		 * range. 0 or missing for shots that hit a single target.
+		 */
+		readonly explosionRadius?: number;
 	};
 
 /**
@@ -98,6 +103,22 @@ export class ShotState
 		return this
 			.#props
 			.weaponType;
+	}
+	get explosionRadius() {
+		return (
+			this
+				.#props
+				.explosionRadius ??
+			0
+		);
+	}
+	/** Whether the shot explodes instead of hitting a single target. */
+	get isExplosive() {
+		return (
+			this
+				.explosionRadius >
+			0
+		);
 	}
 
 	constructor(
@@ -220,4 +241,6 @@ export interface ShotStateInterface {
 	knockback: number;
 	/** Type of weapon that fired this shot */
 	weaponType: WeaponType;
+	/** Radius of the explosion, 0 for single-target shots */
+	explosionRadius?: number;
 }

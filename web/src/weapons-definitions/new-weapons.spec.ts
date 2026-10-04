@@ -215,4 +215,98 @@ describe("new ranged weapons", () => {
 			);
 		});
 	}
+
+	for (const weapon of [
+		grenade,
+		bazooka,
+	]) {
+		it(`${weapon.name} fires shots exploding within its explosion radius`, () => {
+			expect(
+				weapon
+					.attack
+					.type,
+			).toBe(
+				"explosion",
+			);
+			const player =
+				spawnBulbro(
+					"shooter",
+					"normal",
+					{
+						x: 100,
+						y: 100,
+					},
+					1,
+					0,
+					{
+						...wellRoundedBulbro,
+						statBonuses:
+							{},
+						weapons:
+							[
+								weapon,
+							],
+					},
+				);
+			const equipped =
+				player
+					.weapons[0];
+			if (
+				!equipped
+			)
+				throw new Error(
+					"Expected the weapon to be equipped",
+				);
+			const result =
+				attack(
+					player,
+					"player",
+					equipped,
+					{
+						id: "target",
+						aimAt:
+							{
+								x: 300,
+								y: 100,
+							},
+					},
+					nowTime(
+						1000,
+					),
+					() =>
+						0.99,
+				);
+			if (
+				result?.type !==
+				"shot"
+			)
+				throw new Error(
+					"Expected a projectile",
+				);
+			expect(
+				result
+					.shot
+					.explosionRadius,
+			).toBe(
+				weapon
+					.statsBonus
+					.explosionRadius ??
+					0,
+			);
+			expect(
+				result
+					.shot
+					.explosionRadius,
+			).toBeGreaterThan(
+				0,
+			);
+			expect(
+				result
+					.shot
+					.isExplosive,
+			).toBe(
+				true,
+			);
+		});
+	}
 });

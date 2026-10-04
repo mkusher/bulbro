@@ -20,7 +20,10 @@ import {
 	type WaveState,
 	type WeaponState,
 } from "./waveState";
-import { isMeleeWeapon } from "./weapon";
+import {
+	isExplosiveWeapon,
+	isMeleeWeapon,
+} from "./weapon";
 import { getWeaponSize } from "./weapon/sprites/WeaponSprite";
 import type { DamageScalingStat } from "./weapon/WeaponState";
 
@@ -47,6 +50,7 @@ export const baseStats: Stats =
 		luck: 0,
 		pickupRange: 100,
 		knockback: 0,
+		explosionSize: 0,
 	};
 
 // Stat bonus types - plain numeric stat points
@@ -85,6 +89,7 @@ export const percentageStats =
 			"dodge",
 			"luck",
 			"pickupRange",
+			"explosionSize",
 		],
 	);
 
@@ -623,6 +628,55 @@ export function calculateAttackKnockback(
 	);
 }
 
+/** Smallest explosion radius, whatever the explosion size stat. */
+export const minExplosionRadius = 10;
+
+/**
+ * Radius of the explosion of the weapon's projectiles:
+ * weapon explosion radius × (1 + explosion size%). Enemies have no explosion
+ * size stat. Weapons without an "explosion" attack don't explode (0).
+ */
+export function calculateExplosionRadius(
+	attacker: {
+		/** Players' stats, or enemies' stats which have no explosion size */
+		stats: object;
+	},
+	weapon: WeaponState,
+	attackerType: AttackerType,
+) {
+	if (
+		!isExplosiveWeapon(
+			weapon.type,
+		)
+	)
+		return 0;
+	const radius =
+		weapon
+			.statsBonus
+			.explosionRadius ??
+		0;
+	const explosionSize =
+		attackerType ===
+			"player" &&
+		"explosionSize" in
+			attacker.stats &&
+		typeof attacker
+			.stats
+			.explosionSize ===
+			"number"
+			? attacker
+					.stats
+					.explosionSize
+			: 0;
+	return Math.max(
+		minExplosionRadius,
+		radius *
+			(1 +
+				explosionSize /
+					100),
+	);
+}
+
 export function shoot(
 	player:
 		| BulbroState
@@ -715,6 +769,12 @@ export function shoot(
 				),
 			weaponType:
 				weapon.type,
+			explosionRadius:
+				calculateExplosionRadius(
+					player,
+					weapon,
+					shooterType,
+				),
 		},
 	);
 }

@@ -24,6 +24,11 @@ export type WeaponStats =
 		knockback?: number;
 		/** Crit chance (%) added to the wielder's crit chance */
 		critChance?: number;
+		/**
+		 * Radius of the explosion of the weapon's projectiles, before the
+		 * wielder's explosion size is applied. Used by "explosion" attacks.
+		 */
+		explosionRadius?: number;
 		/** Damage multiplier of a critical hit (default 2) */
 		critMultiplier?: number;
 		/**

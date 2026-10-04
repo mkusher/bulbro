@@ -40,13 +40,15 @@ Critical chance below is the weapon’s bonus in percentage points; the wielder�
 | SMG | gun, support | Projectile | 1 | 2× | 50% ranged |
 | Sword | blade, precise | Swing 140°, 260 ms → Thrust 220 ms | 10 | 2× | 100% melee |
 | Flare Gun | gun, elemental | Projectile | 3 | 2× | 50% ranged + 100% elemental |
-| Grenade | explosive, heavy | Projectile | 3 | 2× | 100% ranged + 50% elemental |
+| Grenade | explosive, heavy | Explosion (radius 110) | 3 | 2× | 100% ranged + 50% elemental |
 | Machine Gun | gun, heavy | Projectile | 3 | 2× | 60% ranged |
-| Bazooka | explosive, heavy, gun | Projectile | 3 | 2× | 150% ranged |
+| Bazooka | explosive, heavy, gun | Explosion (radius 140) | 3 | 2× | 150% ranged |
 
 [Combat formulas](../src/game-formulas.ts) apply the wielder’s overall damage percentage after adding scaled damage, then apply critical hits and round the result. Player melee attacks receive half of the wielder’s range stat; projectile attacks receive the full range stat. Attack speed modifies cooldowns, with a 100 ms minimum. Swing/thrust durations above describe strike animation timing, not the interval between attacks.
 
-All projectile weapons currently use the existing single-target shot attack. The shotgun’s damage is defined as `3 * 4 = 12`, but its attack does not spawn a pellet spread or two separate shots. The laser gun uses the same projectile attack rather than a continuous beam. Explosive/elemental classes do not add splash damage, a grenade fuse, or burning effects. Flare gun, grenade, machine gun, and bazooka values are initial balance settings.
+Grenade and bazooka use the `explosion` attack: the projectile explodes on the first enemy it touches, at the end of its range, or at the map edge, whichever comes first. Every alive enemy whose hitbox overlaps the explosion circle receives the shot’s full damage (the crit roll is shared) and is knocked back away from the explosion center. The radius is the weapon’s `explosionRadius` × (1 + the wielder’s `explosionSize`%), at least 10; enemies have no explosion size. Life steal triggers at most once per explosion. The generator emits a `shotExploded` event, which drives the [explosion animation](../src/graphics/ExplosionEffects.ts) and the explosion sound; firing plays the gunshot (bazooka) or throw (grenade) sound instead.
+
+Every other projectile weapon uses the single-target shot attack. The shotgun’s damage is defined as `3 * 4 = 12`, but its attack does not spawn a pellet spread or two separate shots. The laser gun uses the same projectile attack rather than a continuous beam. The explosive class alone (e.g. the shotgun) does not add splash damage, and elemental weapons do not add burning effects. Flare gun, grenade, machine gun, and bazooka values are initial balance settings.
 
 ### Tiles, selection, and shops
 

@@ -6,8 +6,10 @@ import { BULBRO_SIZE } from "../../bulbro";
 import { ENEMY_SIZE } from "../../enemy";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
+	circleIntersectsAabb,
 	distance,
 	type Position,
+	type Rectangle,
 	rectContainsPoint,
 	type Size,
 	segmentAabbHitTime,
@@ -68,6 +70,30 @@ function collider<
 				.y +
 			size.height /
 				2,
+	};
+}
+
+function clampToRect(
+	rect: Rectangle,
+	point: Position,
+): Position {
+	return {
+		x: Math.min(
+			Math.max(
+				point.x,
+				rect.x,
+			),
+			rect.x +
+				rect.width,
+		),
+		y: Math.min(
+			Math.max(
+				point.y,
+				rect.y,
+			),
+			rect.y +
+				rect.height,
+		),
 	};
 }
 
@@ -193,6 +219,395 @@ export class ShotMovementEventGenerator
 					);
 			}
 		}
+		const shooterOf =
+			(
+				shot: (typeof shots)[number],
+			) =>
+				shot.shooterType ===
+				"player"
+					? players.find(
+							(
+								p,
+							) =>
+								p.id ===
+								shot.shooterId,
+						)
+					: undefined;
+		const stealLife =
+			(
+				shooter: ReturnType<
+					typeof shooterOf
+				>,
+			) => {
+				if (
+					!shooter ||
+					lifeStolenBy.has(
+						shooter.id,
+					)
+				)
+					return;
+				const heal =
+					shooter.stealLife(
+						now,
+					);
+				if (
+					heal
+				) {
+					events.push(
+						heal,
+					);
+					lifeStolenBy.add(
+						shooter.id,
+					);
+				}
+			};
+		/** Enemy hitboxes that may overlap the given box. */
+		const enemiesNear =
+			(
+				minX: number,
+				minY: number,
+				maxX: number,
+				maxY: number,
+			): typeof enemyBounds => {
+				if (
+					!grid
+				)
+					return enemyBounds;
+				// Centers outside the box cells can still have overlapping hitboxes.
+				const minCx =
+					Math.floor(
+						(minX -
+							ENEMY_SIZE.width /
+								2) /
+							CELL_SIZE,
+					);
+				const maxCx =
+					Math.floor(
+						(maxX +
+							ENEMY_SIZE.width /
+								2) /
+							CELL_SIZE,
+					);
+				const minCy =
+					Math.floor(
+						(minY -
+							ENEMY_SIZE.height /
+								2) /
+							CELL_SIZE,
+					);
+				const maxCy =
+					Math.floor(
+						(maxY +
+							ENEMY_SIZE.height /
+								2) /
+							CELL_SIZE,
+					);
+				const near: typeof enemyBounds =
+					[];
+				for (
+					let cx =
+						minCx;
+					cx <=
+					maxCx;
+					cx++
+				) {
+					for (
+						let cy =
+							minCy;
+						cy <=
+						maxCy;
+						cy++
+					) {
+						const cell =
+							grid.get(
+								`${cx},${cy}`,
+							);
+						if (
+							cell
+						)
+							near.push(
+								...cell,
+							);
+					}
+				}
+				return near;
+			};
+		/** First body the shot touches flying from `from` to `to`. */
+		const findHit =
+			(
+				shot: (typeof shots)[number],
+				from: Position,
+				to: Position,
+			) => {
+				const dx =
+					to.x -
+					from.x;
+				const dy =
+					to.y -
+					from.y;
+				let hitTime =
+					Infinity;
+				let hitOrder =
+					Infinity;
+				let hitEnemy:
+					| (typeof enemies)[number]
+					| undefined;
+				let hitPlayer:
+					| (typeof players)[number]
+					| undefined;
+				if (
+					shot.shooterType ===
+					"player"
+				) {
+					for (const body of enemiesNear(
+						Math.min(
+							from.x,
+							to.x,
+						),
+						Math.min(
+							from.y,
+							to.y,
+						),
+						Math.max(
+							from.x,
+							to.x,
+						),
+						Math.max(
+							from.y,
+							to.y,
+						),
+					)) {
+						const t =
+							segmentAabbHitTime(
+								from.x,
+								from.y,
+								dx,
+								dy,
+								body.minX,
+								body.minY,
+								body.maxX,
+								body.maxY,
+							);
+						if (
+							t <
+								hitTime ||
+							(t !==
+								Infinity &&
+								t ===
+									hitTime &&
+								body.order <
+									hitOrder)
+						) {
+							hitTime =
+								t;
+							hitOrder =
+								body.order;
+							hitEnemy =
+								body.entity;
+						}
+					}
+				} else if (
+					shot.shooterType ===
+					"enemy"
+				) {
+					for (const body of playerBounds) {
+						const t =
+							segmentAabbHitTime(
+								from.x,
+								from.y,
+								dx,
+								dy,
+								body.minX,
+								body.minY,
+								body.maxX,
+								body.maxY,
+							);
+						if (
+							t <
+							hitTime
+						) {
+							hitTime =
+								t;
+							hitPlayer =
+								body.entity;
+						}
+					}
+				}
+				return {
+					hitTime,
+					hitEnemy,
+					hitPlayer,
+					position:
+						hitTime ===
+						Infinity
+							? to
+							: {
+									x:
+										from.x +
+										dx *
+											hitTime,
+									y:
+										from.y +
+										dy *
+											hitTime,
+								},
+				};
+			};
+		/** Hits everything within the shot's explosion radius around `center`. */
+		const explode =
+			(
+				shot: (typeof shots)[number],
+				center: Position,
+			) => {
+				const radius =
+					shot.explosionRadius;
+				const blast =
+					{
+						x: center.x,
+						y: center.y,
+						radius,
+					};
+				const knockbackDirection =
+					(
+						target: Position,
+					) => {
+						const d =
+							distance(
+								center,
+								target,
+							);
+						return d >
+							0
+							? {
+									x:
+										(target.x -
+											center.x) /
+										d,
+									y:
+										(target.y -
+											center.y) /
+										d,
+								}
+							: shot.direction;
+					};
+				const hitIds: string[] =
+					[];
+				if (
+					shot.shooterType ===
+					"player"
+				) {
+					const shooter =
+						shooterOf(
+							shot,
+						);
+					for (const body of enemiesNear(
+						center.x -
+							radius,
+						center.y -
+							radius,
+						center.x +
+							radius,
+						center.y +
+							radius,
+					)) {
+						if (
+							!circleIntersectsAabb(
+								blast,
+								body.minX,
+								body.minY,
+								body.maxX,
+								body.maxY,
+							)
+						)
+							continue;
+						hitIds.push(
+							body
+								.entity
+								.id,
+						);
+						events.push(
+							body.entity.beHit(
+								{
+									damage:
+										shot.damage,
+									luck: shooter
+										?.stats
+										.luck,
+								},
+								now,
+								{
+									strength:
+										shot.knockback,
+									direction:
+										knockbackDirection(
+											body
+												.entity
+												.position,
+										),
+								},
+							),
+						);
+					}
+					if (
+						hitIds.length >
+						0
+					)
+						stealLife(
+							shooter,
+						);
+				} else {
+					for (const body of playerBounds) {
+						if (
+							!circleIntersectsAabb(
+								blast,
+								body.minX,
+								body.minY,
+								body.maxX,
+								body.maxY,
+							)
+						)
+							continue;
+						hitIds.push(
+							body
+								.entity
+								.id,
+						);
+						const hit =
+							body.entity.beHit(
+								shot.damage,
+								now,
+							);
+						if (
+							hit
+						)
+							events.push(
+								hit,
+							);
+					}
+				}
+				events.push(
+					{
+						type: "shotExploded",
+						shotId:
+							shot.id,
+						shooterType:
+							shot.shooterType,
+						weaponType:
+							shot.weaponType,
+						position:
+							center,
+						radius,
+						hitIds,
+					},
+					{
+						type: "shotExpired",
+						shotId:
+							shot.id,
+						position:
+							center,
+					},
+				);
+			};
 		for (const shot of shots) {
 			const prevPos =
 				shot.position;
@@ -203,17 +618,74 @@ export class ShotMovementEventGenerator
 					shot.direction,
 					deltaTime,
 				);
-			// Preserve existing range/map expiration precedence.
-			if (
+			const isOutOfBounds =
 				!rectContainsPoint(
 					bounds,
 					nextPos,
-				) ||
+				);
+			const isOutOfRange =
 				distance(
 					shot.startPosition,
 					nextPos,
 				) >
-					shot.range
+				shot.range;
+			if (
+				shot.isExplosive
+			) {
+				// The shot flies up to the end of its range (staying on the map)
+				// and explodes on the first body on its way or at that point.
+				const endPos =
+					clampToRect(
+						bounds,
+						isOutOfRange
+							? {
+									x:
+										shot
+											.startPosition
+											.x +
+										shot
+											.direction
+											.x *
+											shot.range,
+									y:
+										shot
+											.startPosition
+											.y +
+										shot
+											.direction
+											.y *
+											shot.range,
+								}
+							: nextPos,
+					);
+				const hit =
+					findHit(
+						shot,
+						prevPos,
+						endPos,
+					);
+				if (
+					hit.hitTime !==
+						Infinity ||
+					isOutOfBounds ||
+					isOutOfRange
+				)
+					explode(
+						shot,
+						hit.position,
+					);
+				else
+					events.push(
+						shot.move(
+							nextPos,
+						),
+					);
+				continue;
+			}
+			// Preserve existing range/map expiration precedence.
+			if (
+				isOutOfBounds ||
+				isOutOfRange
 			) {
 				events.push(
 					{
@@ -226,177 +698,24 @@ export class ShotMovementEventGenerator
 				);
 				continue;
 			}
-			const dx =
-				nextPos.x -
-				prevPos.x;
-			const dy =
-				nextPos.y -
-				prevPos.y;
-			let hitTime =
-				Infinity;
-			let hitOrder =
-				Infinity;
-			let hitEnemy:
-				| (typeof enemies)[number]
-				| undefined;
-			let hitPlayer:
-				| (typeof players)[number]
-				| undefined;
-			const testEnemy =
-				(
-					body: (typeof enemyBounds)[number],
-				) => {
-					const t =
-						segmentAabbHitTime(
-							prevPos.x,
-							prevPos.y,
-							dx,
-							dy,
-							body.minX,
-							body.minY,
-							body.maxX,
-							body.maxY,
-						);
-					if (
-						t <
-							hitTime ||
-						(t !==
-							Infinity &&
-							t ===
-								hitTime &&
-							body.order <
-								hitOrder)
-					) {
-						hitTime =
-							t;
-						hitOrder =
-							body.order;
-						hitEnemy =
-							body.entity;
-					}
-				};
-			if (
-				shot.shooterType ===
-				"player"
-			) {
-				if (
-					grid
-				) {
-					// Centers outside the segment cells can still have overlapping hitboxes.
-					const minCx =
-						Math.floor(
-							(Math.min(
-								prevPos.x,
-								nextPos.x,
-							) -
-								ENEMY_SIZE.width /
-									2) /
-								CELL_SIZE,
-						);
-					const maxCx =
-						Math.floor(
-							(Math.max(
-								prevPos.x,
-								nextPos.x,
-							) +
-								ENEMY_SIZE.width /
-									2) /
-								CELL_SIZE,
-						);
-					const minCy =
-						Math.floor(
-							(Math.min(
-								prevPos.y,
-								nextPos.y,
-							) -
-								ENEMY_SIZE.height /
-									2) /
-								CELL_SIZE,
-						);
-					const maxCy =
-						Math.floor(
-							(Math.max(
-								prevPos.y,
-								nextPos.y,
-							) +
-								ENEMY_SIZE.height /
-									2) /
-								CELL_SIZE,
-						);
-					for (
-						let cx =
-							minCx;
-						cx <=
-						maxCx;
-						cx++
-					) {
-						for (
-							let cy =
-								minCy;
-							cy <=
-							maxCy;
-							cy++
-						) {
-							const cell =
-								grid.get(
-									`${cx},${cy}`,
-								);
-							if (
-								cell
-							)
-								for (const body of cell)
-									testEnemy(
-										body,
-									);
-						}
-					}
-				} else {
-					for (const body of enemyBounds)
-						testEnemy(
-							body,
-						);
-				}
-			} else if (
-				shot.shooterType ===
-				"enemy"
-			) {
-				for (const body of playerBounds) {
-					const t =
-						segmentAabbHitTime(
-							prevPos.x,
-							prevPos.y,
-							dx,
-							dy,
-							body.minX,
-							body.minY,
-							body.maxX,
-							body.maxY,
-						);
-					if (
-						t <
-						hitTime
-					) {
-						hitTime =
-							t;
-						hitPlayer =
-							body.entity;
-					}
-				}
-			}
+			const {
+				hitTime,
+				hitEnemy,
+				hitPlayer,
+				position,
+			} =
+				findHit(
+					shot,
+					prevPos,
+					nextPos,
+				);
 			if (
 				hitEnemy
 			) {
 				const shooter =
-					shot.shooterType ===
-					"player"
-						? players.find(
-								(
-									p,
-								) =>
-									p.id ===
-									shot.shooterId,
-							)
-						: undefined;
+					shooterOf(
+						shot,
+					);
 				events.push(
 					hitEnemy.beHit(
 						{
@@ -415,27 +734,9 @@ export class ShotMovementEventGenerator
 						},
 					),
 				);
-				if (
-					shooter &&
-					!lifeStolenBy.has(
-						shooter.id,
-					)
-				) {
-					const heal =
-						shooter.stealLife(
-							now,
-						);
-					if (
-						heal
-					) {
-						events.push(
-							heal,
-						);
-						lifeStolenBy.add(
-							shooter.id,
-						);
-					}
-				}
+				stealLife(
+					shooter,
+				);
 			}
 			if (
 				hitPlayer
@@ -461,17 +762,7 @@ export class ShotMovementEventGenerator
 						type: "shotExpired",
 						shotId:
 							shot.id,
-						position:
-							{
-								x:
-									prevPos.x +
-									dx *
-										hitTime,
-								y:
-									prevPos.y +
-									dy *
-										hitTime,
-							},
+						position,
 					},
 				);
 			} else

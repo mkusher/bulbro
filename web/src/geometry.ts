@@ -231,6 +231,42 @@ export function circlesIntersect(
 	);
 }
 
+/** Whether a circle overlaps an axis-aligned box given by its bounds. */
+export function circleIntersectsAabb(
+	circle: Circle,
+	minX: number,
+	minY: number,
+	maxX: number,
+	maxY: number,
+): boolean {
+	const dx =
+		circle.x -
+		Math.max(
+			minX,
+			Math.min(
+				circle.x,
+				maxX,
+			),
+		);
+	const dy =
+		circle.y -
+		Math.max(
+			minY,
+			Math.min(
+				circle.y,
+				maxY,
+			),
+		);
+	return (
+		dx *
+			dx +
+			dy *
+				dy <=
+		circle.radius *
+			circle.radius
+	);
+}
+
 /**
  * Check if two axis-aligned rectangles intersect.
  */

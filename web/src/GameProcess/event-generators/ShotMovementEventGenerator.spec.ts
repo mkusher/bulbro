@@ -1203,3 +1203,423 @@ for (const count of [
 		);
 	});
 }
+
+describe("ShotMovementEventGenerator explosions", () => {
+	const generator =
+		new ShotMovementEventGenerator();
+	const delta =
+		dt(
+			100,
+		);
+	const now =
+		nowTime(
+			1000,
+		);
+
+	function createExplosiveShot(
+		position = {
+			x: 1000,
+			y: 1000,
+		},
+		startPosition = position,
+	): ShotState {
+		return new ShotState(
+			{
+				id: "rocket",
+				shooterId:
+					"p1",
+				shooterType:
+					"player",
+				startPosition,
+				position,
+				direction:
+					{
+						x: 1,
+						y: 0,
+					},
+				// 30px per 100ms tick
+				speed: 300,
+				damage: 20,
+				range: 500,
+				knockback: 10,
+				weaponType:
+					"bazooka",
+				explosionRadius: 100,
+			},
+		);
+	}
+
+	function hitEnemyIds(
+		events: ReturnType<
+			typeof generator.generate
+		>,
+	) {
+		return events.flatMap(
+			(
+				e,
+			) =>
+				e.type ===
+					"enemyReceivedHit" ||
+				e.type ===
+					"enemyDied"
+					? [
+							e.enemyId,
+						]
+					: [],
+		);
+	}
+
+	it("explodes on the first enemy hit, hitting every enemy in the radius", () => {
+		// The shot reaches e1's hitbox (120x90) at x = 1020
+		const events =
+			generator.generate(
+				makeState(
+					{
+						shots:
+							[
+								createExplosiveShot(),
+							],
+						enemies:
+							[
+								createEnemy(
+									"e1",
+									1080,
+									1000,
+								),
+								// Hitbox 85px below the explosion
+								createEnemy(
+									"e2",
+									1020,
+									1130,
+								),
+								// Hitbox 255px below the explosion
+								createEnemy(
+									"e3",
+									1020,
+									1300,
+								),
+								createEnemy(
+									"dead",
+									1020,
+									1050,
+									500,
+								),
+							],
+					},
+				),
+				delta,
+				now,
+			);
+
+		expect(
+			hitEnemyIds(
+				events,
+			),
+		).toEqual(
+			[
+				"e1",
+				"e2",
+			],
+		);
+		expect(
+			events,
+		).toContainEqual(
+			{
+				type: "shotExploded",
+				shotId:
+					"rocket",
+				shooterType:
+					"player",
+				weaponType:
+					"bazooka",
+				position:
+					{
+						x: 1020,
+						y: 1000,
+					},
+				radius: 100,
+				hitIds:
+					[
+						"e1",
+						"e2",
+					],
+			},
+		);
+		expect(
+			events,
+		).toContainEqual(
+			{
+				type: "shotExpired",
+				shotId:
+					"rocket",
+				position:
+					{
+						x: 1020,
+						y: 1000,
+					},
+			},
+		);
+		expect(
+			events.some(
+				(
+					e,
+				) =>
+					e.type ===
+					"shotMoved",
+			),
+		).toBe(
+			false,
+		);
+	});
+
+	it("deals the shot damage to every enemy and pushes them away from the explosion", () => {
+		const events =
+			generator.generate(
+				makeState(
+					{
+						shots:
+							[
+								createExplosiveShot(),
+							],
+						enemies:
+							[
+								createEnemy(
+									"e1",
+									1080,
+									1000,
+								),
+								createEnemy(
+									"e2",
+									1020,
+									1130,
+								),
+							],
+					},
+				),
+				delta,
+				now,
+			);
+		const hits =
+			events.filter(
+				(
+					e,
+				) =>
+					e.type ===
+					"enemyReceivedHit",
+			);
+		expect(
+			hits.map(
+				(
+					e,
+				) =>
+					e.damage,
+			),
+		).toEqual(
+			[
+				20,
+				20,
+			],
+		);
+		const e2Hit =
+			hits.find(
+				(
+					e,
+				) =>
+					e.enemyId ===
+					"e2",
+			);
+		expect(
+			e2Hit
+				?.knockback
+				?.direction,
+		).toEqual(
+			{
+				x: 0,
+				y: 1,
+			},
+		);
+	});
+
+	it("explodes at the end of its range when it hits nothing", () => {
+		const events =
+			generator.generate(
+				makeState(
+					{
+						shots:
+							[
+								createExplosiveShot(
+									{
+										x: 1490,
+										y: 1000,
+									},
+									{
+										x: 1000,
+										y: 1000,
+									},
+								),
+							],
+						enemies:
+							[
+								// Off the flight path, 75px from the range end
+								createEnemy(
+									"near",
+									1500,
+									1120,
+								),
+								createEnemy(
+									"far",
+									1800,
+									1000,
+								),
+							],
+					},
+				),
+				delta,
+				now,
+			);
+
+		expect(
+			hitEnemyIds(
+				events,
+			),
+		).toEqual(
+			[
+				"near",
+			],
+		);
+		const explosion =
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"shotExploded",
+			);
+		expect(
+			explosion?.type ===
+				"shotExploded" &&
+				explosion.position,
+		).toEqual(
+			{
+				x: 1500,
+				y: 1000,
+			},
+		);
+	});
+
+	it("explodes without hits when nobody is around", () => {
+		const events =
+			generator.generate(
+				makeState(
+					{
+						shots:
+							[
+								createExplosiveShot(
+									{
+										x: 1490,
+										y: 1000,
+									},
+									{
+										x: 1000,
+										y: 1000,
+									},
+								),
+							],
+					},
+				),
+				delta,
+				now,
+			);
+		expect(
+			events.map(
+				(
+					e,
+				) =>
+					e.type,
+			),
+		).toEqual(
+			[
+				"shotExploded",
+				"shotExpired",
+			],
+		);
+	});
+
+	it("keeps flying while nothing is touched and the range is not reached", () => {
+		const events =
+			generator.generate(
+				makeState(
+					{
+						shots:
+							[
+								createExplosiveShot(),
+							],
+						enemies:
+							[
+								// Within the explosion radius, but not on the way
+								createEnemy(
+									"e1",
+									1030,
+									1100,
+								),
+							],
+					},
+				),
+				delta,
+				now,
+			);
+		expect(
+			events.map(
+				(
+					e,
+				) =>
+					e.type,
+			),
+		).toEqual(
+			[
+				"shotMoved",
+			],
+		);
+	});
+
+	it("explodes at the map edge", () => {
+		const events =
+			generator.generate(
+				makeState(
+					{
+						shots:
+							[
+								createExplosiveShot(
+									{
+										x:
+											mapSize.width -
+											10,
+										y: 1000,
+									},
+								),
+							],
+					},
+				),
+				delta,
+				now,
+			);
+		const explosion =
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"shotExploded",
+			);
+		expect(
+			explosion?.type ===
+				"shotExploded" &&
+				explosion.position,
+		).toEqual(
+			{
+				x: mapSize.width,
+				y: 1000,
+			},
+		);
+	});
+});

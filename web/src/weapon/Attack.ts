@@ -25,7 +25,11 @@ import {
 } from "@/geometry";
 import type { ShotState } from "@/shot/ShotState";
 import type { NowTime } from "@/time";
-import { getWeaponByType } from "@/weapon";
+import {
+	getWeaponByType,
+	isMeleeWeapon,
+	isProjectileAttack,
+} from "@/weapon";
 import {
 	createStrike,
 	isStriking,
@@ -62,12 +66,9 @@ function isTouchAttack(
 	return (
 		attackerType ===
 			"enemy" &&
-		getWeaponByType(
+		isMeleeWeapon(
 			weapon.type,
 		)
-			.attack
-			.type !==
-			"shot"
 	);
 }
 
@@ -222,8 +223,9 @@ export function attack(
 			weapon.type,
 		).attack;
 	if (
-		config.type ===
-		"shot"
+		isProjectileAttack(
+			config,
+		)
 	) {
 		return {
 			type: "shot",

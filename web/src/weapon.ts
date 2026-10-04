@@ -98,10 +98,27 @@ export type ShotAttackConfig =
 	};
 
 /**
+ * Explosive ranged attack: the weapon fires a projectile flying at `shotSpeed`
+ * that explodes on the first enemy it touches or at the end of its range,
+ * hitting every enemy within the weapon's `explosionRadius`.
+ */
+export type ExplosionAttackConfig =
+	{
+		type: "explosion";
+	};
+
+/**
+ * Attacks that fire a projectile.
+ */
+export type ProjectileAttackConfig =
+	| ShotAttackConfig
+	| ExplosionAttackConfig;
+
+/**
  * How a weapon attacks: fires a projectile or strikes in melee.
  */
 export type AttackConfig =
-	| ShotAttackConfig
+	| ProjectileAttackConfig
 	| StrikeConfig;
 
 /**
@@ -185,8 +202,30 @@ export const isUnarmedWeapon =
 			"unarmed",
 		);
 
+/** Whether the attack config fires a projectile instead of striking in melee. */
+export const isProjectileAttack =
+	(
+		config: AttackConfig,
+	): config is ProjectileAttackConfig =>
+		config.type ===
+			"shot" ||
+		config.type ===
+			"explosion";
+
 /** Whether the weapon strikes in melee instead of firing projectiles. */
 export const isMeleeWeapon =
+	(
+		type: WeaponType,
+	): boolean =>
+		!isProjectileAttack(
+			getWeaponByType(
+				type,
+			)
+				.attack,
+		);
+
+/** Whether the weapon's projectiles explode, hitting every enemy around. */
+export const isExplosiveWeapon =
 	(
 		type: WeaponType,
 	): boolean =>
@@ -194,5 +233,5 @@ export const isMeleeWeapon =
 			type,
 		)
 			.attack
-			.type !==
-		"shot";
+			.type ===
+		"explosion";

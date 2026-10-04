@@ -66,6 +66,7 @@ function createTestPlayer(
 					lifeSteal: 0,
 					harvesting: 0,
 					pickupRange: 0,
+					explosionSize: 0,
 				},
 			materialsAvailable: 0,
 			lastMovedAt: 0,
