@@ -22,3 +22,15 @@ export function isLocallyAuthoritativeEvent(
 			localPlayerId
 	);
 }
+
+/** Remote movement is predicted locally, but only its owner broadcasts it. */
+export function isLocallySimulatedEvent(
+	event: GameEvent,
+	isHost: boolean,
+): boolean {
+	return (
+		isHost ||
+		event.type ===
+			"bulbroMoved"
+	);
+}

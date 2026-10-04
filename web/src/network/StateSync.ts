@@ -124,6 +124,9 @@ export class StateSync {
 				this.#stateUpdater.processMessage(
 					message,
 				);
+				this.#remotePlayerControl.onMessage(
+					message,
+				);
 				return;
 			}
 			if (

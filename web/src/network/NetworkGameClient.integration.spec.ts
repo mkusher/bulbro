@@ -17,7 +17,10 @@ import {
 import { RageRunningBehaviors } from "@/enemy/RageRunningBehaviors";
 import type { WaveProcess } from "@/GameProcess";
 import { PlayerMovementEventGenerator } from "@/GameProcess/event-generators/PlayerMovementEventGenerator";
-import { withEventMetaMultiple } from "@/game-events/GameEvents";
+import {
+	type GameEvent,
+	withEventMetaMultiple,
+} from "@/game-events/GameEvents";
 import { InMemoryGameEventQueue } from "@/game-events/InMemoryGameEventQueue";
 import type { Logger } from "@/logger";
 import { ShotState } from "@/shot/ShotState";
@@ -31,7 +34,7 @@ import {
 } from "@/waveState";
 import type { User } from "./currentUser";
 import { WebsocketMessage } from "./InGameCommunicationChannel";
-import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
+import { isLocallySimulatedEvent } from "./networkEventFilter";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
@@ -331,10 +334,9 @@ function makeClient(
 						(
 							event,
 						) =>
-							isLocallyAuthoritativeEvent(
+							isLocallySimulatedEvent(
 								event,
 								isHost,
-								localId,
 							),
 					);
 				state.value =
@@ -411,6 +413,140 @@ afterEach(
 );
 
 describe("network game client integration", () => {
+	for (const isHost of [
+		true,
+		false,
+	]) {
+		it(
+			"predicts remote movement between packets and calibrates stops: " +
+				isHost,
+			async () => {
+				const client =
+					makeClient(
+						isHost,
+					);
+				activeClients.push(
+					client,
+				);
+				await client.remoteControl.start();
+				client.sync.start();
+				const remoteId =
+					isHost
+						? guestId
+						: hostId;
+				const remote =
+					() =>
+						client.state.value.players.find(
+							(
+								p,
+							) =>
+								p.id ===
+								remoteId,
+						)!;
+				const deliver =
+					(
+						version: number,
+						x: number,
+						direction: number,
+					) =>
+						client.connection.deliver(
+							JSON.stringify(
+								{
+									type: "game-state-position-updated",
+									gameId,
+									playerId:
+										remoteId,
+									position:
+										{
+											x,
+											y: 100,
+										},
+									direction:
+										{
+											x: direction,
+											y: 0,
+										},
+									version,
+									sentAt: 1000,
+								},
+							),
+						);
+				deliver(
+					1,
+					300,
+					1,
+				);
+				client.process.tick();
+				const first =
+					remote()
+						.position
+						.x;
+				expect(
+					first,
+				).toBeGreaterThan(
+					300,
+				);
+				client.process.tick();
+				expect(
+					remote()
+						.position
+						.x,
+				).toBeGreaterThan(
+					first,
+				);
+				deliver(
+					3,
+					305,
+					0,
+				);
+				expect(
+					remote()
+						.position
+						.x,
+				).toBe(
+					305,
+				);
+				deliver(
+					2,
+					302,
+					1,
+				);
+				client.process.tick();
+				expect(
+					remote()
+						.position
+						.x,
+				).toBe(
+					305,
+				);
+				await Bun.sleep(
+					60,
+				);
+				const sent =
+					client.connection.latest(
+						isHost
+							? "game-state-updated-by-host"
+							: "game-state-updated-by-guest",
+					);
+				expect(
+					(
+						sent.events as GameEvent[]
+					).some(
+						(
+							event,
+						) =>
+							event.type ===
+								"bulbroMoved" &&
+							event.bulbroId ===
+								remoteId,
+					),
+				).toBe(
+					false,
+				);
+			},
+		);
+	}
+
 	it("generates guest movement, sends it to the host, and updates host state", async () => {
 		const host =
 			makeClient(
@@ -588,7 +724,7 @@ describe("network game client integration", () => {
 		);
 	});
 
-	it("keeps both players aligned over repeated exchanges without extra receive ticks", async () => {
+	it("calibrates remote predictions on repeated exchanges without extra receive ticks", async () => {
 		const host =
 			makeClient(
 				true,
@@ -638,6 +774,44 @@ describe("network game client integration", () => {
 					hostUpdate,
 				),
 			);
+			const guestPlayer =
+				guest.state.value.players.find(
+					(
+						p,
+					) =>
+						p.id ===
+						guestId,
+				)!;
+			const predictedMove =
+				guestPlayer.move(
+					{
+						x:
+							-1,
+						y: 0,
+					},
+					guest
+						.state
+						.value
+						.mapSize,
+					[],
+					deltaTime(
+						16,
+					),
+				)!;
+			const predictedGuest =
+				guestPlayer.applyEvent(
+					{
+						...predictedMove,
+						deltaTime:
+							deltaTime(
+								16,
+							),
+						occurredAt:
+							nowTime(
+								1000,
+							),
+					},
+				);
 			expect(
 				host.state.value.players.find(
 					(
@@ -645,18 +819,12 @@ describe("network game client integration", () => {
 					) =>
 						p.id ===
 						guestId,
-				)
-					?.position,
+				)!
+					.position,
 			).toEqual(
-				guest.state.value.players.find(
-					(
-						p,
-					) =>
-						p.id ===
-						guestId,
-				)
-					?.position,
+				predictedGuest.position,
 			);
+
 			expect(
 				guest.state.value.players.find(
 					(

@@ -482,6 +482,17 @@ function stepPickup(
 	)
 		return undefined;
 
+	if (
+		distToPlayer <=
+		PICKUP_COLLECTION_THRESHOLD
+	) {
+		return {
+			type: "collected",
+			playerId:
+				player.id,
+		};
+	}
+
 	const mover =
 		new Movement(
 			{

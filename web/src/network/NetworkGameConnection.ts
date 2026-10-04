@@ -48,7 +48,8 @@ import type {
 	WebsocketMessage,
 } from "./InGameCommunicationChannel";
 import type { Lobby } from "./LobbySocketMessages";
-import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
+import { MaterialPrediction } from "./MaterialPrediction";
+import { isLocallySimulatedEvent } from "./networkEventFilter";
 import { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import { StateSync } from "./StateSync";
 import { StateUpdater } from "./StateUpdater";
@@ -156,13 +157,15 @@ export class NetworkGameConnection {
 			(
 				event,
 			) =>
-				isLocallyAuthoritativeEvent(
+				isLocallySimulatedEvent(
 					event,
 					isHost,
-					currentUser
-						.value
-						.id,
 				),
+			isHost
+				? undefined
+				: () =>
+						new MaterialPrediction()
+							.predict,
 		);
 	}
 

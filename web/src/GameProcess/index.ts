@@ -52,6 +52,15 @@ export type WavePromises =
 		>;
 	};
 
+export type StatePrediction =
+	(
+		state: WaveState,
+		delta: DeltaTime,
+		now: NowTime,
+	) => WaveState;
+export type StatePredictionFactory =
+	() => StatePrediction;
+
 export interface GameProcess {
 	setEventFilter(
 		filter:
@@ -59,6 +68,7 @@ export interface GameProcess {
 					event: GameEvent,
 			  ) => boolean)
 			| null,
+		createPrediction?: StatePredictionFactory,
 	): void;
 	start(
 		players: Player[],
