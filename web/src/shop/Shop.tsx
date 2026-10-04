@@ -1,4 +1,3 @@
-import { useState } from "preact/hooks";
 import { t } from "@/i18n";
 import { Button } from "@/ui/shadcn/button";
 import {
@@ -35,15 +34,12 @@ export function Shop({
 	rerollPrice,
 	disabled = false,
 }: ShopProps) {
-	const [
-		purchasedItems,
-		setPurchasedItems,
-	] =
-		useState<
-			Set<string>
-		>(
-			new Set(),
-		);
+	const canAfford =
+		(
+			price: number,
+		) =>
+			availableMaterials >=
+			price;
 
 	const handlePurchase =
 		(
@@ -51,43 +47,15 @@ export function Shop({
 		) => {
 			if (
 				!disabled &&
-				availableMaterials >=
-					item.price &&
-				!purchasedItems.has(
-					item
-						.weapon
-						.id,
+				canAfford(
+					item.price,
 				)
 			) {
-				setPurchasedItems(
-					new Set(
-						[
-							...purchasedItems,
-							item
-								.weapon
-								.id,
-						],
-					),
-				);
 				onPurchase?.(
 					item,
 				);
 			}
 		};
-
-	const canAfford =
-		(
-			price: number,
-		) =>
-			availableMaterials >=
-			price;
-	const isPurchased =
-		(
-			weaponId: string,
-		) =>
-			purchasedItems.has(
-				weaponId,
-			);
 
 	return (
 		<Card>
@@ -139,12 +107,6 @@ export function Shop({
 						(
 							item,
 						) => {
-							const purchased =
-								isPurchased(
-									item
-										.weapon
-										.id,
-								);
 							const affordable =
 								canAfford(
 									item.price,
@@ -158,11 +120,9 @@ export function Shop({
 											.id
 									}
 									className={`w-full ${
-										purchased
-											? "opacity-50 cursor-not-allowed"
-											: affordable
-												? "cursor-pointer hover:shadow-md transition-shadow"
-												: "opacity-75 cursor-not-allowed"
+										affordable
+											? "cursor-pointer hover:shadow-md transition-shadow"
+											: "opacity-75 cursor-not-allowed"
 									}`}
 								>
 									<CardContent className="p-1 flex flex-col gap-0.5 items-center">
@@ -197,31 +157,26 @@ export function Shop({
 											}
 											disabled={
 												disabled ||
-												!affordable ||
-												purchased
+												!affordable
 											}
 											className="w-full h-5 text-[8px] px-1 py-0"
 											size="sm"
 										>
-											{purchased
+											{affordable
 												? t(
-														"shop.owned",
+														"shop.price",
+														{
+															price:
+																item.price,
+														},
 													)
-												: affordable
-													? t(
-															"shop.price",
-															{
-																price:
-																	item.price,
-															},
-														)
-													: t(
-															"shop.locked",
-															{
-																price:
-																	item.price,
-															},
-														)}
+												: t(
+														"shop.locked",
+														{
+															price:
+																item.price,
+														},
+													)}
 										</Button>
 									</CardContent>
 								</Card>

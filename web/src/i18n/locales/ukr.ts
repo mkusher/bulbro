@@ -92,8 +92,6 @@ export default {
 		"Магазин",
 	"shop.reroll":
 		"Перекинути ${price}",
-	"shop.owned":
-		"Придбано",
 	"shop.locked":
 		"Заблоковано ${price}",
 	"shop.price":
