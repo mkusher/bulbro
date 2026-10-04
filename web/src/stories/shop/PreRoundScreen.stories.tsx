@@ -71,7 +71,6 @@ function createInitialState(
 				maxItems:
 					maxShopItems,
 				wave,
-				rerollCount,
 			},
 		);
 
@@ -127,8 +126,6 @@ function handleStoryPurchase(
 					newPlayer.weapons,
 				maxItems: 4,
 				wave: state.currentWave,
-				rerollCount:
-					newPlayer.rerollCount,
 			},
 		);
 
@@ -218,8 +215,6 @@ export const CompletePreRoundScreen =
 												newPlayer.weapons,
 											maxItems: 4,
 											wave: state.currentWave,
-											rerollCount:
-												newRerollCount,
 										},
 									),
 							},
@@ -615,8 +610,6 @@ export const AddWeaponDemo =
 												newPlayer.weapons,
 											maxItems: 4,
 											wave: state.currentWave,
-											rerollCount:
-												newPlayer.rerollCount,
 										},
 									),
 							},
@@ -803,7 +796,6 @@ export const WaveRerollPriceScaling =
 						wellRoundedBulbro,
 						{
 							wave,
-							rerollCount,
 						},
 					);
 

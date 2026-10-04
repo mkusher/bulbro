@@ -63,8 +63,6 @@ function generateShopItemsFromWaveState(): ShopItem[] {
 			wave: state
 				.round
 				.wave,
-			rerollCount:
-				player.rerollCount,
 		},
 	);
 }

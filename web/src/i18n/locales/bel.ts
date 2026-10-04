@@ -92,8 +92,6 @@ export default {
 		"Крама",
 	"shop.reroll":
 		"Перакінуць ${price}",
-	"shop.owned":
-		"Куплена",
 	"shop.locked":
 		"Заблакавана ${price}",
 	"shop.price":

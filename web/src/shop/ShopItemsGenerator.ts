@@ -1,22 +1,17 @@
 import type { Bulbro } from "@/bulbro/BulbroCharacter";
 import { itemPrice } from "@/game-formulas";
-import { seededRng } from "@/random";
 import type { ShopItem } from "@/shop/Shop";
 import type { Weapon } from "@/weapon";
 
 /**
- * Fisher-Yates shuffle using a seeded RNG for deterministic results.
+ * Fisher-Yates shuffle using the given RNG.
  */
 function shuffleArray<
 	T,
 >(
 	array: T[],
-	seed: number,
+	rng: () => number,
 ): void {
-	const rng =
-		seededRng(
-			seed,
-		);
 	for (
 		let i =
 			array.length -
@@ -60,8 +55,8 @@ export interface GenerateShopItemsOptions {
 	maxItems?: number;
 	/** Current wave number (1-based, default: 1) */
 	wave?: number;
-	/** Re-roll count for shuffling items (0 = first display) */
-	rerollCount?: number;
+	/** Random source in [0, 1) used to pick items (default: Math.random) */
+	random?: () => number;
 	/** Inflation multiplier for prices (default: 1) */
 	inflation?: number;
 }
@@ -84,7 +79,7 @@ export function generateShopItems(
 		excludeWeapons = [],
 		maxItems,
 		wave = 1,
-		rerollCount = 0,
+		random = Math.random,
 		inflation = 1,
 	} = options;
 
@@ -124,10 +119,9 @@ export function generateShopItems(
 				}),
 			);
 
-	// Shuffle items using rerollCount as seed
 	shuffleArray(
 		shopItems,
-		rerollCount,
+		random,
 	);
 
 	// Limit items if maxItems is specified

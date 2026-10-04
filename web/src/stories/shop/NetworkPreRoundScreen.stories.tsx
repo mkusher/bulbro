@@ -83,7 +83,6 @@ function NetworkPreRound({
 							weapons,
 						maxItems: 4,
 						wave: 2,
-						rerollCount: 0,
 					},
 				),
 		);

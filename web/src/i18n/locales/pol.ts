@@ -92,8 +92,6 @@ export default {
 		"Sklep",
 	"shop.reroll":
 		"Przerzuć ${price}",
-	"shop.owned":
-		"Posiadane",
 	"shop.locked":
 		"Zablokowane ${price}",
 	"shop.price":
