@@ -68,14 +68,14 @@ Enemy weapons specify no knockback, critical-chance, or damage-scaling overrides
 
 ## Sprite atlas
 
-All player weapon artwork is packed in [weapons.png](../public/game-assets/weapons.png), currently 1024 × 976 pixels. The original artwork is preserved pixel-for-pixel in the first 540 rows. The brick, flare gun, grenade, machine gun, and bazooka were added below it.
+All player weapon artwork is packed in [weapons.png](../src/assets/weapons.png), currently 1024 × 976 pixels. The original artwork is preserved pixel-for-pixel in the first 540 rows. The brick, flare gun, grenade, machine gun, and bazooka were added below it.
 
 | Asset | Scale | Dimensions |
 | --- | --- | --- |
-| [weapons.png](../public/game-assets/weapons.png) | 1 | 1024 × 976 |
-| [weapons-x0.5.png](../public/game-assets/weapons-x0.5.png) | ½ | 512 × 488 |
-| [weapons-x0.25.png](../public/game-assets/weapons-x0.25.png) | ¼ | 256 × 244 |
-| [weapons-x0.125.png](../public/game-assets/weapons-x0.125.png) | ⅛ | 128 × 122 |
+| [weapons.png](../src/assets/weapons.png) | 1 | 1024 × 976 |
+| [weapons-x0.5.png](../src/assets/weapons-x0.5.png) | ½ | 512 × 488 |
+| [weapons-x0.25.png](../src/assets/weapons-x0.25.png) | ¼ | 256 × 244 |
+| [weapons-x0.125.png](../src/assets/weapons-x0.125.png) | ⅛ | 128 × 122 |
 
 Keep all four sheets: [Assets](../src/Assets.ts) registers them, and [WeaponSprite](../src/weapon/sprites/WeaponSprite.ts) selects the matching sheet for its requested scale. Gameplay uses ⅛; shop previews default to ½. Coordinates and dimensions below are in full-size atlas pixels and are multiplied by the selected scale when extracting a frame.
 
