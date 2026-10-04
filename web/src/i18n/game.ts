@@ -50,6 +50,10 @@ const statNames =
 			"stat.cooldown",
 		critMultiplier:
 			"stat.critMultiplier",
+		maxWeapons:
+			"stat.maxWeapons",
+		startingWeapons:
+			"stat.startingWeapons",
 	} satisfies Record<
 		| keyof Stats
 		| Exclude<
