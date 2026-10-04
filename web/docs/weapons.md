@@ -4,6 +4,10 @@ The game registers 14 player weapons and 3 enemy weapons in [weapons-definitions
 
 ## Player weapons
 
+Bulbros must start with exactly `startingWeapons` weapons (default **1**) and may carry at most `maxWeapons` (default **6**). Both are secondary stats configured through additive `statBonuses`: `{ startingWeapons: 1, maxWeapons: 2 }` requires two starting weapons and allows eight in total. Counts must be nonnegative integers, and the starting count cannot exceed capacity.
+
+Built-in `weapons` count toward the starting requirement. Setup offers the remaining slots, using `defaultWeapons` as initial selections when they are in `availableWeapons`; duplicate weapons can occupy different slots. Single-player, local co-op, and online readiness require the exact count. Shop purchases stop at capacity without spending materials; rerolls remain available.
+
 These are weapon values before character bonuses, damage scaling, attack speed, critical hits, or shop price adjustments. Cooldowns are in seconds. Range is the weapon’s contribution to attack reach, and knockback is added to the wielder’s knockback. Omitted damage, range, knockback, and critical-chance bonuses contribute zero. Projectile speed is unused for melee attacks and is shown as “—”.
 
 | Weapon | ID | Damage | Cooldown (s) | Range | Knockback | Projectile speed | Base price |

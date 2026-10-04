@@ -348,6 +348,8 @@ function getSecondaryStatEntries(
 			"pickupRange",
 			"knockback",
 			"explosionSize",
+			"startingWeapons",
+			"maxWeapons",
 		];
 
 	return secondaryStats
@@ -364,13 +366,17 @@ function getSecondaryStatEntries(
 		)
 		.filter(
 			([
-				_,
+				key,
 				value,
 			]) =>
 				value !==
 					undefined &&
-				value !==
-					0,
+				(value !==
+					0 ||
+					key ===
+						"startingWeapons" ||
+					key ===
+						"maxWeapons"),
 		);
 }
 

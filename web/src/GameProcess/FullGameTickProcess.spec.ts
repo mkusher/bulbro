@@ -4,6 +4,7 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import { baseWeaponStats } from "@bulbro/network-protocol";
 import { signal } from "@preact/signals";
 import {
 	deltaTime,
@@ -134,6 +135,7 @@ function createTestPlayer(
 			weapons,
 			stats:
 				{
+					...baseWeaponStats,
 					maxHp: 80,
 					hpRegeneration: 0,
 					damage: 5,
@@ -1180,6 +1182,7 @@ describe("FullGameTickProcess", () => {
 							],
 						stats:
 							{
+								...baseWeaponStats,
 								maxHp: 80,
 								hpRegeneration: 0,
 								damage: 5,

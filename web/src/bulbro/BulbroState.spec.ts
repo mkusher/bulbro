@@ -770,3 +770,141 @@ describe("BulbroState", () => {
 		});
 	});
 });
+
+describe("weapon capacity", () => {
+	it("rejects a seventh weapon without changing the loadout", async () => {
+		const {
+			smg,
+		} =
+			await import(
+				"@/weapons-definitions"
+			);
+		const {
+			toWeaponState,
+		} =
+			await import(
+				"@/weapon"
+			);
+		const weapons =
+			Array.from(
+				{
+					length: 6,
+				},
+				() =>
+					toWeaponState(
+						smg,
+					),
+			);
+		const full =
+			spawn().useWeapons(
+				weapons,
+			);
+		expect(
+			full.weapons,
+		).toHaveLength(
+			6,
+		);
+		expect(
+			() =>
+				full.useWeapons(
+					[
+						...weapons,
+						toWeaponState(
+							smg,
+						),
+					],
+				),
+		).toThrow(
+			"Weapon limit",
+		);
+		expect(
+			full.weapons,
+		).toHaveLength(
+			6,
+		);
+		expect(
+			full.useWeapons(
+				weapons.slice(
+					0,
+					5,
+				),
+			)
+				.weapons,
+		).toHaveLength(
+			5,
+		);
+	});
+	it("honors lower and higher custom capacities when spawning and equipping", async () => {
+		const {
+			smg,
+		} =
+			await import(
+				"@/weapons-definitions"
+			);
+		const {
+			toWeaponState,
+		} =
+			await import(
+				"@/weapon"
+			);
+		const weapons =
+			Array.from(
+				{
+					length: 7,
+				},
+				() =>
+					toWeaponState(
+						smg,
+					),
+			);
+		expect(
+			spawn(
+				{
+					maxWeapons: 1,
+				},
+			).useWeapons(
+				weapons,
+			)
+				.weapons,
+		).toHaveLength(
+			7,
+		);
+		expect(
+			() =>
+				spawn(
+					{
+						maxWeapons:
+							-5,
+					},
+				).useWeapons(
+					weapons.slice(
+						0,
+						2,
+					),
+				),
+		).toThrow(
+			"Weapon limit",
+		);
+		expect(
+			() =>
+				spawnBulbro(
+					"test",
+					"normal",
+					zeroPoint(),
+					0,
+					0,
+					{
+						...wellRoundedBulbro,
+						weapons:
+							Array(
+								7,
+							).fill(
+								smg,
+							),
+					},
+				),
+		).toThrow(
+			"Weapon limit",
+		);
+	});
+});

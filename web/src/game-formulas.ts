@@ -1,3 +1,4 @@
+import { baseWeaponStats } from "@bulbro/network-protocol";
 import { v4 as uuidv4 } from "uuid";
 import type {
 	BulbroState,
@@ -32,6 +33,7 @@ export const minWeaponRange = 25;
 // Base stats for all Bulbros
 export const baseStats: Stats =
 	{
+		...baseWeaponStats,
 		maxHp: 10,
 		hpRegeneration: 0,
 		lifeSteal: 0,

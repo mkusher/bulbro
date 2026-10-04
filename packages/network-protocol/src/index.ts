@@ -1,5 +1,10 @@
 import { type } from "arktype";
 
+export {
+	baseWeaponStats,
+	hasValidStartingWeapons,
+} from "./weapon-limits";
+
 const Point =
 	type(
 		{

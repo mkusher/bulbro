@@ -2,7 +2,6 @@ import { computed } from "@preact/signals";
 import { ShareIcon } from "lucide-react";
 import { useState } from "preact/hooks";
 import { useStartBgm } from "@/audio/useStartBgm";
-import type { Bulbro } from "@/bulbro";
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import type { Difficulty } from "@/game-formulas";
@@ -34,6 +33,7 @@ import {
 	useRouter,
 } from "@/ui/routing";
 import { SplashBanner } from "@/ui/Splash";
+import { StartingWeaponSelector } from "@/ui/StartingWeaponSelector";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -43,10 +43,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/ui/shadcn/card";
-import { WeaponSelector } from "@/ui/WeaponSelector";
-import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
 import { Failed } from "../Failed";
+import { useStartingLoadout } from "./useStartingLoadout";
 
 function getShareUrl() {
 	const lobby =
@@ -77,26 +76,24 @@ const shareMessage =
 	);
 
 export function SetupOnlineGame() {
-	const [
-		firstBulbro,
-		changeFirstBulbro,
-	] =
-		useState<Bulbro>(
+	const loadout =
+		useStartingLoadout(
 			wellRoundedBulbro,
+			smg,
 		);
+	const {
+		bulbro:
+			firstBulbro,
+		selectBulbro:
+			changeFirstBulbro,
+	} =
+		loadout;
 	const [
 		selectedDifficulty,
 		selectDifficulty,
 	] =
 		useState<Difficulty>(
 			0,
-		);
-	const [
-		selectedWeapon,
-		setSelectedWeapon,
-	] =
-		useState<Weapon | null>(
-			smg,
 		);
 	const lobby =
 		currentLobby.value ?? {
@@ -149,6 +146,10 @@ export function SetupOnlineGame() {
 			e: SubmitEvent,
 		) => {
 			e.preventDefault();
+			if (
+				!loadout.isValid
+			)
+				return;
 			setStartError(
 				"",
 			);
@@ -158,11 +159,7 @@ export function SetupOnlineGame() {
 					createPlayer(
 						iam.id,
 						firstBulbro,
-						selectedWeapon
-							? [
-									selectedWeapon,
-								]
-							: [],
+						loadout.weapons,
 					),
 				);
 			} catch (error) {
@@ -396,19 +393,24 @@ export function SetupOnlineGame() {
 												)
 											}
 										/>
-										<WeaponSelector
-											selectedWeapon={
-												selectedWeapon
+										<StartingWeaponSelector
+											bulbro={
+												firstBulbro
 											}
-											availableWeapons={
-												firstBulbro.availableWeapons
+											selections={
+												loadout.selections
 											}
 											onChange={
-												setSelectedWeapon
+												loadout.selectWeapon
 											}
 										/>
 										<div className="grid">
-											<Button type="submit">
+											<Button
+												type="submit"
+												disabled={
+													!loadout.isValid
+												}
+											>
 												{t(
 													"setup.ready",
 												)}
@@ -420,11 +422,10 @@ export function SetupOnlineGame() {
 										bulbro={{
 											...firstBulbro,
 											weapons:
-												selectedWeapon
-													? [
-															selectedWeapon,
-														]
-													: [],
+												[
+													...firstBulbro.weapons,
+													...loadout.weapons,
+												],
 										}}
 									/>
 								)}

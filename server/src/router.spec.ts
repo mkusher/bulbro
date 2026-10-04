@@ -331,3 +331,173 @@ test("game start requires the host, two ready online players, and matching state
 		);
 	}
 });
+
+test("readiness requires the exact starting weapon count within capacity", async () => {
+	const app =
+		new Hono();
+	configureApi(
+		app,
+		{
+			info: () => {},
+		} as unknown as Logger,
+	);
+	const id =
+		crypto.randomUUID();
+	const lobby =
+		registry.registerLobby(
+			{
+				id,
+				username:
+					"Host",
+			},
+		);
+	const {
+		token,
+	} =
+		await issueToken(
+			id,
+		);
+	const weapon =
+		{
+			id: "smg",
+			name: "SMG",
+			classes:
+				[],
+			statsBonus:
+				{},
+			shotSpeed: 1,
+		};
+	const ready =
+		(
+			count: number,
+			statBonuses = {},
+		) =>
+			app.request(
+				`/game-lobby/${lobby.id}/ready`,
+				{
+					method:
+						"POST",
+					headers:
+						{
+							Authorization: `Bearer ${token}`,
+						},
+					body: JSON.stringify(
+						{
+							player:
+								{
+									id,
+									bulbro:
+										{
+											id: "custom",
+											name: "Custom",
+											statBonuses,
+											style:
+												{
+													faceType:
+														"normal",
+													wearingItems:
+														[],
+												},
+											weapons:
+												Array(
+													count,
+												).fill(
+													weapon,
+												),
+										},
+								},
+						},
+					),
+				},
+			);
+	expect(
+		(
+			await ready(
+				0,
+			)
+		)
+			.status,
+	).toBe(
+		400,
+	);
+	expect(
+		(
+			await ready(
+				2,
+			)
+		)
+			.status,
+	).toBe(
+		400,
+	);
+	expect(
+		registry.find(
+			lobby.id,
+		)
+			?.readyPlayers,
+	).toHaveLength(
+		0,
+	);
+	expect(
+		(
+			await ready(
+				1,
+			)
+		)
+			.status,
+	).toBe(
+		200,
+	);
+	expect(
+		(
+			await ready(
+				2,
+				{
+					startingWeapons: 1,
+					maxWeapons:
+						-4,
+				},
+			)
+		)
+			.status,
+	).toBe(
+		200,
+	);
+	expect(
+		(
+			await ready(
+				7,
+				{
+					startingWeapons: 6,
+				},
+			)
+		)
+			.status,
+	).toBe(
+		400,
+	);
+	expect(
+		registry.find(
+			lobby.id,
+		)
+			?.readyPlayers[0]
+			?.bulbro
+			.weapons,
+	).toHaveLength(
+		2,
+	);
+	expect(
+		(
+			await ready(
+				7,
+				{
+					startingWeapons: 6,
+					maxWeapons: 1,
+				},
+			)
+		)
+			.status,
+	).toBe(
+		200,
+	);
+});

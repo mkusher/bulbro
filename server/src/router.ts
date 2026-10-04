@@ -1,3 +1,4 @@
+import { hasValidStartingWeapons } from "@bulbro/network-protocol";
 import { type } from "arktype";
 import type {
 	Context,
@@ -308,6 +309,19 @@ export const configureApi =
 						},
 						403,
 					);
+				if (
+					!hasValidStartingWeapons(
+						player.bulbro,
+					)
+				) {
+					return c.json(
+						{
+							error:
+								"Invalid starting weapon count",
+						},
+						400,
+					);
+				}
 				const updated =
 					await markPlayerReady(
 						lobby.id,
