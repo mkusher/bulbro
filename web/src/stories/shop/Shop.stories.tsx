@@ -1,6 +1,7 @@
 import {
 	Shop,
 	type ShopItem,
+	shopItemKey,
 } from "@/shop/Shop";
 import {
 	ak47,
@@ -62,9 +63,9 @@ export const DefaultShop =
 				) => {
 					console.log(
 						"Purchased:",
-						item
-							.weapon
-							.name,
+						shopItemKey(
+							item,
+						),
 						"for",
 						item.price,
 					);
@@ -121,9 +122,9 @@ export const LowMaterials =
 				) => {
 					console.log(
 						"Purchased:",
-						item
-							.weapon
-							.name,
+						shopItemKey(
+							item,
+						),
 						"for",
 						item.price,
 					);
@@ -173,9 +174,9 @@ export const HighMaterials =
 				) => {
 					console.log(
 						"Purchased:",
-						item
-							.weapon
-							.name,
+						shopItemKey(
+							item,
+						),
 						"for",
 						item.price,
 					);
@@ -225,9 +226,9 @@ export const ExpensiveShop =
 				) => {
 					console.log(
 						"Purchased:",
-						item
-							.weapon
-							.name,
+						shopItemKey(
+							item,
+						),
 						"for",
 						item.price,
 					);
@@ -277,9 +278,9 @@ export const CheapShop =
 				) => {
 					console.log(
 						"Purchased:",
-						item
-							.weapon
-							.name,
+						shopItemKey(
+							item,
+						),
 						"for",
 						item.price,
 					);
@@ -329,9 +330,9 @@ export const NoMaterials =
 				) => {
 					console.log(
 						"Purchased:",
-						item
-							.weapon
-							.name,
+						shopItemKey(
+							item,
+						),
 						"for",
 						item.price,
 					);

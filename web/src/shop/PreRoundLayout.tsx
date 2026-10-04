@@ -4,6 +4,8 @@ import type { BulbroState } from "@/bulbro/BulbroState";
 import { BulbroStateStats } from "@/bulbro/BulbroStats";
 import { calculateStats } from "@/game-formulas";
 import { t } from "@/i18n";
+import type { ItemDefinition } from "@/items/Items";
+import { ItemSlots } from "@/shop/ItemSlots";
 import {
 	PrevWaveStats,
 	type WaveStats,
@@ -31,6 +33,8 @@ export interface PreRoundPlayerProps {
 	weapons: Weapon[];
 	materials: number;
 	maxWeaponSlots?: number;
+	/** Owned items */
+	items?: ItemDefinition[];
 	onWeaponClick?: (
 		weapon: Weapon,
 		index: number,
@@ -190,6 +194,15 @@ export function PreRoundLayout({
 						/>
 					</div>
 				</div>
+
+				{/* Owned items */}
+				{player.items && (
+					<ItemSlots
+						items={
+							player.items
+						}
+					/>
+				)}
 
 				{/* Shop */}
 				<Shop

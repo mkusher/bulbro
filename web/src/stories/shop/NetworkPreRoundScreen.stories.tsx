@@ -2,8 +2,12 @@ import { useState } from "preact/hooks";
 import { spawnBulbro } from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { zeroPoint } from "@/geometry";
+import type { ItemDefinition } from "@/items/Items";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
-import type { ShopItem } from "@/shop/Shop";
+import {
+	isItemShopItem,
+	type ShopItem,
+} from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import type { PlayerStatus } from "@/ui/PlayersStatus";
 import type { Weapon } from "@/weapon";
@@ -81,6 +85,15 @@ function NetworkPreRound({
 			180,
 		);
 	const [
+		items,
+		setItems,
+	] =
+		useState<
+			ItemDefinition[]
+		>(
+			[],
+		);
+	const [
 		shopItems,
 		setShopItems,
 	] =
@@ -148,12 +161,24 @@ function NetworkPreRound({
 				materials -
 					item.price,
 			);
-			setWeapons(
-				[
-					...weapons,
-					item.weapon,
-				],
-			);
+			if (
+				isItemShopItem(
+					item,
+				)
+			)
+				setItems(
+					[
+						...items,
+						item.item,
+					],
+				);
+			else
+				setWeapons(
+					[
+						...weapons,
+						item.weapon,
+					],
+				);
 			setShopItems(
 				shopItems.filter(
 					(
@@ -175,6 +200,7 @@ function NetworkPreRound({
 					wellRoundedBulbro,
 				bulbroState,
 				weapons,
+				items,
 				materials,
 			}}
 			shopItems={

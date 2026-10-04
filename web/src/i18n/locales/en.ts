@@ -167,6 +167,182 @@ export default {
 		"Exceptional",
 	"weapon.rarity.legendary":
 		"Legendary",
+	"items.title":
+		"Items",
+	"items.empty":
+		"No items yet",
+	"item.name.acid":
+		"Acid",
+	"item.name.alienMagic":
+		"Alien Magic",
+	"item.name.alienTongue":
+		"Alien Tongue",
+	"item.name.alloy":
+		"Alloy",
+	"item.name.banner":
+		"Banner",
+	"item.name.bat":
+		"Bat",
+	"item.name.beanie":
+		"Beanie",
+	"item.name.bigArms":
+		"Big Arms",
+	"item.name.blindfold":
+		"Blindfold",
+	"item.name.bloodLeech":
+		"Blood Leech",
+	"item.name.boilingWater":
+		"Boiling Water",
+	"item.name.book":
+		"Book",
+	"item.name.bowlerHat":
+		"Bowler Hat",
+	"item.name.boxingGlove":
+		"Boxing Glove",
+	"item.name.brokenMouth":
+		"Broken Mouth",
+	"item.name.butterfly":
+		"Butterfly",
+	"item.name.cake":
+		"Cake",
+	"item.name.cape":
+		"Cape",
+	"item.name.charcoal":
+		"Charcoal",
+	"item.name.clawTree":
+		"Claw Tree",
+	"item.name.clover":
+		"Clover",
+	"item.name.coffee":
+		"Coffee",
+	"item.name.cog":
+		"Cog",
+	"item.name.compass":
+		"Compass",
+	"item.name.cyclopsWorm":
+		"Cyclops Worm",
+	"item.name.defectiveSteroids":
+		"Defective Steroids",
+	"item.name.ductTape":
+		"Duct Tape",
+	"item.name.energyBracelet":
+		"Energy Bracelet",
+	"item.name.exoskeleton":
+		"Exoskeleton",
+	"item.name.fertilizer":
+		"Fertilizer",
+	"item.name.fin":
+		"Fin",
+	"item.name.freshMeat":
+		"Fresh Meat",
+	"item.name.fuelTank":
+		"Fuel Tank",
+	"item.name.gamblingToken":
+		"Gambling Token",
+	"item.name.glassCannon":
+		"Glass Cannon",
+	"item.name.glasses":
+		"Glasses",
+	"item.name.gnome":
+		"Gnome",
+	"item.name.goatSkull":
+		"Goat Skull",
+	"item.name.gummyBerserker":
+		"Gummy Berserker",
+	"item.name.headInjury":
+		"Head Injury",
+	"item.name.heavyBullets":
+		"Heavy Bullets",
+	"item.name.hedgehog":
+		"Hedgehog",
+	"item.name.helmet":
+		"Helmet",
+	"item.name.injection":
+		"Injection",
+	"item.name.insanity":
+		"Insanity",
+	"item.name.jetPack":
+		"Jet Pack",
+	"item.name.leatherVest":
+		"Leather Vest",
+	"item.name.lens":
+		"Lens",
+	"item.name.littleFrog":
+		"Little Frog",
+	"item.name.littleMuscleyDude":
+		"Little Muscley Dude",
+	"item.name.lostDuck":
+		"Lost Duck",
+	"item.name.luckyCharm":
+		"Lucky Charm",
+	"item.name.mammoth":
+		"Mammoth",
+	"item.name.mastery":
+		"Mastery",
+	"item.name.medal":
+		"Medal",
+	"item.name.metalPlate":
+		"Metal Plate",
+	"item.name.missile":
+		"Missile",
+	"item.name.mushroom":
+		"Mushroom",
+	"item.name.mutation":
+		"Mutation",
+	"item.name.nightGoggles":
+		"Night Goggles",
+	"item.name.octopus":
+		"Octopus",
+	"item.name.panda":
+		"Panda",
+	"item.name.peacefulBee":
+		"Peaceful Bee",
+	"item.name.pencil":
+		"Pencil",
+	"item.name.plant":
+		"Plant",
+	"item.name.plasticExplosive":
+		"Plastic Explosive",
+	"item.name.poisonousTonic":
+		"Poisonous Tonic",
+	"item.name.potato":
+		"Potato",
+	"item.name.propellerHat":
+		"Propeller Hat",
+	"item.name.reinforcedSteel":
+		"Reinforced Steel",
+	"item.name.ritual":
+		"Ritual",
+	"item.name.scope":
+		"Scope",
+	"item.name.shadyPotion":
+		"Shady Potion",
+	"item.name.shmoop":
+		"Shmoop",
+	"item.name.smallMagazine":
+		"Small Magazine",
+	"item.name.sunglasses":
+		"Sunglasses",
+	"item.name.terrifiedOnion":
+		"Terrified Onion",
+	"item.name.toolbox":
+		"Toolbox",
+	"item.name.toxicSludge":
+		"Toxic Sludge",
+	"item.name.tractor":
+		"Tractor",
+	"item.name.warriorHelmet":
+		"Warrior Helmet",
+	"item.name.wheat":
+		"Wheat",
+	"item.name.wheelbarrow":
+		"Wheelbarrow",
+	"item.name.whetstone":
+		"Whetstone",
+	"item.name.wings":
+		"Wings",
+	"item.name.wolfHelmet":
+		"Wolf Helmet",
 
 	"start.tab.local":
 		"Local",

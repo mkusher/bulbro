@@ -6,9 +6,13 @@ import {
 	rerollIncrease,
 } from "@/game-formulas";
 import { zeroPoint } from "@/geometry";
+import type { ItemDefinition } from "@/items/Items";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { WaveStats } from "@/shop/PrevWaveStats";
-import type { ShopItem } from "@/shop/Shop";
+import {
+	isItemShopItem,
+	type ShopItem,
+} from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import type { Weapon } from "@/weapon";
 import {
@@ -54,6 +58,7 @@ function getRerollPrice(
 interface StoryPlayerState {
 	id: string;
 	weapons: Weapon[];
+	items?: ItemDefinition[];
 	materials: number;
 	rerollCount: number;
 }
@@ -101,6 +106,39 @@ function createInitialState(
 	};
 }
 
+/** Adds the bought weapon or item to the player's loadout */
+function withPurchase(
+	player: StoryPlayerState,
+	item: ShopItem,
+): Pick<
+	StoryPlayerState,
+	| "weapons"
+	| "items"
+> {
+	return isItemShopItem(
+		item,
+	)
+		? {
+				weapons:
+					player.weapons,
+				items:
+					[
+						...(player.items ??
+							[]),
+						item.item,
+					],
+			}
+		: {
+				weapons:
+					[
+						...player.weapons,
+						item.weapon,
+					],
+				items:
+					player.items,
+			};
+}
+
 function handleStoryPurchase(
 	state: StoryState,
 	item: ShopItem,
@@ -116,13 +154,10 @@ function handleStoryPurchase(
 	const newPlayer =
 		{
 			...state.player,
-			weapons:
-				[
-					...state
-						.player
-						.weapons,
-					item.weapon,
-				],
+			...withPurchase(
+				state.player,
+				item,
+			),
 			materials:
 				state
 					.player
@@ -277,6 +312,11 @@ export const CompletePreRoundScreen =
 								state
 									.player
 									.weapons,
+							items:
+								state
+									.player
+									.items ??
+								[],
 							materials:
 								state
 									.player
@@ -370,6 +410,11 @@ export const EarlyGame =
 								state
 									.player
 									.weapons,
+							items:
+								state
+									.player
+									.items ??
+								[],
 							materials:
 								state
 									.player
@@ -457,6 +502,11 @@ export const LateGame =
 								state
 									.player
 									.weapons,
+							items:
+								state
+									.player
+									.items ??
+								[],
 							materials:
 								state
 									.player
@@ -543,6 +593,11 @@ export const LowMaterialsScenario =
 								state
 									.player
 									.weapons,
+							items:
+								state
+									.player
+									.items ??
+								[],
 							materials:
 								state
 									.player
@@ -605,13 +660,10 @@ export const AddWeaponDemo =
 						const newPlayer =
 							{
 								...state.player,
-								weapons:
-									[
-										...state
-											.player
-											.weapons,
-										item.weapon,
-									],
+								...withPurchase(
+									state.player,
+									item,
+								),
 							};
 						setState(
 							{
@@ -655,6 +707,11 @@ export const AddWeaponDemo =
 									state
 										.player
 										.weapons,
+								items:
+									state
+										.player
+										.items ??
+									[],
 								materials:
 									state
 										.player
@@ -767,6 +824,11 @@ export const AllShopItems =
 									state
 										.player
 										.weapons,
+								items:
+									state
+										.player
+										.items ??
+									[],
 								materials:
 									state
 										.player

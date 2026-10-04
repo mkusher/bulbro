@@ -169,6 +169,182 @@ export default {
 		"Виняткова",
 	"weapon.rarity.legendary":
 		"Легендарна",
+	"items.title":
+		"Предмети",
+	"items.empty":
+		"Поки немає предметів",
+	"item.name.acid":
+		"Кислота",
+	"item.name.alienMagic":
+		"Інопланетна магія",
+	"item.name.alienTongue":
+		"Інопланетний язик",
+	"item.name.alloy":
+		"Сплав",
+	"item.name.banner":
+		"Прапор",
+	"item.name.bat":
+		"Кажан",
+	"item.name.beanie":
+		"Шапочка",
+	"item.name.bigArms":
+		"Великі руки",
+	"item.name.blindfold":
+		"Пов’язка на очі",
+	"item.name.bloodLeech":
+		"П’явка",
+	"item.name.boilingWater":
+		"Окріп",
+	"item.name.book":
+		"Книга",
+	"item.name.bowlerHat":
+		"Котелок",
+	"item.name.boxingGlove":
+		"Боксерська рукавиця",
+	"item.name.brokenMouth":
+		"Розбитий рот",
+	"item.name.butterfly":
+		"Метелик",
+	"item.name.cake":
+		"Торт",
+	"item.name.cape":
+		"Плащ",
+	"item.name.charcoal":
+		"Деревне вугілля",
+	"item.name.clawTree":
+		"Кігтисте дерево",
+	"item.name.clover":
+		"Конюшина",
+	"item.name.coffee":
+		"Кава",
+	"item.name.cog":
+		"Шестерня",
+	"item.name.compass":
+		"Компас",
+	"item.name.cyclopsWorm":
+		"Хробак-циклоп",
+	"item.name.defectiveSteroids":
+		"Зіпсовані стероїди",
+	"item.name.ductTape":
+		"Скотч",
+	"item.name.energyBracelet":
+		"Енергетичний браслет",
+	"item.name.exoskeleton":
+		"Екзоскелет",
+	"item.name.fertilizer":
+		"Добриво",
+	"item.name.fin":
+		"Плавник",
+	"item.name.freshMeat":
+		"Свіже м’ясо",
+	"item.name.fuelTank":
+		"Паливний бак",
+	"item.name.gamblingToken":
+		"Ігровий жетон",
+	"item.name.glassCannon":
+		"Скляна гармата",
+	"item.name.glasses":
+		"Окуляри",
+	"item.name.gnome":
+		"Гном",
+	"item.name.goatSkull":
+		"Козячий череп",
+	"item.name.gummyBerserker":
+		"Мармеладний берсерк",
+	"item.name.headInjury":
+		"Травма голови",
+	"item.name.heavyBullets":
+		"Важкі кулі",
+	"item.name.hedgehog":
+		"Їжак",
+	"item.name.helmet":
+		"Шолом",
+	"item.name.injection":
+		"Ін’єкція",
+	"item.name.insanity":
+		"Божевілля",
+	"item.name.jetPack":
+		"Реактивний ранець",
+	"item.name.leatherVest":
+		"Шкіряний жилет",
+	"item.name.lens":
+		"Лінза",
+	"item.name.littleFrog":
+		"Жабка",
+	"item.name.littleMuscleyDude":
+		"Маленький качок",
+	"item.name.lostDuck":
+		"Загублена качка",
+	"item.name.luckyCharm":
+		"Талісман",
+	"item.name.mammoth":
+		"Мамонт",
+	"item.name.mastery":
+		"Майстерність",
+	"item.name.medal":
+		"Медаль",
+	"item.name.metalPlate":
+		"Металева пластина",
+	"item.name.missile":
+		"Ракета",
+	"item.name.mushroom":
+		"Гриб",
+	"item.name.mutation":
+		"Мутація",
+	"item.name.nightGoggles":
+		"Прилад нічного бачення",
+	"item.name.octopus":
+		"Восьминіг",
+	"item.name.panda":
+		"Панда",
+	"item.name.peacefulBee":
+		"Мирна бджола",
+	"item.name.pencil":
+		"Олівець",
+	"item.name.plant":
+		"Рослина",
+	"item.name.plasticExplosive":
+		"Пластид",
+	"item.name.poisonousTonic":
+		"Отруйний тонік",
+	"item.name.potato":
+		"Картопля",
+	"item.name.propellerHat":
+		"Шапка з пропелером",
+	"item.name.reinforcedSteel":
+		"Посилена сталь",
+	"item.name.ritual":
+		"Ритуал",
+	"item.name.scope":
+		"Приціл",
+	"item.name.shadyPotion":
+		"Підозріле зілля",
+	"item.name.shmoop":
+		"Шмуп",
+	"item.name.smallMagazine":
+		"Маленький магазин",
+	"item.name.sunglasses":
+		"Сонцезахисні окуляри",
+	"item.name.terrifiedOnion":
+		"Нажахана цибуля",
+	"item.name.toolbox":
+		"Ящик з інструментами",
+	"item.name.toxicSludge":
+		"Токсичний мул",
+	"item.name.tractor":
+		"Трактор",
+	"item.name.warriorHelmet":
+		"Шолом воїна",
+	"item.name.wheat":
+		"Пшениця",
+	"item.name.wheelbarrow":
+		"Тачка",
+	"item.name.whetstone":
+		"Точильний камінь",
+	"item.name.wings":
+		"Крила",
+	"item.name.wolfHelmet":
+		"Вовчий шолом",
 
 	"start.tab.local":
 		"Локальна",

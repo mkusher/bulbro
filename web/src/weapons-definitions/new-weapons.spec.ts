@@ -5,7 +5,7 @@ import {
 } from "bun:test";
 import { spawnBulbro } from "../bulbro/BulbroState";
 import { wellRoundedBulbro } from "../characters-definitions";
-import { generateShopItems } from "../shop/ShopItemsGenerator";
+import { generateWeaponShopItems } from "../shop/ShopItemsGenerator";
 import { nowTime } from "../time";
 import {
 	fromWeaponState,
@@ -51,7 +51,7 @@ describe("new ranged weapons", () => {
 				weapon,
 			);
 			const item =
-				generateShopItems(
+				generateWeaponShopItems(
 					wellRoundedBulbro,
 				).find(
 					(

@@ -9,6 +9,7 @@ import {
 	render,
 } from "preact";
 import { act } from "preact/test-utils";
+import { findItemById } from "@/items/Items";
 import { smg } from "@/weapons-definitions";
 
 mock.module(
@@ -245,5 +246,62 @@ it("allows the same weapon after a reroll until capacity is reached", async () =
 		purchase,
 	).toHaveBeenCalledTimes(
 		2,
+	);
+});
+
+it("allows buying items at weapon capacity", async () => {
+	const {
+		Shop,
+	} =
+		await import(
+			"./Shop"
+		);
+	const purchase =
+		mock(
+			() => {},
+		);
+	const item =
+		findItemById(
+			"helmet",
+		)!;
+	act(
+		() =>
+			render(
+				h(
+					Shop,
+					{
+						items:
+							[
+								{
+									item,
+									price: 1,
+								},
+							],
+						availableMaterials: 100,
+						weaponsFull: true,
+						onPurchase:
+							purchase,
+					},
+				),
+				container,
+			),
+	);
+	const buy =
+		container.querySelector(
+			"button",
+		)!;
+	expect(
+		buy.disabled,
+	).toBe(
+		false,
+	);
+	act(
+		() =>
+			buy.click(),
+	);
+	expect(
+		purchase,
+	).toHaveBeenCalledTimes(
+		1,
 	);
 });

@@ -50,6 +50,11 @@ import {
 	zeroPoint,
 } from "../geometry";
 import {
+	findItemById,
+	itemIdFromStatSourceId,
+	itemStatSourceId,
+} from "../items/Items";
+import {
 	type MovableObject,
 	Movement,
 	type Shape,
@@ -181,6 +186,27 @@ export class BulbroState
 			this
 				.levelUpgradesTaken +
 			1
+		);
+	}
+	/** Ids of the items bought in the shop, in purchase order */
+	get items() {
+		return this.statSources.flatMap(
+			(
+				s,
+			) => {
+				const itemId =
+					s.kind ===
+					"item"
+						? itemIdFromStatSourceId(
+								s.id,
+							)
+						: undefined;
+				return itemId
+					? [
+							itemId,
+						]
+					: [];
+			},
 		);
 	}
 	get totalExperience() {
@@ -1360,26 +1386,56 @@ export class BulbroState
 					},
 				);
 
-			case "shopPurchased":
+			case "shopPurchased": {
 				if (
 					event.playerId !==
 					this
 						.id
 				)
 					return this;
-				return new BulbroState(
-					{
-						...this
-							.#props,
-						materialsAvailable:
-							Math.max(
-								0,
-								this
-									.materialsAvailable -
-									event.price,
-							),
-					},
-				);
+				const item =
+					event.itemId !==
+					undefined
+						? findItemById(
+								event.itemId,
+							)
+						: undefined;
+				if (
+					event.itemId !==
+						undefined &&
+					!item
+				)
+					return this;
+				const paid =
+					new BulbroState(
+						{
+							...this
+								.#props,
+							materialsAvailable:
+								Math.max(
+									0,
+									this
+										.materialsAvailable -
+										event.price,
+								),
+						},
+					);
+				return item
+					? paid.withStatSource(
+							{
+								id: itemStatSourceId(
+									item.id,
+									this
+										.items
+										.length,
+								),
+								kind: "item",
+								bonuses:
+									item.bonuses,
+							},
+						)
+					: paid;
+			}
 
 			default:
 				return this;
