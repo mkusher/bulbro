@@ -1,5 +1,5 @@
-import { bulbroName } from "@/i18n/game";
 import { t } from "@/i18n";
+import { bulbroName } from "@/i18n/game";
 import { calculateStats } from "../game-formulas";
 import type { Bulbro } from "./BulbroCharacter";
 import type { BulbroState } from "./BulbroState";

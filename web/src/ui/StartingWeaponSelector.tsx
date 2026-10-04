@@ -1,6 +1,6 @@
-import { t } from "@/i18n";
 import type { Bulbro } from "@/bulbro";
 import { calculateStats } from "@/game-formulas";
+import { t } from "@/i18n";
 import type { Weapon } from "@/weapon";
 import { WeaponSelector } from "./WeaponSelector";
 

@@ -1,4 +1,3 @@
-import { t } from "@/i18n";
 import {
 	useEffect,
 	useRef,
@@ -10,6 +9,7 @@ import {
 	isRound as isRoundSignal,
 	waveResult,
 } from "@/currentGameProcess";
+import { t } from "@/i18n";
 import {
 	currentLobby,
 	currentNetworkGame,

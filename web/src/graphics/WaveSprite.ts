@@ -1,5 +1,5 @@
-import { t } from "@/i18n";
 import * as PIXI from "pixi.js";
+import { t } from "@/i18n";
 import type { RoundState } from "../waveState";
 
 export class WaveSprite {

@@ -1,4 +1,3 @@
-import { bulbroName } from "@/i18n/game";
 import { computed } from "@preact/signals";
 import { ShareIcon } from "lucide-react";
 import { useState } from "preact/hooks";
@@ -7,6 +6,7 @@ import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import type { Difficulty } from "@/game-formulas";
 import { t } from "@/i18n";
+import { bulbroName } from "@/i18n/game";
 import { logger } from "@/logger";
 import {
 	currentLobby,

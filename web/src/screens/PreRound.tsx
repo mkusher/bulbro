@@ -1,4 +1,3 @@
-import { bulbroName } from "@/i18n/game";
 import { useState } from "preact/hooks";
 import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
@@ -6,6 +5,7 @@ import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
+import { bulbroName } from "@/i18n/game";
 import { findItemById } from "@/items/Items";
 import {
 	currentLobby,
