@@ -5,35 +5,48 @@ const assetDefinitions =
 	{
 		weapons:
 			{
-				path: "/game-assets/weapons.png",
-			},
-		weaponsx05:
-			{
-				path: "/game-assets/weapons-x0.5.png",
-			},
-		weaponsx025:
-			{
-				path: "/game-assets/weapons-x0.25.png",
-			},
-		weaponsx0125:
-			{
-				path: "/game-assets/weapons-x0.125.png",
+				path: new URL(
+					"./assets/weapons.png",
+					import.meta
+						.url,
+				)
+					.href,
 			},
 		bulbroHeroes:
 			{
-				path: "/game-assets/bulbro-heroes.png",
+				path: new URL(
+					"./assets/bulbro-heroes.png",
+					import.meta
+						.url,
+				)
+					.href,
 			},
 		objects:
 			{
-				path: "/game-assets/objects.png",
+				path: new URL(
+					"./assets/objects.png",
+					import.meta
+						.url,
+				)
+					.href,
 			},
 		allEnemies:
 			{
-				path: "/game-assets/all-enemies.png",
+				path: new URL(
+					"./assets/all-enemies.png",
+					import.meta
+						.url,
+				)
+					.href,
 			},
 		lightmap:
 			{
-				path: "/lightmap.png",
+				path: new URL(
+					"./assets/lightmap.png",
+					import.meta
+						.url,
+				)
+					.href,
 			},
 	} as const;
 

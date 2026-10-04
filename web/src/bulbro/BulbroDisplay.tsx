@@ -1,10 +1,10 @@
-import * as PIXI from "pixi.js";
+import type * as PIXI from "pixi.js";
 import { FIELD_BACKGROUND_COLOR } from "../graphics/PlayingFieldTile";
 import { PixiApp } from "../ui/PixiApp";
 import type { Bulbro } from "./BulbroCharacter";
+import { initBulbroPreview } from "./BulbroPreview";
 import type { BulbroState } from "./BulbroState";
 import { spawnBulbro } from "./BulbroState";
-import { createBulbroSprite } from "./Sprite";
 
 // Re-export the BulbroCard component for convenience
 export { BulbroCard } from "./BulbroCard";
@@ -26,72 +26,22 @@ export function BulbroDisplay({
 	const onInit =
 		async (
 			app: PIXI.Application,
-			container: HTMLDivElement,
 		) => {
-			if (
-				!app ||
-				!app.stage
-			)
-				return;
-
-			const rect =
-				container.getBoundingClientRect();
-			const currentWidth =
-				Math.max(
-					rect.width ||
-						minWidth *
-							1.5,
-					minWidth,
-				);
-			const currentHeight =
-				Math.max(
-					rect.height ||
-						Math.floor(
-							minHeight *
-								1.2,
-						),
-					minHeight,
-				);
-
-			const sprite =
-				createBulbroSprite(
-					bulbro
-						.style
-						.faceType,
-					false,
-				);
-			const bulbroState =
+			await initBulbroPreview(
+				app,
 				spawnBulbro(
 					"demo",
 					bulbro
 						.style
 						.faceType,
 					{
-						x:
-							currentWidth /
-							2,
-						y:
-							currentHeight /
-							2,
+						x: 0,
+						y: 0,
 					},
 					1,
 					0,
 					bulbro,
-				);
-
-			sprite.init(
-				bulbroState,
-			);
-
-			const layer =
-				new PIXI.RenderLayer();
-			app.stage.addChild(
-				layer,
-			);
-
-			sprite.appendTo(
-				app.stage,
-				layer,
+				),
 			);
 		};
 
@@ -150,72 +100,10 @@ export function BulbroStateDisplay({
 	const onInit =
 		async (
 			app: PIXI.Application,
-			canvas: HTMLDivElement,
 		) => {
-			if (
-				!app
-			)
-				return;
-
-			const rect =
-				canvas.getBoundingClientRect();
-			const currentWidth =
-				Math.max(
-					rect.width ||
-						minWidth *
-							1.5,
-					minWidth,
-				);
-			const currentHeight =
-				Math.max(
-					rect.height ||
-						Math.floor(
-							minHeight *
-								1.2,
-						),
-					minHeight,
-				);
-
-			const sprite =
-				createBulbroSprite(
-					bulbro
-						.style
-						.faceType,
-					false,
-				);
-
-			// Position sprite at field center with the actual state
-			const centeredState =
-				new (
-					bulbroState.constructor as any
-				)(
-					{
-						...bulbroState.toJSON(),
-						position:
-							{
-								x:
-									currentWidth /
-									2,
-								y:
-									currentHeight /
-									2,
-							},
-					},
-				);
-
-			sprite.init(
-				centeredState,
-			);
-
-			const layer =
-				new PIXI.RenderLayer();
-			app.stage.addChild(
-				layer,
-			);
-
-			sprite.appendTo(
-				app.stage,
-				layer,
+			await initBulbroPreview(
+				app,
+				bulbroState,
 			);
 		};
 

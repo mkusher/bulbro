@@ -68,16 +68,9 @@ Enemy weapons specify no knockback, critical-chance, or damage-scaling overrides
 
 ## Sprite atlas
 
-All player weapon artwork is packed in [weapons.png](../public/game-assets/weapons.png), currently 1024 × 976 pixels. The original artwork is preserved pixel-for-pixel in the first 540 rows. The brick, flare gun, grenade, machine gun, and bazooka were added below it.
+All player weapon artwork is packed in [weapons.png](../src/assets/weapons.png), currently 1024 × 976 pixels. The original artwork is preserved pixel-for-pixel in the first 540 rows. The brick, flare gun, grenade, machine gun, and bazooka were added below it.
 
-| Asset | Scale | Dimensions |
-| --- | --- | --- |
-| [weapons.png](../public/game-assets/weapons.png) | 1 | 1024 × 976 |
-| [weapons-x0.5.png](../public/game-assets/weapons-x0.5.png) | ½ | 512 × 488 |
-| [weapons-x0.25.png](../public/game-assets/weapons-x0.25.png) | ¼ | 256 × 244 |
-| [weapons-x0.125.png](../public/game-assets/weapons-x0.125.png) | ⅛ | 128 × 122 |
-
-Keep all four sheets: [Assets](../src/Assets.ts) registers them, and [WeaponSprite](../src/weapon/sprites/WeaponSprite.ts) selects the matching sheet for its requested scale. Gameplay uses ⅛; shop previews default to ½. Coordinates and dimensions below are in full-size atlas pixels and are multiplied by the selected scale when extracting a frame.
+[Assets](../src/Assets.ts) registers the full-resolution sheet, bundled by Vite with a content-hashed filename. [WeaponSprite](../src/weapon/sprites/WeaponSprite.ts) extracts frames using the full-size atlas coordinates below and scales each sprite programmatically. Gameplay uses ⅛ scale; shop previews default to ½. No pre-scaled sheets are needed.
 
 | Weapon | ID | x | y | Width | Height |
 | --- | --- | --- | --- | --- | --- |
@@ -99,7 +92,7 @@ Keep all four sheets: [Assets](../src/Assets.ts) registers them, and [WeaponSpri
 | Enemy Fist | `enemyFist` | 0 | 0 | 0 | 0 |
 | Orc Very Slow Gun | `orcGun` | 0 | 0 | 0 | 0 |
 
-SMG, knife, sword, and shotgun frames were expanded to avoid clipping their edges. The separate PNGs for the added weapons and their preload entries were removed after packing. When adding or moving artwork, update the frame in `WeaponSprite.ts` and regenerate every scaled sheet from the full atlas. Keep transparent spacing between frames to avoid texture bleeding.
+SMG, knife, sword, and shotgun frames were expanded to avoid clipping their edges. The separate PNGs for the added weapons and their preload entries were removed after packing. When adding or moving artwork, update the full-resolution atlas and the frame in `WeaponSprite.ts`. Keep transparent spacing between frames to avoid texture bleeding.
 
 The five added sprites were generated with the built-in imagegen tool, then packed and resized using Bun and Sharp while preserving transparency. Their original prompts are retained below; prompts for the original nine sprites are not recorded here.
 
