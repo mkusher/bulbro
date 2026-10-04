@@ -854,6 +854,73 @@ describe("StateUpdater", () => {
 				mockLogger.info,
 			).toHaveBeenCalled();
 		});
+
+		it("ends the wave when the host does, even with time left on the guest's timer", () => {
+			// Each client starts the next wave at its own Date.now().
+			currentState.value =
+				{
+					...currentState.value,
+					round:
+						{
+							...currentState
+								.value
+								.round,
+							duration: 60,
+							startedAt:
+								Date.now(),
+						},
+				};
+
+			stateUpdater.processMessage(
+				{
+					type: "game-state-updated-by-host",
+					gameId:
+						"test-game",
+					version: 1,
+					sentAt: 1000,
+					events:
+						[
+							{
+								type: "tick",
+								deltaTime:
+									deltaTime(
+										16,
+									),
+								occurredAt:
+									nowTime(
+										1000,
+									),
+							},
+							{
+								type: "waveEnded",
+								deltaTime:
+									deltaTime(
+										16,
+									),
+								occurredAt:
+									nowTime(
+										1016,
+									),
+							},
+						],
+				},
+			);
+
+			expect(
+				currentState
+					.value
+					.round
+					.isRunning,
+			).toBe(
+				false,
+			);
+			expect(
+				currentState
+					.value
+					.round
+					.endedAt,
+			).toBeNumber();
+		});
 	});
 
 	describe("Event sorting", () => {

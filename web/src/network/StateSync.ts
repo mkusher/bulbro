@@ -284,6 +284,13 @@ export class StateSync {
 		};
 
 	stop() {
+		// The wave ends between send intervals, so the last events (including
+		// waveEnded) would otherwise never reach the other player.
+		if (
+			this
+				.#isStarted
+		)
+			this.#sendEvents();
 		this.#isStarted = false;
 		if (
 			this

@@ -1,8 +1,9 @@
 import type { Signal } from "@preact/signals";
 import type { Logger } from "pino";
-import type {
-	GameEvent,
-	GameEventQueue,
+import {
+	type GameEvent,
+	type GameEventQueue,
+	withEventMeta,
 } from "@/game-events/GameEvents";
 import { VoidGameEventQueue } from "@/game-events/VoidGameEventQueue";
 import {
@@ -251,6 +252,22 @@ export class BaseWaveProcess
 					},
 					"Stop wave",
 				);
+				const waveEnded =
+					withEventMeta(
+						{
+							type: "waveEnded",
+						},
+						delta,
+						now,
+					);
+				if (
+					this.#eventFilter(
+						waveEnded,
+					)
+				)
+					this.#eventQueue.addEvent(
+						waveEnded,
+					);
 				this.stop(
 					state.players.filter(
 						(
