@@ -8,6 +8,7 @@ import { baseStats } from "./characters-definitions/base";
 import {
 	calculateAttackDamage,
 	calculateAttackRange,
+	calculateExplosionRadius,
 	calculateStats,
 	calculateWeaponVisualWorldOffset,
 	computeStats,
@@ -15,6 +16,7 @@ import {
 	dropChanceWithLuck,
 	getDodgeChance,
 	getHpRegenerationPerSecond,
+	minExplosionRadius,
 	shoot,
 } from "./game-formulas";
 import {
@@ -966,6 +968,97 @@ describe("calculateAttackRange", () => {
 			),
 		).toBe(
 			100,
+		);
+	});
+});
+
+describe("calculateExplosionRadius", () => {
+	it("enlarges the weapon's explosion radius by the player's explosion size", () => {
+		expect(
+			calculateExplosionRadius(
+				{
+					stats:
+						{
+							explosionSize: 50,
+						},
+				},
+				weaponState(
+					"bazooka",
+					{
+						explosionRadius: 100,
+					},
+				),
+				"player",
+			),
+		).toBe(
+			150,
+		);
+	});
+
+	it("never shrinks an explosion below the minimum radius", () => {
+		expect(
+			calculateExplosionRadius(
+				{
+					stats:
+						{
+							explosionSize:
+								-100,
+						},
+				},
+				weaponState(
+					"grenade",
+					{
+						explosionRadius: 100,
+					},
+				),
+				"player",
+			),
+		).toBe(
+			minExplosionRadius,
+		);
+	});
+
+	it("ignores explosion size of enemies", () => {
+		expect(
+			calculateExplosionRadius(
+				{
+					stats:
+						{
+							explosionSize: 50,
+						},
+				},
+				weaponState(
+					"bazooka",
+					{
+						explosionRadius: 100,
+					},
+				),
+				"enemy",
+			),
+		).toBe(
+			100,
+		);
+	});
+
+	it("is 0 for weapons that don't explode", () => {
+		expect(
+			calculateExplosionRadius(
+				{
+					stats:
+						{
+							explosionSize: 50,
+						},
+				},
+				weaponState(
+					"pistol",
+					{
+						explosionRadius: 100,
+					},
+				),
+				"player",
+			),
+		).toBe(
+			0,
 		);
 	});
 });

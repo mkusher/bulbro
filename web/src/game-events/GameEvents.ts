@@ -9,6 +9,7 @@ import type {
 	NowTime,
 } from "@/time";
 import type { UpgradeTier } from "@/upgrades/Upgrades";
+import type { WeaponType } from "@/weapon";
 import type { MeleeStrike } from "@/weapon/MeleeStrike";
 
 // Base events without EventMeta
@@ -43,6 +44,7 @@ export type GameEventInternal =
 	| MoveShotEvent
 	| ShotMovedEvent
 	| ShotExpiredEvent
+	| ShotExplodedEvent
 	| StrikeSweptEvent
 	| ShopRerolledEvent
 	| ShopPurchasedEvent
@@ -269,6 +271,24 @@ export type ShotExpiredEvent =
 			x: number;
 			y: number;
 		};
+	};
+
+/**
+ * An explosive shot exploded. Hits of the explosion come as separate
+ * `enemyReceivedHit` / `bulbroReceivedHit` events.
+ */
+export type ShotExplodedEvent =
+	{
+		type: "shotExploded";
+		shotId: string;
+		shooterType:
+			| "player"
+			| "enemy";
+		weaponType: WeaponType;
+		position: Position;
+		radius: number;
+		/** Enemies (or players for enemy shots) caught in the explosion */
+		hitIds: string[];
 	};
 
 export type TickEvent =

@@ -15,6 +15,7 @@ import { canvasSize } from "../game-canvas";
 import type { WaveState } from "../waveState";
 import type { Camera } from "./Camera";
 import { DustCloudEffect } from "./DustCloudEffect";
+import { ExplosionEffects } from "./ExplosionEffects";
 import { HitIndicators } from "./HitIndicators";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
@@ -36,6 +37,7 @@ export class StageWithUi {
 	#camera: Camera;
 	#logger: Logger;
 	#hitIndicators: HitIndicators;
+	#explosionEffects: ExplosionEffects;
 	#dustEffects: Map<
 		string,
 		DustCloudEffect
@@ -89,6 +91,15 @@ export class StageWithUi {
 			this
 				.#camera
 				.ui,
+			this
+				.#uiLayer,
+		);
+
+		this.#explosionEffects =
+			new ExplosionEffects();
+		this.#explosionEffects.appendTo(
+			this
+				.playingFieldContainer,
 			this
 				.#uiLayer,
 		);
@@ -164,6 +175,10 @@ export class StageWithUi {
 		this.#updatePlayerStats(
 			deltaTime,
 			state,
+		);
+		this.#explosionEffects.update(
+			deltaTime,
+			events,
 		);
 		this.#hitIndicators.update(
 			deltaTime,

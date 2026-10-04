@@ -5,6 +5,8 @@ import type { FaceType } from "./sprites/FaceSprite";
 export interface SecondaryStats {
 	pickupRange: number;
 	knockback: number;
+	/** Explosion radius bonus of explosive weapons, in % */
+	explosionSize: number;
 }
 export interface MainStats {
 	maxHp: number;

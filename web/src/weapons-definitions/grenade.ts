@@ -1,6 +1,6 @@
 import type { Weapon } from "../weapon";
 
-/** A short-range, slow projectile with a heavy impact. */
+/** A short-range, slow projectile exploding on impact. */
 export const grenade: Weapon =
 	{
 		id: "grenade",
@@ -18,6 +18,7 @@ export const grenade: Weapon =
 				range: 300,
 				knockback: 12,
 				critChance: 3,
+				explosionRadius: 110,
 				scaling:
 					{
 						rangedDamage: 1,
@@ -27,6 +28,6 @@ export const grenade: Weapon =
 		basePrice: 9,
 		attack:
 			{
-				type: "shot",
+				type: "explosion",
 			},
 	};

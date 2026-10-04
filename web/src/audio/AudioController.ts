@@ -77,6 +77,11 @@ class AudioController {
 					event,
 				);
 				break;
+			case "shotExploded":
+				audioEngine.playEffect(
+					"explosion",
+				);
+				break;
 		}
 	}
 
@@ -259,6 +264,18 @@ export function weaponSound(
 		case "aphidGun":
 			return "enemyShot";
 	}
+	// Exploding projectiles make their boom when they explode, not when fired
+	if (
+		weapon
+			.attack
+			.type ===
+		"explosion"
+	)
+		return weapon.classes.includes(
+			"gun",
+		)
+			? "gunshot"
+			: "kick";
 	if (
 		weapon.classes.includes(
 			"explosive",

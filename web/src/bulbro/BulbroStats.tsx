@@ -347,6 +347,7 @@ function getSecondaryStatEntries(
 		[
 			"pickupRange",
 			"knockback",
+			"explosionSize",
 		];
 
 	return secondaryStats

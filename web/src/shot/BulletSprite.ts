@@ -5,6 +5,34 @@ import type { ShotState } from "./ShotState";
 
 const width = 8;
 const height = 16;
+const explosiveRadius = 7;
+
+/** A dark round shell with a glowing fuse at its front (sprites point up at 0°). */
+function explosiveProjectile() {
+	return new PIXI.Graphics()
+		.circle(
+			0,
+			0,
+			explosiveRadius,
+		)
+		.fill(
+			0x3d4a2a,
+		)
+		.stroke(
+			{
+				width: 2,
+				color: 0x1b1f14,
+			},
+		)
+		.circle(
+			0,
+			-explosiveRadius,
+			3,
+		)
+		.fill(
+			0xff7a1a,
+		);
+}
 /**
  * Manages a bullet sprite graphic.
  */
@@ -15,25 +43,27 @@ export class BulletSprite {
 		shot: ShotState,
 	) {
 		this.#gfx =
-			new PIXI.Graphics()
-				.roundRect(
-					-width /
-						2,
-					-height /
-						2,
-					width,
-					height,
-					width,
-				)
-				.fill(
-					0xfff625,
-				)
-				.stroke(
-					0xffffff,
-				)
-				.lineStyle(
-					2,
-				);
+			shot.isExplosive
+				? explosiveProjectile()
+				: new PIXI.Graphics()
+						.roundRect(
+							-width /
+								2,
+							-height /
+								2,
+							width,
+							height,
+							width,
+						)
+						.fill(
+							0xfff625,
+						)
+						.stroke(
+							0xffffff,
+						)
+						.lineStyle(
+							2,
+						);
 		// Set initial rotation based on shot direction
 		this.#gfx.rotation =
 			rotation(
