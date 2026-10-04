@@ -2,10 +2,6 @@ import { BulbroCard } from "@/bulbro/BulbroCard";
 import type { Bulbro } from "@/bulbro/BulbroCharacter";
 import { t } from "@/i18n";
 import {
-	type NetworkPlayerStatus,
-	NetworkPlayersStatus,
-} from "@/shop/NetworkPlayersStatus";
-import {
 	PrevWaveStats,
 	type WaveStats,
 } from "@/shop/PrevWaveStats";
@@ -14,6 +10,10 @@ import {
 	type ShopItem,
 } from "@/shop/Shop";
 import { WeaponSlots } from "@/shop/WeaponSlots";
+import {
+	type PlayerStatus,
+	PlayersStatus,
+} from "@/ui/PlayersStatus";
 import { Button } from "@/ui/shadcn/button";
 import { Card } from "@/ui/shadcn/card";
 import type { Weapon } from "@/weapon";
@@ -36,7 +36,7 @@ export interface PreRoundPlayerProps {
  * Online game readiness. The wave starts once every player is ready.
  */
 export interface PreRoundNetworkProps {
-	players: NetworkPlayerStatus[];
+	players: PlayerStatus[];
 	/** The local player already confirmed readiness; the shop is locked */
 	isLocalReady: boolean;
 	/** Withdraws readiness and unlocks the shop */
@@ -118,7 +118,7 @@ export function PreRoundLayout({
 
 				{/* Online players' connection and readiness */}
 				{network && (
-					<NetworkPlayersStatus
+					<PlayersStatus
 						players={
 							network.players
 						}

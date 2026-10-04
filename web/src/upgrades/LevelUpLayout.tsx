@@ -5,6 +5,10 @@ import {
 	formatStatValue,
 } from "@/bulbro/BulbroStats";
 import { t } from "@/i18n";
+import {
+	type PlayerStatus,
+	PlayersStatus,
+} from "@/ui/PlayersStatus";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -55,6 +59,8 @@ export interface LevelUpLayoutProps {
 	/** Price of offering new choices */
 	rerollPrice?: number;
 	onReroll?: () => void;
+	/** Online players' bulbros, levels and readiness */
+	players?: PlayerStatus[];
 }
 
 /**
@@ -71,6 +77,7 @@ export function LevelUpLayout({
 	materials,
 	rerollPrice,
 	onReroll,
+	players,
 }: LevelUpLayoutProps) {
 	return (
 		<div className="p-4 max-w-6xl mx-auto">
@@ -142,6 +149,14 @@ export function LevelUpLayout({
 							</div>
 						)}
 				</Card>
+
+				{players && (
+					<PlayersStatus
+						players={
+							players
+						}
+					/>
+				)}
 
 				<div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-3">
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-2">

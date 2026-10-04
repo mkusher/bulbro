@@ -18,6 +18,7 @@ import {
 	deltaTime as dt,
 	nowTime,
 } from "@/time";
+import type { PlayerStatus } from "@/ui/PlayersStatus";
 import { LevelUpLayout } from "@/upgrades/LevelUpLayout";
 import {
 	generateUpgradeChoices,
@@ -91,6 +92,10 @@ function useNetworkReadiness():
 		game
 			.readyForNextWave
 			.value;
+	const bulbros =
+		waveState
+			.value
+			.players;
 	return {
 		isLocalReady:
 			readyPlayerIds.includes(
@@ -103,21 +108,39 @@ function useNetworkReadiness():
 			lobby.players.map(
 				(
 					player,
-				) => ({
-					id: player.id,
-					username:
-						player.username,
-					connected:
-						player.status ===
-						"connected",
-					ready:
-						readyPlayerIds.includes(
-							player.id,
-						),
-					isLocal:
-						player.id ===
-						localPlayerId,
-				}),
+				) => {
+					const bulbro =
+						bulbros.find(
+							(
+								b,
+							) =>
+								b.id ===
+								player.id,
+						);
+					return {
+						id: player.id,
+						username:
+							player.username,
+						connected:
+							player.status ===
+							"connected",
+						ready:
+							readyPlayerIds.includes(
+								player.id,
+							),
+						isLocal:
+							player.id ===
+							localPlayerId,
+						bulbroName:
+							bulbro &&
+							findBulbroById(
+								bulbro.type,
+							)
+								.name,
+						level:
+							bulbro?.level,
+					};
+				},
 			),
 	};
 }
@@ -129,9 +152,14 @@ function useNetworkReadiness():
 function findLevelingUpPlayer() {
 	const players =
 		currentNetworkGame.value
-			? waveState.value.players.slice(
-					0,
-					1,
+			? waveState.value.players.filter(
+					(
+						player,
+					) =>
+						player.id ===
+						currentUser
+							.value
+							.id,
 				)
 			: waveState
 					.value
@@ -149,7 +177,11 @@ function findLevelingUpPlayer() {
  * Level-up upgrade choice, one level at a time. Shown after the wave
  * ends and before the shop until every gained level got its upgrade.
  */
-function LevelUp() {
+function LevelUp({
+	players,
+}: {
+	players?: PlayerStatus[];
+}) {
 	const player =
 		findLevelingUpPlayer();
 	if (
@@ -273,6 +305,9 @@ function LevelUp() {
 			}
 			onReroll={
 				handleReroll
+			}
+			players={
+				players
 			}
 			bulbroState={
 				player
@@ -479,7 +514,11 @@ export function PreRound() {
 		findLevelingUpPlayer()
 	) {
 		return (
-			<LevelUp />
+			<LevelUp
+				players={
+					network?.players
+				}
+			/>
 		);
 	}
 

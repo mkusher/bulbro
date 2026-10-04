@@ -50,10 +50,6 @@ export default {
 		"Адлучана",
 	"setup.share":
 		"Падзяліцца лобі",
-	"setup.yourStatus":
-		"Ваш стан",
-	"setup.otherPlayerStatus":
-		"Стан іншага гульца",
 
 	"setup.single.title":
 		"Пачаць адзіночную гульню",
@@ -119,6 +115,8 @@ export default {
 		"Гульцы",
 	"preround.you":
 		"вы",
+	"players.level":
+		"Узр. {level}",
 	"preround.noPlayer":
 		"Гулец не знойдзены",
 	"preround.weaponClicked":

@@ -50,10 +50,6 @@ export default {
 		"Disconnected",
 	"setup.share":
 		"Share lobby",
-	"setup.yourStatus":
-		"Your status",
-	"setup.otherPlayerStatus":
-		"Other player's status",
 
 	"setup.single.title":
 		"Start single player run",
@@ -119,6 +115,8 @@ export default {
 		"Players",
 	"preround.you":
 		"you",
+	"players.level":
+		"Lv. {level}",
 	"preround.noPlayer":
 		"No player found",
 	"preround.weaponClicked":

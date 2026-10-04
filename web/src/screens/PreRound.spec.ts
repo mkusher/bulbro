@@ -5,6 +5,7 @@ import {
 	it,
 	mock,
 } from "bun:test";
+import { signal } from "@preact/signals";
 import {
 	h,
 	render,
@@ -12,6 +13,11 @@ import {
 import { getTotalExperienceForLevel } from "@/bulbro/Levels";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { classicMapSize } from "@/game-canvas";
+import {
+	currentLobby,
+	currentNetworkGame,
+} from "@/network/currentLobby";
+import { currentUser } from "@/network/currentUser";
 import {
 	createInitialState,
 	waveState,
@@ -353,4 +359,110 @@ it("re-rolls the offered upgrades for materials", async () => {
 	).toContain(
 		"Prepare",
 	);
+});
+
+it("shows only the local player's level-ups with the players panel online", async () => {
+	const user =
+		currentUser.value;
+	currentUser.value =
+		{
+			id: "player-2",
+			username:
+				"Bob",
+			isGuest: false,
+		} as typeof user;
+	currentLobby.value =
+		{
+			players:
+				[
+					{
+						id: "player-1",
+						username:
+							"Alice",
+						status:
+							"connected",
+					},
+					{
+						id: "player-2",
+						username:
+							"Bob",
+						status:
+							"connected",
+					},
+				],
+		} as never;
+	currentNetworkGame.value =
+		{
+			readyForNextWave:
+				signal(
+					[
+						"player-1",
+					],
+				),
+			markNotReadyForNextWave:
+				() => {},
+		} as never;
+	try {
+		startPreRound(
+			1,
+			2,
+		);
+		expect(
+			root.textContent,
+		).toContain(
+			"Level 1!",
+		);
+		expect(
+			root.textContent,
+		).toContain(
+			"Bob (you)",
+		);
+		expect(
+			root.textContent,
+		).toContain(
+			"Well Rounded · Lv. 1",
+		);
+		expect(
+			root.querySelector(
+				'[data-player-id="player-1"]',
+			)
+				?.textContent,
+		).toContain(
+			"Ready",
+		);
+
+		upgradeButtons()[0]!.click();
+		await flush();
+		const [
+			remote,
+			local,
+		] =
+			waveState
+				.value
+				.players;
+		expect(
+			local!
+				.pendingLevelUps,
+		).toBe(
+			0,
+		);
+		expect(
+			remote!
+				.pendingLevelUps,
+		).toBe(
+			1,
+		);
+		expect(
+			root.textContent,
+		).toContain(
+			"Prepare",
+		);
+	} finally {
+		currentNetworkGame.value =
+			null;
+		currentLobby.value =
+			null;
+		currentUser.value =
+			user;
+	}
 });
