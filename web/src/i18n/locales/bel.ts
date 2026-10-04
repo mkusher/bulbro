@@ -124,6 +124,17 @@ export default {
 	"preround.weaponClicked":
 		"Зброя націснута:",
 
+	"levelUp.title":
+		"Узровень {level}!",
+	"levelUp.choose":
+		"Абярыце паляпшэнне",
+	"levelUp.remaining":
+		"Абярыце паляпшэнне (потым яшчэ {count, plural, one {# узровень} few {# узроўні} many {# узроўняў} other {# узроўня}})",
+	"levelUp.tier":
+		"Ранг {tier}",
+	"levelUp.select":
+		"Абраць",
+
 	"stats.waveResults":
 		"Вынікі хвалі",
 	"stats.totalGame":

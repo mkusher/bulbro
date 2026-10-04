@@ -124,6 +124,17 @@ export default {
 	"preround.weaponClicked":
 		"Weapon clicked:",
 
+	"levelUp.title":
+		"Level {level}!",
+	"levelUp.choose":
+		"Choose an upgrade",
+	"levelUp.remaining":
+		"Choose an upgrade ({count, plural, one {# more level} other {# more levels}} after this)",
+	"levelUp.tier":
+		"Tier {tier}",
+	"levelUp.select":
+		"Choose",
+
 	"stats.waveResults":
 		"Wave Results",
 	"stats.totalGame":

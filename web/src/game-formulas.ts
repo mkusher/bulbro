@@ -1113,6 +1113,22 @@ export function firstRerollPrice(
 	);
 }
 
+/** Price of the next re-roll after `rerollCount` re-rolls in the wave. */
+export function rerollPrice(
+	rerollCount: number,
+	waveNumber: number,
+) {
+	return (
+		firstRerollPrice(
+			waveNumber,
+		) +
+		rerollCount *
+			rerollIncrease(
+				waveNumber,
+			)
+	);
+}
+
 export function itemPrice(
 	basePrice: number,
 	waveNumber: number,

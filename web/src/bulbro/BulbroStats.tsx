@@ -373,7 +373,7 @@ function getSecondaryStatEntries(
 		);
 }
 
-function formatStatName(
+export function formatStatName(
 	key: string,
 ): string {
 	return key
@@ -402,7 +402,7 @@ const absoluteDisplayStats =
 		],
 	);
 
-function formatStatValue(
+export function formatStatValue(
 	key: keyof Stats,
 	value: number,
 ): string {

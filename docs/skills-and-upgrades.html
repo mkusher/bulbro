@@ -78,7 +78,7 @@
       <div class="tile ok"><strong>13</strong>of 16 primary stats work as in Brotato<br><small>plus both secondary stats</small></div>
       <div class="tile partial"><strong>2</strong>primary stats work partially<br><small>elementalDamage, luck</small></div>
       <div class="tile unused"><strong>1</strong>primary stat has no effect<br><small>engineering</small></div>
-      <div class="tile broken"><strong>0</strong>levels do anything yet<br><small>XP and level are tracked, but there are no rewards</small></div>
+      <div class="tile ok"><strong>+1</strong>max HP and an upgrade per level<br><small>with a paid re-roll of the choices</small></div>
     </div>
     <p>Stats are stat points summed from a list of stat sources, and the combat formulas give the points their meaning.
       Damage, attack speed, crits, armor, dodge, life steal, HP regeneration, harvesting and range follow Brotato's formulas.
@@ -176,14 +176,13 @@
       <li><strong>Co-op shares every pickup (intended).</strong> <code>materialCollected</code> carries the collecting <code>playerId</code>, but every player gets +1 material and +1 XP. Players level at the same rate from pickups and differ only by their own harvesting. Covered by tests in <code>BulbroState.spec.ts</code> and <code>waveState.spec.ts</code> ("co-op shared pickups").</li>
       <li><strong>Curve</strong> (<code>web/src/bulbro/Levels.ts</code>): Bulbros start at level 0, and reaching level <em>n</em> takes (<em>n</em>+3)² more XP (16, 25, 36, …), as in Brotato. A level is reached exactly at its threshold.</li>
       <li><strong>State:</strong> <code>BulbroState.level</code> follows the XP (<code>getLevelForExperience</code>) and never goes down. The in-wave XP bar uses the same functions.</li>
-      <li><strong>Rewards:</strong> none yet. There is no level-up event, no +1 max HP and no upgrade choice.</li>
+      <li><strong>Rewards:</strong> every level gives +1 max HP right away (a <code>level</code> stat source, also healed while alive). After a survived wave and before the shop, the level-up screen offers 4 random upgrades (<code>web/src/upgrades/Upgrades.ts</code>) for each level gained, one level at a time. The pick is an <code>upgradeSelected</code> event that adds an <code>upgrade</code> stat source with the id <code>level-up-&lt;level&gt;</code>. Pending level-ups are <code>level</code> minus the picked upgrades. Choices are seeded by player, level and re-roll count. A re-roll (<code>upgradesRerolled</code>) costs the same as a shop re-roll, grows with each re-roll and resets for the next level; tiers follow the guaranteed levels and level- and luck-based chances. Online, each player picks locally and the stat sources reach the others with the player state on Ready; in local co-op the players pick in turn.</li>
     </ul>
   </section>
 
   <section id="issues">
     <h2>Current issues</h2>
     <ol class="issues">
-      <li><span class="sev high">High</span> <strong>Levels give nothing.</strong> Level and XP are tracked, but there is no +1 max HP and no upgrade choice. This is covered by Phase 2.</li>
       <li><span class="sev med">Medium</span> <strong>No feedback for crits, dodges or life steal.</strong> The mechanics work, but <code>HitIndicators</code> shows nothing special, so players can't tell their stats are working.</li>
       <li><span class="sev med">Medium</span> <strong>No stats panel during a run.</strong> <code>BulbroStateStats</code> shows live <code>BulbroState.stats</code>, but only stories use it. The character selector shows the character's stats only. After upgrades and items, the shop needs a live stats view.</li>
       <li><span class="sev med">Medium</span> <strong>Engineering has no effect</strong>, yet Medic (+3) and Cyborg (+5) have it. There are no structures.</li>
@@ -270,7 +269,7 @@
       <p class="note">Implementation note: random rolls take an injectable <code>random</code> argument and happen in event generators, not reducers. The free baseline regeneration was removed on purpose. Harvesting runs in the <code>tick</code> reducer only when a wave is survived.</p>
     </div>
     <div class="phase">
-      <h3>Phase 2: level-up upgrades — next</h3>
+      <h3>Phase 2: level-up upgrades — done</h3>
       <ul>
         <li>Co-op pickups are shared, so players reach level-ups together; each player still picks their own upgrades.</li>
         <li>An <code>upgrades-definitions/</code> module with the 16 Brotato upgrades × 4 tiers (table above). Leave engineering out until structures exist.</li>
@@ -278,6 +277,7 @@
         <li>A level-up screen between the wave end and the shop: seeded choices (like <code>ShopItemsGenerator</code>), tier rolls by level and luck, reroll cost, and <code>upgradeSelected</code>/<code>upgradesRerolled</code> events that add <code>upgrade</code> stat sources.</li>
         <li>Show live stats in the shop and level-up screen (<code>BulbroStateStats</code>).</li>
       </ul>
+      <p class="note">Implementation note: the module is <code>web/src/upgrades/</code>, the level-up screen is part of <code>PreRound</code>, and only the level-up screen shows live stats so far. The re-roll price uses the shop formula (<code>rerollPrice</code>).</p>
     </div>
     <div class="phase">
       <h3>Phase 3: items</h3>
