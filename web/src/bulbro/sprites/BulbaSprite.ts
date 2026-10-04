@@ -223,7 +223,8 @@ export class BulbaSprite extends GameSprite {
 		delta: DeltaTime,
 		now: NowTime,
 	) {
-		this.#shadow.visible =
+		// A dead Bulbro disappears from the field until the next wave
+		this.container.visible =
 			player.isAlive();
 		this.#updateSpritePosition(
 			player.position,

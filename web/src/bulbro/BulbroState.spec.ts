@@ -530,6 +530,47 @@ describe("BulbroState", () => {
 			);
 		});
 
+		it("shares pickups with a dead Bulbro", () => {
+			const dead =
+				apply(
+					spawn(),
+					{
+						type: "bulbroDied",
+						bulbroId:
+							"test",
+						damage: 10,
+						position:
+							zeroPoint(),
+					},
+				);
+			expect(
+				dead.isAlive(),
+			).toBe(
+				false,
+			);
+			const state =
+				apply(
+					dead,
+					{
+						type: "materialCollected",
+						materialId:
+							"m1",
+						playerId:
+							"someone-else",
+					},
+				);
+			expect(
+				state.materialsAvailable,
+			).toBe(
+				1,
+			);
+			expect(
+				state.totalExperience,
+			).toBe(
+				1,
+			);
+		});
+
 		it("gives one material per pickup regardless of harvesting", () => {
 			const state =
 				apply(

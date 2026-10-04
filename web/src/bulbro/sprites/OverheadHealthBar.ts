@@ -100,7 +100,8 @@ export class OverheadHealthBar {
 
 		if (
 			healthPercent >=
-			1
+				1 ||
+			!player.isAlive()
 		) {
 			this.#container.visible = false;
 			return;
