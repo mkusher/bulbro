@@ -8,7 +8,6 @@ import {
 	bgmEnabled,
 } from "@/audio";
 import { useStartBgm } from "@/audio/useStartBgm";
-import type { Bulbro } from "@/bulbro";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import {
 	createMainControls,
@@ -22,6 +21,7 @@ import { BulbroSelector } from "@/ui/BulbroSelector";
 import { DifficultySelector } from "@/ui/DifficultySelector";
 import { CentralCard } from "@/ui/Layout";
 import { useRouter } from "@/ui/routing";
+import { StartingWeaponSelector } from "@/ui/StartingWeaponSelector";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -29,45 +29,40 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import { WeaponSelector } from "@/ui/WeaponSelector";
-import type { Weapon } from "@/weapon";
 import { smg } from "@/weapons-definitions";
+import { useStartingLoadout } from "./useStartingLoadout";
 
 export function SetupLocalCoOp() {
-	const [
-		firstBulbro,
-		changeFirstBulbro,
-	] =
-		useState<Bulbro>(
+	const firstLoadout =
+		useStartingLoadout(
 			wellRoundedBulbro,
+			smg,
 		);
-	const [
-		secondBulbro,
-		changeSecondBulbro,
-	] =
-		useState<Bulbro>(
+	const {
+		bulbro:
+			firstBulbro,
+		selectBulbro:
+			changeFirstBulbro,
+	} =
+		firstLoadout;
+	const secondLoadout =
+		useStartingLoadout(
 			wellRoundedBulbro,
+			smg,
 		);
+	const {
+		bulbro:
+			secondBulbro,
+		selectBulbro:
+			changeSecondBulbro,
+	} =
+		secondLoadout;
 	const [
 		selectedDifficulty,
 		selectDifficulty,
 	] =
 		useState<Difficulty>(
 			0,
-		);
-	const [
-		firstPlayerWeapon,
-		setFirstPlayerWeapon,
-	] =
-		useState<Weapon | null>(
-			smg,
-		);
-	const [
-		secondPlayerWeapon,
-		setSecondPlayerWeapon,
-	] =
-		useState<Weapon | null>(
-			smg,
 		);
 	const router =
 		useRouter();
@@ -80,25 +75,24 @@ export function SetupLocalCoOp() {
 			e: SubmitEvent,
 		) => {
 			e.preventDefault();
+			if (
+				!(
+					firstLoadout.isValid &&
+					secondLoadout.isValid
+				)
+			)
+				return;
 			startLocalGame(
 				[
 					createPlayer(
 						v4(),
 						firstBulbro,
-						firstPlayerWeapon
-							? [
-									firstPlayerWeapon,
-								]
-							: [],
+						firstLoadout.weapons,
 					),
 					createPlayer(
 						v4(),
 						secondBulbro,
-						secondPlayerWeapon
-							? [
-									secondPlayerWeapon,
-								]
-							: [],
+						secondLoadout.weapons,
 					),
 				],
 				[
@@ -121,6 +115,7 @@ export function SetupLocalCoOp() {
 				</CardHeader>
 				<CardContent className="grid gap-6">
 					<form
+						id="local-coop-setup"
 						onSubmit={
 							onSubmit
 						}
@@ -140,15 +135,15 @@ export function SetupLocalCoOp() {
 									}
 								/>
 								<div className="mt-4">
-									<WeaponSelector
-										selectedWeapon={
-											firstPlayerWeapon
+									<StartingWeaponSelector
+										bulbro={
+											firstBulbro
 										}
-										availableWeapons={
-											firstBulbro.availableWeapons
+										selections={
+											firstLoadout.selections
 										}
 										onChange={
-											setFirstPlayerWeapon
+											firstLoadout.selectWeapon
 										}
 									/>
 								</div>
@@ -167,15 +162,15 @@ export function SetupLocalCoOp() {
 									}
 								/>
 								<div className="mt-4">
-									<WeaponSelector
-										selectedWeapon={
-											secondPlayerWeapon
+									<StartingWeaponSelector
+										bulbro={
+											secondBulbro
 										}
-										availableWeapons={
-											secondBulbro.availableWeapons
+										selections={
+											secondLoadout.selections
 										}
 										onChange={
-											setSecondPlayerWeapon
+											secondLoadout.selectWeapon
 										}
 									/>
 								</div>
@@ -196,6 +191,13 @@ export function SetupLocalCoOp() {
 				<CardFooter>
 					<Button
 						type="submit"
+						form="local-coop-setup"
+						disabled={
+							!(
+								firstLoadout.isValid &&
+								secondLoadout.isValid
+							)
+						}
 						className="w-full"
 					>
 						{t(

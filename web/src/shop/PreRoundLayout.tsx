@@ -1,5 +1,6 @@
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import type { Bulbro } from "@/bulbro/BulbroCharacter";
+import { calculateStats } from "@/game-formulas";
 import { t } from "@/i18n";
 import {
 	PrevWaveStats,
@@ -165,7 +166,12 @@ export function PreRoundLayout({
 							}
 							maxSlots={
 								player.maxWeaponSlots ??
-								6
+								calculateStats(
+									player
+										.bulbro
+										.statBonuses,
+								)
+									.maxWeapons
 							}
 							onWeaponClick={
 								player.onWeaponClick
@@ -176,6 +182,18 @@ export function PreRoundLayout({
 
 				{/* Shop */}
 				<Shop
+					weaponsFull={
+						player
+							.weapons
+							.length >=
+						(player.maxWeaponSlots ??
+							calculateStats(
+								player
+									.bulbro
+									.statBonuses,
+							)
+								.maxWeapons)
+					}
 					items={
 						shopItems
 					}

@@ -3,6 +3,10 @@ import type { Weapon } from "../weapon";
 import type { FaceType } from "./sprites/FaceSprite";
 
 export interface SecondaryStats {
+	/** Required starting count; character bonuses are added to the default of 1. */
+	startingWeapons: number;
+	/** Weapon capacity; character bonuses are added to the default of 6. */
+	maxWeapons: number;
 	pickupRange: number;
 	knockback: number;
 	/** Explosion radius bonus of explosive weapons, in % */

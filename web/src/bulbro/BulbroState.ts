@@ -252,6 +252,27 @@ export class BulbroState
 	constructor(
 		props: BulbroStateProperties,
 	) {
+		if (
+			!Number.isSafeInteger(
+				props
+					.stats
+					.maxWeapons,
+			) ||
+			props
+				.stats
+				.maxWeapons <
+				0 ||
+			props
+				.weapons
+				.length >
+				props
+					.stats
+					.maxWeapons
+		) {
+			throw new Error(
+				"Weapon limit exceeded or invalid maximum weapon count",
+			);
+		}
 		this.#props =
 			props;
 	}

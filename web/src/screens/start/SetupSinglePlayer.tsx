@@ -8,7 +8,6 @@ import {
 	bgmEnabled,
 	useStartBgm,
 } from "@/audio";
-import type { Bulbro } from "@/bulbro";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { createMainControls } from "@/controls";
 import { startLocalGame } from "@/currentGameProcess";
@@ -23,6 +22,7 @@ import {
 } from "@/ui/Layout";
 import { useRouter } from "@/ui/routing";
 import { SplashBanner } from "@/ui/Splash";
+import { StartingWeaponSelector } from "@/ui/StartingWeaponSelector";
 import { Button } from "@/ui/shadcn/button";
 import {
 	Card,
@@ -30,30 +30,26 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import { WeaponSelector } from "@/ui/WeaponSelector";
-import type { Weapon } from "@/weapon";
+import { useStartingLoadout } from "./useStartingLoadout";
 
 export function SetupSinglePlayer() {
-	const [
-		firstBulbro,
-		changeFirstBulbro,
-	] =
-		useState<Bulbro>(
+	const loadout =
+		useStartingLoadout(
 			wellRoundedBulbro,
 		);
+	const {
+		bulbro:
+			firstBulbro,
+		selectBulbro:
+			changeFirstBulbro,
+	} =
+		loadout;
 	const [
 		selectedDifficulty,
 		selectDifficulty,
 	] =
 		useState<Difficulty>(
 			0,
-		);
-	const [
-		selectedWeapon,
-		selectWeapon,
-	] =
-		useState<Weapon | null>(
-			null,
 		);
 	const router =
 		useRouter();
@@ -65,6 +61,10 @@ export function SetupSinglePlayer() {
 			e: SubmitEvent,
 		) => {
 			e.preventDefault();
+			if (
+				!loadout.isValid
+			)
+				return;
 			startLocalGame(
 				[
 					firstBulbro,
@@ -75,11 +75,7 @@ export function SetupSinglePlayer() {
 						createPlayer(
 							v4(),
 							character,
-							selectedWeapon
-								? [
-										selectedWeapon,
-									]
-								: [],
+							loadout.weapons,
 						),
 				),
 				[
@@ -126,15 +122,15 @@ export function SetupSinglePlayer() {
 									id="weapons-select"
 									className="gap-3"
 								>
-									<WeaponSelector
-										selectedWeapon={
-											selectedWeapon
+									<StartingWeaponSelector
+										bulbro={
+											firstBulbro
 										}
-										availableWeapons={
-											firstBulbro.availableWeapons
+										selections={
+											loadout.selections
 										}
 										onChange={
-											selectWeapon
+											loadout.selectWeapon
 										}
 									/>
 								</div>
@@ -155,6 +151,9 @@ export function SetupSinglePlayer() {
 							<CardFooter className="flex gap-6">
 								<Button
 									type="submit"
+									disabled={
+										!loadout.isValid
+									}
 									className="w-full"
 								>
 									{t(

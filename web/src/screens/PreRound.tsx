@@ -402,10 +402,24 @@ export function PreRound() {
 		(
 			item: ShopItem,
 		) => {
+			const purchasingPlayer =
+				waveState.value.players.find(
+					(
+						candidate,
+					) =>
+						candidate.id ===
+						player?.id,
+				);
 			if (
-				!player ||
+				!purchasingPlayer ||
+				purchasingPlayer
+					.weapons
+					.length >=
+					purchasingPlayer
+						.stats
+						.maxWeapons ||
 				network?.isLocalReady ||
-				player.materialsAvailable <
+				purchasingPlayer.materialsAvailable <
 					item.price
 			)
 				return;
@@ -415,15 +429,15 @@ export function PreRound() {
 					Date.now(),
 				);
 
-			// Apply purchase event to deduct materials
-			waveState.value =
+			// Commit the cost and loadout together after both updates succeed.
+			const purchasedState =
 				updateState(
 					waveState.value,
 					withEventMeta(
 						{
 							type: "shopPurchased",
 							playerId:
-								player.id,
+								purchasingPlayer.id,
 							weaponId:
 								item
 									.weapon
@@ -438,14 +452,14 @@ export function PreRound() {
 					),
 				);
 
-			// Add weapon to player's loadout
+			// Add weapon to purchasingPlayer's loadout
 			const updatedPlayer =
-				waveState.value.players.find(
+				purchasedState.players.find(
 					(
 						p,
 					) =>
 						p.id ===
-						player.id,
+						purchasingPlayer.id,
 				);
 			const newWeapons =
 				[
@@ -458,11 +472,11 @@ export function PreRound() {
 
 			waveState.value =
 				selectWeaponsInState(
-					waveState.value,
+					purchasedState,
 					{
 						type: "select-weapons",
 						playerId:
-							player.id,
+							purchasingPlayer.id,
 						weapons:
 							newWeapons,
 						now,
@@ -552,6 +566,10 @@ export function PreRound() {
 				bulbro,
 				weapons:
 					ownedWeapons,
+				maxWeaponSlots:
+					player
+						.stats
+						.maxWeapons,
 				materials:
 					player.materialsAvailable,
 				onWeaponClick:

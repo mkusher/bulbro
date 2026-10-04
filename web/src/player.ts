@@ -1,3 +1,4 @@
+import { hasValidStartingWeapons } from "@bulbro/network-protocol";
 import type { Bulbro } from "./bulbro";
 import type { Weapon } from "./weapon";
 
@@ -6,6 +7,22 @@ export function createPlayer(
 	bulbro: Bulbro,
 	weapons: Weapon[] = [],
 ): Player {
+	if (
+		!hasValidStartingWeapons(
+			{
+				...bulbro,
+				weapons:
+					[
+						...bulbro.weapons,
+						...weapons,
+					],
+			},
+		)
+	) {
+		throw new Error(
+			"Select exactly the required number of starting weapons within the weapon limit.",
+		);
+	}
 	return {
 		id,
 		bulbro:

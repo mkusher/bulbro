@@ -24,6 +24,7 @@ export interface ShopProps {
 	rerollPrice?: number;
 	/** Locks purchases and re-rolls, e.g. after the player is ready in an online game */
 	disabled?: boolean;
+	weaponsFull?: boolean;
 }
 
 export function Shop({
@@ -33,6 +34,7 @@ export function Shop({
 	onReroll,
 	rerollPrice,
 	disabled = false,
+	weaponsFull = false,
 }: ShopProps) {
 	const canAfford =
 		(
@@ -47,6 +49,7 @@ export function Shop({
 		) => {
 			if (
 				!disabled &&
+				!weaponsFull &&
 				canAfford(
 					item.price,
 				)
@@ -157,26 +160,29 @@ export function Shop({
 											}
 											disabled={
 												disabled ||
+												weaponsFull ||
 												!affordable
 											}
 											className="w-full h-5 text-[8px] px-1 py-0"
 											size="sm"
 										>
-											{affordable
-												? t(
-														"shop.price",
-														{
-															price:
-																item.price,
-														},
-													)
-												: t(
-														"shop.locked",
-														{
-															price:
-																item.price,
-														},
-													)}
+											{weaponsFull
+												? "Weapon limit reached"
+												: affordable
+													? t(
+															"shop.price",
+															{
+																price:
+																	item.price,
+															},
+														)
+													: t(
+															"shop.locked",
+															{
+																price:
+																	item.price,
+															},
+														)}
 										</Button>
 									</CardContent>
 								</Card>
