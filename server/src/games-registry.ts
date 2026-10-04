@@ -1,81 +1,14 @@
-import { type } from "arktype";
+import type {
+	Lobby,
+	Player,
+	ReadyPlayer,
+} from "@bulbro/network-protocol";
 
-export const Player =
-	type(
-		{
-			id: "string",
-			username:
-				"string",
-			"status?":
-				"string",
-		},
-	);
-
-export const Weapon =
-	type(
-		{
-			id: "string",
-			name: "string",
-			classes:
-				"string[]",
-			statsBonus:
-				"Record<string, string | number | boolean>",
-			shotSpeed:
-				"number",
-		},
-	);
-
-export const Bulbro =
-	type(
-		{
-			id: "string",
-			name: "string",
-			statBonuses:
-				"Record<string, string | number | boolean>",
-			style:
-				type(
-					{
-						faceType:
-							"string",
-						wearingItems:
-							"unknown[]",
-					},
-				),
-			weapons:
-				Weapon.array(),
-		},
-	);
-
-export const ReadyPlayer =
-	type(
-		{
-			id: "string",
-			bulbro:
-				Bulbro,
-		},
-	);
-
-export const Lobby =
-	type(
-		{
-			id: "string",
-			hostId:
-				"string",
-			players:
-				Player.array(),
-			readyPlayers:
-				ReadyPlayer.array(),
-			createdAt:
-				"number",
-		},
-	);
-
-export type Player =
-	typeof Player.infer;
-export type ReadyPlayer =
-	typeof ReadyPlayer.infer;
-export type Lobby =
-	typeof Lobby.infer;
+export {
+	Lobby,
+	Player,
+	ReadyPlayer,
+} from "@bulbro/network-protocol";
 
 export function canStartLobby(
 	lobby: Lobby,

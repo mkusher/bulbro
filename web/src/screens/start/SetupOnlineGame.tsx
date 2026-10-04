@@ -141,22 +141,36 @@ export function SetupOnlineGame() {
 		);
 	}
 	const onReady =
-		(
+		async (
 			e: SubmitEvent,
 		) => {
 			e.preventDefault();
-			markAsReady(
-				lobby.id,
-				createPlayer(
-					iam.id,
-					firstBulbro,
-					selectedWeapon
-						? [
-								selectedWeapon,
-							]
-						: [],
-				),
+			setStartError(
+				"",
 			);
+			try {
+				await markAsReady(
+					lobby.id,
+					createPlayer(
+						iam.id,
+						firstBulbro,
+						selectedWeapon
+							? [
+									selectedWeapon,
+								]
+							: [],
+					),
+				);
+			} catch (error) {
+				setStartError(
+					error instanceof
+						Error
+						? error.message
+						: String(
+								error,
+							),
+				);
+			}
 		};
 	const onStart =
 		(
