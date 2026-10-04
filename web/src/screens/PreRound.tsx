@@ -1,3 +1,4 @@
+import { bulbroName } from "@/i18n/game";
 import { useState } from "preact/hooks";
 import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
@@ -136,10 +137,11 @@ function useNetworkReadiness():
 							localPlayerId,
 						bulbroName:
 							bulbro &&
-							findBulbroById(
-								bulbro.characterId,
-							)
-								.name,
+							bulbroName(
+								findBulbroById(
+									bulbro.characterId,
+								),
+							),
 						level:
 							bulbro?.level,
 					};
@@ -317,7 +319,7 @@ function LevelUp({
 			}
 			playerName={
 				isLocalCoOp
-					? `P${waveState.value.players.indexOf(player) + 1}: ${findBulbroById(player.characterId).name}`
+					? `P${waveState.value.players.indexOf(player) + 1}: ${bulbroName(findBulbroById(player.characterId))}`
 					: undefined
 			}
 		/>

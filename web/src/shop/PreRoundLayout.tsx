@@ -109,18 +109,21 @@ export function PreRoundLayout({
 				<Card className="bg-white border p-4">
 					<div className="text-center">
 						<h1 className="text-2xl font-bold mb-1">
-							Prepare
-							for
-							Wave{" "}
-							{
-								nextWave
-							}
+							{t(
+								"preround.prepareForWave",
+								{
+									wave: nextWave,
+								},
+							)}
 						</h1>
 						<p className="text-sm text-muted-foreground">
-							Materials:{" "}
-							{
-								player.materials
-							}
+							{t(
+								"preround.materials",
+								{
+									count:
+										player.materials,
+								},
+							)}
 						</p>
 					</div>
 				</Card>

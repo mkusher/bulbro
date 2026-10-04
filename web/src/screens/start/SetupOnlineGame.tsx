@@ -1,3 +1,4 @@
+import { bulbroName } from "@/i18n/game";
 import { computed } from "@preact/signals";
 import { ShareIcon } from "lucide-react";
 import { useState } from "preact/hooks";
@@ -276,10 +277,13 @@ export function SetupOnlineGame() {
 					isLocal,
 					bulbroName:
 						isLocal
-							? firstBulbro.name
-							: readyPlayer
-									?.bulbro
-									.name,
+							? bulbroName(
+									firstBulbro,
+								)
+							: readyPlayer &&
+								bulbroName(
+									readyPlayer.bulbro,
+								),
 				};
 			},
 		);

@@ -345,7 +345,9 @@ export function Shop({
 											size="sm"
 										>
 											{blocked
-												? "Weapon limit reached"
+												? t(
+														"shop.weaponLimitReached",
+													)
 												: affordable
 													? t(
 															"shop.price",

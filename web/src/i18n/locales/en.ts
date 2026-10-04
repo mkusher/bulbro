@@ -541,4 +541,57 @@ export default {
 
 	"items.count":
 		"{count, plural, =0 {No items} one {# item} other {# items}}",
+
+	"preround.materials":
+		"Materials: {count}",
+	"shop.weaponLimitReached":
+		"Weapon limit reached",
+	"bulbro.hp":
+		"HP",
+	"bulbro.baseSpeed":
+		"Base",
+	"bulbro.knockedOut":
+		"KO",
+	"bulbro.lowHp":
+		"Low HP",
+	"bulbro.level":
+		"Lvl",
+	"bulbro.xp":
+		"XP",
+	"bulbro.bonuses":
+		"Bonuses:",
+	"bulbro.items":
+		"Items:",
+	"hud.wave":
+		"Wave: {wave}",
+	"hud.level":
+		"Lvl {level}",
+	"game.starting":
+		"Starting...",
+	"common.loading":
+		"Loading...",
+	"lobby.joining":
+		"Joining…",
+	"lobby.joinFailed":
+		"Could not join lobby",
+	"character.startingWeaponsCount":
+		"Starting weapons: {selected} / {total}. Maximum weapons: {max}.",
+	"character.weaponNumber":
+		"Weapon {number}",
+	"character.name.berserker":
+		"Berserker",
+	"character.name.cyborg":
+		"Cyborg",
+	"character.name.evil":
+		"Evil",
+	"character.name.grandpa":
+		"Grandpa",
+	"character.name.king":
+		"King",
+	"character.name.medic":
+		"Medic",
+	"character.name.vampire":
+		"Vampire",
+	"character.name.well-rounded":
+		"Well Rounded",
 } as const;

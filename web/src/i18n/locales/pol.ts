@@ -543,6 +543,59 @@ export default {
 
 	"items.count":
 		"{count, plural, =0 {Brak przedmiotów} one {# przedmiot} few {# przedmioty} other {# przedmiotów}}",
+
+	"preround.materials":
+		"Materiały: {count}",
+	"shop.weaponLimitReached":
+		"Osiągnięto limit broni",
+	"bulbro.hp":
+		"PŻ",
+	"bulbro.baseSpeed":
+		"Bazowa",
+	"bulbro.knockedOut":
+		"KO",
+	"bulbro.lowHp":
+		"Mało PŻ",
+	"bulbro.level":
+		"Poz.",
+	"bulbro.xp":
+		"PD",
+	"bulbro.bonuses":
+		"Bonusy:",
+	"bulbro.items":
+		"Przedmioty:",
+	"hud.wave":
+		"Fala: {wave}",
+	"hud.level":
+		"Poz. {level}",
+	"game.starting":
+		"Uruchamianie...",
+	"common.loading":
+		"Ładowanie...",
+	"lobby.joining":
+		"Dołączanie…",
+	"lobby.joinFailed":
+		"Nie udało się dołączyć do lobby",
+	"character.startingWeaponsCount":
+		"Bronie startowe: {selected} / {total}. Maksymalnie broni: {max}.",
+	"character.weaponNumber":
+		"Broń {number}",
+	"character.name.berserker":
+		"Berserker",
+	"character.name.cyborg":
+		"Cyborg",
+	"character.name.evil":
+		"Złoczyńca",
+	"character.name.grandpa":
+		"Dziadek",
+	"character.name.king":
+		"Król",
+	"character.name.medic":
+		"Medyk",
+	"character.name.vampire":
+		"Wampir",
+	"character.name.well-rounded":
+		"Wszechstronny",
 } as const satisfies Record<
 	keyof typeof en,
 	string

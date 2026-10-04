@@ -543,6 +543,59 @@ export default {
 
 	"items.count":
 		"{count, plural, =0 {Няма прадметаў} one {# прадмет} few {# прадметы} other {# прадметаў}}",
+
+	"preround.materials":
+		"Матэрыялы: {count}",
+	"shop.weaponLimitReached":
+		"Дасягнуты ліміт зброі",
+	"bulbro.hp":
+		"ЗД",
+	"bulbro.baseSpeed":
+		"Базавая",
+	"bulbro.knockedOut":
+		"Накаўт",
+	"bulbro.lowHp":
+		"Мала ЗД",
+	"bulbro.level":
+		"Узр.",
+	"bulbro.xp":
+		"Досвед",
+	"bulbro.bonuses":
+		"Бонусы:",
+	"bulbro.items":
+		"Прадметы:",
+	"hud.wave":
+		"Хваля: {wave}",
+	"hud.level":
+		"Узр. {level}",
+	"game.starting":
+		"Запуск...",
+	"common.loading":
+		"Загрузка...",
+	"lobby.joining":
+		"Далучэнне…",
+	"lobby.joinFailed":
+		"Не ўдалося далучыцца да лобі",
+	"character.startingWeaponsCount":
+		"Пачатковая зброя: {selected} / {total}. Максімум зброі: {max}.",
+	"character.weaponNumber":
+		"Зброя {number}",
+	"character.name.berserker":
+		"Берсерк",
+	"character.name.cyborg":
+		"Кібарг",
+	"character.name.evil":
+		"Злыдзень",
+	"character.name.grandpa":
+		"Дзядуля",
+	"character.name.king":
+		"Кароль",
+	"character.name.medic":
+		"Медык",
+	"character.name.vampire":
+		"Вампір",
+	"character.name.well-rounded":
+		"Універсал",
 } as const satisfies Record<
 	keyof typeof en,
 	string

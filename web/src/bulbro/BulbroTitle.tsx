@@ -1,3 +1,5 @@
+import { bulbroName } from "@/i18n/game";
+import { t } from "@/i18n";
 import { calculateStats } from "../game-formulas";
 import type { Bulbro } from "./BulbroCharacter";
 import type { BulbroState } from "./BulbroState";
@@ -48,12 +50,15 @@ export function BulbroTitle({
 		>
 			<div className="flex-1">
 				<div className="font-medium text-sm">
-					{
-						bulbro.name
-					}
+					{bulbroName(
+						bulbro,
+					)}
 				</div>
 				<div className="text-xs opacity-75">
-					HP:{" "}
+					{t(
+						"bulbro.hp",
+					)}
+					:{" "}
 					{
 						calculateStats(
 							bulbro.statBonuses,
@@ -61,12 +66,17 @@ export function BulbroTitle({
 							.maxHp
 					}{" "}
 					•
-					Speed:{" "}
+					{t(
+						"stat.speed",
+					)}
+					:{" "}
 					{bulbro
 						.statBonuses
 						.speed
 						? `${bulbro.statBonuses.speed > 0 ? "+" : ""}${bulbro.statBonuses.speed}%`
-						: "Base"}
+						: t(
+								"bulbro.baseSpeed",
+							)}
 				</div>
 			</div>
 		</div>
@@ -100,13 +110,15 @@ export function BulbroStateTitle({
 		>
 			<div className="flex-1">
 				<div className="font-medium text-sm flex items-center gap-2">
-					{
-						bulbro.name
-					}
+					{bulbroName(
+						bulbro,
+					)}
 					{!isAlive && (
 						<span className="text-red-600 text-xs">
-							💀
-							KO
+							💀{" "}
+							{t(
+								"bulbro.knockedOut",
+							)}
 						</span>
 					)}
 					{isAlive &&
@@ -116,19 +128,25 @@ export function BulbroStateTitle({
 								.maxHp *
 								0.3 && (
 							<span className="text-orange-600 text-xs">
-								⚠️
-								Low
-								HP
+								⚠️{" "}
+								{t(
+									"bulbro.lowHp",
+								)}
 							</span>
 						)}
 				</div>
 				<div className="text-xs opacity-75">
-					Lvl{" "}
+					{t(
+						"bulbro.level",
+					)}{" "}
 					{
 						bulbroState.level
 					}{" "}
 					•
-					HP:{" "}
+					{t(
+						"bulbro.hp",
+					)}
+					:{" "}
 					{
 						bulbroState.healthPoints
 					}
@@ -139,7 +157,10 @@ export function BulbroStateTitle({
 							.maxHp
 					}{" "}
 					•
-					XP:{" "}
+					{t(
+						"bulbro.xp",
+					)}
+					:{" "}
 					{
 						bulbroState.totalExperience
 					}
