@@ -12,33 +12,6 @@ const assetDefinitions =
 				)
 					.href,
 			},
-		weaponsx05:
-			{
-				path: new URL(
-					"./assets/weapons-x0.5.png",
-					import.meta
-						.url,
-				)
-					.href,
-			},
-		weaponsx025:
-			{
-				path: new URL(
-					"./assets/weapons-x0.25.png",
-					import.meta
-						.url,
-				)
-					.href,
-			},
-		weaponsx0125:
-			{
-				path: new URL(
-					"./assets/weapons-x0.125.png",
-					import.meta
-						.url,
-				)
-					.href,
-			},
 		bulbroHeroes:
 			{
 				path: new URL(

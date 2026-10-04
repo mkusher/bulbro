@@ -229,12 +229,6 @@ export const weaponTypes =
 		weapons,
 	) as WeaponType[];
 
-type Scaling =
-	| 0.125
-	| 0.25
-	| 0.5
-	| 1;
-
 /**
  * Manages a weapon sprite graphic.
  *
@@ -254,11 +248,11 @@ export class WeaponSprite {
 		new PIXI.Sprite();
 	#debugSprite?: DebugSprite;
 	#weaponType: WeaponType;
-	#scaling: Scaling;
+	#scaling: number;
 
 	constructor(
 		weaponType: WeaponType,
-		scaling: Scaling = 0.5,
+		scaling: number = 0.5,
 		debug: boolean = false,
 	) {
 		this.#scaling =
@@ -314,23 +308,9 @@ export class WeaponSprite {
 	}
 
 	async init() {
-		const assetName =
-			this
-				.#scaling ===
-			1
-				? "weapons"
-				: this
-							.#scaling ===
-						0.5
-					? "weaponsx05"
-					: this
-								.#scaling ===
-							0.25
-						? "weaponsx025"
-						: "weaponsx0125";
 		const fullTexture =
 			await Assets.get(
-				assetName,
+				"weapons",
 				{
 					scaleMode:
 						"linear",
@@ -348,30 +328,26 @@ export class WeaponSprite {
 						new PIXI.Rectangle(
 							weaponConfig
 								.position
-								.x *
-								this
-									.#scaling,
+								.x,
 							weaponConfig
 								.position
-								.y *
-								this
-									.#scaling,
+								.y,
 							weaponConfig
 								.size
-								.width *
-								this
-									.#scaling,
+								.width,
 							weaponConfig
 								.size
-								.height *
-								this
-									.#scaling,
+								.height,
 						),
 				},
 			);
 
 		this.#sprite.texture =
 			weaponTexture;
+		this.#sprite.scale.set(
+			this
+				.#scaling,
+		);
 		this.#sprite.anchor.set(
 			0.5,
 		);

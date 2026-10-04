@@ -2,8 +2,143 @@ import {
 	describe,
 	expect,
 	it,
+	spyOn,
 } from "bun:test";
 import * as PIXI from "pixi.js";
+import { Assets } from "@/Assets";
+import { WeaponSprite } from "./WeaponSprite";
+
+it("uses full-resolution frames while preserving weapon size and position at every scale", async () => {
+	const source =
+		new PIXI.TextureSource(
+			{
+				width: 1024,
+				height: 976,
+			},
+		);
+	const getAsset =
+		spyOn(
+			Assets,
+			"get",
+		).mockResolvedValue(
+			source,
+		);
+	try {
+		for (const scale of [
+			0.125,
+			0.25,
+			0.3,
+			0.5,
+			1,
+		]) {
+			const weapon =
+				new WeaponSprite(
+					"bazooka",
+					scale,
+				);
+			const parent =
+				new PIXI.Container();
+			await weapon.init();
+			weapon.appendTo(
+				parent,
+			);
+			weapon.updatePosition(
+				100,
+				50,
+			);
+			for (const direction of [
+				{
+					x: 1,
+					y: 0,
+				},
+				{
+					x:
+						-1,
+					y: 0,
+				},
+			]) {
+				weapon.aim(
+					direction,
+				);
+				const bounds =
+					parent.getBounds();
+				expect(
+					bounds.width,
+				).toBeCloseTo(
+					360 *
+						scale,
+				);
+				expect(
+					bounds.height,
+				).toBeCloseTo(
+					180 *
+						scale,
+				);
+				expect(
+					bounds.x +
+						bounds.width /
+							2,
+				).toBeCloseTo(
+					100,
+				);
+				expect(
+					bounds.y +
+						bounds.height /
+							2,
+				).toBeCloseTo(
+					50,
+				);
+			}
+			const sprite =
+				parent
+					.children[0]
+					?.children[0]
+					?.children[0] as PIXI.Sprite;
+			expect(
+				sprite
+					.texture
+					.source,
+			).toBe(
+				source,
+			);
+			expect(
+				sprite
+					.texture
+					.frame,
+			).toEqual(
+				new PIXI.Rectangle(
+					16,
+					784,
+					360,
+					180,
+				),
+			);
+			parent.destroy(
+				{
+					children: true,
+				},
+			);
+		}
+		expect(
+			getAsset,
+		).toHaveBeenCalledTimes(
+			5,
+		);
+		for (const [
+			name,
+		] of getAsset
+			.mock
+			.calls)
+			expect(
+				name,
+			).toBe(
+				"weapons",
+			);
+	} finally {
+		getAsset.mockRestore();
+		source.destroy();
+	}
+});
 
 /**
  * These tests verify that WeaponSprite's position remains stable during rotation.
