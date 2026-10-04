@@ -1,4 +1,161 @@
 export default {
+	"characterStats.title":
+		"Character Stats",
+	"characterStats.current":
+		"Current Stats",
+	"characterStats.core":
+		"Core Stats",
+	"characterStats.secondary":
+		"Secondary Stats",
+	"characterStats.health":
+		"Health",
+	"characterStats.level":
+		"Level",
+	"characterStats.experience":
+		"Experience",
+	"stat.maxHp":
+		"Max HP",
+	"stat.hpRegeneration":
+		"HP Regeneration",
+	"stat.lifeSteal":
+		"Life Steal",
+	"stat.damage":
+		"Damage",
+	"stat.meleeDamage":
+		"Melee Damage",
+	"stat.rangedDamage":
+		"Ranged Damage",
+	"stat.elementalDamage":
+		"Elemental Damage",
+	"stat.attackSpeed":
+		"Attack Speed",
+	"stat.critChance":
+		"Critical Chance",
+	"stat.engineering":
+		"Engineering",
+	"stat.range":
+		"Range",
+	"stat.armor":
+		"Armor",
+	"stat.dodge":
+		"Dodge",
+	"stat.speed":
+		"Speed",
+	"stat.luck":
+		"Luck",
+	"stat.harvesting":
+		"Harvesting",
+	"stat.pickupRange":
+		"Pickup Range",
+	"stat.knockback":
+		"Knockback",
+	"stat.cooldown":
+		"Cooldown",
+	"stat.critMultiplier":
+		"Critical Multiplier",
+	"upgrade.heart":
+		"Heart",
+	"upgrade.lungs":
+		"Lungs",
+	"upgrade.teeth":
+		"Teeth",
+	"upgrade.triceps":
+		"Triceps",
+	"upgrade.forearms":
+		"Forearms",
+	"upgrade.shoulders":
+		"Shoulders",
+	"upgrade.brain":
+		"Brain",
+	"upgrade.reflexes":
+		"Reflexes",
+	"upgrade.fingers":
+		"Fingers",
+	"upgrade.eyes":
+		"Eyes",
+	"upgrade.chest":
+		"Chest",
+	"upgrade.back":
+		"Back",
+	"upgrade.legs":
+		"Legs",
+	"upgrade.nose":
+		"Nose",
+	"upgrade.hands":
+		"Hands",
+	"weapon.selectTitle":
+		"Select Weapon",
+	"weapon.deselectHint":
+		"(click to deselect)",
+	"weapon.moreStats":
+		"+{count} more…",
+	"common.selectNamed":
+		"Select {name}",
+	"weapon.name.hand":
+		"Hand",
+	"weapon.name.fist":
+		"Fist",
+	"weapon.name.pistol":
+		"Pistol",
+	"weapon.name.smg":
+		"SMG",
+	"weapon.name.ak47":
+		"AK-47",
+	"weapon.name.doubleBarrelShotgun":
+		"Double Barrel Shotgun",
+	"weapon.name.knife":
+		"Knife",
+	"weapon.name.sword":
+		"Sword",
+	"weapon.name.laserGun":
+		"Laser Gun",
+	"weapon.name.brick":
+		"Brick",
+	"weapon.name.flareGun":
+		"Flare Gun",
+	"weapon.name.grenade":
+		"Grenade",
+	"weapon.name.machineGun":
+		"Machine Gun",
+	"weapon.name.bazooka":
+		"Bazooka",
+	"weapon.name.orcGun":
+		"Orc Very Slow Gun",
+	"weapon.name.enemyFist":
+		"Enemy Fist",
+	"weapon.name.aphidGun":
+		"Ranged Aphid Gun",
+	"weapon.class.blade":
+		"Blade",
+	"weapon.class.blunt":
+		"Blunt",
+	"weapon.class.elemental":
+		"Elemental",
+	"weapon.class.explosive":
+		"Explosive",
+	"weapon.class.gun":
+		"Gun",
+	"weapon.class.heavy":
+		"Heavy",
+	"weapon.class.precise":
+		"Precise",
+	"weapon.class.support":
+		"Support",
+	"weapon.class.tool":
+		"Tool",
+	"weapon.class.unarmed":
+		"Unarmed",
+	"weapon.rarity.common":
+		"Common",
+	"weapon.rarity.uncommon":
+		"Uncommon",
+	"weapon.rarity.rare":
+		"Rare",
+	"weapon.rarity.exceptional":
+		"Exceptional",
+	"weapon.rarity.legendary":
+		"Legendary",
+
 	"start.tab.local":
 		"Local",
 	"start.tab.online":

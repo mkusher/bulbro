@@ -1,4 +1,163 @@
+import type en from "./en";
+
 export default {
+	"characterStats.title":
+		"Statystyki postaci",
+	"characterStats.current":
+		"Aktualne statystyki",
+	"characterStats.core":
+		"Główne statystyki",
+	"characterStats.secondary":
+		"Dodatkowe statystyki",
+	"characterStats.health":
+		"Zdrowie",
+	"characterStats.level":
+		"Poziom",
+	"characterStats.experience":
+		"Doświadczenie",
+	"stat.maxHp":
+		"Maks. zdrowie",
+	"stat.hpRegeneration":
+		"Regeneracja zdrowia",
+	"stat.lifeSteal":
+		"Kradzież życia",
+	"stat.damage":
+		"Obrażenia",
+	"stat.meleeDamage":
+		"Obrażenia w zwarciu",
+	"stat.rangedDamage":
+		"Obrażenia dystansowe",
+	"stat.elementalDamage":
+		"Obrażenia od żywiołów",
+	"stat.attackSpeed":
+		"Szybkość ataku",
+	"stat.critChance":
+		"Szansa na trafienie krytyczne",
+	"stat.engineering":
+		"Inżynieria",
+	"stat.range":
+		"Zasięg",
+	"stat.armor":
+		"Pancerz",
+	"stat.dodge":
+		"Unik",
+	"stat.speed":
+		"Prędkość",
+	"stat.luck":
+		"Szczęście",
+	"stat.harvesting":
+		"Zbiory",
+	"stat.pickupRange":
+		"Zasięg zbierania",
+	"stat.knockback":
+		"Odrzut",
+	"stat.cooldown":
+		"Czas odnowienia",
+	"stat.critMultiplier":
+		"Mnożnik obrażeń krytycznych",
+	"upgrade.heart":
+		"Serce",
+	"upgrade.lungs":
+		"Płuca",
+	"upgrade.teeth":
+		"Zęby",
+	"upgrade.triceps":
+		"Triceps",
+	"upgrade.forearms":
+		"Przedramiona",
+	"upgrade.shoulders":
+		"Barki",
+	"upgrade.brain":
+		"Mózg",
+	"upgrade.reflexes":
+		"Refleks",
+	"upgrade.fingers":
+		"Palce",
+	"upgrade.eyes":
+		"Oczy",
+	"upgrade.chest":
+		"Klatka piersiowa",
+	"upgrade.back":
+		"Plecy",
+	"upgrade.legs":
+		"Nogi",
+	"upgrade.nose":
+		"Nos",
+	"upgrade.hands":
+		"Dłonie",
+	"weapon.selectTitle":
+		"Wybierz broń",
+	"weapon.deselectHint":
+		"(kliknij, aby odznaczyć)",
+	"weapon.moreStats":
+		"Jeszcze +{count}…",
+	"common.selectNamed":
+		"Wybierz: {name}",
+	"weapon.name.hand":
+		"Dłoń",
+	"weapon.name.fist":
+		"Pięść",
+	"weapon.name.pistol":
+		"Pistolet",
+	"weapon.name.smg":
+		"Pistolet maszynowy",
+	"weapon.name.ak47":
+		"AK-47",
+	"weapon.name.doubleBarrelShotgun":
+		"Dubeltówka",
+	"weapon.name.knife":
+		"Nóż",
+	"weapon.name.sword":
+		"Miecz",
+	"weapon.name.laserGun":
+		"Broń laserowa",
+	"weapon.name.brick":
+		"Cegła",
+	"weapon.name.flareGun":
+		"Pistolet sygnałowy",
+	"weapon.name.grenade":
+		"Granat",
+	"weapon.name.machineGun":
+		"Karabin maszynowy",
+	"weapon.name.bazooka":
+		"Bazooka",
+	"weapon.name.orcGun":
+		"Bardzo wolna broń orka",
+	"weapon.name.enemyFist":
+		"Pięść wroga",
+	"weapon.name.aphidGun":
+		"Broń dystansowa mszycy",
+	"weapon.class.blade":
+		"Ostrze",
+	"weapon.class.blunt":
+		"Obuchowa",
+	"weapon.class.elemental":
+		"Żywioły",
+	"weapon.class.explosive":
+		"Wybuchowa",
+	"weapon.class.gun":
+		"Palna",
+	"weapon.class.heavy":
+		"Ciężka",
+	"weapon.class.precise":
+		"Precyzyjna",
+	"weapon.class.support":
+		"Wsparcie",
+	"weapon.class.tool":
+		"Narzędzie",
+	"weapon.class.unarmed":
+		"Bez broni",
+	"weapon.rarity.common":
+		"Zwykła",
+	"weapon.rarity.uncommon":
+		"Niezwykła",
+	"weapon.rarity.rare":
+		"Rzadka",
+	"weapon.rarity.exceptional":
+		"Wyjątkowa",
+	"weapon.rarity.legendary":
+		"Legendarna",
+
 	"start.tab.local":
 		"Lokalna",
 	"start.tab.online":
@@ -202,4 +361,7 @@ export default {
 
 	"items.count":
 		"{count, plural, =0 {Brak przedmiotów} one {# przedmiot} few {# przedmioty} other {# przedmiotów}}",
-} as const;
+} as const satisfies Record<
+	keyof typeof en,
+	string
+>;

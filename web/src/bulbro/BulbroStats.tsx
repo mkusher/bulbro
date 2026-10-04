@@ -1,3 +1,6 @@
+import { t } from "@/i18n";
+import { formatStatName } from "@/i18n/game";
+export { formatStatName } from "@/i18n/game";
 import {
 	calculateStats,
 	percentageStats,
@@ -36,15 +39,17 @@ export function BulbroStats({
 			className={`p-3 border rounded-md ${className || ""}`}
 		>
 			<div className="text-sm font-medium mb-3">
-				Character
-				Stats
+				{t(
+					"characterStats.title",
+				)}
 			</div>
 
 			{/* Main Stats */}
 			<div className="mb-3">
 				<div className="text-xs font-medium mb-2 text-muted-foreground">
-					Core
-					Stats
+					{t(
+						"characterStats.core",
+					)}
 				</div>
 				<div className="grid grid-cols-2 gap-2 text-xs">
 					{mainStatEntries.map(
@@ -81,8 +86,9 @@ export function BulbroStats({
 				0 && (
 				<div className="pt-2 border-t">
 					<div className="text-xs font-medium mb-2 text-muted-foreground">
-						Secondary
-						Stats
+						{t(
+							"characterStats.secondary",
+						)}
 					</div>
 					<div className="grid grid-cols-2 gap-2 text-xs">
 						{secondaryStatEntries.map(
@@ -119,7 +125,10 @@ export function BulbroStats({
 			<div className="mt-3 pt-2 border-t text-xs">
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">
-						Weapons:
+						{t(
+							"shop.weapons",
+						)}
+						:
 					</span>
 					<span className="font-medium">
 						{
@@ -160,15 +169,19 @@ export function BulbroStateStats({
 			className={`p-3 border rounded-md ${className || ""}`}
 		>
 			<div className="text-sm font-medium mb-3">
-				Current
-				Stats
+				{t(
+					"characterStats.current",
+				)}
 			</div>
 
 			{/* Health */}
 			<div className="mb-3 p-2 bg-muted/50 rounded">
 				<div className="flex justify-between text-sm">
 					<span>
-						Health:
+						{t(
+							"characterStats.health",
+						)}
+						:
 					</span>
 					<span className="font-medium">
 						{
@@ -185,8 +198,9 @@ export function BulbroStateStats({
 			{/* Main Stats */}
 			<div className="mb-3">
 				<div className="text-xs font-medium mb-2 text-muted-foreground">
-					Core
-					Stats
+					{t(
+						"characterStats.core",
+					)}
 				</div>
 				<div className="grid grid-cols-2 gap-2 text-xs">
 					{mainStatEntries.map(
@@ -223,8 +237,9 @@ export function BulbroStateStats({
 				0 && (
 				<div className="pt-2 border-t">
 					<div className="text-xs font-medium mb-2 text-muted-foreground">
-						Secondary
-						Stats
+						{t(
+							"characterStats.secondary",
+						)}
 					</div>
 					<div className="grid grid-cols-2 gap-2 text-xs">
 						{secondaryStatEntries.map(
@@ -261,7 +276,10 @@ export function BulbroStateStats({
 			<div className="mt-3 pt-2 border-t text-xs space-y-1">
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">
-						Level:
+						{t(
+							"characterStats.level",
+						)}
+						:
 					</span>
 					<span className="font-medium">
 						{
@@ -271,7 +289,10 @@ export function BulbroStateStats({
 				</div>
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">
-						Experience:
+						{t(
+							"characterStats.experience",
+						)}
+						:
 					</span>
 					<span className="font-medium">
 						{
@@ -281,7 +302,10 @@ export function BulbroStateStats({
 				</div>
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">
-						Materials:
+						{t(
+							"stats.materials",
+						)}
+						:
 					</span>
 					<span className="font-medium">
 						{
@@ -301,6 +325,7 @@ function getMainStatEntries(
 		[
 			"maxHp",
 			"hpRegeneration",
+			"lifeSteal",
 			"damage",
 			"meleeDamage",
 			"rangedDamage",
@@ -372,24 +397,6 @@ function getSecondaryStatEntries(
 				value !==
 					0,
 		);
-}
-
-export function formatStatName(
-	key: string,
-): string {
-	return key
-		.replace(
-			/([A-Z])/g,
-			" $1",
-		)
-		.replace(
-			/^./,
-			(
-				str,
-			) =>
-				str.toUpperCase(),
-		)
-		.trim();
 }
 
 /** Stats shown as absolute values even though their points are percentages. */

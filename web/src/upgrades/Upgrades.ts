@@ -1,3 +1,4 @@
+import type { MessageKey } from "@/i18n";
 import type { MainStats } from "@/bulbro/BulbroCharacter";
 import type { StatBonus } from "@/game-formulas";
 import { seededRng } from "@/random";
@@ -21,8 +22,8 @@ export const upgradeTiers: UpgradeTier[] =
 export type UpgradeDefinition =
 	{
 		id: string;
-		/** Brotato name of the upgrade, e.g. "Heart" */
-		name: string;
+		/** Localized display name, resolved when rendered. */
+		nameKey: MessageKey;
 		stat: keyof MainStats;
 		/** Stat points for tiers I, II, III and IV */
 		values: Record<
@@ -39,7 +40,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 	[
 		{
 			id: "heart",
-			name: "Heart",
+			nameKey:
+				"upgrade.heart",
 			stat: "maxHp",
 			values:
 				{
@@ -51,7 +53,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "lungs",
-			name: "Lungs",
+			nameKey:
+				"upgrade.lungs",
 			stat: "hpRegeneration",
 			values:
 				{
@@ -63,7 +66,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "teeth",
-			name: "Teeth",
+			nameKey:
+				"upgrade.teeth",
 			stat: "lifeSteal",
 			values:
 				{
@@ -75,7 +79,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "triceps",
-			name: "Triceps",
+			nameKey:
+				"upgrade.triceps",
 			stat: "damage",
 			values:
 				{
@@ -87,7 +92,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "forearms",
-			name: "Forearms",
+			nameKey:
+				"upgrade.forearms",
 			stat: "meleeDamage",
 			values:
 				{
@@ -99,7 +105,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "shoulders",
-			name: "Shoulders",
+			nameKey:
+				"upgrade.shoulders",
 			stat: "rangedDamage",
 			values:
 				{
@@ -111,7 +118,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "brain",
-			name: "Brain",
+			nameKey:
+				"upgrade.brain",
 			stat: "elementalDamage",
 			values:
 				{
@@ -123,7 +131,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "reflexes",
-			name: "Reflexes",
+			nameKey:
+				"upgrade.reflexes",
 			stat: "attackSpeed",
 			values:
 				{
@@ -135,7 +144,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "fingers",
-			name: "Fingers",
+			nameKey:
+				"upgrade.fingers",
 			stat: "critChance",
 			values:
 				{
@@ -147,7 +157,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "eyes",
-			name: "Eyes",
+			nameKey:
+				"upgrade.eyes",
 			stat: "range",
 			values:
 				{
@@ -159,7 +170,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "chest",
-			name: "Chest",
+			nameKey:
+				"upgrade.chest",
 			stat: "armor",
 			values:
 				{
@@ -171,7 +183,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "back",
-			name: "Back",
+			nameKey:
+				"upgrade.back",
 			stat: "dodge",
 			values:
 				{
@@ -183,7 +196,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "legs",
-			name: "Legs",
+			nameKey:
+				"upgrade.legs",
 			stat: "speed",
 			values:
 				{
@@ -195,7 +209,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "nose",
-			name: "Nose",
+			nameKey:
+				"upgrade.nose",
 			stat: "luck",
 			values:
 				{
@@ -207,7 +222,8 @@ export const upgradeDefinitions: UpgradeDefinition[] =
 		},
 		{
 			id: "hands",
-			name: "Hands",
+			nameKey:
+				"upgrade.hands",
 			stat: "harvesting",
 			values:
 				{

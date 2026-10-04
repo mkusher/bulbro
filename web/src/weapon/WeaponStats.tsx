@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+import { formatStatName } from "@/i18n/game";
 import type { Weapon } from "../weapon";
 import { fromWeaponState } from "../weapon";
 import type { WeaponState } from "./WeaponState";
@@ -42,9 +44,9 @@ export function WeaponStats({
 				className={`p-3 border rounded-md bg-muted/50 ${className || ""}`}
 			>
 				<div className="text-sm text-muted-foreground">
-					No
-					stat
-					bonuses
+					{t(
+						"weapon.noStatBonuses",
+					)}
 				</div>
 			</div>
 		);
@@ -55,8 +57,9 @@ export function WeaponStats({
 			className={`p-3 border rounded-md ${className || ""}`}
 		>
 			<div className="text-sm font-medium mb-2">
-				Stats
-				Bonuses
+				{t(
+					"weapon.statsBonuses",
+				)}
 			</div>
 			<div className="grid grid-cols-2 gap-2 text-xs">
 				{statEntries.map(
@@ -71,12 +74,9 @@ export function WeaponStats({
 							className="flex justify-between"
 						>
 							<span className="text-muted-foreground capitalize">
-								{key
-									.replace(
-										/([A-Z])/g,
-										" $1",
-									)
-									.trim()}
+								{formatStatName(
+									key,
+								)}
 								:
 							</span>
 							<span
@@ -97,8 +97,9 @@ export function WeaponStats({
 			<div className="mt-2 pt-2 border-t text-xs">
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">
-						Shot
-						Speed:
+						{t(
+							"weapon.shotSpeed",
+						)}
 					</span>
 					<span className="font-medium">
 						{

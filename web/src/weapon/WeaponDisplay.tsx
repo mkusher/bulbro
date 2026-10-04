@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+import { formatStatName } from "@/i18n/game";
 import * as PIXI from "pixi.js";
 import {
 	type Direction,
@@ -132,8 +134,8 @@ export function WeaponDisplay({
 						_,
 						value,
 					]) =>
-						value !==
-							undefined &&
+						typeof value ===
+							"number" &&
 						value !==
 							0,
 				);
@@ -141,9 +143,9 @@ export function WeaponDisplay({
 			return (
 				<div className="flex flex-col justify-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm flex-1 min-w-0">
 					<div className="text-sm font-medium mb-2 text-gray-900 dark:text-gray-100 truncate">
-						{
-							weapon.name
-						}
+						{t(
+							`weapon.name.${weapon.id}`,
+						)}
 					</div>
 					{statEntries.length >
 					0 ? (
@@ -165,12 +167,9 @@ export function WeaponDisplay({
 											className="flex justify-between text-xs"
 										>
 											<span className="text-gray-600 dark:text-gray-300 capitalize truncate mr-2">
-												{key
-													.replace(
-														/([A-Z])/g,
-														" $1",
-													)
-													.trim()}
+												{formatStatName(
+													key,
+												)}
 												:
 											</span>
 											<span
@@ -197,24 +196,30 @@ export function WeaponDisplay({
 							{statEntries.length >
 								4 && (
 								<div className="text-xs text-gray-500 dark:text-gray-400">
-									+
-									{statEntries.length -
-										4}{" "}
-									more...
+									{t(
+										"weapon.moreStats",
+										{
+											count:
+												statEntries.length -
+												4,
+										},
+									)}
 								</div>
 							)}
 						</div>
 					) : (
 						<div className="text-xs text-gray-500 dark:text-gray-400">
-							No
-							bonuses
+							{t(
+								"weapon.noStatBonuses",
+							)}
 						</div>
 					)}
 					<div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600 text-xs">
 						<div className="flex justify-between">
 							<span className="text-gray-600 dark:text-gray-300">
-								Shot
-								Speed:
+								{t(
+									"weapon.shotSpeed",
+								)}
 							</span>
 							<span className="font-medium text-gray-900 dark:text-gray-100">
 								{
