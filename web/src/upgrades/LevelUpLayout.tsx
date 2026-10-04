@@ -185,11 +185,11 @@ export function LevelUpLayout({
 											)}
 										</p>
 										<p className="text-base font-bold text-center">
-											{
+											{t(
 												choice
 													.upgrade
-													.name
-											}
+													.nameKey,
+											)}
 										</p>
 										<p className="text-sm text-center grow">
 											+

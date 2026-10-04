@@ -1,4 +1,167 @@
+import type en from "./en";
+
 export default {
+	"characterStats.title":
+		"Характеристики персонажа",
+	"characterStats.current":
+		"Поточні характеристики",
+	"characterStats.core":
+		"Основні характеристики",
+	"characterStats.secondary":
+		"Додаткові характеристики",
+	"characterStats.health":
+		"Здоров’я",
+	"characterStats.level":
+		"Рівень",
+	"characterStats.experience":
+		"Досвід",
+	"stat.maxHp":
+		"Макс. здоров’я",
+	"stat.hpRegeneration":
+		"Відновлення здоров’я",
+	"stat.lifeSteal":
+		"Викрадення здоров’я",
+	"stat.damage":
+		"Шкода",
+	"stat.meleeDamage":
+		"Шкода в ближньому бою",
+	"stat.rangedDamage":
+		"Шкода в дальньому бою",
+	"stat.elementalDamage":
+		"Стихійна шкода",
+	"stat.attackSpeed":
+		"Швидкість атаки",
+	"stat.critChance":
+		"Шанс критичного удару",
+	"stat.engineering":
+		"Інженерія",
+	"stat.range":
+		"Дальність",
+	"stat.armor":
+		"Броня",
+	"stat.dodge":
+		"Ухилення",
+	"stat.speed":
+		"Швидкість",
+	"stat.luck":
+		"Удача",
+	"stat.harvesting":
+		"Збирання врожаю",
+	"stat.pickupRange":
+		"Радіус збирання",
+	"stat.knockback":
+		"Відкидання",
+	"stat.explosionSize":
+		"Розмір вибуху",
+	"stat.explosionRadius":
+		"Радіус вибуху",
+	"stat.cooldown":
+		"Час відновлення",
+	"stat.critMultiplier":
+		"Множник критичної шкоди",
+	"upgrade.heart":
+		"Серце",
+	"upgrade.lungs":
+		"Легені",
+	"upgrade.teeth":
+		"Зуби",
+	"upgrade.triceps":
+		"Трицепс",
+	"upgrade.forearms":
+		"Передпліччя",
+	"upgrade.shoulders":
+		"Плечі",
+	"upgrade.brain":
+		"Мозок",
+	"upgrade.reflexes":
+		"Рефлекси",
+	"upgrade.fingers":
+		"Пальці",
+	"upgrade.eyes":
+		"Очі",
+	"upgrade.chest":
+		"Груди",
+	"upgrade.back":
+		"Спина",
+	"upgrade.legs":
+		"Ноги",
+	"upgrade.nose":
+		"Ніс",
+	"upgrade.hands":
+		"Кисті рук",
+	"weapon.selectTitle":
+		"Оберіть зброю",
+	"weapon.deselectHint":
+		"(натисніть, щоб скасувати)",
+	"weapon.moreStats":
+		"Ще +{count}…",
+	"common.selectNamed":
+		"Обрати: {name}",
+	"weapon.name.hand":
+		"Долоня",
+	"weapon.name.fist":
+		"Кулак",
+	"weapon.name.pistol":
+		"Пістолет",
+	"weapon.name.smg":
+		"Пістолет-кулемет",
+	"weapon.name.ak47":
+		"АК-47",
+	"weapon.name.doubleBarrelShotgun":
+		"Двоствольна рушниця",
+	"weapon.name.knife":
+		"Ніж",
+	"weapon.name.sword":
+		"Меч",
+	"weapon.name.laserGun":
+		"Лазерна гармата",
+	"weapon.name.brick":
+		"Цеглина",
+	"weapon.name.flareGun":
+		"Сигнальний пістолет",
+	"weapon.name.grenade":
+		"Граната",
+	"weapon.name.machineGun":
+		"Кулемет",
+	"weapon.name.bazooka":
+		"Базука",
+	"weapon.name.orcGun":
+		"Дуже повільна гармата орка",
+	"weapon.name.enemyFist":
+		"Кулак ворога",
+	"weapon.name.aphidGun":
+		"Далекобійна гармата попелиці",
+	"weapon.class.blade":
+		"Клинкова",
+	"weapon.class.blunt":
+		"Ударна",
+	"weapon.class.elemental":
+		"Стихійна",
+	"weapon.class.explosive":
+		"Вибухова",
+	"weapon.class.gun":
+		"Вогнепальна",
+	"weapon.class.heavy":
+		"Важка",
+	"weapon.class.precise":
+		"Точна",
+	"weapon.class.support":
+		"Підтримка",
+	"weapon.class.tool":
+		"Інструмент",
+	"weapon.class.unarmed":
+		"Беззбройна",
+	"weapon.rarity.common":
+		"Звичайна",
+	"weapon.rarity.uncommon":
+		"Незвичайна",
+	"weapon.rarity.rare":
+		"Рідкісна",
+	"weapon.rarity.exceptional":
+		"Виняткова",
+	"weapon.rarity.legendary":
+		"Легендарна",
+
 	"start.tab.local":
 		"Локальна",
 	"start.tab.online":
@@ -202,4 +365,7 @@ export default {
 
 	"items.count":
 		"{count, plural, =0 {Немає предметів} one {# предмет} few {# предмети} other {# предметів}}",
-} as const;
+} as const satisfies Record<
+	keyof typeof en,
+	string
+>;

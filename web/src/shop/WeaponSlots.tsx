@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import {
 	Card,
 	CardContent,
@@ -42,7 +43,9 @@ export function WeaponSlots({
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
 					<h3 className="text-sm font-semibold">
-						Weapons
+						{t(
+							"shop.weapons",
+						)}
 					</h3>
 					<span className="text-xs text-muted-foreground">
 						{
@@ -91,9 +94,9 @@ export function WeaponSlots({
 											/>
 										</div>
 										<p className="text-[8px] text-center truncate w-full leading-tight">
-											{
-												weapon.name
-											}
+											{t(
+												`weapon.name.${weapon.id}`,
+											)}
 										</p>
 									</>
 								) : (
@@ -108,7 +111,14 @@ export function WeaponSlots({
 										<button
 											type="button"
 											className="absolute inset-0 cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-											aria-label={`Select ${weapon.name}`}
+											aria-label={t(
+												"common.selectNamed",
+												{
+													name: t(
+														`weapon.name.${weapon.id}`,
+													),
+												},
+											)}
 											onClick={() =>
 												onWeaponClick(
 													weapon,

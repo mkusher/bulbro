@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import type { Weapon } from "../weapon";
 import { fromWeaponState } from "../weapon";
 import type { WeaponRarity } from "./WeaponDisplay";
@@ -42,20 +43,29 @@ export function WeaponTitle({
 		>
 			<div className="flex-1">
 				<div className="font-medium text-sm">
-					{
-						weapon.name
-					}
+					{t(
+						`weapon.name.${weapon.id}`,
+					)}
 				</div>
 				<div className="text-xs opacity-75">
-					{weapon.classes.join(
-						", ",
-					)}
+					{weapon.classes
+						.map(
+							(
+								weaponClass,
+							) =>
+								t(
+									`weapon.class.${weaponClass}`,
+								),
+						)
+						.join(
+							", ",
+						)}
 				</div>
 			</div>
 			<div className="text-xs font-medium capitalize opacity-75">
-				{
-					rarity
-				}
+				{t(
+					`weapon.rarity.${rarity}`,
+				)}
 			</div>
 		</div>
 	);

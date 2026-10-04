@@ -146,11 +146,9 @@ export function Shop({
 											/>
 										</div>
 										<p className="text-[7px] font-medium w-full text-center leading-tight whitespace-nowrap px-0.5 overflow-hidden text-ellipsis">
-											{
-												item
-													.weapon
-													.name
-											}
+											{t(
+												`weapon.name.${item.weapon.id}`,
+											)}
 										</p>
 										<Button
 											onClick={() =>

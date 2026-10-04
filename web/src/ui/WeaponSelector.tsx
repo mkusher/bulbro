@@ -1,4 +1,5 @@
 import type { Direction } from "@/geometry";
+import { t } from "@/i18n";
 import type { Weapon } from "../weapon";
 import { WeaponDisplay } from "../weapon/WeaponDisplay";
 import { WeaponStats } from "../weapon/WeaponStats";
@@ -47,13 +48,14 @@ export function WeaponSelector({
 			{/* Thumbnail Grid */}
 			<div className="flex flex-col">
 				<h3 className="text-lg font-semibold mb-3 text-center lg:text-left">
-					Select
-					Weapon
+					{t(
+						"weapon.selectTitle",
+					)}
 					{allowDeselect && (
 						<span className="text-sm text-gray-500 ml-2">
-							(click
-							to
-							deselect)
+							{t(
+								"weapon.deselectHint",
+							)}
 						</span>
 					)}
 				</h3>
@@ -125,8 +127,9 @@ export function WeaponSelector({
 							{/* Weapon Classes */}
 							<div>
 								<h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">
-									Weapon
-									Classes
+									{t(
+										"weapon.classes",
+									)}
 								</h4>
 								<div className="flex flex-wrap gap-2">
 									{displayedWeapon.classes.map(
@@ -139,9 +142,9 @@ export function WeaponSelector({
 												}
 												className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs font-medium capitalize"
 											>
-												{
-													weaponClass
-												}
+												{t(
+													`weapon.class.${weaponClass}`,
+												)}
 											</span>
 										),
 									)}
@@ -151,13 +154,16 @@ export function WeaponSelector({
 							{/* Weapon Details */}
 							<div>
 								<h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">
-									Details
+									{t(
+										"weapon.details",
+									)}
 								</h4>
 								<div className="space-y-1 text-sm">
 									<div className="flex justify-between">
 										<span className="text-gray-600 dark:text-gray-400">
-											Shot
-											Speed:
+											{t(
+												"weapon.shotSpeed",
+											)}
 										</span>
 										<span className="font-medium">
 											{
@@ -168,12 +174,14 @@ export function WeaponSelector({
 									</div>
 									<div className="flex justify-between">
 										<span className="text-gray-600 dark:text-gray-400">
-											Type:
+											{t(
+												"weapon.type",
+											)}
 										</span>
 										<span className="font-medium capitalize">
-											{
-												displayedWeapon.id
-											}
+											{t(
+												`weapon.name.${displayedWeapon.id}`,
+											)}
 										</span>
 									</div>
 								</div>
@@ -191,20 +199,14 @@ export function WeaponSelector({
 							⚔️
 						</div>
 						<h3 className="text-lg font-semibold mb-2">
-							No
-							Weapon
-							Selected
+							{t(
+								"weapon.none",
+							)}
 						</h3>
 						<p className="text-sm">
-							Choose
-							a
-							weapon
-							from
-							the
-							grid
-							to
-							see
-							details
+							{t(
+								"weapon.chooseHint",
+							)}
 						</p>
 					</div>
 				</div>
@@ -268,14 +270,21 @@ function WeaponThumbnail({
 
 			{/* Name Label */}
 			<div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 truncate">
-				{
-					weapon.name
-				}
+				{t(
+					`weapon.name.${weapon.id}`,
+				)}
 			</div>
 			<button
 				type="button"
 				className="absolute inset-0 z-10 cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-				aria-label={`Select ${weapon.name}`}
+				aria-label={t(
+					"common.selectNamed",
+					{
+						name: t(
+							`weapon.name.${weapon.id}`,
+						),
+					},
+				)}
 				aria-pressed={
 					isSelected
 				}

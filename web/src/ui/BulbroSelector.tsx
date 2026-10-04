@@ -119,9 +119,9 @@ export function BulbroSelector({
 											}
 											className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium"
 										>
-											{
-												weapon.name
-											}
+											{t(
+												`weapon.name.${weapon.id}`,
+											)}
 										</span>
 									),
 								)}
@@ -165,9 +165,9 @@ export function BulbroSelector({
 													}
 													className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-xs"
 												>
-													{
-														weapon.name
-													}
+													{t(
+														`weapon.name.${weapon.id}`,
+													)}
 												</span>
 											),
 										)}
@@ -234,7 +234,12 @@ function BulbroThumbnailIcon({
 			<button
 				type="button"
 				className="absolute inset-0 z-10 cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-				aria-label={`Select ${bulbro.name}`}
+				aria-label={t(
+					"common.selectNamed",
+					{
+						name: bulbro.name,
+					},
+				)}
 				aria-pressed={
 					isSelected
 				}
