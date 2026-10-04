@@ -25,6 +25,10 @@ import {
 	MainContainer,
 } from "@/ui/Layout";
 import {
+	type PlayerStatus,
+	PlayersStatus,
+} from "@/ui/PlayersStatus";
+import {
 	getJoinLobbyUrl,
 	getTgJoinLobbyUrl,
 	useRouter,
@@ -247,8 +251,41 @@ export function SetupOnlineGame() {
 				p.id ===
 				anotherPlayer?.id,
 		);
-	const isAnotherPlayerReady =
-		!!anotherPlayerBulbro;
+	const playersStatus: PlayerStatus[] =
+		lobby.players.map(
+			(
+				player,
+			) => {
+				const readyPlayer =
+					readyPlayers.value.find(
+						(
+							ready,
+						) =>
+							ready.id ===
+							player.id,
+					);
+				const isLocal =
+					player.id ===
+					iam.id;
+				return {
+					id: player.id,
+					username:
+						player.username,
+					connected:
+						player.status ===
+						"connected",
+					ready:
+						!!readyPlayer,
+					isLocal,
+					bulbroName:
+						isLocal
+							? firstBulbro.name
+							: readyPlayer
+									?.bulbro
+									.name,
+				};
+			},
+		);
 	const isHost =
 		iam.id ===
 		lobby.hostId;
@@ -322,58 +359,14 @@ export function SetupOnlineGame() {
 										</Button>
 									) : null}
 								</form>
-								<p>
-									{t(
-										"setup.yourStatus",
-									)}
-									:{" "}
-									{lobby.players.find(
-										(
-											p,
-										) =>
-											p.id ===
-											iam.id,
-									)
-										?.status ===
-									"connected"
-										? t(
-												"setup.connected",
-											)
-										: t(
-												"setup.disconnected",
-											)}{" "}
-									{isLocalReady
-										? t(
-												"setup.ready",
-											)
-										: t(
-												"setup.notReady",
-											)}
-								</p>
-								<p>
-									{t(
-										"setup.otherPlayerStatus",
-									)}
-									:{" "}
-									{anotherPlayer?.status ===
-									"connected"
-										? t(
-												"setup.connected",
-											)
-										: t(
-												"setup.disconnected",
-											)}{" "}
-									{isAnotherPlayerReady
-										? t(
-												"setup.ready",
-											)
-										: t(
-												"setup.notReady",
-											)}
-								</p>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="grid gap-6">
+							<PlayersStatus
+								players={
+									playersStatus
+								}
+							/>
 							<h2>
 								{t(
 									"greeting",

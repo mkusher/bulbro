@@ -50,10 +50,6 @@ export default {
 		"Відключено",
 	"setup.share":
 		"Поділитися лобі",
-	"setup.yourStatus":
-		"Ваш стан",
-	"setup.otherPlayerStatus":
-		"Стан іншого гравця",
 
 	"setup.single.title":
 		"Почати гру одного гравця",
@@ -119,6 +115,8 @@ export default {
 		"Гравці",
 	"preround.you":
 		"ви",
+	"players.level":
+		"Рів. {level}",
 	"preround.noPlayer":
 		"Гравця не знайдено",
 	"preround.weaponClicked":

@@ -8,16 +8,20 @@ import {
 /**
  * Connection and readiness of a single online game participant.
  */
-export interface NetworkPlayerStatus {
+export interface PlayerStatus {
 	id: string;
 	username: string;
 	connected: boolean;
 	ready: boolean;
 	isLocal?: boolean;
+	/** Name of the chosen bulbro, once known */
+	bulbroName?: string;
+	/** Current level, omitted before the game starts */
+	level?: number;
 }
 
-export interface NetworkPlayersStatusProps {
-	players: NetworkPlayerStatus[];
+export interface PlayersStatusProps {
+	players: PlayerStatus[];
 }
 
 function StatusBadge({
@@ -47,11 +51,12 @@ function StatusBadge({
 }
 
 /**
- * Pure presentation of every online player's connection and ready state.
+ * Pure presentation of every online player's bulbro, level, connection and
+ * ready state. Used in the lobby, on the level-up screen and in the shop.
  */
-export function NetworkPlayersStatus({
+export function PlayersStatus({
 	players,
-}: NetworkPlayersStatusProps) {
+}: PlayersStatusProps) {
 	return (
 		<Card>
 			<CardHeader className="pb-2">
@@ -85,15 +90,42 @@ export function NetworkPlayersStatus({
 												: "bg-red-500"
 										}`}
 									/>
-									<span className="truncate text-sm">
-										{
-											player.username
-										}
-										{player.isLocal
-											? ` (${t(
-													"preround.you",
-												)})`
-											: ""}
+									<span className="flex flex-col min-w-0">
+										<span className="truncate text-sm">
+											{
+												player.username
+											}
+											{player.isLocal
+												? ` (${t(
+														"preround.you",
+													)})`
+												: ""}
+										</span>
+										{(player.bulbroName ||
+											player.level !==
+												undefined) && (
+											<span className="truncate text-xs text-muted-foreground">
+												{[
+													player.bulbroName,
+													player.level !==
+													undefined
+														? t(
+																"players.level",
+																{
+																	level:
+																		player.level,
+																},
+															)
+														: undefined,
+												]
+													.filter(
+														Boolean,
+													)
+													.join(
+														" · ",
+													)}
+											</span>
+										)}
 									</span>
 								</span>
 								<span className="flex shrink-0 gap-1">

@@ -1,12 +1,9 @@
 import { useState } from "preact/hooks";
 import { wellRoundedBulbro } from "@/characters-definitions";
-import {
-	type NetworkPlayerStatus,
-	NetworkPlayersStatus,
-} from "@/shop/NetworkPlayersStatus";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { ShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
+import type { PlayerStatus } from "@/ui/PlayersStatus";
 import type { Weapon } from "@/weapon";
 import {
 	fist,
@@ -18,7 +15,7 @@ export default {
 		"Shop/NetworkPreRoundScreen",
 };
 
-const localPlayer: NetworkPlayerStatus =
+const localPlayer: PlayerStatus =
 	{
 		id: "local-player",
 		username:
@@ -26,15 +23,21 @@ const localPlayer: NetworkPlayerStatus =
 		connected: true,
 		ready: false,
 		isLocal: true,
+		bulbroName:
+			"Well Rounded",
+		level: 3,
 	};
 
-const remotePlayer: NetworkPlayerStatus =
+const remotePlayer: PlayerStatus =
 	{
 		id: "remote-player",
 		username:
 			"Bob",
 		connected: true,
 		ready: false,
+		bulbroName:
+			"Berserker",
+		level: 2,
 	};
 
 function NetworkPreRound({
@@ -43,7 +46,7 @@ function NetworkPreRound({
 	simulateRemoteReady = false,
 }: {
 	initialLocalReady?: boolean;
-	remote?: NetworkPlayerStatus;
+	remote?: PlayerStatus;
 	simulateRemoteReady?: boolean;
 }) {
 	const [
@@ -253,38 +256,5 @@ export const InteractiveReadyFlow =
 				<NetworkPreRound
 					simulateRemoteReady
 				/>
-			),
-	};
-
-// Players status panel on its own, every combination of states
-export const PlayersStatusPanel =
-	{
-		render:
-			() => (
-				<div className="max-w-md p-4">
-					<NetworkPlayersStatus
-						players={[
-							{
-								...localPlayer,
-								ready: true,
-							},
-							remotePlayer,
-							{
-								id: "disconnected-ready",
-								username:
-									"Carol",
-								connected: false,
-								ready: true,
-							},
-							{
-								id: "disconnected",
-								username:
-									"Dave",
-								connected: false,
-								ready: false,
-							},
-						]}
-					/>
-				</div>
 			),
 	};

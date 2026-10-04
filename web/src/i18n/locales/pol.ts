@@ -50,10 +50,6 @@ export default {
 		"Rozłączony",
 	"setup.share":
 		"Udostępnij pokój",
-	"setup.yourStatus":
-		"Twój status",
-	"setup.otherPlayerStatus":
-		"Status drugiego gracza",
 
 	"setup.single.title":
 		"Rozpocznij grę jednoosobową",
@@ -119,6 +115,8 @@ export default {
 		"Gracze",
 	"preround.you":
 		"ty",
+	"players.level":
+		"Poz. {level}",
 	"preround.noPlayer":
 		"Nie znaleziono gracza",
 	"preround.weaponClicked":
