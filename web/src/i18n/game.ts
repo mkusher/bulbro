@@ -42,6 +42,10 @@ const statNames =
 			"stat.pickupRange",
 		knockback:
 			"stat.knockback",
+		explosionSize:
+			"stat.explosionSize",
+		explosionRadius:
+			"stat.explosionRadius",
 		cooldown:
 			"stat.cooldown",
 		critMultiplier:

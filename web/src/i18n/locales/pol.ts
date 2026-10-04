@@ -51,6 +51,10 @@ export default {
 		"Zasięg zbierania",
 	"stat.knockback":
 		"Odrzut",
+	"stat.explosionSize":
+		"Rozmiar eksplozji",
+	"stat.explosionRadius":
+		"Promień eksplozji",
 	"stat.cooldown":
 		"Czas odnowienia",
 	"stat.critMultiplier":

@@ -51,6 +51,10 @@ export default {
 		"Радіус збирання",
 	"stat.knockback":
 		"Відкидання",
+	"stat.explosionSize":
+		"Розмір вибуху",
+	"stat.explosionRadius":
+		"Радіус вибуху",
 	"stat.cooldown":
 		"Час відновлення",
 	"stat.critMultiplier":

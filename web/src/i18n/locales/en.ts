@@ -49,6 +49,10 @@ export default {
 		"Pickup Range",
 	"stat.knockback":
 		"Knockback",
+	"stat.explosionSize":
+		"Explosion Size",
+	"stat.explosionRadius":
+		"Explosion Radius",
 	"stat.cooldown":
 		"Cooldown",
 	"stat.critMultiplier":
