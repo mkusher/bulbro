@@ -66,6 +66,8 @@ function createBulbro(
 				[],
 			id: "p1",
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position,
 			level: 1,
 			totalExperience: 0,

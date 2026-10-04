@@ -39,6 +39,8 @@ function createBulbro(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position:
 				{
 					x,

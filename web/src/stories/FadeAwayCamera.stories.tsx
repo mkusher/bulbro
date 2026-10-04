@@ -38,6 +38,8 @@ function createFadeAwayState(
 					[],
 				id: "player-1",
 				type: "normal",
+				characterId:
+					"well-rounded",
 				position:
 					PLAYER_POSITION,
 				level: 0,

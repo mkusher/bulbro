@@ -38,6 +38,8 @@ function createTestPlayer(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			level: 1,
 			totalExperience: 0,
 			position:

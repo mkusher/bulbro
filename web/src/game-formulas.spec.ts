@@ -43,6 +43,8 @@ function createTestBulbro(
 				[],
 			id: "test-player",
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position:
 				{
 					x,

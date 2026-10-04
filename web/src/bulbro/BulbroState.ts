@@ -81,7 +81,7 @@ type BulbroStateProperties =
 		readonly id: string;
 		readonly type: FaceType;
 		/** Id of the character definition the Bulbro was spawned from */
-		readonly characterId?: string;
+		readonly characterId: string;
 		readonly position: Position;
 		readonly level: number;
 		readonly totalExperience: number;

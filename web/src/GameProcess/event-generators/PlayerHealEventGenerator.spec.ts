@@ -35,6 +35,8 @@ function createBulbro(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position:
 				{
 					x: 100,
@@ -365,6 +367,8 @@ describe("PlayerHealEventGenerator", () => {
 						[],
 					id: "p1",
 					type: "normal",
+					characterId:
+						"well-rounded",
 					position:
 						{
 							x: 0,

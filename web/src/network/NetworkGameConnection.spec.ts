@@ -55,6 +55,8 @@ function player(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position:
 				{
 					x: 0,
@@ -382,6 +384,8 @@ describe("NetworkGameConnection next wave", () => {
 				player:
 					{
 						id: guestId,
+						characterId:
+							"well-rounded",
 					},
 				sentAt: 0,
 			},
@@ -425,6 +429,8 @@ describe("NetworkGameConnection next wave", () => {
 				player:
 					{
 						id: guestId,
+						characterId:
+							"well-rounded",
 					},
 				sentAt: 0,
 			},
@@ -447,6 +453,8 @@ describe("NetworkGameConnection next wave", () => {
 				player:
 					{
 						id: guestId,
+						characterId:
+							"well-rounded",
 					},
 				sentAt: 0,
 			},

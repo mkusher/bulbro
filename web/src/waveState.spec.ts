@@ -110,6 +110,8 @@ function createTestBulbro(
 				[],
 			id,
 			type: "normal",
+			characterId:
+				"well-rounded",
 			position:
 				{
 					x,
