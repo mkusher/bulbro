@@ -9,6 +9,10 @@ export default {
 		"Асноўныя характарыстыкі",
 	"characterStats.secondary":
 		"Дадатковыя характарыстыкі",
+	"characterStats.showAll":
+		"Паказаць усе",
+	"characterStats.showChanged":
+		"Паказаць змененыя",
 	"characterStats.health":
 		"Здароўе",
 	"characterStats.level":

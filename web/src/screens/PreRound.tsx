@@ -564,6 +564,8 @@ export function PreRound() {
 			}
 			player={{
 				bulbro,
+				bulbroState:
+					player,
 				weapons:
 					ownedWeapons,
 				maxWeaponSlots:

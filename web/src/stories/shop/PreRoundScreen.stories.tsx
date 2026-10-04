@@ -1,9 +1,11 @@
 import { useState } from "preact/hooks";
+import { spawnBulbro } from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import {
 	firstRerollPrice,
 	rerollIncrease,
 } from "@/game-formulas";
+import { zeroPoint } from "@/geometry";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import type { WaveStats } from "@/shop/PrevWaveStats";
 import type { ShopItem } from "@/shop/Shop";
@@ -15,6 +17,16 @@ import {
 	smg,
 	sword,
 } from "@/weapons-definitions";
+
+const bulbroState =
+	spawnBulbro(
+		"player-1",
+		"normal",
+		zeroPoint(),
+		0,
+		0,
+		wellRoundedBulbro,
+	);
 
 export default {
 	title:
@@ -260,6 +272,7 @@ export const CompletePreRoundScreen =
 						player={{
 							bulbro:
 								wellRoundedBulbro,
+							bulbroState,
 							weapons:
 								state
 									.player
@@ -352,6 +365,7 @@ export const EarlyGame =
 						player={{
 							bulbro:
 								wellRoundedBulbro,
+							bulbroState,
 							weapons:
 								state
 									.player
@@ -438,6 +452,7 @@ export const LateGame =
 						player={{
 							bulbro:
 								wellRoundedBulbro,
+							bulbroState,
 							weapons:
 								state
 									.player
@@ -523,6 +538,7 @@ export const LowMaterialsScenario =
 						player={{
 							bulbro:
 								wellRoundedBulbro,
+							bulbroState,
 							weapons:
 								state
 									.player
@@ -634,6 +650,7 @@ export const AddWeaponDemo =
 							player={{
 								bulbro:
 									wellRoundedBulbro,
+								bulbroState,
 								weapons:
 									state
 										.player
@@ -745,6 +762,7 @@ export const AllShopItems =
 							player={{
 								bulbro:
 									wellRoundedBulbro,
+								bulbroState,
 								weapons:
 									state
 										.player
@@ -905,6 +923,7 @@ export const WaveRerollPriceScaling =
 							player={{
 								bulbro:
 									wellRoundedBulbro,
+								bulbroState,
 								weapons:
 									[],
 								materials: 10000,

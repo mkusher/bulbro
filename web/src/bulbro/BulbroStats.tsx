@@ -1,5 +1,7 @@
+import { useState } from "preact/hooks";
 import { t } from "@/i18n";
 import { formatStatName } from "@/i18n/game";
+import { cn } from "@/ui/shadcn/utils";
 
 export { formatStatName } from "@/i18n/game";
 
@@ -155,25 +157,56 @@ export function BulbroStateStats({
 	bulbroState,
 	className,
 }: BulbroStateStatsProps) {
+	const [
+		showAll,
+		setShowAll,
+	] =
+		useState(
+			false,
+		);
 	const stats =
 		bulbroState.stats;
 	const mainStatEntries =
 		getMainStatEntries(
 			stats,
+			showAll,
 		);
 	const secondaryStatEntries =
 		getSecondaryStatEntries(
 			stats,
+			showAll,
 		);
 
 	return (
 		<div
-			className={`p-3 border rounded-md bg-white ${className || ""}`}
+			className={cn(
+				"p-3 border rounded-md bg-card text-card-foreground",
+				className,
+			)}
 		>
-			<div className="text-sm font-medium mb-3">
-				{t(
-					"characterStats.current",
-				)}
+			<div className="flex items-center justify-between gap-2 mb-3">
+				<div className="text-sm font-medium">
+					{t(
+						"characterStats.current",
+					)}
+				</div>
+				<button
+					type="button"
+					className="text-xs text-muted-foreground underline hover:text-foreground"
+					onClick={() =>
+						setShowAll(
+							!showAll,
+						)
+					}
+				>
+					{showAll
+						? t(
+								"characterStats.showChanged",
+							)
+						: t(
+								"characterStats.showAll",
+							)}
+				</button>
 			</div>
 
 			{/* Health */}
@@ -322,6 +355,7 @@ export function BulbroStateStats({
 
 function getMainStatEntries(
 	stats: Stats,
+	showAll = false,
 ) {
 	const mainStats: (keyof Stats)[] =
 		[
@@ -362,13 +396,15 @@ function getMainStatEntries(
 			]) =>
 				value !==
 					undefined &&
-				value !==
-					0,
+				(showAll ||
+					value !==
+						0),
 		);
 }
 
 function getSecondaryStatEntries(
 	stats: Stats,
+	showAll = false,
 ) {
 	const secondaryStats: (keyof Stats)[] =
 		[
@@ -398,8 +434,9 @@ function getSecondaryStatEntries(
 			]) =>
 				value !==
 					undefined &&
-				(value !==
-					0 ||
+				(showAll ||
+					value !==
+						0 ||
 					key ===
 						"startingWeapons" ||
 					key ===

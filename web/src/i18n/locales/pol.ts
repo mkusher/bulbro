@@ -9,6 +9,10 @@ export default {
 		"Główne statystyki",
 	"characterStats.secondary":
 		"Dodatkowe statystyki",
+	"characterStats.showAll":
+		"Pokaż wszystkie",
+	"characterStats.showChanged":
+		"Pokaż zmienione",
 	"characterStats.health":
 		"Zdrowie",
 	"characterStats.level":
