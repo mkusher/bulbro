@@ -7,7 +7,10 @@ import {
 	deltaTime,
 	nowTime,
 } from "@/time";
-import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
+import {
+	isLocallyAuthoritativeEvent,
+	isLocallySimulatedEvent,
+} from "./networkEventFilter";
 
 const meta =
 	{
@@ -94,4 +97,45 @@ it("lets each player move locally while only the host simulates the world", () =
 			guestMove,
 		],
 	);
+});
+
+it("predicts remote movement locally but never broadcasts it as authoritative", () => {
+	for (const isHost of [
+		true,
+		false,
+	]) {
+		const localId =
+			isHost
+				? "host"
+				: "guest";
+		const remote =
+			isHost
+				? guestMove
+				: hostMove;
+		expect(
+			isLocallySimulatedEvent(
+				remote,
+				isHost,
+			),
+		).toBe(
+			true,
+		);
+		expect(
+			isLocallyAuthoritativeEvent(
+				remote,
+				isHost,
+				localId,
+			),
+		).toBe(
+			false,
+		);
+		expect(
+			isLocallySimulatedEvent(
+				worldTick,
+				isHost,
+			),
+		).toBe(
+			isHost,
+		);
+	}
 });

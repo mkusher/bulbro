@@ -26,6 +26,7 @@ import { deltaTime } from "../time";
 import { waveState } from "../waveState";
 import type {
 	GameEventsProcessor,
+	StatePrediction,
 	TickProcessFactory,
 	WaveProcess,
 } from "./index";
@@ -59,6 +60,7 @@ export class BaseWaveProcess
 		| HTMLCanvasElement
 		| undefined
 	>;
+	#predictState?: StatePrediction;
 	#processors: GameEventsProcessor[];
 
 	constructor(
@@ -75,7 +77,10 @@ export class BaseWaveProcess
 					event: GameEvent,
 			  ) => boolean)
 			| null = null,
+		predictState?: StatePrediction,
 	) {
+		this.#predictState =
+			predictState;
 		this.#logger =
 			baseLogger.child(
 				{
@@ -336,7 +341,12 @@ export class BaseWaveProcess
 				this.#scene.update(
 					delta,
 					now,
-					waveState.value,
+					this.#predictState?.(
+						waveState.value,
+						delta,
+						now,
+					) ??
+						waveState.value,
 					events,
 				);
 			}

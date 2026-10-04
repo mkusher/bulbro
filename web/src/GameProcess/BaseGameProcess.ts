@@ -23,6 +23,7 @@ import { BaseWaveProcess } from "./BaseWaveProcess";
 import { FullGameTickProcess } from "./FullGameTickProcess";
 import type {
 	GameProcess,
+	StatePredictionFactory,
 	TickProcessFactory,
 	WaveProcess,
 	WavePromises,
@@ -47,13 +48,18 @@ export class BaseGameProcess
 		| null =
 		null;
 
+	#createPrediction?: StatePredictionFactory;
+
 	setEventFilter(
 		filter:
 			| ((
 					event: GameEvent,
 			  ) => boolean)
 			| null,
+		createPrediction?: StatePredictionFactory,
 	) {
+		this.#createPrediction =
+			createPrediction;
 		this.#eventFilter =
 			filter;
 	}
@@ -180,6 +186,7 @@ export class BaseGameProcess
 				.#createTickProcess,
 			this
 				.#eventFilter,
+			this.#createPrediction?.(),
 		);
 	}
 

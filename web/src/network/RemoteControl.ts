@@ -1,9 +1,6 @@
 import { signal } from "@preact/signals";
 import type { PlayerControl } from "@/controls";
-import type {
-	BulbroMovedEvent,
-	GameEvent,
-} from "@/game-events/GameEvents";
+import type { GameEvent } from "@/game-events/GameEvents";
 import { zeroPoint } from "@/geometry";
 import type { LiveStateMessage } from "./InGameCommunicationChannel";
 
@@ -16,12 +13,11 @@ export class RemoteRepeatLastKnownDirectionControl
 		signal(
 			zeroPoint(),
 		);
-	#lastPosition =
-		signal(
-			zeroPoint(),
-		);
 	#isHost: boolean;
-	#isStarted: boolean = false;
+	#isStarted = false;
+	#lastPositionVersion =
+		-1;
+	#lastStateVersion = 0;
 
 	constructor(
 		isHost: boolean,
@@ -34,11 +30,18 @@ export class RemoteRepeatLastKnownDirectionControl
 	}
 
 	async start() {
+		this.#direction.value =
+			zeroPoint();
+		this.#lastPositionVersion =
+			-1;
+		this.#lastStateVersion = 0;
 		this.#isStarted = true;
 	}
 
 	async stop() {
 		this.#isStarted = false;
+		this.#direction.value =
+			zeroPoint();
 	}
 
 	onMessage(
@@ -49,48 +52,46 @@ export class RemoteRepeatLastKnownDirectionControl
 				.#isStarted
 		)
 			return;
-		switch (
-			message.type
+		if (
+			message.type ===
+			"game-state-position-updated"
 		) {
-			case "game-state-updated-by-host":
-				if (
-					!this
-						.#isHost
-				) {
-					this.#useEvents(
-						message.events as GameEvent[],
-					);
-				}
-				return;
-			case "game-state-updated-by-guest":
-				if (
+			if (
+				message.playerId !==
 					this
-						.#isHost
-				) {
-					this.#useEvents(
-						message.events as GameEvent[],
-					);
-				}
+						.#playerId ||
+				message.version <=
+					this
+						.#lastPositionVersion
+			)
 				return;
+			this.#lastPositionVersion =
+				message.version;
+			this.#direction.value =
+				message.direction;
+			return;
 		}
-	}
-
-	get signal() {
-		return this
-			.#direction;
-	}
-
-	get direction() {
-		return this
-			.#direction
-			.value;
-	}
-
-	#useEvents(
-		events: GameEvent[],
-	) {
-		const playerEvents =
-			events.filter(
+		// Position packets and batches have independent sequences. Once positions
+		// arrive, an older batch must not change direction or undo a stop packet.
+		if (
+			this
+				.#lastPositionVersion >=
+				0 ||
+			message.version <=
+				this
+					.#lastStateVersion ||
+			this
+				.#isHost ===
+				(message.type ===
+					"game-state-updated-by-host")
+		)
+			return;
+		this.#lastStateVersion =
+			message.version;
+		const movement =
+			(
+				message.events as GameEvent[]
+			).findLast(
 				(
 					event,
 				) =>
@@ -99,25 +100,21 @@ export class RemoteRepeatLastKnownDirectionControl
 					event.bulbroId ===
 						this
 							.#playerId,
-			) as BulbroMovedEvent[];
-		const event =
-			playerEvents.pop();
-		if (
-			!event
-		) {
-			this.#direction.value =
-				zeroPoint();
-			this.#lastPosition.value =
-				zeroPoint();
-			return;
-		}
-		const newPos =
-			event.to;
-		const direction =
-			event.direction;
+			);
 		this.#direction.value =
-			direction;
-		this.#lastPosition.value =
-			newPos;
+			movement?.type ===
+			"bulbroMoved"
+				? movement.direction
+				: zeroPoint();
+	}
+
+	get signal() {
+		return this
+			.#direction;
+	}
+	get direction() {
+		return this
+			.#direction
+			.value;
 	}
 }
