@@ -18,7 +18,7 @@ import { isLocallyAuthoritativeEvent } from "./networkEventFilter";
 import type { RemoteRepeatLastKnownDirectionControl } from "./RemoteControl";
 import type { StateUpdater } from "./StateUpdater";
 
-export const persistDelay = 50;
+export const persistDelay = 25;
 
 export class StateSync {
 	#logger: Logger;

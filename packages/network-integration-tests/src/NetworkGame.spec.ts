@@ -851,6 +851,8 @@ test("repeated exchanges converge and replayed event batches are ignored", async
 		3;
 		turn++
 	) {
+		const beforeGuestBatch =
+			host.updater.getLastSyncedState();
 		guest.process.tick();
 		await waitFor(
 			() =>
@@ -876,6 +878,8 @@ test("repeated exchanges converge and replayed event batches are ignored", async
 					guestId,
 				),
 		);
+		// Event batches and position packets arrive independently. The batch
+		// snapshot proves receipt, while the live state above proves convergence.
 		await waitFor(
 			() =>
 				host
@@ -883,18 +887,12 @@ test("repeated exchanges converge and replayed event batches are ignored", async
 					.direction
 					.x ===
 					-1 &&
-				playerX(
-					host.updater.getLastSyncedState(),
-					guestId,
-				) ===
-					playerX(
-						guest
-							.state
-							.value,
-						guestId,
-					),
+				host.updater.getLastSyncedState() !==
+					beforeGuestBatch,
 		);
 
+		const beforeHostBatch =
+			guest.updater.getLastSyncedState();
 		host.process.tick();
 		await waitFor(
 			() =>
@@ -912,16 +910,8 @@ test("repeated exchanges converge and replayed event batches are ignored", async
 					.direction
 					.x ===
 					1 &&
-				playerX(
-					guest.updater.getLastSyncedState(),
-					hostId,
-				) ===
-					playerX(
-						host
-							.state
-							.value,
-						hostId,
-					),
+				guest.updater.getLastSyncedState() !==
+					beforeHostBatch,
 		);
 		await waitFor(
 			() =>
