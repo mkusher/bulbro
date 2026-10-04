@@ -217,8 +217,6 @@ export default {
 		"Конюшина",
 	"item.name.coffee":
 		"Кава",
-	"item.name.cog":
-		"Шестерня",
 	"item.name.compass":
 		"Компас",
 	"item.name.cyclopsWorm":
@@ -299,8 +297,6 @@ export default {
 		"Панда",
 	"item.name.peacefulBee":
 		"Мирна бджола",
-	"item.name.pencil":
-		"Олівець",
 	"item.name.plant":
 		"Рослина",
 	"item.name.plasticExplosive":
@@ -327,8 +323,6 @@ export default {
 		"Сонцезахисні окуляри",
 	"item.name.terrifiedOnion":
 		"Нажахана цибуля",
-	"item.name.toolbox":
-		"Ящик з інструментами",
 	"item.name.toxicSludge":
 		"Токсичний мул",
 	"item.name.tractor":

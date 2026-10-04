@@ -215,8 +215,6 @@ export default {
 		"Clover",
 	"item.name.coffee":
 		"Coffee",
-	"item.name.cog":
-		"Cog",
 	"item.name.compass":
 		"Compass",
 	"item.name.cyclopsWorm":
@@ -297,8 +295,6 @@ export default {
 		"Panda",
 	"item.name.peacefulBee":
 		"Peaceful Bee",
-	"item.name.pencil":
-		"Pencil",
 	"item.name.plant":
 		"Plant",
 	"item.name.plasticExplosive":
@@ -325,8 +321,6 @@ export default {
 		"Sunglasses",
 	"item.name.terrifiedOnion":
 		"Terrified Onion",
-	"item.name.toolbox":
-		"Toolbox",
 	"item.name.toxicSludge":
 		"Toxic Sludge",
 	"item.name.tractor":

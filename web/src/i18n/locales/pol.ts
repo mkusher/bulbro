@@ -217,8 +217,6 @@ export default {
 		"Koniczyna",
 	"item.name.coffee":
 		"Kawa",
-	"item.name.cog":
-		"Zębatka",
 	"item.name.compass":
 		"Kompas",
 	"item.name.cyclopsWorm":
@@ -299,8 +297,6 @@ export default {
 		"Panda",
 	"item.name.peacefulBee":
 		"Pokojowa pszczoła",
-	"item.name.pencil":
-		"Ołówek",
 	"item.name.plant":
 		"Roślina",
 	"item.name.plasticExplosive":
@@ -327,8 +323,6 @@ export default {
 		"Okulary przeciwsłoneczne",
 	"item.name.terrifiedOnion":
 		"Przerażona cebula",
-	"item.name.toolbox":
-		"Skrzynka z narzędziami",
 	"item.name.toxicSludge":
 		"Toksyczny szlam",
 	"item.name.tractor":

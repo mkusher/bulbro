@@ -217,8 +217,6 @@ export default {
 		"Канюшына",
 	"item.name.coffee":
 		"Кава",
-	"item.name.cog":
-		"Шасцярня",
 	"item.name.compass":
 		"Компас",
 	"item.name.cyclopsWorm":
@@ -299,8 +297,6 @@ export default {
 		"Панда",
 	"item.name.peacefulBee":
 		"Мірная пчала",
-	"item.name.pencil":
-		"Аловак",
 	"item.name.plant":
 		"Расліна",
 	"item.name.plasticExplosive":
@@ -327,8 +323,6 @@ export default {
 		"Сонечныя акуляры",
 	"item.name.terrifiedOnion":
 		"Перапалоханая цыбуля",
-	"item.name.toolbox":
-		"Скрынка з інструментамі",
 	"item.name.toxicSludge":
 		"Таксічны глей",
 	"item.name.tractor":

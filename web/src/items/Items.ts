@@ -24,7 +24,8 @@ export type ItemDefinition =
 
 /**
  * Brotato items that only change stats
- * (https://brotato.wiki.spellsandguns.com/Items).
+ * (https://brotato.wiki.spellsandguns.com/Items). Pencil, Toolbox and Cog
+ * are left out until structures exist: Engineering is their only benefit.
  */
 export const itemDefinitions: ItemDefinition[] =
 	[
@@ -336,20 +337,6 @@ export const itemDefinitions: ItemDefinition[] =
 					attackSpeed: 10,
 					damage:
 						-2,
-				},
-		},
-		{
-			id: "cog",
-			nameKey:
-				"item.name.cog",
-			tier: 2,
-			basePrice: 35,
-			bonuses:
-				{
-					engineering: 4,
-					knockback: 1,
-					damage:
-						-4,
 				},
 		},
 		{
@@ -917,17 +904,6 @@ export const itemDefinitions: ItemDefinition[] =
 				},
 		},
 		{
-			id: "pencil",
-			nameKey:
-				"item.name.pencil",
-			tier: 1,
-			basePrice: 8,
-			bonuses:
-				{
-					engineering: 1,
-				},
-		},
-		{
 			id: "plant",
 			nameKey:
 				"item.name.plant",
@@ -1107,19 +1083,6 @@ export const itemDefinitions: ItemDefinition[] =
 					speed: 4,
 					luck:
 						-5,
-				},
-		},
-		{
-			id: "toolbox",
-			nameKey:
-				"item.name.toolbox",
-			tier: 3,
-			basePrice: 55,
-			bonuses:
-				{
-					engineering: 6,
-					attackSpeed:
-						-8,
 				},
 		},
 		{
