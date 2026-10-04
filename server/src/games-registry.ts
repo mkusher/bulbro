@@ -3,6 +3,7 @@ import type {
 	Player,
 	ReadyPlayer,
 } from "@bulbro/network-protocol";
+
 export {
 	Lobby,
 	Player,

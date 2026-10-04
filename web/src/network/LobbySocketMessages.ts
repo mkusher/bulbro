@@ -1,19 +1,20 @@
-import { type } from "arktype";
 import { LobbyWebsocketMessage as WebsocketMessage } from "@bulbro/network-protocol";
-export {
-	Player as PlayerAttendee,
-	ReadyPlayer as ReadyPlayerAttendee,
-	Lobby as LobbySchema,
-	LobbyWebsocketMessage as WebsocketMessage,
-	Connected,
-	PlayerJoined,
-	LobbySnapshot,
-	PlayerReady,
-	PlayerDisconnected,
-	PlayerConnected,
-	GameStarted,
-} from "@bulbro/network-protocol";
+import { type } from "arktype";
+
 export type { Lobby } from "@bulbro/network-protocol";
+export {
+	Connected,
+	GameStarted,
+	Lobby as LobbySchema,
+	LobbySnapshot,
+	LobbyWebsocketMessage as WebsocketMessage,
+	Player as PlayerAttendee,
+	PlayerConnected,
+	PlayerDisconnected,
+	PlayerJoined,
+	PlayerReady,
+	ReadyPlayer as ReadyPlayerAttendee,
+} from "@bulbro/network-protocol";
 
 export function parseMessage(
 	message: string,

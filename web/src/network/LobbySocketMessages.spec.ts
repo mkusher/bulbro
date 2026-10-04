@@ -1,10 +1,10 @@
-import { wellRoundedBulbro } from "../characters-definitions";
-import { smg } from "../weapons-definitions";
 import {
 	expect,
 	test,
 } from "bun:test";
 import { type } from "arktype";
+import { wellRoundedBulbro } from "../characters-definitions";
+import { smg } from "../weapons-definitions";
 import {
 	LobbySchema,
 	parseMessage,
