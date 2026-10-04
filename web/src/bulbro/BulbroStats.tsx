@@ -168,7 +168,7 @@ export function BulbroStateStats({
 
 	return (
 		<div
-			className={`p-3 border rounded-md ${className || ""}`}
+			className={`p-3 border rounded-md bg-white ${className || ""}`}
 		>
 			<div className="text-sm font-medium mb-3">
 				{t(
