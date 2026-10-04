@@ -124,6 +124,17 @@ export default {
 	"preround.weaponClicked":
 		"Зброя натиснута:",
 
+	"levelUp.title":
+		"Рівень {level}!",
+	"levelUp.choose":
+		"Оберіть покращення",
+	"levelUp.remaining":
+		"Оберіть покращення (потім ще {count, plural, one {# рівень} few {# рівні} many {# рівнів} other {# рівня}})",
+	"levelUp.tier":
+		"Ранг {tier}",
+	"levelUp.select":
+		"Обрати",
+
 	"stats.waveResults":
 		"Результати хвилі",
 	"stats.totalGame":

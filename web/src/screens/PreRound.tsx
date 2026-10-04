@@ -3,10 +3,7 @@ import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
 import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
-import {
-	firstRerollPrice,
-	rerollIncrease,
-} from "@/game-formulas";
+import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
 import {
 	currentLobby,
@@ -21,6 +18,11 @@ import {
 	deltaTime as dt,
 	nowTime,
 } from "@/time";
+import { LevelUpLayout } from "@/upgrades/LevelUpLayout";
+import {
+	generateUpgradeChoices,
+	type UpgradeChoice,
+} from "@/upgrades/Upgrades";
 import {
 	selectWeapons as selectWeaponsInState,
 	updateState,
@@ -31,24 +33,6 @@ import {
 	toWeaponState,
 	type Weapon,
 } from "@/weapon";
-
-/**
- * Calculates the re-roll price for a given re-roll count and wave.
- */
-function getRerollPrice(
-	rerollCount: number,
-	wave: number,
-): number {
-	return (
-		firstRerollPrice(
-			wave,
-		) +
-		rerollCount *
-			rerollIncrease(
-				wave,
-			)
-	);
-}
 
 /**
  * Generates shop items for the first player from the current wave state.
@@ -136,6 +120,170 @@ function useNetworkReadiness():
 				}),
 			),
 	};
+}
+
+/**
+ * The player picking a level-up upgrade, if any: the local player online,
+ * or the first player with pending level-ups in a local game.
+ */
+function findLevelingUpPlayer() {
+	const players =
+		currentNetworkGame.value
+			? waveState.value.players.slice(
+					0,
+					1,
+				)
+			: waveState
+					.value
+					.players;
+	return players.find(
+		(
+			player,
+		) =>
+			player.pendingLevelUps >
+			0,
+	);
+}
+
+/**
+ * Level-up upgrade choice, one level at a time. Shown after the wave
+ * ends and before the shop until every gained level got its upgrade.
+ */
+function LevelUp() {
+	const player =
+		findLevelingUpPlayer();
+	if (
+		!player
+	)
+		return null;
+	const level =
+		player.nextLevelUpLevel;
+	const choices =
+		generateUpgradeChoices(
+			{
+				playerId:
+					player.id,
+				level,
+				luck: player
+					.stats
+					.luck,
+				rerollCount:
+					player.upgradeRerollCount,
+			},
+		);
+	const upgradesRerollPrice =
+		getRerollPrice(
+			player.upgradeRerollCount,
+			waveState
+				.value
+				.round
+				.wave,
+		);
+	const isLocalCoOp =
+		!currentNetworkGame.value &&
+		waveState
+			.value
+			.players
+			.length >
+			1;
+
+	const handleSelect =
+		(
+			choice: UpgradeChoice,
+		) => {
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "upgradeSelected",
+							playerId:
+								player.id,
+							level,
+							upgradeId:
+								choice
+									.upgrade
+									.id,
+							tier: choice.tier,
+						},
+						dt(
+							0,
+						),
+						nowTime(
+							Date.now(),
+						),
+					),
+				);
+		};
+
+	const handleReroll =
+		() => {
+			if (
+				player.materialsAvailable <
+				upgradesRerollPrice
+			)
+				return;
+			recordReroll(
+				upgradesRerollPrice,
+			);
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "upgradesRerolled",
+							playerId:
+								player.id,
+							level,
+							cost: upgradesRerollPrice,
+							rerollCount:
+								player.upgradeRerollCount +
+								1,
+						},
+						dt(
+							0,
+						),
+						nowTime(
+							Date.now(),
+						),
+					),
+				);
+		};
+
+	return (
+		<LevelUpLayout
+			key={`${player.id}:${level}`}
+			level={
+				level
+			}
+			pendingLevelUps={
+				player.pendingLevelUps
+			}
+			choices={
+				choices
+			}
+			onSelect={
+				handleSelect
+			}
+			materials={
+				player.materialsAvailable
+			}
+			rerollPrice={
+				upgradesRerollPrice
+			}
+			onReroll={
+				handleReroll
+			}
+			bulbroState={
+				player
+			}
+			playerName={
+				isLocalCoOp
+					? `P${waveState.value.players.indexOf(player) + 1}: ${findBulbroById(player.type).name}`
+					: undefined
+			}
+		/>
+	);
 }
 
 /**
@@ -326,6 +474,14 @@ export function PreRound() {
 				waveState.value,
 			);
 		};
+
+	if (
+		findLevelingUpPlayer()
+	) {
+		return (
+			<LevelUp />
+		);
+	}
 
 	if (
 		!player

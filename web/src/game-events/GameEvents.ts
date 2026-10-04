@@ -8,6 +8,7 @@ import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
+import type { UpgradeTier } from "@/upgrades/Upgrades";
 import type { MeleeStrike } from "@/weapon/MeleeStrike";
 
 // Base events without EventMeta
@@ -45,6 +46,8 @@ export type GameEventInternal =
 	| StrikeSweptEvent
 	| ShopRerolledEvent
 	| ShopPurchasedEvent
+	| UpgradeSelectedEvent
+	| UpgradesRerolledEvent
 	| TickEvent
 	| UndefinedEvent;
 
@@ -303,6 +306,29 @@ export type ShopRerolledEvent =
 		type: "shopRerolled";
 		playerId: string;
 		cost: number;
+		rerollCount: number;
+	};
+
+/** A level-up upgrade picked on the level-up screen */
+export type UpgradeSelectedEvent =
+	{
+		type: "upgradeSelected";
+		playerId: string;
+		/** Level the upgrade was picked for */
+		level: number;
+		upgradeId: string;
+		tier: UpgradeTier;
+	};
+
+/** New upgrade choices bought on the level-up screen */
+export type UpgradesRerolledEvent =
+	{
+		type: "upgradesRerolled";
+		playerId: string;
+		/** Level the upgrades are offered for */
+		level: number;
+		cost: number;
+		/** Rerolls done for this level, including this one */
 		rerollCount: number;
 	};
 

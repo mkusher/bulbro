@@ -1517,7 +1517,9 @@ export function updateState(
 			};
 		}
 		case "shopRerolled":
-		case "shopPurchased": {
+		case "shopPurchased":
+		case "upgradeSelected":
+		case "upgradesRerolled": {
 			return {
 				...state,
 				players:

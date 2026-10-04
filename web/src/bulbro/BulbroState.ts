@@ -55,6 +55,11 @@ import {
 	type Shape,
 } from "../movement/Movement";
 import type { Material } from "../object";
+import {
+	findUpgradeById,
+	levelUpgradeStatSourceId,
+	upgradeBonuses,
+} from "../upgrades/Upgrades";
 import type {
 	WaveState,
 	WeaponState,
@@ -93,6 +98,8 @@ type BulbroStateProperties =
 		readonly lastDirection: Direction;
 		readonly lastHorizontalDirection: number;
 		readonly rerollCount: number;
+		/** Level-up upgrade re-rolls done for the current level */
+		readonly upgradeRerollCount?: number;
 	};
 
 /**
@@ -139,6 +146,35 @@ export class BulbroState
 		return this
 			.#props
 			.level;
+	}
+	/** Level-up upgrades already picked */
+	get levelUpgradesTaken() {
+		return this.statSources.filter(
+			(
+				s,
+			) =>
+				s.kind ===
+				"upgrade",
+		)
+			.length;
+	}
+	/** Levels gained that still wait for an upgrade to be picked */
+	get pendingLevelUps() {
+		return Math.max(
+			0,
+			this
+				.level -
+				this
+					.levelUpgradesTaken,
+		);
+	}
+	/** Level the next upgrade is picked for */
+	get nextLevelUpLevel() {
+		return (
+			this
+				.levelUpgradesTaken +
+			1
+		);
 	}
 	get totalExperience() {
 		return this
@@ -196,6 +232,15 @@ export class BulbroState
 		return this
 			.#props
 			.lastHorizontalDirection;
+	}
+
+	get upgradeRerollCount() {
+		return (
+			this
+				.#props
+				.upgradeRerollCount ??
+			0
+		);
 	}
 
 	get rerollCount() {
@@ -799,22 +844,57 @@ export class BulbroState
 			this
 				.totalExperience +
 			amount;
+		const level =
+			Math.max(
+				this
+					.level,
+				getLevelForExperience(
+					totalExperience,
+				),
+			);
+		const gained =
+			new BulbroState(
+				{
+					...this
+						.#props,
+					materialsAvailable:
+						this
+							.materialsAvailable +
+						amount,
+					totalExperience,
+					level,
+				},
+			);
+		if (
+			level ===
+			this
+				.level
+		)
+			return gained;
+		// Every level gives +1 max HP (and heals it while alive)
+		const leveled =
+			gained.withStatSource(
+				levelStatSource(
+					level,
+				),
+			);
+		if (
+			!this.isAlive()
+		)
+			return leveled;
 		return new BulbroState(
 			{
-				...this
-					.#props,
-				materialsAvailable:
-					this
-						.materialsAvailable +
-					amount,
-				totalExperience,
-				level:
-					Math.max(
+				...leveled.#props,
+				healthPoints:
+					Math.min(
+						leveled
+							.stats
+							.maxHp,
 						this
-							.level,
-						getLevelForExperience(
-							totalExperience,
-						),
+							.healthPoints +
+							level -
+							this
+								.level,
 					),
 			},
 		);
@@ -1180,6 +1260,78 @@ export class BulbroState
 					},
 				);
 
+			case "upgradeSelected": {
+				if (
+					event.playerId !==
+						this
+							.id ||
+					event.level !==
+						this
+							.nextLevelUpLevel ||
+					event.level >
+						this
+							.level
+				)
+					return this;
+				const upgrade =
+					findUpgradeById(
+						event.upgradeId,
+					);
+				if (
+					!upgrade
+				)
+					return this;
+				const upgraded =
+					this.withStatSource(
+						{
+							id: levelUpgradeStatSourceId(
+								event.level,
+							),
+							kind: "upgrade",
+							bonuses:
+								upgradeBonuses(
+									upgrade,
+									event.tier,
+								),
+						},
+					);
+				return new BulbroState(
+					{
+						...upgraded.#props,
+						upgradeRerollCount: 0,
+					},
+				);
+			}
+
+			case "upgradesRerolled":
+				if (
+					event.playerId !==
+						this
+							.id ||
+					event.level !==
+						this
+							.nextLevelUpLevel ||
+					this
+						.pendingLevelUps ===
+						0 ||
+					this
+						.materialsAvailable <
+						event.cost
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						materialsAvailable:
+							this
+								.materialsAvailable -
+							event.cost,
+						upgradeRerollCount:
+							event.rerollCount,
+					},
+				);
+
 			case "shopPurchased":
 				if (
 					event.playerId !==
@@ -1227,6 +1379,23 @@ export const characterStatSourceId =
 	"character";
 export const harvestingGrowthStatSourceId =
 	"harvesting-growth";
+export const levelStatSourceId =
+	"level";
+
+/** +1 max HP per level reached. */
+export function levelStatSource(
+	level: number,
+): StatSource {
+	return {
+		id: levelStatSourceId,
+		kind: "level",
+		bonuses:
+			{
+				maxHp:
+					level,
+			},
+	};
+}
 
 /**
  * Spawns a new BulbroState from a character definition.
@@ -1244,6 +1413,13 @@ export function spawnBulbro(
 		character.weapons.map(
 			toWeaponState,
 		);
+	const startLevel =
+		Math.max(
+			level,
+			getLevelForExperience(
+				experience,
+			),
+		);
 	const statSources: StatSource[] =
 		[
 			{
@@ -1252,6 +1428,14 @@ export function spawnBulbro(
 				bonuses:
 					character.statBonuses,
 			},
+			...(startLevel >
+			0
+				? [
+						levelStatSource(
+							startLevel,
+						),
+					]
+				: []),
 		];
 	const stats =
 		computeStats(
@@ -1264,12 +1448,7 @@ export function spawnBulbro(
 				.style
 				.faceType,
 			level:
-				Math.max(
-					level,
-					getLevelForExperience(
-						experience,
-					),
-				),
+				startLevel,
 			totalExperience:
 				experience,
 			position,

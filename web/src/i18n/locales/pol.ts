@@ -124,6 +124,17 @@ export default {
 	"preround.weaponClicked":
 		"Broń kliknięta:",
 
+	"levelUp.title":
+		"Poziom {level}!",
+	"levelUp.choose":
+		"Wybierz ulepszenie",
+	"levelUp.remaining":
+		"Wybierz ulepszenie (potem jeszcze {count, plural, one {# poziom} few {# poziomy} many {# poziomów} other {# poziomu}})",
+	"levelUp.tier":
+		"Ranga {tier}",
+	"levelUp.select":
+		"Wybierz",
+
 	"stats.waveResults":
 		"Wyniki fali",
 	"stats.totalGame":
