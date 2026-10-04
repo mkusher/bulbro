@@ -1,11 +1,11 @@
-import { t } from "@/i18n";
-import { formatStatName } from "@/i18n/game";
 import * as PIXI from "pixi.js";
 import {
 	type Direction,
 	isEqual,
 	zeroPoint,
 } from "@/geometry";
+import { t } from "@/i18n";
+import { formatStatName } from "@/i18n/game";
 import { PixiApp } from "../ui/PixiApp";
 import type { Weapon } from "../weapon";
 import { fromWeaponState } from "../weapon";

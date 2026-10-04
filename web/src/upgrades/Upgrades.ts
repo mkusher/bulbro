@@ -1,6 +1,6 @@
-import type { MessageKey } from "@/i18n";
 import type { MainStats } from "@/bulbro/BulbroCharacter";
 import type { StatBonus } from "@/game-formulas";
+import type { MessageKey } from "@/i18n";
 import { seededRng } from "@/random";
 
 /** Upgrade tiers I–IV, as in Brotato. */

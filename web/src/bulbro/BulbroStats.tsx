@@ -1,6 +1,8 @@
 import { t } from "@/i18n";
 import { formatStatName } from "@/i18n/game";
+
 export { formatStatName } from "@/i18n/game";
+
 import {
 	calculateStats,
 	percentageStats,

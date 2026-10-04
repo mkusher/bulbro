@@ -1,8 +1,8 @@
 import type { Stats } from "@/bulbro/BulbroCharacter";
 import type { WeaponStats } from "@/weapon/WeaponState";
 import {
-	t,
 	type MessageKey,
+	t,
 } from "./index";
 
 const statNames =

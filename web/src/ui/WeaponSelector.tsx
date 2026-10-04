@@ -1,5 +1,5 @@
-import { t } from "@/i18n";
 import type { Direction } from "@/geometry";
+import { t } from "@/i18n";
 import type { Weapon } from "../weapon";
 import { WeaponDisplay } from "../weapon/WeaponDisplay";
 import { WeaponStats } from "../weapon/WeaponStats";
