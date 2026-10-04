@@ -9,6 +9,7 @@ import {
 	isRound as isRoundSignal,
 	waveResult,
 } from "@/currentGameProcess";
+import { t } from "@/i18n";
 import {
 	currentLobby,
 	currentNetworkGame,
@@ -104,8 +105,12 @@ export function InGame() {
 					:{" "}
 					{remotePlayer.status ===
 					"connected"
-						? "Connected"
-						: "Disconnected"}
+						? t(
+								"setup.connected",
+							)
+						: t(
+								"setup.disconnected",
+							)}
 				</p>
 			)}
 			<TouchscreenJoystick />
@@ -155,7 +160,9 @@ export function ShowRound({
 				rootEl
 			}
 		>
-			Starting...
+			{t(
+				"game.starting",
+			)}
 		</div>
 	);
 }

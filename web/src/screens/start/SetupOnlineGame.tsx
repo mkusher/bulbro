@@ -6,6 +6,7 @@ import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import type { Difficulty } from "@/game-formulas";
 import { t } from "@/i18n";
+import { bulbroName } from "@/i18n/game";
 import { logger } from "@/logger";
 import {
 	currentLobby,
@@ -276,10 +277,13 @@ export function SetupOnlineGame() {
 					isLocal,
 					bulbroName:
 						isLocal
-							? firstBulbro.name
-							: readyPlayer
-									?.bulbro
-									.name,
+							? bulbroName(
+									firstBulbro,
+								)
+							: readyPlayer &&
+								bulbroName(
+									readyPlayer.bulbro,
+								),
 				};
 			},
 		);

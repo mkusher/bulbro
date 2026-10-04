@@ -543,6 +543,59 @@ export default {
 
 	"items.count":
 		"{count, plural, =0 {Немає предметів} one {# предмет} few {# предмети} other {# предметів}}",
+
+	"preround.materials":
+		"Матеріали: {count}",
+	"shop.weaponLimitReached":
+		"Досягнуто ліміту зброї",
+	"bulbro.hp":
+		"ОЗ",
+	"bulbro.baseSpeed":
+		"Базова",
+	"bulbro.knockedOut":
+		"Нокаут",
+	"bulbro.lowHp":
+		"Мало ОЗ",
+	"bulbro.level":
+		"Рів.",
+	"bulbro.xp":
+		"Досвід",
+	"bulbro.bonuses":
+		"Бонуси:",
+	"bulbro.items":
+		"Предмети:",
+	"hud.wave":
+		"Хвиля: {wave}",
+	"hud.level":
+		"Рів. {level}",
+	"game.starting":
+		"Запуск...",
+	"common.loading":
+		"Завантаження...",
+	"lobby.joining":
+		"Приєднання…",
+	"lobby.joinFailed":
+		"Не вдалося приєднатися до лобі",
+	"character.startingWeaponsCount":
+		"Початкова зброя: {selected} / {total}. Максимум зброї: {max}.",
+	"character.weaponNumber":
+		"Зброя {number}",
+	"character.name.berserker":
+		"Берсерк",
+	"character.name.cyborg":
+		"Кіборг",
+	"character.name.evil":
+		"Лиходій",
+	"character.name.grandpa":
+		"Дідусь",
+	"character.name.king":
+		"Король",
+	"character.name.medic":
+		"Медик",
+	"character.name.vampire":
+		"Вампір",
+	"character.name.well-rounded":
+		"Універсал",
 } as const satisfies Record<
 	keyof typeof en,
 	string

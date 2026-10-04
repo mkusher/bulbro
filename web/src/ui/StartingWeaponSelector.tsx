@@ -1,5 +1,6 @@
 import type { Bulbro } from "@/bulbro";
 import { calculateStats } from "@/game-formulas";
+import { t } from "@/i18n";
 import type { Weapon } from "@/weapon";
 import { WeaponSelector } from "./WeaponSelector";
 
@@ -33,22 +34,16 @@ export function StartingWeaponSelector({
 	return (
 		<div className="space-y-4">
 			<p>
-				Starting
-				weapons:{" "}
-				{
-					selectedCount
-				}{" "}
-				/{" "}
-				{
-					startingWeapons
-				}
-				.
-				Maximum
-				weapons:{" "}
-				{
-					maxWeapons
-				}
-				.
+				{t(
+					"character.startingWeaponsCount",
+					{
+						selected:
+							selectedCount,
+						total:
+							startingWeapons,
+						max: maxWeapons,
+					},
+				)}
 			</p>
 			{selections.map(
 				(
@@ -63,9 +58,14 @@ export function StartingWeaponSelector({
 						{selections.length >
 							1 && (
 							<h4>
-								Weapon{" "}
-								{index +
-									1}
+								{t(
+									"character.weaponNumber",
+									{
+										number:
+											index +
+											1,
+									},
+								)}
 							</h4>
 						)}
 						<WeaponSelector

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import {
 	Card,
 	CardContent,
@@ -53,7 +54,9 @@ function StatBonusDisplay({
 	return (
 		<div className="space-y-0.5">
 			<strong className="text-[9px]">
-				Bonuses:
+				{t(
+					"bulbro.bonuses",
+				)}
 			</strong>
 			{statEntries.map(
 				([
@@ -218,7 +221,9 @@ export function BulbroCard({
 							0 && (
 							<div className="truncate">
 								<strong className="text-[9px]">
-									Items:
+									{t(
+										"bulbro.items",
+									)}
 								</strong>{" "}
 								{bulbro.style.wearingItems.join(
 									", ",

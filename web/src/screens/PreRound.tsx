@@ -5,6 +5,7 @@ import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
+import { bulbroName } from "@/i18n/game";
 import { findItemById } from "@/items/Items";
 import {
 	currentLobby,
@@ -136,10 +137,11 @@ function useNetworkReadiness():
 							localPlayerId,
 						bulbroName:
 							bulbro &&
-							findBulbroById(
-								bulbro.characterId,
-							)
-								.name,
+							bulbroName(
+								findBulbroById(
+									bulbro.characterId,
+								),
+							),
 						level:
 							bulbro?.level,
 					};
@@ -317,7 +319,7 @@ function LevelUp({
 			}
 			playerName={
 				isLocalCoOp
-					? `P${waveState.value.players.indexOf(player) + 1}: ${findBulbroById(player.characterId).name}`
+					? `P${waveState.value.players.indexOf(player) + 1}: ${bulbroName(findBulbroById(player.characterId))}`
 					: undefined
 			}
 		/>

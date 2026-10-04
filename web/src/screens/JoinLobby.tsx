@@ -87,7 +87,9 @@ export function JoinLobby({
 					cause instanceof
 						Error
 						? cause.message
-						: "Could not join lobby",
+						: t(
+								"lobby.joinFailed",
+							),
 				);
 			} finally {
 				setJoining(
@@ -162,7 +164,9 @@ export function JoinLobby({
 									}
 								>
 									{joining
-										? "Joining…"
+										? t(
+												"lobby.joining",
+											)
 										: t(
 												"lobby.joinById",
 											)}

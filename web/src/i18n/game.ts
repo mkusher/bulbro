@@ -1,4 +1,7 @@
-import type { Stats } from "@/bulbro/BulbroCharacter";
+import type {
+	Bulbro,
+	Stats,
+} from "@/bulbro/BulbroCharacter";
 import type { WeaponStats } from "@/weapon/WeaponState";
 import {
 	type MessageKey,
@@ -90,4 +93,23 @@ export function formatStatName(
 				str.toUpperCase(),
 		)
 		.trim();
+}
+
+export function bulbroName(
+	bulbro: Pick<
+		Bulbro,
+		| "id"
+		| "name"
+	>,
+): string {
+	const key =
+		`character.name.${bulbro.id}` as MessageKey;
+	const name =
+		t(
+			key,
+		);
+	return name ===
+		key
+		? bulbro.name
+		: name;
 }

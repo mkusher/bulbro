@@ -1,4 +1,5 @@
 import { t } from "@/i18n";
+import { bulbroName } from "@/i18n/game";
 import type { Bulbro } from "../bulbro";
 import { BulbroCard } from "../bulbro/BulbroDisplay";
 import { BulbroStats } from "../bulbro/BulbroStats";
@@ -60,9 +61,9 @@ export function BulbroSelector({
 			{/* Detailed View */}
 			<div className="flex-1 min-w-0">
 				<h3 className="text-lg font-semibold mb-3 text-center lg:text-left">
-					{
-						displayedBulbro.name
-					}
+					{bulbroName(
+						displayedBulbro,
+					)}
 				</h3>
 				<div className="flex flex-col md:flex-row gap-4">
 					{/* Large Display */}
@@ -227,9 +228,9 @@ function BulbroThumbnailIcon({
 
 			{/* Name Label */}
 			<div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 truncate">
-				{
-					bulbro.name
-				}
+				{bulbroName(
+					bulbro,
+				)}
 			</div>
 			<button
 				type="button"
@@ -237,7 +238,9 @@ function BulbroThumbnailIcon({
 				aria-label={t(
 					"common.selectNamed",
 					{
-						name: bulbro.name,
+						name: bulbroName(
+							bulbro,
+						),
 					},
 				)}
 				aria-pressed={

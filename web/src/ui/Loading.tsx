@@ -1,7 +1,10 @@
+import { t } from "@/i18n";
 export function Loader() {
 	return (
 		<h1>
-			Loading...
+			{t(
+				"common.loading",
+			)}
 		</h1>
 	);
 }

@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { t } from "@/i18n";
 import type { Size } from "../../../geometry";
 import type { BulbroState } from "../..";
 import {
@@ -127,7 +128,14 @@ export class ExperienceSprite {
 					padding,
 		);
 		greenExperienceRectangle.endFill();
-		this.#lvlText.text = `Lvl ${currentLevelByExp}`;
+		this.#lvlText.text =
+			t(
+				"hud.level",
+				{
+					level:
+						currentLevelByExp,
+				},
+			);
 		this.#lvlText.x =
 			greenExperienceRectangleWidth -
 			this

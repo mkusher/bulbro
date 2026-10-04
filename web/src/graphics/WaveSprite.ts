@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { t } from "@/i18n";
 import type { RoundState } from "../waveState";
 
 export class WaveSprite {
@@ -43,7 +44,13 @@ export class WaveSprite {
 	) {
 		const wave =
 			round.wave;
-		this.#gfx.text = `Wave: ${wave}`;
+		this.#gfx.text =
+			t(
+				"hud.wave",
+				{
+					wave,
+				},
+			);
 		this.#gfx.x =
 			(viewSizeWidth -
 				this
