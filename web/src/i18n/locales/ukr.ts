@@ -9,6 +9,10 @@ export default {
 		"Основні характеристики",
 	"characterStats.secondary":
 		"Додаткові характеристики",
+	"characterStats.showAll":
+		"Показати всі",
+	"characterStats.showChanged":
+		"Показати змінені",
 	"characterStats.health":
 		"Здоров’я",
 	"characterStats.level":

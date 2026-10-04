@@ -7,6 +7,10 @@ export default {
 		"Core Stats",
 	"characterStats.secondary":
 		"Secondary Stats",
+	"characterStats.showAll":
+		"Show all",
+	"characterStats.showChanged":
+		"Show changed",
 	"characterStats.health":
 		"Health",
 	"characterStats.level":
