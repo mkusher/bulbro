@@ -136,7 +136,9 @@ Inflation defaults to 1. At wave 1, a base-price-15 Cake costs 17 materials, a b
 
 ## Ownership, stacking, and effects
 
-A purchase records a separate `kind: "item"` stat source with ID `item:<purchase index>:<item ID>` in [BulbroState](../src/bulbro/BulbroState.ts). The state's `items` getter derives owned IDs from these sources, which survive serialization. [computeStats](../src/game-formulas.ts) sums bonuses from all sources before applying them to base stats. Two Helmets give +2 Armor and −4% Speed. There is no per-item copy limit, and items do not occupy weapon slots.
+A purchase appends an item ID to the explicit `items` list in [BulbroState](../src/bulbro/BulbroState.ts). The immutable `withItem(itemId)` method adds one copy and records a separate `kind: "item"` stat source with ID `item:<purchase index>:<item ID>`, then recomputes stats. It can also grant an item without spending materials; shop purchases validate the price and available materials before spending and adding the item. Unknown item IDs leave the state unchanged.
+
+The list preserves acquisition order and duplicate copies, and is serialized alongside stat sources and computed stats. Older snapshots without `items` derive their initial list from item stat sources without reapplying bonuses. [computeStats](../src/game-formulas.ts) sums bonuses from all sources before applying them to base stats. Two Helmets give +2 Armor and −4% Speed. Max HP penalties clamp current health to the new maximum; Max HP bonuses do not heal. There is no per-item copy limit, and items do not occupy weapon slots.
 
 [Shop](../src/shop/Shop.tsx) displays tier, localized name, artwork, per-copy bonuses, and the calculated price. Purchases depend on available materials and the shop's disabled state; reaching weapon capacity still allows item purchases. [ItemSlots](../src/shop/ItemSlots.tsx) groups identical owned items and displays their count alongside per-copy bonuses, rather than multiplying the displayed bonuses.
 
