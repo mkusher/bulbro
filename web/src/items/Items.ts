@@ -17,7 +17,7 @@ export type ItemDefinition =
 		/** Localized display name, resolved when rendered. */
 		nameKey: MessageKey;
 		tier: ItemTier;
-		/** Price on wave 1, before wave scaling and inflation */
+		/** Input to itemPrice, before wave scaling (including wave 1) and inflation. */
 		basePrice: number;
 		bonuses: StatBonus;
 	};
