@@ -1,3 +1,4 @@
+import { itemPrice } from "@/game-formulas";
 import { t } from "@/i18n";
 import { ItemDisplay } from "@/items/ItemDisplay";
 import { itemDefinitions } from "@/items/Items";
@@ -6,7 +7,6 @@ import {
 	ItemBonuses,
 	Shop,
 } from "@/shop/Shop";
-import { itemPrice } from "@/game-formulas";
 
 export default {
 	title:
