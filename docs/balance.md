@@ -3,6 +3,10 @@
 This document reviews Bulbro's balance: stats, level-ups, weapons, enemies,
 economy and characters. Bulbro is compared with Brotato throughout.
 
+The [item reference](../web/docs/items.md) lists all 83 items, their tiers,
+prices, bonuses, stacking rules, and sprite frames. The
+[weapon reference](../web/docs/weapons.md) covers weapon values and attacks.
+
 Bulbro copies Brotato's **formulas** almost exactly. The **content numbers**
 on top of them (weapons, enemies, economy, characters) have drifted far from
 Brotato. Most balance problems come from that mix: Brotato's scaling rules
@@ -42,10 +46,11 @@ at difficulty 0. They are not measured in play.
   Sword costs 51. Wave 1 drops roughly 77 materials, so you can buy the whole
   4-item shop right away.
 - **Items are the only other sink.** The shop also sells 83 Brotato items
-  that only change stats ([Items.ts](../web/src/items/Items.ts)): each slot
+  that only change stats ([item values and shop rules](../web/docs/items.md)): each slot
   offers a weapon 35% of the time, otherwise an item of a tier rolled from
   the wave and luck. Items keep Brotato's prices, so they cost 3–20× more
-  than a weapon (wave 1: tier I 17–34, tier IV 100–122, a 5-price weapon 6).
+  than a weapon (wave 1: tier I 17–34, a 5-price weapon 6; tier IV would
+  cost 100–122 but cannot appear before wave 7 in the default pool).
   There are still no weapon tiers or merging, and items with conditional
   effects are not in yet.
 
@@ -96,6 +101,9 @@ scaling stat:
   Gnome (+10 melee) or Big Arms (+12 melee, +6 ranged) add flat damage to every
   hit, so they help the fast weapons most. Attack speed items are wasted on a
   Machine Gun at the cooldown floor.
+  See [item bonuses and effect limits](../web/docs/items.md#ownership-stacking-and-effects)
+  for the complete tradeoffs and the distinction between stat items and
+  conditional effects.
 
 ### 3. Enemy damage scaling is uneven, and there are no i-frames
 

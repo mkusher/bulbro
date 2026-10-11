@@ -98,6 +98,8 @@ type BulbroStateProperties =
 		/** When life steal healed the Bulbro the last time */
 		readonly lastLifeStealAt?: number;
 		readonly weapons: WeaponState[];
+		/** Owned item IDs in acquisition order; duplicates represent separate copies. */
+		readonly items: readonly string[];
 		readonly lastMovedAt: number;
 		readonly lastHitAt: number;
 		readonly healedByHpRegenerationAt: number;
@@ -188,26 +190,11 @@ export class BulbroState
 			1
 		);
 	}
-	/** Ids of the items bought in the shop, in purchase order */
+	/** Owned item IDs in acquisition order, including duplicate copies. */
 	get items() {
-		return this.statSources.flatMap(
-			(
-				s,
-			) => {
-				const itemId =
-					s.kind ===
-					"item"
-						? itemIdFromStatSourceId(
-								s.id,
-							)
-						: undefined;
-				return itemId
-					? [
-							itemId,
-						]
-					: [];
-			},
-		);
+		return this
+			.#props
+			.items;
 	}
 	get totalExperience() {
 		return this
@@ -283,7 +270,12 @@ export class BulbroState
 	}
 
 	constructor(
-		props: BulbroStateProperties,
+		props: Omit<
+			BulbroStateProperties,
+			"items"
+		> & {
+			items?: readonly string[];
+		},
 	) {
 		if (
 			!Number.isSafeInteger(
@@ -307,7 +299,30 @@ export class BulbroState
 			);
 		}
 		this.#props =
-			props;
+			{
+				...props,
+				// Migrate snapshots written before inventory was stored explicitly.
+				items:
+					props.items ??
+					props.statSources.flatMap(
+						(
+							source,
+						) => {
+							const id =
+								source.kind ===
+								"item"
+									? itemIdFromStatSourceId(
+											source.id,
+										)
+									: undefined;
+							return id
+								? [
+										id,
+									]
+								: [];
+						},
+					),
+			};
 	}
 
 	toJSON() {
@@ -757,6 +772,53 @@ export class BulbroState
 			source:
 				"lifeSteal",
 		};
+	}
+
+	/** Adds one owned copy and applies its stat bonuses without spending materials. */
+	withItem(
+		itemId: string,
+	): BulbroState {
+		const item =
+			findItemById(
+				itemId,
+			);
+		if (
+			!item
+		)
+			return this;
+		const upgraded =
+			this.withStatSource(
+				{
+					id: itemStatSourceId(
+						item.id,
+						this
+							.items
+							.length,
+					),
+					kind: "item",
+					bonuses:
+						item.bonuses,
+				},
+			);
+		return new BulbroState(
+			{
+				...upgraded.#props,
+				items:
+					[
+						...this
+							.items,
+						item.id,
+					],
+				healthPoints:
+					Math.min(
+						this
+							.healthPoints,
+						upgraded
+							.stats
+							.maxHp,
+					),
+			},
+		);
 	}
 
 	/** Replaces the stat source with the same id (or adds it) and recomputes stats. */
@@ -1389,8 +1451,16 @@ export class BulbroState
 			case "shopPurchased": {
 				if (
 					event.playerId !==
-					this
-						.id
+						this
+							.id ||
+					!Number.isFinite(
+						event.price,
+					) ||
+					event.price <
+						0 ||
+					event.price >
+						this
+							.materialsAvailable
 				)
 					return this;
 				const item =
@@ -1421,18 +1491,8 @@ export class BulbroState
 						},
 					);
 				return item
-					? paid.withStatSource(
-							{
-								id: itemStatSourceId(
-									item.id,
-									this
-										.items
-										.length,
-								),
-								kind: "item",
-								bonuses:
-									item.bonuses,
-							},
+					? paid.withItem(
+							item.id,
 						)
 					: paid;
 			}
@@ -1543,6 +1603,8 @@ export function spawnBulbro(
 			stats,
 			statSources,
 			weapons,
+			items:
+				[],
 			lastMovedAt: 0,
 			lastHitAt: 0,
 			healedByHpRegenerationAt: 0,

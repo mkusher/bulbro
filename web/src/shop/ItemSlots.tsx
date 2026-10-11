@@ -1,4 +1,5 @@
 import { t } from "@/i18n";
+import { ItemDisplay } from "@/items/ItemDisplay";
 import type { ItemDefinition } from "@/items/Items";
 import { ItemBonuses } from "@/shop/Shop";
 import {
@@ -84,6 +85,14 @@ export function ItemSlots({
 											item.nameKey,
 										)}
 									</p>
+									<ItemDisplay
+										item={
+											item
+										}
+										size={
+											32
+										}
+									/>
 									<ItemBonuses
 										item={
 											item

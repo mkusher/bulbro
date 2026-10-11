@@ -2,6 +2,7 @@ import type { Stats } from "@/bulbro/BulbroCharacter";
 import { formatStatName } from "@/bulbro/BulbroStats";
 import { percentageStats } from "@/game-formulas";
 import { t } from "@/i18n";
+import { ItemDisplay } from "@/items/ItemDisplay";
 import type {
 	ItemDefinition,
 	ItemTier,
@@ -153,6 +154,11 @@ function ItemCardContent({
 					item.nameKey,
 				)}
 			</p>
+			<ItemDisplay
+				item={
+					item
+				}
+			/>
 			<ItemBonuses
 				item={
 					item

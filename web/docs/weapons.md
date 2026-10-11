@@ -1,5 +1,8 @@
 # Weapons
 
+See [Items](items.md) for shop item bonuses and artwork, and
+[Game Balance](../../docs/balance.md) for the economy and combat review.
+
 The game registers 14 player weapons and 3 enemy weapons in [weapons-definitions/index.ts](../src/weapons-definitions/index.ts). Each definition supplies an ID, display name, classes, weapon stats, base price, projectile speed, and attack configuration. The [Weapon model](../src/weapon.ts) and [WeaponStats type](../src/weapon/WeaponState.ts) define these fields.
 
 ## Player weapons

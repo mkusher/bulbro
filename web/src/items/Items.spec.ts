@@ -3,8 +3,10 @@ import {
 	expect,
 	it,
 } from "bun:test";
-import type { BulbroState } from "@/bulbro/BulbroState";
-import { spawnBulbro } from "@/bulbro/BulbroState";
+import {
+	BulbroState,
+	spawnBulbro,
+} from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { baseStats } from "@/game-formulas";
@@ -226,6 +228,225 @@ describe("rollItemTier", () => {
 });
 
 describe("buying items", () => {
+	it("starts with an explicit empty inventory", () => {
+		const state =
+			spawn();
+		expect(
+			state.items,
+		).toEqual(
+			[],
+		);
+		expect(
+			state.toJSON()
+				.items,
+		).toEqual(
+			[],
+		);
+	});
+
+	it("adds items immutably and combines their bonuses with character and upgrade stats", () => {
+		const original =
+			spawn().withStatSource(
+				{
+					id: "upgrade-armor",
+					kind: "upgrade",
+					bonuses:
+						{
+							armor: 2,
+						},
+				},
+			);
+		const upgraded =
+			original
+				.withItem(
+					"helmet",
+				)
+				.withItem(
+					"helmet",
+				)
+				.withItem(
+					"glassCannon",
+				);
+		expect(
+			original.items,
+		).toEqual(
+			[],
+		);
+		expect(
+			original
+				.stats
+				.armor,
+		).toBe(
+			2,
+		);
+		expect(
+			upgraded.items,
+		).toEqual(
+			[
+				"helmet",
+				"helmet",
+				"glassCannon",
+			],
+		);
+		expect(
+			upgraded
+				.stats
+				.armor,
+		).toBe(
+			1,
+		);
+		expect(
+			upgraded
+				.stats
+				.damage,
+		).toBe(
+			original
+				.stats
+				.damage +
+				25,
+		);
+		expect(
+			upgraded
+				.stats
+				.speed,
+		).toBeCloseTo(
+			original
+				.stats
+				.speed -
+				baseStats.speed *
+					0.04,
+		);
+		expect(
+			upgraded.materialsAvailable,
+		).toBe(
+			original.materialsAvailable,
+		);
+		expect(
+			upgraded.gainMaterials(
+				1,
+			)
+				.items,
+		).toEqual(
+			upgraded.items,
+		);
+		expect(
+			upgraded.withItem(
+				"unknown",
+			),
+		).toBe(
+			upgraded,
+		);
+	});
+
+	it("caps current health after a max HP penalty without healing for a max HP bonus", () => {
+		const original =
+			spawn();
+		const penalized =
+			original.withItem(
+				"injection",
+			);
+		expect(
+			penalized
+				.stats
+				.maxHp,
+		).toBe(
+			original
+				.stats
+				.maxHp -
+				2,
+		);
+		expect(
+			penalized.healthPoints,
+		).toBe(
+			penalized
+				.stats
+				.maxHp,
+		);
+		expect(
+			penalized.withItem(
+				"cake",
+			)
+				.healthPoints,
+		).toBe(
+			penalized.healthPoints,
+		);
+		expect(
+			original.healthPoints,
+		).toBe(
+			original
+				.stats
+				.maxHp,
+		);
+	});
+
+	it("rejects purchases with insufficient funds or invalid prices without changing items or stats", () => {
+		const state =
+			spawn(
+				10,
+			);
+		for (const price of [
+			11,
+			-1,
+			Number.NaN,
+			Number.POSITIVE_INFINITY,
+		]) {
+			expect(
+				buyItem(
+					state,
+					"helmet",
+					price,
+				),
+			).toBe(
+				state,
+			);
+		}
+		const purchased =
+			buyItem(
+				state,
+				"helmet",
+				10,
+			);
+		expect(
+			purchased.materialsAvailable,
+		).toBe(
+			0,
+		);
+		expect(
+			purchased.items,
+		).toEqual(
+			[
+				"helmet",
+			],
+		);
+	});
+
+	it("ignores purchases for another player", () => {
+		const state =
+			spawn();
+		expect(
+			state.applyEvent(
+				withEventMeta(
+					{
+						type: "shopPurchased",
+						playerId:
+							"other",
+						itemId:
+							"helmet",
+						price: 10,
+					},
+					deltaTime(
+						0,
+					),
+					nowTime(
+						1000,
+					),
+				),
+			),
+		).toBe(
+			state,
+		);
+	});
+
 	it("applies item stats and spends materials", () => {
 		const state =
 			buyItem(
@@ -327,6 +548,136 @@ describe("buying items", () => {
 			json.statSources,
 		).toEqual(
 			state.statSources,
+		);
+		expect(
+			json.items,
+		).toEqual(
+			[
+				"potato",
+			],
+		);
+		const restored =
+			new BulbroState(
+				json,
+			);
+		expect(
+			restored.items,
+		).toEqual(
+			state.items,
+		);
+		expect(
+			restored.stats,
+		).toEqual(
+			state.stats,
+		);
+		const next =
+			restored.withItem(
+				"potato",
+			);
+		expect(
+			next.items,
+		).toEqual(
+			[
+				"potato",
+				"potato",
+			],
+		);
+		expect(
+			next
+				.stats
+				.armor,
+		).toBe(
+			state
+				.stats
+				.armor +
+				1,
+		);
+	});
+
+	it("migrates legacy item stat sources once and preserves duplicate copies", () => {
+		const state =
+			spawn()
+				.withItem(
+					"helmet",
+				)
+				.withItem(
+					"helmet",
+				);
+		const {
+			items:
+				_items,
+			...legacy
+		} =
+			state.toJSON();
+		const restored =
+			new BulbroState(
+				legacy,
+			);
+		expect(
+			restored.items,
+		).toEqual(
+			[
+				"helmet",
+				"helmet",
+			],
+		);
+		expect(
+			restored.stats,
+		).toEqual(
+			state.stats,
+		);
+		const reloaded =
+			new BulbroState(
+				JSON.parse(
+					JSON.stringify(
+						restored,
+					),
+				),
+			);
+		expect(
+			reloaded.items,
+		).toEqual(
+			restored.items,
+		);
+		expect(
+			reloaded.stats,
+		).toEqual(
+			restored.stats,
+		);
+		const next =
+			buyItem(
+				reloaded,
+				"helmet",
+			);
+		expect(
+			next.items,
+		).toEqual(
+			[
+				"helmet",
+				"helmet",
+				"helmet",
+			],
+		);
+		expect(
+			next
+				.stats
+				.armor,
+		).toBe(
+			state
+				.stats
+				.armor +
+				1,
+		);
+		expect(
+			next.statSources.filter(
+				(
+					source,
+				) =>
+					source.kind ===
+					"item",
+			),
+		).toHaveLength(
+			3,
 		);
 	});
 });
