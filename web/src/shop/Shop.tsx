@@ -72,10 +72,10 @@ export const itemTierStyles: Record<
 	string
 > =
 	{
-		1: "border-slate-300",
-		2: "border-sky-400 bg-sky-50",
-		3: "border-purple-400 bg-purple-50",
-		4: "border-red-400 bg-red-50",
+		1: "border-border",
+		2: "border-border bg-sky-50",
+		3: "border-border bg-purple-50",
+		4: "border-border bg-red-50",
 	};
 
 /**
