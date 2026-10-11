@@ -25,7 +25,7 @@ export const brick: Weapon =
 						meleeDamage: 1,
 					},
 			},
-		basePrice: 5,
+		basePrice: 25,
 		attack:
 			{
 				type: "swing",

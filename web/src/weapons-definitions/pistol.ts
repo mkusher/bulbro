@@ -25,7 +25,7 @@ export const pistol: Weapon =
 						rangedDamage: 1,
 					},
 			},
-		basePrice: 5,
+		basePrice: 15,
 		attack:
 			{
 				type: "shot",

@@ -22,7 +22,7 @@ export const fist: Weapon =
 						meleeDamage: 1,
 					},
 			},
-		basePrice: 5,
+		basePrice: 12,
 		attack:
 			{
 				type: "thrust",

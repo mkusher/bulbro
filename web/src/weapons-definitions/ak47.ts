@@ -25,7 +25,7 @@ export const ak47: Weapon =
 						rangedDamage: 0.8,
 					},
 			},
-		basePrice: 5,
+		basePrice: 20,
 		attack:
 			{
 				type: "shot",

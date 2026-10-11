@@ -25,7 +25,7 @@ export const laserGun: Weapon =
 						elementalDamage: 0.5,
 					},
 			},
-		basePrice: 5,
+		basePrice: 8,
 		attack:
 			{
 				type: "shot",

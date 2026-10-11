@@ -24,7 +24,7 @@ export const smg: Weapon =
 						rangedDamage: 0.5,
 					},
 			},
-		basePrice: 5,
+		basePrice: 15,
 		attack:
 			{
 				type: "shot",

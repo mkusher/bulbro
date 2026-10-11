@@ -41,18 +41,30 @@ at difficulty 0. They are not measured in play.
   The enemy's `materialsDropped` value, carried by the material as `value`,
   is ignored. So the Wild Boar's 5 (+3/wave), the Tree's 3, the Archer's
   +1/wave and similar values have no effect.
-- **Weapons are very cheap.** Most weapons have `basePrice: 5`, which is
-  6 materials on wave 1. In Brotato, tier-I weapons cost around 10–20 and the
-  Sword costs 51. Wave 1 drops roughly 77 materials, so you can buy the whole
-  4-item shop right away.
-- **Items are the only other sink.** The shop also sells 83 Brotato items
+- **Weapon prices follow weapon power.** Weapon base prices range from 8
+  (Laser Gun) to 70 (Machine Gun), ordered by the DPS table below: weak or
+  support weapons cost 8–15, mid-tier weapons 18–28, the area weapons
+  28–35, and the two outliers 60–70. At wave 1 that is 9–78 materials,
+  against tier-I items at 17–34, so wave 1's roughly 77 materials buy two
+  or three offers instead of the whole shop, or a Machine Gun alone. In Brotato, tier-I weapons cost around 10–20
+  and the Sword costs 51.
+- **Items share the shop with weapons.** The shop sells 77 of the 83 Brotato items
   that only change stats ([item values and shop rules](../web/docs/items.md)): each slot
   offers a weapon 35% of the time, otherwise an item of a tier rolled from
-  the wave and luck. Items keep Brotato's prices, so they cost 3–20× more
-  than a weapon (wave 1: tier I 17–34, a 5-price weapon 6; tier IV would
-  cost 100–122 but cannot appear before wave 7 in the default pool).
-  There are still no weapon tiers or merging, and items with conditional
-  effects are not in yet.
+  the wave and luck. Items keep Brotato's prices (tier I 15–30, tier II
+  40–65, tier III and IV up to 110), so tier-I items and mid-tier weapons
+  compete for the same early materials; tier IV (100–122 at wave 1) cannot
+  appear before wave 7 in the default pool. There are still no weapon tiers
+  or merging, and items with conditional effects are not in yet.
+- **Engineering items are out of the shop.** Engineering does nothing yet
+  (see [Characters](#7-characters)), so Book, Duct Tape, Compass,
+  Reinforced Steel, Alloy and Exoskeleton would charge full price for part
+  of a bonus. They are not offered until structures exist. Ritual and Wolf
+  Helmet stay: their Engineering penalty is free for now, which makes them
+  slightly better than in Brotato.
+- **Materials still drop as 1.** Every pickup is worth 1 regardless of the
+  enemy, so later waves give fewer materials than Brotato and higher prices
+  bite harder after wave 5.
 
 Estimated materials (and XP) per wave, solo, difficulty 0:
 
@@ -73,23 +85,28 @@ scaling stat:
 
 | Weapon | Bulbro DPS (base → +5) | Brotato tier I DPS (base → +5) | Bulbro price |
 |---|---|---|---|
-| Machine Gun | **21 → 43** (3 dmg / 0.14s) | — | 10 |
-| Sword | **28** (25 dmg / 0.9s, 10% crit) | 23 (30 / 1.28s) | **5** (Brotato: 51) |
-| Brick | 22 (30 / 1.39s) | 22 | 5 |
-| AK-47 | 6.7 → 20 | — | 5 |
-| Bazooka | 14 → 17, area damage | — | 14 |
-| Grenade | 12, area damage | — | 9 |
-| Fist | 10 | 10 | 5 |
-| Double Barrel Shotgun | 8.8 → 12 (single shot) | 4 pellets, pierce 2 | 5 |
-| Knife | 5.9 (6 dmg) | 8.9 (9 dmg) | 5 |
-| Flare Gun | 5.7 | — | 7 |
-| SMG | 5 → 17.5 (1 / 0.2s) | 17.6 → 32 (3 / 0.17s) | 5 |
-| Pistol | 4 → 14 (2 / 0.5s) | 10 → 14 (12 / 1.2s) | 5 |
-| Laser Gun | **2 → 4.5** (4 / 1.98s) | 20 → 30 (40 dmg, 400% scaling) | 5 |
-| Hand | ~1 | ~1 (support weapon, +3 harvesting) | 5 |
+| Machine Gun | **21 → 43** (3 dmg / 0.14s) | — | 70 |
+| Sword | **28** (25 dmg / 0.9s, 10% crit) | 23 (30 / 1.28s) | 60 (Brotato: 51) |
+| Brick | 22 (30 / 1.39s) | 22 | 25 |
+| AK-47 | 6.7 → 20 | — | 20 |
+| Bazooka | 14 → 17, area damage | — | 35 |
+| Grenade | 12, area damage | — | 28 |
+| Fist | 10 | 10 | 12 |
+| Double Barrel Shotgun | 8.8 → 12 (single shot) | 4 pellets, pierce 2 | 18 |
+| Knife | 5.9 (6 dmg) | 8.9 (9 dmg) | 12 |
+| Flare Gun | 5.7 | — | 15 |
+| SMG | 5 → 17.5 (1 / 0.2s) | 17.6 → 32 (3 / 0.17s) | 15 |
+| Pistol | 4 → 14 (2 / 0.5s) | 10 → 14 (12 / 1.2s) | 15 |
+| Laser Gun | **2 → 4.5** (4 / 1.98s) | 20 → 30 (40 dmg, 400% scaling) | 8 |
+| Hand | ~1 | ~1 (support weapon, +3 harvesting) | 10 |
 
-- **Sword** (cheapest price) and **Machine Gun** clearly beat everything else.
-- **Laser Gun, SMG, Hand and Flare Gun** are not worth buying.
+- **Sword** and **Machine Gun** clearly beat everything else. Their prices
+  (60 and 70, 67 and 78 at wave 1) are set above their Brotato tier to
+  offset that: on wave 1 a Machine Gun takes the whole income, and the Sword
+  costs as much as two tier-I items. Their damage is still out of line.
+- **Laser Gun, SMG, Hand and Flare Gun** are not worth buying. The Laser Gun
+  is the cheapest weapon (8, 9 at wave 1) to make it a stopgap buy, but
+  price cannot fix 2 DPS.
 - **Attack speed hits a floor.** The Machine Gun reaches the 100ms minimum
   cooldown at only +40% attack speed, so further attack speed is wasted on it.
 - **Missing weapon effects.** There is no pierce: Brotato's Pistol pierces one
@@ -177,18 +194,18 @@ scaling stat:
 
 Brotato characters always trade something away. Engineering does nothing yet,
 because there are no structures. For the same reason the Skull upgrade and
-the Pencil, Toolbox and Cog items are left out, and the Engineering on other
-items is a wasted bonus.
+the Pencil, Toolbox and Cog items are left out, and the shop does not offer
+items with an Engineering bonus.
 
 ## Suggested priority
 
-1. **Economy:** use the material's real value on pickup, raise weapon prices
-   to Brotato levels (tier I around 10–20, Sword and Machine Gun around
-   30–50+), and add weapon merging as a second sink next to stat items.
+1. **Economy:** use the material's real value on pickup and add weapon
+   merging as a second sink next to stat items. Weapon prices are already
+   raised to Brotato levels.
 2. **Weapons:** rebase them on Brotato's numbers (Pistol 12 dmg / 1.2s,
    SMG 3 / 0.17s, Laser 40 with 4× scaling). Alternatively, keep the fast feel
-   but lower each weapon's scaling in proportion to its cooldown. Fix the
-   Sword's price and nerf the Machine Gun either way.
+   but lower each weapon's scaling in proportion to its cooldown. Nerf the
+   Machine Gun either way.
 3. **Enemies:** give every enemy damage growth per wave (Brotato uses +0.6 to
    +1.2), drop Baby to +0.6, add 0.2–0.4s i-frames, and fix what enemy
    `attackSpeed` means.

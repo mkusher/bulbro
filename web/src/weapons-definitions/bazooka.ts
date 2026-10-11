@@ -25,7 +25,7 @@ export const bazooka: Weapon =
 						rangedDamage: 1.5,
 					},
 			},
-		basePrice: 14,
+		basePrice: 35,
 		attack:
 			{
 				type: "explosion",

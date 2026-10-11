@@ -2,8 +2,8 @@ import type { Bulbro } from "@/bulbro/BulbroCharacter";
 import { itemPrice } from "@/game-formulas";
 import {
 	type ItemDefinition,
-	itemDefinitions,
 	rollItemTier,
+	shopItemDefinitions,
 } from "@/items/Items";
 import type {
 	ItemShopItem,
@@ -209,7 +209,7 @@ export const weaponSlotChance = 0.35;
  */
 export interface GenerateShopItemsOptions
 	extends GenerateWeaponShopItemsOptions {
-	/** Items that can be offered (default: every item) */
+	/** Items that can be offered (default: shopItemDefinitions) */
 	items?: ItemDefinition[];
 	/** Luck of the shopping Bulbro, raises chances of higher item tiers */
 	luck?: number;
@@ -231,7 +231,7 @@ export function generateShopItems(
 		wave = 1,
 		random = Math.random,
 		inflation = 1,
-		items = itemDefinitions,
+		items = shopItemDefinitions,
 		luck = 0,
 		weaponChance = weaponSlotChance,
 	} = options;
