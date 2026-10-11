@@ -21,7 +21,10 @@ import {
 } from "@/ui/PlayersStatus";
 import { Button } from "@/ui/shadcn/button";
 import { Card } from "@/ui/shadcn/card";
-import type { Weapon } from "@/weapon";
+import {
+	minWeaponTier,
+	type OwnedWeapon,
+} from "@/weapon/WeaponTiers";
 
 /**
  * Props for a single player section in the layout.
@@ -30,14 +33,21 @@ export interface PreRoundPlayerProps {
 	bulbro: Bulbro;
 	/** Live state of the player's bulbro; its current stats replace the class bonuses */
 	bulbroState?: BulbroState;
-	weapons: Weapon[];
+	weapons: OwnedWeapon[];
 	materials: number;
 	maxWeaponSlots?: number;
 	/** Owned items */
 	items?: ItemDefinition[];
-	onWeaponClick?: (
-		weapon: Weapon,
-		index: number,
+	/** Materials paid back for selling an owned weapon */
+	weaponSellPrice?: (
+		weapon: OwnedWeapon,
+	) => number;
+	onSellWeapon?: (
+		weapon: OwnedWeapon,
+	) => void;
+	onCombineWeapons?: (
+		weapon: OwnedWeapon,
+		other: OwnedWeapon,
 	) => void;
 }
 
@@ -191,8 +201,17 @@ export function PreRoundLayout({
 								)
 									.maxWeapons
 							}
-							onWeaponClick={
-								player.onWeaponClick
+							sellPrice={
+								player.weaponSellPrice
+							}
+							onSell={
+								player.onSellWeapon
+							}
+							onCombine={
+								player.onCombineWeapons
+							}
+							disabled={
+								isLocalReady
 							}
 						/>
 						{player.items && (
@@ -219,6 +238,22 @@ export function PreRoundLayout({
 							)
 								.maxWeapons)
 					}
+					combinableWeaponIds={player.weapons
+						.filter(
+							(
+								weapon,
+							) =>
+								weapon.tier ===
+								minWeaponTier,
+						)
+						.map(
+							(
+								weapon,
+							) =>
+								weapon
+									.weapon
+									.id,
+						)}
 					items={
 						shopItems
 					}

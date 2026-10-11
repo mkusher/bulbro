@@ -556,6 +556,20 @@ export default {
 		"Materiały: {count}",
 	"shop.weaponLimitReached":
 		"Osiągnięto limit broni",
+	"shop.sellWeapon":
+		"Sprzedaj +${price}",
+	"shop.combineWeapon":
+		"Połącz → Ranga {tier}",
+	"shop.combineHint":
+		"Zdobądź kolejną kopię rangi {tier}, aby połączyć",
+	"shop.maxWeaponTier":
+		"Najwyższa ranga",
+	"shop.lastWeapon":
+		"Nie możesz sprzedać ostatniej broni",
+	"shop.weaponDetails":
+		"Szczegóły broni",
+	"shop.selectWeaponHint":
+		"Wybierz broń, aby ją sprzedać lub połączyć",
 	"bulbro.hp":
 		"PŻ",
 	"bulbro.baseSpeed":

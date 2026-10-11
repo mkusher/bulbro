@@ -48,6 +48,8 @@ export type GameEventInternal =
 	| StrikeSweptEvent
 	| ShopRerolledEvent
 	| ShopPurchasedEvent
+	| WeaponSoldEvent
+	| WeaponsCombinedEvent
 	| UpgradeSelectedEvent
 	| UpgradesRerolledEvent
 	| TickEvent
@@ -339,6 +341,31 @@ export type ShopPurchasedEvent =
 				weaponId?: undefined;
 		  }
 	);
+
+/** An owned weapon sold in the shop for materials */
+export type WeaponSoldEvent =
+	{
+		type: "weaponSold";
+		playerId: string;
+		/** Id of the owned weapon state */
+		weaponId: string;
+		/** Materials paid back */
+		price: number;
+	};
+
+/**
+ * Two equal owned weapons of the same tier combined: the first one moves up
+ * a tier, the second one is removed.
+ */
+export type WeaponsCombinedEvent =
+	{
+		type: "weaponsCombined";
+		playerId: string;
+		/** Id of the weapon state that moves up a tier */
+		weaponId: string;
+		/** Id of the weapon state that is removed */
+		consumedWeaponId: string;
+	};
 
 export type ShopRerolledEvent =
 	{

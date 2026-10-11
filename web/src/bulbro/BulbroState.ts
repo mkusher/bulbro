@@ -70,6 +70,7 @@ import type {
 	WeaponState,
 } from "../waveState";
 import { toWeaponState } from "../weapon";
+import { combineWeapons } from "../weapon/WeaponTiers";
 import type {
 	Bulbro,
 	Stats,
@@ -1495,6 +1496,76 @@ export class BulbroState
 							item.id,
 						)
 					: paid;
+			}
+
+			case "weaponSold": {
+				if (
+					event.playerId !==
+						this
+							.id ||
+					!Number.isFinite(
+						event.price,
+					) ||
+					event.price <
+						0 ||
+					this
+						.weapons
+						.length <=
+						1 ||
+					!this.weapons.some(
+						(
+							w,
+						) =>
+							w.id ===
+							event.weaponId,
+					)
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						materialsAvailable:
+							this
+								.materialsAvailable +
+							event.price,
+						weapons:
+							this.weapons.filter(
+								(
+									w,
+								) =>
+									w.id !==
+									event.weaponId,
+							),
+					},
+				);
+			}
+
+			case "weaponsCombined": {
+				if (
+					event.playerId !==
+					this
+						.id
+				)
+					return this;
+				const weapons =
+					combineWeapons(
+						this
+							.weapons,
+						event.weaponId,
+						event.consumedWeaponId,
+					);
+				if (
+					!weapons
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						weapons,
+					},
+				);
 			}
 
 			default:

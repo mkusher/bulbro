@@ -11,6 +11,7 @@ import {
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import type { PlayerStatus } from "@/ui/PlayersStatus";
 import type { Weapon } from "@/weapon";
+import { toOwnedWeapons } from "@/weapon/WeaponTiers";
 import {
 	fist,
 	pistol,
@@ -199,7 +200,10 @@ function NetworkPreRound({
 				bulbro:
 					wellRoundedBulbro,
 				bulbroState,
-				weapons,
+				weapons:
+					toOwnedWeapons(
+						weapons,
+					),
 				items,
 				materials,
 			}}
