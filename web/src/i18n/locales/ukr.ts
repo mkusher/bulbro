@@ -173,6 +173,14 @@ export default {
 		"Предмети",
 	"items.empty":
 		"Поки немає предметів",
+	"items.selectHint":
+		"Виберіть предмет, щоб побачити його ефект",
+	"items.effect":
+		"Ефект",
+	"items.totalEffect":
+		"Усього ({count, plural, one {# примірник} few {# примірники} other {# примірників}})",
+	"items.details":
+		"Деталі предмета",
 	"item.name.acid":
 		"Кислота",
 	"item.name.alienMagic":

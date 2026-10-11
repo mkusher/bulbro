@@ -146,7 +146,7 @@ export function PreRoundLayout({
 					/>
 				)}
 
-				{/* Two column layout for Bulbro and Weapon Slots */}
+				{/* Two column layout for Bulbro, Weapon Slots and items */}
 				<div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3">
 					{/* Bulbro Description */}
 					<div className="overflow-visible flex flex-col gap-3">
@@ -176,8 +176,8 @@ export function PreRoundLayout({
 						)}
 					</div>
 
-					{/* Weapon Slots */}
-					<div>
+					{/* Weapon Slots and owned items */}
+					<div className="flex flex-col gap-3">
 						<WeaponSlots
 							weapons={
 								player.weapons
@@ -195,17 +195,15 @@ export function PreRoundLayout({
 								player.onWeaponClick
 							}
 						/>
+						{player.items && (
+							<ItemSlots
+								items={
+									player.items
+								}
+							/>
+						)}
 					</div>
 				</div>
-
-				{/* Owned items */}
-				{player.items && (
-					<ItemSlots
-						items={
-							player.items
-						}
-					/>
-				)}
 
 				{/* Shop */}
 				<Shop

@@ -53,7 +53,7 @@ export function shopItemKey(
 		: `weapon:${shopItem.weapon.id}`;
 }
 
-const itemTierNames: Record<
+export const itemTierNames: Record<
 	ItemTier,
 	string
 > =
@@ -64,7 +64,7 @@ const itemTierNames: Record<
 		4: "IV",
 	};
 
-const itemTierStyles: Record<
+export const itemTierStyles: Record<
 	ItemTier,
 	string
 > =
@@ -81,9 +81,12 @@ const itemTierStyles: Record<
  */
 export function ItemBonuses({
 	item,
+	count = 1,
 	className = "",
 }: {
 	item: ItemDefinition;
+	/** Copies owned: bonuses are multiplied by it */
+	count?: number;
 	className?: string;
 }) {
 	return (
@@ -95,36 +98,45 @@ export function ItemBonuses({
 			).map(
 				([
 					key,
-					value = 0,
-				]) => (
-					<li
-						key={
-							key
-						}
-						className={
-							value >=
+					bonus = 0,
+				]) => {
+					const value =
+						Math.round(
+							bonus *
+								count *
+								10,
+						) /
+						10;
+					return (
+						<li
+							key={
+								key
+							}
+							className={
+								value >=
+								0
+									? "text-green-700"
+									: "text-red-600"
+							}
+						>
+							{value >=
 							0
-								? "text-green-700"
-								: "text-red-600"
-						}
-					>
-						{value >=
-						0
-							? "+"
-							: ""}
-						{
-							value
-						}
-						{percentageStats.has(
-							key as keyof Stats,
-						)
-							? "%"
-							: ""}{" "}
-						{formatStatName(
-							key,
-						)}
-					</li>
-				),
+								? "+"
+								: ""}
+							{
+								value
+							}
+							{percentageStats.has(
+								key as keyof Stats,
+							)
+								? "%"
+								: ""}{" "}
+							{formatStatName(
+								key,
+							)}
+						</li>
+					);
+				},
 			)}
 		</ul>
 	);
