@@ -15,6 +15,7 @@ import {
 } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import type { Weapon } from "@/weapon";
+import { toOwnedWeapons } from "@/weapon/WeaponTiers";
 import {
 	fist,
 	pistol,
@@ -286,19 +287,6 @@ export const CompletePreRoundScreen =
 						}
 					};
 
-				const handleWeaponClick =
-					(
-						weapon: Weapon,
-						index: number,
-					) => {
-						console.log(
-							"Weapon clicked:",
-							weapon.name,
-							"at index",
-							index,
-						);
-					};
-
 				return (
 					<PreRoundLayout
 						currentWave={
@@ -309,9 +297,11 @@ export const CompletePreRoundScreen =
 								wellRoundedBulbro,
 							bulbroState,
 							weapons:
-								state
-									.player
-									.weapons,
+								toOwnedWeapons(
+									state
+										.player
+										.weapons,
+								),
 							items:
 								state
 									.player
@@ -321,8 +311,6 @@ export const CompletePreRoundScreen =
 								state
 									.player
 									.materials,
-							onWeaponClick:
-								handleWeaponClick,
 						}}
 						shopItems={
 							state.shopItems
@@ -407,9 +395,11 @@ export const EarlyGame =
 								wellRoundedBulbro,
 							bulbroState,
 							weapons:
-								state
-									.player
-									.weapons,
+								toOwnedWeapons(
+									state
+										.player
+										.weapons,
+								),
 							items:
 								state
 									.player
@@ -499,9 +489,11 @@ export const LateGame =
 								wellRoundedBulbro,
 							bulbroState,
 							weapons:
-								state
-									.player
-									.weapons,
+								toOwnedWeapons(
+									state
+										.player
+										.weapons,
+								),
 							items:
 								state
 									.player
@@ -590,9 +582,11 @@ export const LowMaterialsScenario =
 								wellRoundedBulbro,
 							bulbroState,
 							weapons:
-								state
-									.player
-									.weapons,
+								toOwnedWeapons(
+									state
+										.player
+										.weapons,
+								),
 							items:
 								state
 									.player
@@ -704,9 +698,11 @@ export const AddWeaponDemo =
 									wellRoundedBulbro,
 								bulbroState,
 								weapons:
-									state
-										.player
-										.weapons,
+									toOwnedWeapons(
+										state
+											.player
+											.weapons,
+									),
 								items:
 									state
 										.player
@@ -821,9 +817,11 @@ export const AllShopItems =
 									wellRoundedBulbro,
 								bulbroState,
 								weapons:
-									state
-										.player
-										.weapons,
+									toOwnedWeapons(
+										state
+											.player
+											.weapons,
+									),
 								items:
 									state
 										.player

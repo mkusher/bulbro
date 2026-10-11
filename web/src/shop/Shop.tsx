@@ -13,7 +13,10 @@ import {
 	CardContent,
 	CardHeader,
 } from "@/ui/shadcn/card";
-import type { Weapon } from "@/weapon";
+import type {
+	Weapon,
+	WeaponType,
+} from "@/weapon";
 import { WeaponDisplay } from "@/weapon/WeaponDisplay";
 
 export type WeaponShopItem =
@@ -192,6 +195,11 @@ export interface ShopProps {
 	/** Locks purchases and re-rolls, e.g. after the player is ready in an online game */
 	disabled?: boolean;
 	weaponsFull?: boolean;
+	/**
+	 * Weapons owned at tier I: buying one more combines them into tier II,
+	 * so they can be bought when the weapon slots are full.
+	 */
+	combinableWeaponIds?: WeaponType[];
 }
 
 export function Shop({
@@ -202,6 +210,7 @@ export function Shop({
 	rerollPrice,
 	disabled = false,
 	weaponsFull = false,
+	combinableWeaponIds = [],
 }: ShopProps) {
 	const canAfford =
 		(
@@ -217,6 +226,11 @@ export function Shop({
 			weaponsFull &&
 			!isItemShopItem(
 				item,
+			) &&
+			!combinableWeaponIds.includes(
+				item
+					.weapon
+					.id,
 			);
 
 	const handlePurchase =

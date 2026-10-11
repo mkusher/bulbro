@@ -1529,6 +1529,8 @@ export function updateState(
 		}
 		case "shopRerolled":
 		case "shopPurchased":
+		case "weaponSold":
+		case "weaponsCombined":
 		case "upgradeSelected":
 		case "upgradesRerolled": {
 			return {

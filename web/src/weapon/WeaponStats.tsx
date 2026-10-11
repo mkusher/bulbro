@@ -1,8 +1,8 @@
 import { t } from "@/i18n";
 import { formatStatName } from "@/i18n/game";
 import type { Weapon } from "../weapon";
-import { fromWeaponState } from "../weapon";
 import type { WeaponState } from "./WeaponState";
+import { ownedWeaponFromState } from "./WeaponTiers";
 
 export type WeaponStatsProps =
 	{
@@ -123,9 +123,9 @@ export function WeaponStateStats({
 	className,
 }: WeaponStateStatsProps) {
 	const weapon =
-		fromWeaponState(
+		ownedWeaponFromState(
 			weaponState,
-		);
+		).weapon;
 	return (
 		<WeaponStats
 			weapon={

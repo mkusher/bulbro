@@ -556,6 +556,20 @@ export default {
 		"Матэрыялы: {count}",
 	"shop.weaponLimitReached":
 		"Дасягнуты ліміт зброі",
+	"shop.sellWeapon":
+		"Прадаць +${price}",
+	"shop.combineWeapon":
+		"Аб'яднаць → Ранг {tier}",
+	"shop.combineHint":
+		"Патрэбна яшчэ адна копія рангу {tier}",
+	"shop.maxWeaponTier":
+		"Найвышэйшы ранг",
+	"shop.lastWeapon":
+		"Нельга прадаць апошнюю зброю",
+	"shop.weaponDetails":
+		"Звесткі пра зброю",
+	"shop.selectWeaponHint":
+		"Абярыце зброю, каб прадаць або аб'яднаць яе",
 	"bulbro.hp":
 		"ЗД",
 	"bulbro.baseSpeed":

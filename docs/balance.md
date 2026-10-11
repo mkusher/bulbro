@@ -28,6 +28,7 @@ at difficulty 0. They are not measured in play.
 | Life steal | Chance per hit to heal 1 HP; at most 10 heals per second | [game-formulas.ts](../web/src/game-formulas.ts) |
 | Harvesting | Paid out at the end of the wave; grows by 5% each wave | [BulbroState.ts](../web/src/bulbro/BulbroState.ts) |
 | Item and reroll prices | Same formulas as Brotato | [game-formulas.ts](../web/src/game-formulas.ts) |
+| Weapon tiers | Tiers I–IV; two equal weapons of a tier combine into the next tier; selling pays back 25% | [WeaponTiers.ts](../web/src/weapon/WeaponTiers.ts) |
 | Wave length | 20s, +5s per wave, max 60s | [waveDuration.ts](../web/src/waveDuration.ts) |
 | Melee range | Melee weapons get half of the range stat | [game-formulas.ts](../web/src/game-formulas.ts) |
 | Early enemy HP | Baby (3, +2/wave), Colorado beetle (2, +1/wave), Aphid (8, +1/wave) are close to Brotato's Baby Alien, Chaser and Spitter | [enemies-definitions](../web/src/enemies-definitions) |
@@ -54,8 +55,16 @@ at difficulty 0. They are not measured in play.
   the wave and luck. Items keep Brotato's prices (tier I 15–30, tier II
   40–65, tier III and IV up to 110), so tier-I items and mid-tier weapons
   compete for the same early materials; tier IV (100–122 at wave 1) cannot
-  appear before wave 7 in the default pool. There are still no weapon tiers
-  or merging, and items with conditional effects are not in yet.
+  appear before wave 7 in the default pool. Items with conditional effects
+  are not in yet.
+- **Weapons can be sold and combined.** Selling pays back 25% of the
+  weapon's current price at its tier, so a wave-1 Pistol sells for 4 and a
+  Sword for 16. Two equal weapons of the same tier combine into the next
+  tier, and a tier is valued at the two weapons it is made of (base price
+  ×1/×2/×4/×8). With full slots, a weapon already owned at tier I can still
+  be bought and combines on purchase, as in Brotato. The shop only offers
+  tier I weapons, so tier IV costs eight copies: about 136 materials of
+  Pistols or 536 of Swords at wave-1 prices, and more later.
 - **Engineering items are out of the shop.** Engineering does nothing yet
   (see [Characters](#7-characters)), so Book, Duct Tape, Compass,
   Reinforced Steel, Alloy and Exoskeleton would charge full price for part
@@ -106,7 +115,18 @@ scaling stat:
   costs as much as two tier-I items. Their damage is still out of line.
 - **Laser Gun, SMG, Hand and Flare Gun** are not worth buying. The Laser Gun
   is the cheapest weapon (8, 9 at wave 1) to make it a stopgap buy, but
-  price cannot fix 2 DPS.
+  price cannot fix 2 DPS. Even at tier IV it reaches only 9.4 DPS, less
+  than a tier I Fist.
+- **Tiers multiply the gap.** Each tier multiplies base damage by
+  1/1.6/2.4/3.6 and cooldown by 1/0.93/0.85/0.75, so base DPS grows about
+  1.7× per tier and 4.8× at tier IV (see the
+  [tier table](../web/docs/weapons.md#tiers-selling-and-combining)). A tier
+  IV Sword deals 132 base DPS and a tier IV Machine Gun 100, against 18 for
+  a tier IV Pistol. Damage scaling does not grow with the tier, so stat
+  points (Ranged/Melee Damage) matter relatively less on high-tier weapons
+  than in Brotato, where scaling often grows too. The Machine Gun's tier IV
+  cooldown (0.11s) is already near the 100ms floor, so attack speed is
+  almost useless on it.
 - **Attack speed hits a floor.** The Machine Gun reaches the 100ms minimum
   cooldown at only +40% attack speed, so further attack speed is wasted on it.
 - **Missing weapon effects.** There is no pierce: Brotato's Pistol pierces one
@@ -199,9 +219,11 @@ items with an Engineering bonus.
 
 ## Suggested priority
 
-1. **Economy:** use the material's real value on pickup and add weapon
-   merging as a second sink next to stat items. Weapon prices are already
-   raised to Brotato levels.
+1. **Economy:** use the material's real value on pickup. Weapon prices are
+   already raised to Brotato levels, and weapon combining is now a second
+   sink next to stat items. Consider offering tier II+ weapons in later
+   waves (rolled like item tiers), so high tiers do not always cost eight
+   tier I copies.
 2. **Weapons:** rebase them on Brotato's numbers (Pistol 12 dmg / 1.2s,
    SMG 3 / 0.17s, Laser 40 with 4× scaling). Alternatively, keep the fast feel
    but lower each weapon's scaling in proportion to its cooldown. Nerf the

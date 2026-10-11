@@ -34,11 +34,14 @@ import {
 	updateState,
 	waveState,
 } from "@/waveState";
+import { toWeaponState } from "@/weapon";
 import {
-	fromWeaponState,
-	toWeaponState,
-	type Weapon,
-} from "@/weapon";
+	minWeaponTier,
+	type OwnedWeapon,
+	ownedWeaponFromState,
+	weaponSellPrice,
+	weaponTierOf,
+} from "@/weapon/WeaponTiers";
 
 /**
  * Generates shop items for the first player from the current wave state.
@@ -468,13 +471,32 @@ export function PreRound() {
 				return;
 			}
 
-			if (
+			const isFull =
 				purchasingPlayer
 					.weapons
 					.length >=
 				purchasingPlayer
 					.stats
-					.maxWeapons
+					.maxWeapons;
+			// With full slots, a weapon owned at tier I can still be bought:
+			// the copies combine into tier II.
+			const combinable =
+				purchasingPlayer.weapons.find(
+					(
+						weapon,
+					) =>
+						weapon.type ===
+							item
+								.weapon
+								.id &&
+						weaponTierOf(
+							weapon,
+						) ===
+							minWeaponTier,
+				);
+			if (
+				isFull &&
+				!combinable
 			)
 				return;
 
@@ -510,16 +532,18 @@ export function PreRound() {
 						p.id ===
 						purchasingPlayer.id,
 				);
+			const purchasedWeapon =
+				toWeaponState(
+					item.weapon,
+				);
 			const newWeapons =
 				[
 					...(updatedPlayer?.weapons ??
 						[]),
-					toWeaponState(
-						item.weapon,
-					),
+					purchasedWeapon,
 				];
 
-			waveState.value =
+			const equippedState =
 				selectWeaponsInState(
 					purchasedState,
 					{
@@ -531,6 +555,28 @@ export function PreRound() {
 						now,
 					},
 				);
+			waveState.value =
+				isFull &&
+				combinable
+					? updateState(
+							equippedState,
+							withEventMeta(
+								{
+									type: "weaponsCombined",
+									playerId:
+										purchasingPlayer.id,
+									weaponId:
+										combinable.id,
+									consumedWeaponId:
+										purchasedWeapon.id,
+								},
+								dt(
+									0,
+								),
+								now,
+							),
+						)
+					: equippedState;
 
 			setShopItems(
 				shopItems.filter(
@@ -543,17 +589,88 @@ export function PreRound() {
 			);
 		};
 
-	const handleWeaponClick =
+	const sellPrice =
 		(
-			weapon: Weapon,
-			index: number,
-		) => {
-			console.log(
-				"Weapon clicked:",
-				weapon.name,
-				"at index",
-				index,
+			weapon: OwnedWeapon,
+		) =>
+			weaponSellPrice(
+				{
+					type: weapon
+						.weapon
+						.id,
+					tier: weapon.tier,
+				},
+				waveState
+					.value
+					.round
+					.wave,
 			);
+
+	const handleSellWeapon =
+		(
+			weapon: OwnedWeapon,
+		) => {
+			if (
+				!player ||
+				network?.isLocalReady
+			)
+				return;
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "weaponSold",
+							playerId:
+								player.id,
+							weaponId:
+								weapon.id,
+							price:
+								sellPrice(
+									weapon,
+								),
+						},
+						dt(
+							0,
+						),
+						nowTime(
+							Date.now(),
+						),
+					),
+				);
+		};
+
+	const handleCombineWeapons =
+		(
+			weapon: OwnedWeapon,
+			other: OwnedWeapon,
+		) => {
+			if (
+				!player ||
+				network?.isLocalReady
+			)
+				return;
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "weaponsCombined",
+							playerId:
+								player.id,
+							weaponId:
+								weapon.id,
+							consumedWeaponId:
+								other.id,
+						},
+						dt(
+							0,
+						),
+						nowTime(
+							Date.now(),
+						),
+					),
+				);
 		};
 
 	const handleStartWave =
@@ -601,7 +718,7 @@ export function PreRound() {
 		);
 	const ownedWeapons =
 		player.weapons.map(
-			fromWeaponState,
+			ownedWeaponFromState,
 		);
 
 	return (
@@ -633,8 +750,12 @@ export function PreRound() {
 					),
 				materials:
 					player.materialsAvailable,
-				onWeaponClick:
-					handleWeaponClick,
+				weaponSellPrice:
+					sellPrice,
+				onSellWeapon:
+					handleSellWeapon,
+				onCombineWeapons:
+					handleCombineWeapons,
 			}}
 			shopItems={
 				shopItems

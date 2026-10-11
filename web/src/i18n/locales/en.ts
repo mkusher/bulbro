@@ -554,6 +554,20 @@ export default {
 		"Materials: {count}",
 	"shop.weaponLimitReached":
 		"Weapon limit reached",
+	"shop.sellWeapon":
+		"Sell +${price}",
+	"shop.combineWeapon":
+		"Combine → Tier {tier}",
+	"shop.combineHint":
+		"Get another Tier {tier} copy to combine",
+	"shop.maxWeaponTier":
+		"Highest tier",
+	"shop.lastWeapon":
+		"You can't sell your last weapon",
+	"shop.weaponDetails":
+		"Weapon details",
+	"shop.selectWeaponHint":
+		"Select a weapon to sell or combine it",
 	"bulbro.hp":
 		"HP",
 	"bulbro.baseSpeed":

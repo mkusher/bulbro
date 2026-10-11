@@ -305,3 +305,65 @@ it("allows buying items at weapon capacity", async () => {
 		1,
 	);
 });
+
+it("allows buying a weapon owned at tier I when slots are full, to combine it", async () => {
+	const {
+		Shop,
+	} =
+		await import(
+			"./Shop"
+		);
+	const purchase =
+		mock(
+			() => {},
+		);
+	act(
+		() =>
+			render(
+				h(
+					Shop,
+					{
+						items:
+							[
+								{
+									weapon:
+										smg,
+									price: 1,
+								},
+							],
+						availableMaterials: 100,
+						onPurchase:
+							purchase,
+						weaponsFull: true,
+						combinableWeaponIds:
+							[
+								"smg",
+							],
+					},
+				),
+				container,
+			),
+	);
+	const buy =
+		[
+			...container.querySelectorAll(
+				"button",
+			),
+		].at(
+			-1,
+		)!;
+	expect(
+		buy.disabled,
+	).toBe(
+		false,
+	);
+	act(
+		() =>
+			buy.click(),
+	);
+	expect(
+		purchase,
+	).toHaveBeenCalledTimes(
+		1,
+	);
+});

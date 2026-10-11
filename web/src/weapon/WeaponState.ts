@@ -43,6 +43,13 @@ export type WeaponStats =
 		>;
 	};
 
+/** Weapon tiers I–IV, as in Brotato. Two equal weapons combine into the next tier. */
+export type WeaponTier =
+	| 1
+	| 2
+	| 3
+	| 4;
+
 /**
  * Runtime state of a single weapon in play.
  */
@@ -51,9 +58,12 @@ export interface WeaponState {
 	id: string;
 	/** Timestamp of the last time this weapon struck */
 	lastStrikedAt: number;
+	/** Stats of the weapon at its tier */
 	statsBonus: WeaponStats;
 	shotSpeed: number;
 	type: WeaponType;
+	/** Weapon tier, I when missing */
+	tier?: WeaponTier;
 	/** Aiming direction for the weapon */
 	aimingDirection: Direction;
 	/** Last melee strike of this weapon, if it strikes instead of shooting */
