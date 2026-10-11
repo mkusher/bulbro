@@ -40,6 +40,8 @@ export type {
 
 export const RAGE_STARTING_DURATION = 500;
 export const RAGE_TOTAL_DURATION = 1500;
+/** Pause after a rage ends before the enemy can rage again */
+export const RAGE_COOLDOWN = 1000;
 export const DEATH_DURATION = 1000;
 
 /**
@@ -566,6 +568,27 @@ export class EnemyState
 				this
 					.ragingStartedAt <
 			RAGE_STARTING_DURATION
+		);
+	}
+
+	/**
+	 * An enemy can rage if it never raged or its previous rage
+	 * (successful or missed) is over and cooled down.
+	 */
+	canStartRaging(
+		now: NowTime,
+	): boolean {
+		if (
+			!this
+				.ragingStartedAt
+		)
+			return true;
+		return (
+			now -
+				this
+					.ragingStartedAt >=
+			RAGE_TOTAL_DURATION +
+				RAGE_COOLDOWN
 		);
 	}
 

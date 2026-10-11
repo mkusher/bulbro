@@ -25,6 +25,7 @@ import {
 } from "../weapon/Attack";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
 import type { EnemyState } from "./EnemyState";
+import { withSeparation } from "./EnemyTactics";
 import { KnockbackMovement } from "./KnockbackMovement";
 
 export class ChasingBehavior
@@ -76,9 +77,13 @@ export class ChasingBehavior
 		}
 
 		const closestBulbroDirection =
-			direction(
-				currentEnemy.position,
-				closest.position,
+			withSeparation(
+				currentEnemy,
+				waveState.enemies,
+				direction(
+					currentEnemy.position,
+					closest.position,
+				),
 			);
 
 		return this.moveToDirection(
