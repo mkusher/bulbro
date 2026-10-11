@@ -81,15 +81,33 @@ function connect(
 	);
 }
 
+function serializedPlayer(
+	id: string,
+	materialsAvailable = 3,
+	items: string[] = [],
+) {
+	return {
+		id,
+		characterId:
+			"well-rounded",
+		level: 0,
+		totalExperience: 0,
+		materialsAvailable,
+		healthPoints: 10,
+		statSources:
+			[],
+		items,
+		weapons:
+			[],
+	};
+}
+
 function ready(
 	playerId: string,
 	wave = 2,
-	player: object = {
-		id: playerId,
-		characterId:
-			"well-rounded",
-		materialsAvailable: 3,
-	},
+	player: object = serializedPlayer(
+		playerId,
+	),
 ) {
 	new WebsocketGameController(
 		logger,
@@ -287,22 +305,21 @@ describe("next wave readiness", () => {
 		ready(
 			hostId,
 			2,
-			{
-				id: hostId,
-				characterId:
-					"well-rounded",
-				materialsAvailable: 10,
-			},
+			serializedPlayer(
+				hostId,
+				10,
+			),
 		);
 		ready(
 			hostId,
 			2,
-			{
-				id: hostId,
-				characterId:
-					"well-rounded",
-				materialsAvailable: 0,
-			},
+			serializedPlayer(
+				hostId,
+				0,
+				[
+					"acid",
+				],
+			),
 		);
 		ready(
 			guestId,
@@ -315,12 +332,13 @@ describe("next wave readiness", () => {
 			)[0]
 				?.players,
 		).toContainEqual(
-			{
-				id: hostId,
-				characterId:
-					"well-rounded",
-				materialsAvailable: 0,
-			},
+			serializedPlayer(
+				hostId,
+				0,
+				[
+					"acid",
+				],
+			),
 		);
 	});
 
@@ -336,11 +354,34 @@ describe("next wave readiness", () => {
 		ready(
 			hostId,
 			2,
-			{
-				id: guestId,
-				characterId:
-					"well-rounded",
-			},
+			serializedPlayer(
+				guestId,
+			),
+		);
+
+		expect(
+			messagesOf(
+				guestId,
+				"next-wave-player-ready",
+			),
+		).toEqual(
+			[],
+		);
+	});
+
+	test("rejects player states without items", () => {
+		const {
+			items:
+				_,
+			...withoutItems
+		} =
+			serializedPlayer(
+				hostId,
+			);
+		ready(
+			hostId,
+			2,
+			withoutItems,
 		);
 
 		expect(

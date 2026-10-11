@@ -330,6 +330,11 @@ export class BulbroState
 		return {
 			...this
 				.#props,
+			items:
+				[
+					...this
+						.items,
+				],
 		};
 	}
 
@@ -1684,6 +1689,84 @@ export function spawnBulbro(
 				zeroPoint(),
 			lastHorizontalDirection: 1,
 			rerollCount: 0,
+		},
+	);
+}
+
+/**
+ * Restores a Bulbro received from another player. Item stat sources are rebuilt
+ * from the owned items and stats are recomputed, so a remote Bulbro always has
+ * the stats its inventory gives on this client. Unknown items are dropped.
+ */
+export function restoreBulbroState(
+	props: ConstructorParameters<
+		typeof BulbroState
+	>[0],
+): BulbroState {
+	const items =
+		(
+			props.items ??
+			[]
+		).flatMap(
+			(
+				id,
+			) => {
+				const item =
+					findItemById(
+						id,
+					);
+				return item
+					? [
+							item,
+						]
+					: [];
+			},
+		);
+	const statSources: StatSource[] =
+		[
+			...props.statSources.filter(
+				(
+					source,
+				) =>
+					source.kind !==
+					"item",
+			),
+			...items.map(
+				(
+					item,
+					index,
+				): StatSource => ({
+					id: itemStatSourceId(
+						item.id,
+						index,
+					),
+					kind: "item",
+					bonuses:
+						item.bonuses,
+				}),
+			),
+		];
+	const stats =
+		computeStats(
+			statSources,
+		);
+	return new BulbroState(
+		{
+			...props,
+			items:
+				items.map(
+					(
+						item,
+					) =>
+						item.id,
+				),
+			statSources,
+			stats,
+			healthPoints:
+				Math.min(
+					props.healthPoints,
+					stats.maxHp,
+				),
 		},
 	);
 }

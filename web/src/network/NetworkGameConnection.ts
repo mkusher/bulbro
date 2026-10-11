@@ -3,7 +3,10 @@ import {
 	computed,
 	signal,
 } from "@preact/signals";
-import { BulbroState } from "@/bulbro/BulbroState";
+import {
+	type BulbroState,
+	restoreBulbroState,
+} from "@/bulbro/BulbroState";
 import {
 	createMainControls,
 	type PlayerControl,
@@ -395,8 +398,10 @@ export class NetworkGameConnection {
 							(
 								player,
 							) =>
-								new BulbroState(
-									player as BulbroStateProperties,
+								// The protocol validates stats, items and weapons; the rest passes through.
+								restoreBulbroState(
+									player as typeof player &
+										BulbroStateProperties,
 								),
 						),
 				},

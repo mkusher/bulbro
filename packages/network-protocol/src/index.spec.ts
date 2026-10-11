@@ -4,7 +4,62 @@ import {
 	test,
 } from "bun:test";
 import { type } from "arktype";
-import { WebsocketMessage } from "./index";
+import {
+	type SerializedPlayer,
+	WebsocketMessage,
+} from "./index";
+
+function serializedPlayer(
+	id: string,
+): SerializedPlayer {
+	return {
+		id,
+		characterId:
+			"well-rounded",
+		level: 1,
+		totalExperience: 20,
+		materialsAvailable: 12,
+		healthPoints: 10,
+		statSources:
+			[
+				{
+					id: "character",
+					kind: "character",
+					bonuses:
+						{
+							maxHp: 5,
+						},
+				},
+				{
+					id: "item:0:acid",
+					kind: "item",
+					bonuses:
+						{
+							maxHp: 8,
+							dodge:
+								-2,
+						},
+				},
+			],
+		items:
+			[
+				"acid",
+			],
+		weapons:
+			[
+				{
+					id: "pistol",
+					type: "pistol",
+					tier: 2,
+					statsBonus:
+						{
+							damage: 12,
+						},
+					shotSpeed: 10,
+				},
+			],
+	};
+}
 
 describe("live game protocol", () => {
 	test.each(
@@ -104,12 +159,10 @@ describe("live game protocol", () => {
 					"player-1",
 				player:
 					{
-						id: "player-1",
-						characterId:
-							"well-rounded",
-						materialsAvailable: 12,
-						weapons:
-							[],
+						...serializedPlayer(
+							"player-1",
+						),
+						lastHitAt: 0,
 					},
 				sentAt: 20,
 			};
@@ -134,11 +187,9 @@ describe("live game protocol", () => {
 					playerId:
 						"player-1",
 					player:
-						{
-							id: "player-1",
-							characterId:
-								"well-rounded",
-						},
+						serializedPlayer(
+							"player-1",
+						),
 					sentAt: 20,
 				},
 			),
@@ -199,18 +250,12 @@ describe("live game protocol", () => {
 				wave: 2,
 				players:
 					[
-						{
-							id: "host",
-							characterId:
-								"well-rounded",
-							healthPoints: 10,
-						},
-						{
-							id: "guest",
-							characterId:
-								"well-rounded",
-							healthPoints: 5,
-						},
+						serializedPlayer(
+							"host",
+						),
+						serializedPlayer(
+							"guest",
+						),
 					],
 				serverStartTime: 100,
 			};
@@ -223,4 +268,105 @@ describe("live game protocol", () => {
 			message,
 		);
 	});
+
+	test.each(
+		[
+			[
+				"items",
+				{
+					items:
+						undefined,
+				},
+			],
+			[
+				"a non-string item",
+				{
+					items:
+						[
+							1,
+						],
+				},
+			],
+			[
+				"stat sources",
+				{
+					statSources:
+						undefined,
+				},
+			],
+			[
+				"an unknown stat source kind",
+				{
+					statSources:
+						[
+							{
+								id: "x",
+								kind: "cheat",
+								bonuses:
+									{},
+							},
+						],
+				},
+			],
+			[
+				"a non-numeric stat bonus",
+				{
+					statSources:
+						[
+							{
+								id: "character",
+								kind: "character",
+								bonuses:
+									{
+										maxHp:
+											"5",
+									},
+							},
+						],
+				},
+			],
+			[
+				"an invalid weapon tier",
+				{
+					weapons:
+						[
+							{
+								id: "pistol",
+								type: "pistol",
+								tier: 5,
+								statsBonus:
+									{},
+								shotSpeed: 10,
+							},
+						],
+				},
+			],
+		] as const,
+	)(
+		"rejects next wave readiness with invalid %s",
+		(_, override) => {
+			expect(
+				WebsocketMessage(
+					{
+						type: "next-wave-player-ready",
+						gameId:
+							"game-1",
+						wave: 2,
+						playerId:
+							"player-1",
+						player:
+							{
+								...serializedPlayer(
+									"player-1",
+								),
+								...override,
+							},
+						sentAt: 20,
+					},
+				),
+			).toBeInstanceOf(
+				type.errors,
+			);
+		},
+	);
 });

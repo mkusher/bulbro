@@ -382,11 +382,9 @@ describe("NetworkGameConnection next wave", () => {
 				playerId:
 					guestId,
 				player:
-					{
-						id: guestId,
-						characterId:
-							"well-rounded",
-					},
+					player(
+						guestId,
+					).toJSON(),
 				sentAt: 0,
 			},
 		);
@@ -427,11 +425,9 @@ describe("NetworkGameConnection next wave", () => {
 				playerId:
 					guestId,
 				player:
-					{
-						id: guestId,
-						characterId:
-							"well-rounded",
-					},
+					player(
+						guestId,
+					).toJSON(),
 				sentAt: 0,
 			},
 		);
@@ -451,11 +447,9 @@ describe("NetworkGameConnection next wave", () => {
 				playerId:
 					guestId,
 				player:
-					{
-						id: guestId,
-						characterId:
-							"well-rounded",
-					},
+					player(
+						guestId,
+					).toJSON(),
 				sentAt: 0,
 			},
 		);
@@ -647,6 +641,86 @@ describe("NetworkGameConnection next wave", () => {
 			startWave,
 		).toHaveBeenCalledTimes(
 			1,
+		);
+	});
+
+	it("derives remote stats from the items they own", async () => {
+		const {
+			finishWave:
+				finish,
+			channel,
+		} =
+			makeConnection(
+				guestId,
+			);
+		finishWave =
+			finish;
+		const shopper =
+			player(
+				hostId,
+			)
+				.withItem(
+					"acid",
+				)
+				.withItem(
+					"acid",
+				);
+		const serialized =
+			shopper.toJSON();
+
+		channel.deliver(
+			{
+				type: "next-wave-started",
+				gameId,
+				wave: 2,
+				players:
+					[
+						{
+							...serialized,
+							// Stale stats and missing item sources are rebuilt from the items.
+							stats:
+								{
+									...serialized.stats,
+									maxHp: 1,
+								},
+							statSources:
+								serialized.statSources.filter(
+									(
+										source,
+									) =>
+										source.kind !==
+										"item",
+								),
+						},
+						player(
+							guestId,
+						).toJSON(),
+					],
+				serverStartTime: 0,
+			},
+		);
+		await Promise.resolve();
+
+		const remote =
+			waveState.value.players.find(
+				(
+					p,
+				) =>
+					p.id ===
+					hostId,
+			);
+		expect(
+			remote?.items,
+		).toEqual(
+			[
+				"acid",
+				"acid",
+			],
+		);
+		expect(
+			remote?.stats,
+		).toEqual(
+			shopper.stats,
 		);
 	});
 });
