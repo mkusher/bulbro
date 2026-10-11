@@ -23,7 +23,11 @@ import {
 } from "../weapon/Attack";
 import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
-import type { EnemyState } from "./EnemyState";
+import {
+	type EnemyState,
+	RAGE_STARTING_DURATION,
+} from "./EnemyState";
+import { predictTargetPosition } from "./EnemyTactics";
 import { KnockbackMovement } from "./KnockbackMovement";
 
 const lookupRanges =
@@ -179,14 +183,21 @@ export class KeepkingDistanceBehaviors
 			2;
 
 		if (
-			!currentEnemy.ragingStartedAt &&
+			currentEnemy.canStartRaging(
+				now,
+			) &&
 			d <=
 				actualRange
 		) {
+			// Aim where the target will be once the wind-up is over
 			const dir =
 				direction(
 					currentEnemy.position,
-					target.position,
+					predictTargetPosition(
+						target,
+						now,
+						RAGE_STARTING_DURATION,
+					),
 				);
 			return [
 				{

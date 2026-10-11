@@ -19,8 +19,14 @@ import {
 import type { WaveState } from "../waveState";
 import { ChasingBehavior } from "./ChasingBehavior";
 import type { EnemyBehaviors } from "./EnemyBehaviors";
-import type { EnemyState } from "./EnemyState";
+import {
+	type EnemyState,
+	RAGE_STARTING_DURATION,
+} from "./EnemyState";
+import { predictTargetPosition } from "./EnemyTactics";
 import { KnockbackMovement } from "./KnockbackMovement";
+
+const RAGE_SPEED_MULTIPLIER = 3;
 
 export class RageRunningBehaviors
 	implements
@@ -77,7 +83,7 @@ export class RageRunningBehaviors
 					currentEnemy
 						.stats
 						.speed *
-						3,
+						RAGE_SPEED_MULTIPLIER,
 				);
 			return this.#default.moveToDirection(
 				ragingEnemy,
@@ -125,14 +131,29 @@ export class RageRunningBehaviors
 			4;
 
 		if (
-			!currentEnemy.ragingStartedAt &&
+			currentEnemy.canStartRaging(
+				now,
+			) &&
 			d <=
 				actualRange
 		) {
+			// Aim the charge where the target will be once it lands
+			const chargeTime =
+				(d /
+					(currentEnemy
+						.stats
+						.speed *
+						RAGE_SPEED_MULTIPLIER)) *
+				1000;
 			const dir =
 				direction(
 					currentEnemy.position,
-					target.position,
+					predictTargetPosition(
+						target,
+						now,
+						RAGE_STARTING_DURATION +
+							chargeTime,
+					),
 				);
 			return [
 				{
