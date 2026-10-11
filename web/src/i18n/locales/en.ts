@@ -171,6 +171,14 @@ export default {
 		"Items",
 	"items.empty":
 		"No items yet",
+	"items.selectHint":
+		"Select an item to see its effect",
+	"items.effect":
+		"Effect",
+	"items.totalEffect":
+		"Total ({count, plural, one {# copy} other {# copies}})",
+	"items.details":
+		"Item details",
 	"item.name.acid":
 		"Acid",
 	"item.name.alienMagic":

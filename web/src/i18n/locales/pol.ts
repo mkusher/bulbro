@@ -173,6 +173,14 @@ export default {
 		"Przedmioty",
 	"items.empty":
 		"Brak przedmiotów",
+	"items.selectHint":
+		"Wybierz przedmiot, aby zobaczyć jego efekt",
+	"items.effect":
+		"Efekt",
+	"items.totalEffect":
+		"Łącznie ({count, plural, one {# sztuka} few {# sztuki} other {# sztuk}})",
+	"items.details":
+		"Szczegóły przedmiotu",
 	"item.name.acid":
 		"Kwas",
 	"item.name.alienMagic":

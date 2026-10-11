@@ -173,6 +173,14 @@ export default {
 		"Прадметы",
 	"items.empty":
 		"Пакуль няма прадметаў",
+	"items.selectHint":
+		"Выберыце прадмет, каб убачыць яго эфект",
+	"items.effect":
+		"Эфект",
+	"items.totalEffect":
+		"Усяго ({count, plural, one {# асобнік} few {# асобнікі} other {# асобнікаў}})",
+	"items.details":
+		"Падрабязнасці прадмета",
 	"item.name.acid":
 		"Кіслата",
 	"item.name.alienMagic":
