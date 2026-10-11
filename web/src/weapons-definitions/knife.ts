@@ -26,7 +26,7 @@ export const knife: Weapon =
 						meleeDamage: 0.8,
 					},
 			},
-		basePrice: 5,
+		basePrice: 12,
 		attack:
 			{
 				type: "thrust",

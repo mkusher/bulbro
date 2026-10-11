@@ -23,7 +23,7 @@ export const machineGun: Weapon =
 						rangedDamage: 0.6,
 					},
 			},
-		basePrice: 10,
+		basePrice: 70,
 		attack:
 			{
 				type: "shot",

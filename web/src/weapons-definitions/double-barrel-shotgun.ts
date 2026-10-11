@@ -28,7 +28,7 @@ export const doubleBarrelShotgun: Weapon =
 						rangedDamage: 0.8,
 					},
 			},
-		basePrice: 5,
+		basePrice: 18,
 		attack:
 			{
 				type: "shot",

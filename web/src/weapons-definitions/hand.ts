@@ -23,7 +23,7 @@ export const hand: Weapon =
 						meleeDamage: 0.5,
 					},
 			},
-		basePrice: 5,
+		basePrice: 10,
 		attack:
 			{
 				type: "thrust",

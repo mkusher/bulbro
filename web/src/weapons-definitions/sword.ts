@@ -41,5 +41,5 @@ export const sword: Weapon =
 						},
 					],
 			},
-		basePrice: 5,
+		basePrice: 60,
 	};

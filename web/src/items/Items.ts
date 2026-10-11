@@ -1196,6 +1196,35 @@ export const itemDefinitions: ItemDefinition[] =
 		},
 	];
 
+/** Stats that have no gameplay effect yet (Engineering needs structures). */
+export const inactiveStats: (keyof StatBonus)[] =
+	[
+		"engineering",
+	];
+
+/**
+ * Items the shop offers by default: every item except those whose bonuses
+ * include an inactive stat, since part of what they cost would buy nothing.
+ * Owned copies keep working; they just stop appearing in the shop.
+ */
+export const shopItemDefinitions: ItemDefinition[] =
+	itemDefinitions.filter(
+		(
+			item,
+		) =>
+			!inactiveStats.some(
+				(
+					stat,
+				) =>
+					(item
+						.bonuses[
+						stat
+					] ??
+						0) >
+					0,
+			),
+	);
+
 export function findItemById(
 	id: string,
 ):

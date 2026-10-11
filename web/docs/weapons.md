@@ -13,22 +13,22 @@ Built-in `weapons` count toward the starting requirement. Setup offers the remai
 
 These are weapon values before character bonuses, damage scaling, attack speed, critical hits, or shop price adjustments. Cooldowns are in seconds. Range is the weapon’s contribution to attack reach, and knockback is added to the wielder’s knockback. Omitted damage, range, knockback, and critical-chance bonuses contribute zero. Projectile speed is unused for melee attacks and is shown as “—”.
 
-| Weapon | ID | Damage | Cooldown (s) | Range | Knockback | Projectile speed | Base price |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| AK-47 | `ak47` | 2 | 0.3 | 500 | 5 | 1800 | 5 |
-| Brick | `brick` | 30 | 1.39 | 150 | 5 | — | 5 |
-| Double Barrel Shotgun | `doubleBarrelShotgun` | 12 | 1.37 | 350 | 16 | 1500 | 5 |
-| Fist | `fist` | 8 | 0.78 | 150 | 0 | — | 5 |
-| Hand | `hand` | 1 | 1.01 | 150 | 30 | — | 5 |
-| Knife | `knife` | 6 | 1.01 | 150 | 2 | — | 5 |
-| Laser Gun | `laserGun` | 4 | 1.98 | 500 | 0 | 1500 | 5 |
-| Pistol | `pistol` | 2 | 0.5 | 400 | 5 | 1500 | 5 |
-| SMG | `smg` | 1 | 0.2 | 400 | 0 | 1400 | 5 |
-| Sword | `sword` | 25 | 0.9 | 80 | 8 | — | 5 |
-| Flare Gun | `flareGun` | 8 | 1.4 | 420 | 2 | 900 | 7 |
-| Grenade | `grenade` | 24 | 2 | 300 | 12 | 600 | 9 |
-| Machine Gun | `machineGun` | 3 | 0.14 | 600 | 2 | 1900 | 10 |
-| Bazooka | `bazooka` | 40 | 2.8 | 650 | 18 | 1000 | 14 |
+| Weapon | ID | Damage | Cooldown (s) | Range | Knockback | Projectile speed | Base price | Wave-1 price |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Laser Gun | `laserGun` | 4 | 1.98 | 500 | 0 | 1500 | 8 | 9 |
+| Hand | `hand` | 1 | 1.01 | 150 | 30 | — | 10 | 12 |
+| Fist | `fist` | 8 | 0.78 | 150 | 0 | — | 12 | 14 |
+| Knife | `knife` | 6 | 1.01 | 150 | 2 | — | 12 | 14 |
+| Flare Gun | `flareGun` | 8 | 1.4 | 420 | 2 | 900 | 15 | 17 |
+| Pistol | `pistol` | 2 | 0.5 | 400 | 5 | 1500 | 15 | 17 |
+| SMG | `smg` | 1 | 0.2 | 400 | 0 | 1400 | 15 | 17 |
+| Double Barrel Shotgun | `doubleBarrelShotgun` | 12 | 1.37 | 350 | 16 | 1500 | 18 | 20 |
+| AK-47 | `ak47` | 2 | 0.3 | 500 | 5 | 1800 | 20 | 23 |
+| Brick | `brick` | 30 | 1.39 | 150 | 5 | — | 25 | 28 |
+| Grenade | `grenade` | 24 | 2 | 300 | 12 | 600 | 28 | 31 |
+| Bazooka | `bazooka` | 40 | 2.8 | 650 | 18 | 1000 | 35 | 39 |
+| Sword | `sword` | 25 | 0.9 | 80 | 8 | — | 60 | 67 |
+| Machine Gun | `machineGun` | 3 | 0.14 | 600 | 2 | 1900 | 70 | 78 |
 
 ### Classes, attacks, and damage scaling
 

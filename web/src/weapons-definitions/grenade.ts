@@ -25,7 +25,7 @@ export const grenade: Weapon =
 						elementalDamage: 0.5,
 					},
 			},
-		basePrice: 9,
+		basePrice: 28,
 		attack:
 			{
 				type: "explosion",

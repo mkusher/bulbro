@@ -24,7 +24,7 @@ export const flareGun: Weapon =
 						elementalDamage: 1,
 					},
 			},
-		basePrice: 7,
+		basePrice: 15,
 		attack:
 			{
 				type: "shot",

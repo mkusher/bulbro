@@ -115,7 +115,7 @@ Base price is the input to the shop formula, **not the displayed wave-1 price**.
 
 ## Shop selection and prices
 
-[ShopItemsGenerator](../src/shop/ShopItemsGenerator.ts) fills four slots by default. Each slot offers a weapon with a 35% chance when both pools are available; otherwise it offers an item. All 83 items are available by default, independently of the character's weapon pool. Callers can supply a restricted item pool. An item appears at most once within a roll, but can appear again on later rolls even when already owned. If the rolled tier has no remaining items, selection falls back to any lower-tier item, then any remaining item.
+[ShopItemsGenerator](../src/shop/ShopItemsGenerator.ts) fills four slots by default. Each slot offers a weapon with a 35% chance when both pools are available; otherwise it offers an item. By default it offers `shopItemDefinitions`: the 77 items without a positive bonus to an inactive stat (currently only Engineering), independently of the character's weapon pool. Book, Duct Tape, Compass, Reinforced Steel, Alloy and Exoskeleton are left out of the shop but stay defined, so owned copies keep working. Callers can supply a restricted item pool. An item appears at most once within a roll, but can appear again on later rolls even when already owned. If the rolled tier has no remaining items, selection falls back to any lower-tier item, then any remaining item.
 
 `rollItemTier` uses [upgradeTierChance](../src/upgrades/Upgrades.ts) with the **wave** as its level argument. It tests IV, III, then II with separate random rolls; tier I is the fallback. Unlike level-up upgrades, shop items have no guaranteed tiers on milestone waves.
 
@@ -132,7 +132,7 @@ Here `L = max(0, 1 + luck / 100)`. These are conditional test probabilities: a t
 
 `floor((basePrice + wave + basePrice × wave × 0.1) × inflation)`
 
-Inflation defaults to 1. At wave 1, a base-price-15 Cake costs 17 materials, a base-price-30 Boiling Water costs 34, and a base-price-65 Acid costs 72. Tier IV's base prices of 90–110 would calculate to 100–122 at wave 1, but those items are not offered that early under the default tier rules. See the [economy review](../../docs/balance.md#1-materials-stop-mattering-after-about-wave-2) for the price gap between items and weapons.
+Inflation defaults to 1. At wave 1, a base-price-15 Cake costs 17 materials, a base-price-30 Boiling Water costs 34, and a base-price-65 Acid costs 72. Tier IV's base prices of 90–110 would calculate to 100–122 at wave 1, but those items are not offered that early under the default tier rules. Weapons use the same formula with base prices of 8–70 (9–78 at wave 1); see the [weapon reference](weapons.md) and the [economy review](../../docs/balance.md#1-materials-stop-mattering-after-about-wave-2).
 
 ## Ownership, stacking, and effects
 
@@ -144,7 +144,7 @@ The list preserves acquisition order and duplicate copies, and is serialized alo
 
 All current items are unconditional stat changes. Their names and artwork do not add attacks, summons, poison, burning, on-hit triggers, or other conditional effects. In particular:
 
-- Engineering bonuses are stored but have no gameplay benefit while structures are absent. Pencil, Toolbox, and Cog are intentionally excluded because Engineering would be their only benefit. Book, Compass, Alloy, and other mixed-stat items remain available.
+- Engineering bonuses are stored but have no gameplay benefit while structures are absent. Pencil, Toolbox, and Cog are intentionally excluded because Engineering would be their only benefit. Mixed-stat items with positive Engineering (Book, Duct Tape, Compass, Reinforced Steel, Alloy, Exoskeleton) are not offered by the shop either. Ritual and Wolf Helmet remain: their Engineering penalty currently costs nothing.
 - Plastic Explosive adds +25% Explosion Size. Grenade and Bazooka use this to scale explosion radius; it does not make ordinary shots explode. A single copy changes their base radii from 110 to 137.5 and 140 to 175, respectively, before other bonuses.
 - Flat Melee, Ranged, and Elemental Damage feed the weapon's scaling coefficients, followed by overall Damage and critical hits. They are not all added at full strength to every weapon. See the [weapon balance review](../../docs/balance.md#2-weapon-numbers-dont-fit-the-scaling-formulas).
 - Dodge is capped at 60% in combat, attack cooldown has a 100 ms minimum, and maximum HP has a floor of 1. Additional item bonuses can therefore have diminishing or no benefit at a cap.
