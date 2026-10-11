@@ -13,18 +13,69 @@ const Point =
 		},
 	);
 
+const StatBonuses =
+	type(
+		"Record<string, number>",
+	);
+
+/** Where a Bulbro's stat points come from, e.g. its character or an owned item. */
+const StatSource =
+	type(
+		{
+			id: "string",
+			kind: "'character' | 'harvestingGrowth' | 'upgrade' | 'item' | 'level'",
+			bonuses:
+				StatBonuses,
+		},
+	);
+
+const SerializedWeapon =
+	type(
+		{
+			id: "string",
+			type: "string",
+			"tier?":
+				"1 | 2 | 3 | 4",
+			statsBonus:
+				"object",
+			shotSpeed:
+				"number",
+		},
+	);
+
 /**
- * Serialized player state shared between waves. Only the fields every client
- * relies on are validated; the rest of the state is passed through as is.
+ * Serialized player state shared between waves. Fields that define what a
+ * Bulbro is (stats, inventory, weapons) are validated so every client can
+ * show remote players with their real stats and owned items; the rest of the
+ * state is passed through as is.
  */
-const SerializedPlayer =
+export const SerializedPlayer =
 	type(
 		{
 			id: "string",
 			characterId:
 				"string",
+			level:
+				"number.integer >= 0",
+			totalExperience:
+				"number",
+			materialsAvailable:
+				"number",
+			healthPoints:
+				"number",
+			/** Every stat source, item ones included; receivers recompute stats from them. */
+			statSources:
+				StatSource.array(),
+			/** Owned item ids in acquisition order; duplicates are separate copies. */
+			items:
+				"string[]",
+			weapons:
+				SerializedWeapon.array(),
 		},
 	);
+
+export type SerializedPlayer =
+	typeof SerializedPlayer.infer;
 
 export const HostStateUpdate =
 	type(
