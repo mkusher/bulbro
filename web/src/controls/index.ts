@@ -1,5 +1,6 @@
 import { MainKeyboardControl } from "./MainKeyboardControl";
 import { MultipleControl } from "./MultipleControl";
+import { SecondaryKeyboardControl } from "./SecondaryKeyboardControl";
 import { touchscreenControl } from "./TouchscreenJoystick";
 
 export { MainKeyboardControl } from "./MainKeyboardControl";
@@ -13,10 +14,19 @@ export {
 } from "./TouchscreenJoystick";
 
 export const createMainControls =
-	() =>
+	({
+		wasd = true,
+	}: {
+		wasd?: boolean;
+	} = {}) =>
 		new MultipleControl(
 			[
 				new MainKeyboardControl(),
+				...(wasd
+					? [
+							new SecondaryKeyboardControl(),
+						]
+					: []),
 				touchscreenControl,
 			],
 		);

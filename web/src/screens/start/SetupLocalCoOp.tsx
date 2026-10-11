@@ -96,7 +96,11 @@ export function SetupLocalCoOp() {
 					),
 				],
 				[
-					createMainControls(),
+					createMainControls(
+						{
+							wasd: false,
+						},
+					),
 					new SecondaryKeyboardControl(),
 				],
 				selectedDifficulty,
