@@ -137,6 +137,12 @@ export default {
 		"Enemy Fist",
 	"weapon.name.aphidGun":
 		"Ranged Aphid Gun",
+	"weapon.class.medieval":
+		"Medieval",
+	"stat.projectiles":
+		"Projectiles",
+	"stat.spread":
+		"Spread (radians)",
 	"weapon.class.blade":
 		"Blade",
 	"weapon.class.blunt":

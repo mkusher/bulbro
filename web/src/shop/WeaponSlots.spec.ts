@@ -224,7 +224,7 @@ it("combines a weapon with an equal one of the same tier", async () => {
 	expect(
 		container.textContent,
 	).toContain(
-		"Get another Tier I copy to combine",
+		"Get another Tier II copy to combine",
 	);
 });
 

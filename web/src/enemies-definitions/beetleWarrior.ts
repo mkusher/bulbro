@@ -1,9 +1,6 @@
 import { orcFist } from "@/weapons-definitions/orc-fist";
 import type { EnemyCharacter } from "../enemy";
-import {
-	baseConsumableDropChance,
-	baseStats,
-} from "./base";
+import { baseStats } from "./base";
 
 export const beetleWarrior: EnemyCharacter =
 	{
@@ -11,26 +8,28 @@ export const beetleWarrior: EnemyCharacter =
 		name: "Beetle Warrior",
 		sprite:
 			"potatoBeetleWarrior",
+		/** Brotato analogue: Bruiser. See docs/balance.md. */
 		stats:
 			{
 				...baseStats,
-				maxHp: 6,
-				speed: 150,
-				damage: 3,
+
+				maxHp: 20,
+				speed: 300,
+				damage: 2,
 				range: 80,
-				attackSpeed: 2,
-				materialsDropped: 4,
+				materialsDropped: 3,
+				knockbackResistance: 0.9,
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 6,
+				maxHp: 11,
+				damage: 0.85,
 			},
 		weapons:
 			[
 				orcFist,
 			],
-		consumableDropChance:
-			baseConsumableDropChance,
+		consumableDropChance: 0.03,
 		behaviors:
 			"rage-running",
 	};

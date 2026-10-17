@@ -6,7 +6,8 @@ import type { MeleeStrike } from "./MeleeStrike";
 export type DamageScalingStat =
 	| "meleeDamage"
 	| "rangedDamage"
-	| "elementalDamage";
+	| "elementalDamage"
+	| "engineering";
 
 /**
  * Weapon's own stats. They are not stat points of the wielder:
@@ -14,6 +15,12 @@ export type DamageScalingStat =
  */
 export type WeaponStats =
 	{
+		/** Projectiles per attack (default 1). Damage and scaling apply per projectile. */
+		projectiles?: number;
+		/** Spread between the outermost projectiles in radians. */
+		spread?: number;
+		/** Harvesting granted while this weapon is equipped. */
+		harvesting?: number;
 		/** Base damage of a single attack */
 		damage?: number;
 		/** Seconds between attacks before the wielder's attack speed is applied */

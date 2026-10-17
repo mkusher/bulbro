@@ -139,6 +139,12 @@ export default {
 		"Pięść wroga",
 	"weapon.name.aphidGun":
 		"Broń dystansowa mszycy",
+	"weapon.class.medieval":
+		"Średniowieczna",
+	"stat.projectiles":
+		"Pociski",
+	"stat.spread":
+		"Rozrzut (radiany)",
 	"weapon.class.blade":
 		"Ostrze",
 	"weapon.class.blunt":

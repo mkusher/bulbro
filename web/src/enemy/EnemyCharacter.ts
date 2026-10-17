@@ -15,6 +15,11 @@ export interface EnemyCharacter {
 	sprite: EnemyType;
 	name: string;
 	stats: EnemyStats;
+	/** Per-spawn movement speed interval when the analogue varies its speed. */
+	speedRange?: {
+		from: number;
+		to: number;
+	};
 	waveIncreaseStats: Partial<EnemyStats>;
 	weapons: Weapon[];
 	/** Chance (0..1) to drop a consumable on death */

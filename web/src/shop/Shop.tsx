@@ -17,11 +17,14 @@ import type {
 	Weapon,
 	WeaponType,
 } from "@/weapon";
+import type { WeaponTier } from "@/weapon/WeaponState";
 import { WeaponDisplay } from "@/weapon/WeaponDisplay";
 
 export type WeaponShopItem =
 	{
 		weapon: Weapon;
+		/** Omitted for legacy tier I previews. */
+		tier?: WeaponTier;
 		price: number;
 	};
 
@@ -53,7 +56,7 @@ export function shopItemKey(
 		shopItem,
 	)
 		? `item:${shopItem.item.id}`
-		: `weapon:${shopItem.weapon.id}`;
+		: `weapon:${shopItem.weapon.id}:${shopItem.tier ?? 1}`;
 }
 
 export const itemTierNames: Record<
@@ -195,11 +198,11 @@ export interface ShopProps {
 	/** Locks purchases and re-rolls, e.g. after the player is ready in an online game */
 	disabled?: boolean;
 	weaponsFull?: boolean;
-	/**
-	 * Weapons owned at tier I: buying one more combines them into tier II,
-	 * so they can be bought when the weapon slots are full.
-	 */
-	combinableWeaponIds?: WeaponType[];
+	/** Owned weapons available for combining at each tier. */
+	combinableWeapons?: {
+		type: WeaponType;
+		tier: WeaponTier;
+	}[];
 }
 
 export function Shop({
@@ -210,7 +213,7 @@ export function Shop({
 	rerollPrice,
 	disabled = false,
 	weaponsFull = false,
-	combinableWeaponIds = [],
+	combinableWeapons = [],
 }: ShopProps) {
 	const canAfford =
 		(
@@ -227,10 +230,22 @@ export function Shop({
 			!isItemShopItem(
 				item,
 			) &&
-			!combinableWeaponIds.includes(
-				item
-					.weapon
-					.id,
+			!(
+				(item.tier ??
+					1) <
+					4 &&
+				combinableWeapons.some(
+					(
+						w,
+					) =>
+						w.type ===
+							item
+								.weapon
+								.id &&
+						w.tier ===
+							(item.tier ??
+								1),
+				)
 			);
 
 	const handlePurchase =
@@ -321,7 +336,7 @@ export function Shop({
 											item,
 										)
 											? `border-2 ${itemTierStyles[item.item.tier]}`
-											: ""
+											: `border-2 ${itemTierStyles[item.tier ?? 1]}`
 									} ${
 										affordable
 											? "cursor-pointer hover:shadow-md transition-shadow"
@@ -358,7 +373,13 @@ export function Shop({
 												<p className="text-[7px] font-medium w-full text-center leading-tight whitespace-nowrap px-0.5 overflow-hidden text-ellipsis">
 													{t(
 														`weapon.name.${item.weapon.id}`,
-													)}
+													)}{" "}
+													{
+														itemTierNames[
+															item.tier ??
+																1
+														]
+													}
 												</p>
 											</>
 										)}

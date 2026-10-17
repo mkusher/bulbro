@@ -10,20 +10,32 @@ export const sword: Weapon =
 		classes:
 			[
 				"blade",
-				"precise",
+				"medieval",
 			],
 		shotSpeed: 800,
 		statsBonus:
 			{
-				damage: 25,
-				range: 80,
-				cooldown: 0.9,
-				knockback: 8,
-				critChance: 10,
+				damage: 30,
+				cooldown: 1.28,
+				range: 200,
+				knockback: 5,
+				critChance: 3,
+				critMultiplier: 2,
 				scaling:
 					{
 						meleeDamage: 1,
 					},
+			},
+		tierStats:
+			{
+				"3": {
+					damage: 45,
+					cooldown: 1.13,
+				},
+				"4": {
+					damage: 65,
+					cooldown: 0.98,
+				},
 			},
 		attack:
 			{
@@ -41,5 +53,12 @@ export const sword: Weapon =
 						},
 					],
 			},
-		basePrice: 60,
+		minTier: 2,
+		basePrice: 51,
+		tierBasePrices:
+			{
+				2: 51,
+				3: 95,
+				4: 190,
+			},
 	};

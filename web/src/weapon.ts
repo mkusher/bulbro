@@ -3,6 +3,7 @@ import { uuid } from "./uuid";
 import type {
 	WeaponState,
 	WeaponStats,
+	WeaponTier,
 } from "./weapon/WeaponState";
 import {
 	enemyWeapons,
@@ -33,6 +34,7 @@ export type WeaponType =
  * Weapon classes.
  */
 export type WeaponClass =
+	| "medieval"
 	| "blade"
 	| "blunt"
 	| "elemental"
@@ -131,6 +133,22 @@ export interface Weapon {
 	statsBonus: WeaponStats;
 	shotSpeed: number;
 	basePrice: number;
+	/** Lowest supported tier; Sword begins at II. */
+	minTier?: WeaponTier;
+	/** Exact overrides for each tier instead of generic custom-weapon growth. */
+	tierStats?: Partial<
+		Record<
+			WeaponTier,
+			WeaponStats
+		>
+	>;
+	/** Explicit base prices for tiers II–IV, before wave inflation. */
+	tierBasePrices?: Record<
+		| 2
+		| 3
+		| 4,
+		number
+	>;
 	attack: AttackConfig;
 }
 
@@ -140,6 +158,9 @@ export const toWeaponState =
 	): WeaponState => ({
 		id: uuid(),
 		lastStrikedAt: 0,
+		tier:
+			w.minTier ??
+			1,
 		statsBonus:
 			w.statsBonus,
 		shotSpeed:

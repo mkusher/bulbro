@@ -139,6 +139,12 @@ export default {
 		"Кулак ворага",
 	"weapon.name.aphidGun":
 		"Дальнабойная гармата тлі",
+	"weapon.class.medieval":
+		"Сярэднявечная",
+	"stat.projectiles":
+		"Снарады",
+	"stat.spread":
+		"Роскід (радыяны)",
 	"weapon.class.blade":
 		"Клінковая",
 	"weapon.class.blunt":

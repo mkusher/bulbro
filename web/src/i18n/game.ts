@@ -49,6 +49,10 @@ const statNames =
 			"stat.explosionSize",
 		explosionRadius:
 			"stat.explosionRadius",
+		projectiles:
+			"stat.projectiles",
+		spread:
+			"stat.spread",
 		cooldown:
 			"stat.cooldown",
 		critMultiplier:

@@ -17,7 +17,6 @@ import type { MeleeStrike } from "@/weapon/MeleeStrike";
 export type BulbroEvent =
 	| ShotEvent
 	| BulbroAttackedEvent
-	| BulbroCollectedMaterialEvent
 	| BulbroDiedEvent
 	| BulbroHealedEvent
 	| BulbroMovedEvent
@@ -95,13 +94,6 @@ export type BulbroAttackedEvent =
 		type: "bulbroAttacked";
 		bulbroId: string;
 	} & AttackDescription;
-
-export type BulbroCollectedMaterialEvent =
-	{
-		type: "bulbroCollectedMaterial";
-		bulbroId: string;
-		materialId: string;
-	};
 
 export type BulbroDiedEvent =
 	{
@@ -225,6 +217,8 @@ export type EnemyRagingStartedEvent =
 
 export type MaterialCollectedEvent =
 	{
+		/** Material and XP value shared with every player. */
+		value: number;
 		type: "materialCollected";
 		materialId: string;
 		playerId: string;

@@ -15,12 +15,7 @@ import {
 } from "./geometry";
 import { ShotState } from "./shot/ShotState";
 import type { NowTime } from "./time";
-import {
-	getTimeLeft,
-	type RoundState,
-	type WaveState,
-	type WeaponState,
-} from "./waveState";
+import type { WeaponState } from "./waveState";
 import {
 	isExplosiveWeapon,
 	isMeleeWeapon,
@@ -213,55 +208,6 @@ export const isDifficulty =
 		maybeDifficulty <=
 			5;
 
-export const spawnIntervalForRound =
-	(
-		round: RoundState,
-	) => {
-		const wave =
-			round.wave;
-		const difficulty =
-			round.difficulty +
-			1;
-
-		return (
-			2000 /
-			wave /
-			difficulty
-		);
-	};
-export const shouldSpawnEnemy =
-	(
-		now: NowTime,
-		state: WaveState,
-	) => {
-		const spawnInterval =
-			spawnIntervalForRound(
-				state.round,
-			);
-		const timeSinceLastSpawn =
-			now -
-			(state.lastSpawnAt ??
-				0);
-		const timeLeftInRound =
-			getTimeLeft(
-				state.round,
-			);
-		const timeModifier =
-			(1 -
-				timeLeftInRound /
-					state
-						.round
-						.duration /
-					1000) *
-			timeSinceLastSpawn;
-		return (
-			((timeSinceLastSpawn +
-				timeModifier) /
-				spawnInterval) *
-				Math.random() >=
-			1
-		);
-	};
 /**
  * Calculates the attack cooldown in milliseconds.
  * Positive attack speed divides the cooldown (+100 attacks twice as often),
@@ -447,7 +393,9 @@ type Attacker =
 			| "critChance"
 			| "range"
 			| "knockback"
-		>;
+		> & {
+			engineering?: number;
+		};
 	};
 
 export const defaultCritMultiplier = 2;
@@ -687,6 +635,7 @@ export function shoot(
 	weapon: WeaponState,
 	targetPosition: Position,
 	random: () => number = Math.random,
+	angleOffset = 0,
 ): ShotState {
 	const id =
 		uuidv4();
@@ -761,7 +710,29 @@ export function shoot(
 			startPosition:
 				barrelPosition,
 			direction:
-				shotDirection,
+				angleOffset ===
+				0
+					? shotDirection
+					: {
+							x:
+								shotDirection.x *
+									Math.cos(
+										angleOffset,
+									) -
+								shotDirection.y *
+									Math.sin(
+										angleOffset,
+									),
+							y:
+								shotDirection.x *
+									Math.sin(
+										angleOffset,
+									) +
+								shotDirection.y *
+									Math.cos(
+										angleOffset,
+									),
+						},
 			speed:
 				weapon.shotSpeed,
 			knockback:

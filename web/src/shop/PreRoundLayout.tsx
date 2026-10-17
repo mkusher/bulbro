@@ -21,10 +21,7 @@ import {
 } from "@/ui/PlayersStatus";
 import { Button } from "@/ui/shadcn/button";
 import { Card } from "@/ui/shadcn/card";
-import {
-	minWeaponTier,
-	type OwnedWeapon,
-} from "@/weapon/WeaponTiers";
+import { type OwnedWeapon } from "@/weapon/WeaponTiers";
 
 /**
  * Props for a single player section in the layout.
@@ -238,22 +235,16 @@ export function PreRoundLayout({
 							)
 								.maxWeapons)
 					}
-					combinableWeaponIds={player.weapons
-						.filter(
-							(
-								weapon,
-							) =>
-								weapon.tier ===
-								minWeaponTier,
-						)
-						.map(
-							(
-								weapon,
-							) =>
-								weapon
-									.weapon
-									.id,
-						)}
+					combinableWeapons={player.weapons.map(
+						(
+							w,
+						) => ({
+							type: w
+								.weapon
+								.id,
+							tier: w.tier,
+						}),
+					)}
 					items={
 						shopItems
 					}

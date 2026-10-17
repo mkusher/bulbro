@@ -262,23 +262,31 @@ export class StageWithUi {
 			materials.map(
 				(
 					m,
-				) =>
-					ui.toLocal(
-						field.toGlobal(
-							{
-								x:
-									m
-										.position
-										.x +
-									materialVisualCenterOffset.x,
-								y:
-									m
-										.position
-										.y +
-									materialVisualCenterOffset.y,
-							},
-						),
-					),
+				) => {
+					const position =
+						ui.toLocal(
+							field.toGlobal(
+								{
+									x:
+										m
+											.position
+											.x +
+										materialVisualCenterOffset.x,
+									y:
+										m
+											.position
+											.y +
+										materialVisualCenterOffset.y,
+								},
+							),
+						);
+					return {
+						x: position.x,
+						y: position.y,
+						value:
+							m.value,
+					};
+				},
 			);
 		const animation =
 			new BaggingAnimation(

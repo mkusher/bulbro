@@ -487,6 +487,7 @@ describe("BulbroState", () => {
 						state,
 						{
 							type: "materialCollected",
+							value: 1,
 							materialId: `${i}`,
 							playerId:
 								"test",
@@ -516,6 +517,7 @@ describe("BulbroState", () => {
 					spawn(),
 					{
 						type: "materialCollected",
+						value: 1,
 						materialId:
 							"m1",
 						playerId:
@@ -557,6 +559,7 @@ describe("BulbroState", () => {
 					dead,
 					{
 						type: "materialCollected",
+						value: 1,
 						materialId:
 							"m1",
 						playerId:
@@ -585,6 +588,7 @@ describe("BulbroState", () => {
 					),
 					{
 						type: "materialCollected",
+						value: 1,
 						materialId:
 							"m1",
 						playerId:

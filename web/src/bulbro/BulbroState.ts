@@ -2,7 +2,6 @@ import type { EnemyState } from "@/enemy";
 import type {
 	AttackDescription,
 	BulbroAttackedEvent,
-	BulbroCollectedMaterialEvent,
 	BulbroDiedEvent,
 	BulbroEvent,
 	BulbroHealedEvent,
@@ -10,7 +9,6 @@ import type {
 	BulbroMovedEvent,
 	BulbroReceivedHitEvent,
 	GameEvent,
-	MaterialCollectedEvent,
 } from "@/game-events/GameEvents";
 import type {
 	DeltaTime,
@@ -59,7 +57,6 @@ import {
 	Movement,
 	type Shape,
 } from "../movement/Movement";
-import type { Material } from "../object";
 import {
 	findUpgradeById,
 	levelUpgradeStatSourceId,
@@ -226,9 +223,34 @@ export class BulbroState
 			.healthPoints;
 	}
 	get stats() {
-		return this
-			.#props
-			.stats;
+		const harvesting =
+			this.weapons.reduce(
+				(
+					sum,
+					w,
+				) =>
+					sum +
+					(w
+						.statsBonus
+						.harvesting ??
+						0),
+				0,
+			);
+		return harvesting
+			? {
+					...this
+						.#props
+						.stats,
+					harvesting:
+						this
+							.#props
+							.stats
+							.harvesting +
+						harvesting,
+				}
+			: this
+					.#props
+					.stats;
 	}
 	get weapons() {
 		return this
@@ -946,18 +968,20 @@ export class BulbroState
 		);
 	}
 
-	/**
-	 * Picks up a material. When the bag is not empty one more material is
-	 * taken out of it and added to the picked one.
-	 */
-	collectMaterial() {
+	/** Collects the pickup value plus an equal value from the bag, capped by its balance. */
+	collectMaterial(
+		value: number,
+	) {
 		if (
-			this
-				.bagMaterials <=
+			value <=
 			0
 		)
-			return this.gainMaterials(
-				1,
+			return this;
+		const bonus =
+			Math.min(
+				value,
+				this
+					.bagMaterials,
 			);
 		return new BulbroState(
 			{
@@ -966,10 +990,11 @@ export class BulbroState
 				bagMaterials:
 					this
 						.bagMaterials -
-					1,
+					bonus,
 			},
 		).gainMaterials(
-			2,
+			value +
+				bonus,
 		);
 	}
 
@@ -1081,20 +1106,6 @@ export class BulbroState
 					),
 			},
 		);
-	}
-
-	/** Returns a material collection event for the Bulbro. */
-	takeMaterial(
-		material: Material,
-	): BulbroCollectedMaterialEvent {
-		return {
-			type: "bulbroCollectedMaterial",
-			bulbroId:
-				this
-					.id,
-			materialId:
-				material.id,
-		};
 	}
 
 	healByHpRegeneration(
@@ -1341,22 +1352,13 @@ export class BulbroState
 					},
 				);
 
-			case "bulbroCollectedMaterial":
-				if (
-					event.bulbroId !==
-					this
-						.id
-				)
-					return this;
-				// Note: We'd need the material value to update experience/materials
-				// For now, just return the same state as we don't have the full material object
-				return this;
-
 			case "materialCollected":
 				// Co-op shares every pickup: whoever collects it, every Bulbro
-				// gets a material and experience. Harvesting does not change
+				// gets its value in materials and experience. Harvesting does not change
 				// pickups; it pays out at the end of the wave (see harvest).
-				return this.collectMaterial();
+				return this.collectMaterial(
+					event.value,
+				);
 
 			case "consumableCollected": {
 				if (

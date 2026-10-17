@@ -1,9 +1,6 @@
 import { orcFist } from "@/weapons-definitions/orc-fist";
 import type { EnemyCharacter } from "../enemy";
-import {
-	baseConsumableDropChance,
-	baseStats,
-} from "./base";
+import { baseStats } from "./base";
 
 export const wildBoar: EnemyCharacter =
 	{
@@ -11,27 +8,28 @@ export const wildBoar: EnemyCharacter =
 		name: "Wild Boar",
 		sprite:
 			"wildBoar",
+		/** Brotato analogue: Charger. See docs/balance.md. */
 		stats:
 			{
 				...baseStats,
-				maxHp: 10,
-				speed: 280,
-				damage: 3,
+
+				maxHp: 4,
+				speed: 400,
+				damage: 1,
 				range: 80,
-				attackSpeed: 2,
-				materialsDropped: 5,
+				materialsDropped: 1,
+				knockbackResistance: 0.8,
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 10,
-				materialsDropped: 3,
+				maxHp: 2.5,
+				damage: 0.85,
 			},
 		weapons:
 			[
 				orcFist,
 			],
-		consumableDropChance:
-			baseConsumableDropChance,
+		consumableDropChance: 0.01,
 		behaviors:
 			"rage-running",
 	};

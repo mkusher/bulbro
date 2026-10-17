@@ -39,6 +39,8 @@ export const Weapon =
 									"number",
 								"rangedDamage?":
 									"number",
+								"engineering?":
+									"number",
 								"elementalDamage?":
 									"number",
 							},

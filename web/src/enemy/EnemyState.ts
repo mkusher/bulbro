@@ -63,6 +63,8 @@ export type EnemyStats =
 		speed: number;
 		materialsDropped: number;
 		knockback: number;
+		/** Fraction of incoming knockback resisted (0..1). */
+		knockbackResistance?: number;
 	};
 
 export type Knockback =
@@ -335,6 +337,20 @@ export class EnemyState
 			};
 		}
 
+		if (
+			knockback
+		)
+			knockback =
+				{
+					...knockback,
+					strength:
+						knockback.strength *
+						(1 -
+							(this
+								.stats
+								.knockbackResistance ??
+								0)),
+				};
 		// Enemy takes damage but survives
 		return {
 			type: "enemyReceivedHit",
@@ -622,6 +638,7 @@ export function spawnEnemy(
 	id: string,
 	position: Position,
 	character: EnemyCharacter,
+	random: () => number = Math.random,
 ): EnemyState {
 	const weapons: WeaponState[] =
 		character.weapons.map(
@@ -638,7 +655,22 @@ export function spawnEnemy(
 					.maxHp,
 			weapons,
 			stats:
-				character.stats,
+				character.speedRange
+					? {
+							...character.stats,
+							speed:
+								character
+									.speedRange
+									.from +
+								random() *
+									(character
+										.speedRange
+										.to -
+										character
+											.speedRange
+											.from),
+						}
+					: character.stats,
 			lastMovedAt: 0,
 			lastHitAt: 0,
 			lastHorizontalDirection: 1,

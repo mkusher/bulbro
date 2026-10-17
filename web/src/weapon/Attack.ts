@@ -44,6 +44,7 @@ export type Attack =
 	| {
 			type: "shot";
 			shot: ShotState;
+			additionalShots?: ShotState[];
 	  }
 	| {
 			type: "strike";
@@ -227,15 +228,49 @@ export function attack(
 			config,
 		)
 	) {
+		const count =
+			weapon
+				.statsBonus
+				.projectiles ??
+			1;
+		const spread =
+			weapon
+				.statsBonus
+				.spread ??
+			0;
+		const shots =
+			Array.from(
+				{
+					length:
+						count,
+				},
+				(
+					_,
+					i,
+				) =>
+					shoot(
+						attacker,
+						attackerType,
+						weapon,
+						target.aimAt,
+						random,
+						count ===
+							1
+							? 0
+							: (i /
+									(count -
+										1) -
+									0.5) *
+									spread,
+					),
+			);
 		return {
 			type: "shot",
-			shot: shoot(
-				attacker,
-				attackerType,
-				weapon,
-				target.aimAt,
-				random,
-			),
+			shot: shots[0]!,
+			additionalShots:
+				shots.slice(
+					1,
+				),
 		};
 	}
 	if (
@@ -336,12 +371,18 @@ export function attackSideEvents(
 	return performed.type ===
 		"shot"
 		? [
-				{
+				performed.shot,
+				...(performed.additionalShots ??
+					[]),
+			].map(
+				(
+					shot,
+				) => ({
 					type: "shot" as const,
-					shot: performed.shot,
+					shot,
 					weaponId,
-				},
-			]
+				}),
+			)
 		: [];
 }
 

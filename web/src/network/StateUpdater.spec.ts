@@ -729,6 +729,7 @@ describe("StateUpdater", () => {
 					// Should filter out: material collected by remote
 					{
 						type: "materialCollected",
+						value: 1,
 						materialId:
 							"material-1",
 						playerId:
