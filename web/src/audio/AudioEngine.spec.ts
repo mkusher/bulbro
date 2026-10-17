@@ -19,6 +19,41 @@ const resume =
 	mock(
 		async () => {},
 	);
+const silentBuffer =
+	{};
+const start =
+	mock(
+		() => {},
+	);
+const disconnect =
+	mock(
+		() => {},
+	);
+const connect =
+	mock(
+		(
+			_destination: unknown,
+		) => {},
+	);
+const sources: {
+	buffer: unknown;
+	connect: typeof connect;
+	start: typeof start;
+	disconnect: typeof disconnect;
+	onended:
+		| (() => void)
+		| null;
+}[] =
+	[];
+const createBuffer =
+	mock(
+		(
+			_channels: number,
+			_length: number,
+			_sampleRate: number,
+		) =>
+			silentBuffer,
+	);
 let finishDecoding!: () => void;
 const decoding =
 	new Promise<void>(
@@ -35,6 +70,27 @@ const context =
 			return state;
 		},
 		resume,
+		sampleRate: 48000,
+		createBuffer,
+		createBufferSource:
+			() => {
+				const source =
+					{
+						buffer:
+							null as unknown,
+						connect,
+						start,
+						disconnect,
+						onended:
+							null as
+								| (() => void)
+								| null,
+					};
+				sources.push(
+					source,
+				);
+				return source;
+			},
 		destination:
 			{},
 		createGain:
@@ -121,6 +177,38 @@ it("unlocks audio synchronously from a tap while audio is still preloading", asy
 	).toHaveBeenCalledTimes(
 		1,
 	);
+	expect(
+		createBuffer,
+	).toHaveBeenCalledWith(
+		1,
+		1,
+		48000,
+	);
+	expect(
+		sources[0]
+			?.buffer,
+	).toBe(
+		silentBuffer,
+	);
+	expect(
+		connect,
+	).toHaveBeenCalledWith(
+		context.destination,
+	);
+	expect(
+		start,
+	).toHaveBeenCalledWith(
+		0,
+	);
+	expect(
+		disconnect,
+	).not.toHaveBeenCalled();
+	sources[0]?.onended?.();
+	expect(
+		disconnect,
+	).toHaveBeenCalledTimes(
+		1,
+	);
 	finishDecoding();
 	await Promise.all(
 		[
@@ -134,6 +222,7 @@ it("unlocks audio synchronously from a tap while audio is still preloading", asy
 
 it("recovers from Safari interruptions on subsequent gestures", () => {
 	resume.mockClear();
+	start.mockClear();
 	state =
 		"interrupted";
 	document.dispatchEvent(
@@ -157,6 +246,11 @@ it("recovers from Safari interruptions on subsequent gestures", () => {
 	).toHaveBeenCalledTimes(
 		2,
 	);
+	expect(
+		start,
+	).toHaveBeenCalledTimes(
+		2,
+	);
 });
 
 it("resumes interrupted audio through the public API", async () => {
@@ -173,6 +267,7 @@ it("resumes interrupted audio through the public API", async () => {
 
 it("does not resume running or closed contexts", async () => {
 	resume.mockClear();
+	start.mockClear();
 	for (const nextState of [
 		"running",
 		"closed",
@@ -191,5 +286,8 @@ it("does not resume running or closed contexts", async () => {
 	}
 	expect(
 		resume,
+	).not.toHaveBeenCalled();
+	expect(
+		start,
 	).not.toHaveBeenCalled();
 });
