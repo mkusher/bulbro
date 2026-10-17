@@ -617,6 +617,10 @@ export class ShotMovementEventGenerator
 			>();
 		for (const shot of shots) {
 			if (
+				shot.structure
+			)
+				continue;
+			if (
 				shot.weaponType ===
 					"laserGun" &&
 				shot.shooterType ===

@@ -1,6 +1,54 @@
 import type en from "./en";
 
 export default {
+	"upgrade.skull":
+		"Чэрап",
+	"weapon.name.pruner":
+		"Секатар",
+	"weapon.name.screwdriver":
+		"Адвёртка",
+	"weapon.name.wrench":
+		"Гаечны ключ",
+	"weapon.effect.pruner":
+		"Стварае градку на пачатку хвалі. Плод кожныя {interval} с.",
+	"weapon.effect.screwdriver":
+		"Стварае міну на пачатку хвалі і кожныя {interval} с: 10 + 100% інжынерыі ўрону па вобласці.",
+	"weapon.effect.wrench":
+		"На пачатку хвалі стварае: {turret}.",
+	"item.name.landmines":
+		"Наземныя міны",
+	"item.name.turret":
+		"Турэль",
+	"item.name.medicalTurret":
+		"Медыцынская турэль",
+	"item.name.laserTurret":
+		"Лазерная турэль",
+	"item.name.explosiveTurret":
+		"Выбуховая турэль",
+	"item.name.garden":
+		"Градка",
+	"item.name.incendiaryTurret":
+		"Запальная турэль",
+	"item.name.pencil":
+		"Аловак",
+	"item.name.toolbox":
+		"Скрыня інструментаў",
+	"item.name.cog":
+		"Шасцярня",
+	"item.effect.landmines":
+		"Стварае {count} мін на пачатку хвалі і кожныя 12 с: 10 + 100% інжынерыі ўрону па вобласці.",
+	"item.effect.turret":
+		"Стварае {count} турэляў: 10 + 80% інжынерыі ўрону, далёкасць 300, інтэрвал 0.73 с.",
+	"item.effect.medicalTurret":
+		"Стварае {count} медыцынскіх турэляў: лечаць 3 + 5% інжынерыі HP, далёкасць 400, інтэрвал 2.2 с.",
+	"item.effect.laserTurret":
+		"Стварае {count} лазерных турэляў: 20 + 125% інжынерыі ўрону, 3 прабіцці, далёкасць 400, інтэрвал 0.87 с.",
+	"item.effect.explosiveTurret":
+		"Стварае {count} выбуховых турэляў: 25 + 150% інжынерыі ўрону па вобласці, далёкасць 500, інтэрвал 0.87 с.",
+	"item.effect.garden":
+		"Стварае {count} градак: плод адразу і кожныя 15 с.",
+	"item.effect.incendiaryTurret":
+		"Стварае {count} запальных турэляў: гарэнне 8 × (5 + 33% інжынерыі), далёкасць 300, інтэрвал 0.28 с.",
 	"characterStats.title":
 		"Характарыстыкі персанажа",
 	"characterStats.current":

@@ -1,5 +1,6 @@
 import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
+import { StructureSprite } from "@/engineering/StructureSprite";
 import type {
 	DeltaTime,
 	NowTime,
@@ -61,6 +62,11 @@ export abstract class BaseScene<
 		SceneCamera,
 > {
 	#camera: TCamera;
+	#structureSprites =
+		new Map<
+			string,
+			StructureSprite
+		>();
 	#playerSprites: Map<
 		string,
 		BulbroSprite
@@ -183,6 +189,75 @@ export abstract class BaseScene<
 		now: NowTime,
 		state: WaveState,
 	): void {
+		const structures =
+			state.objects.filter(
+				(
+					o,
+				) =>
+					o.type ===
+						"structure" &&
+					o.kind !==
+						"landmineSource" &&
+					o.kind !==
+						"burn",
+			);
+		const ids =
+			new Set(
+				structures.map(
+					(
+						s,
+					) =>
+						s.id,
+				),
+			);
+		for (const [
+			id,
+			sprite,
+		] of this
+			.#structureSprites) {
+			if (
+				!ids.has(
+					id,
+				)
+			) {
+				sprite.destroy();
+				this.#structureSprites.delete(
+					id,
+				);
+			}
+		}
+		for (const s of structures) {
+			if (
+				s.type !==
+				"structure"
+			)
+				continue;
+			let sprite =
+				this.#structureSprites.get(
+					s.id,
+				);
+			if (
+				!sprite
+			) {
+				sprite =
+					new StructureSprite(
+						s,
+					);
+				this.playingFieldContainer.addChild(
+					sprite,
+				);
+				this.#playingFieldLayer.attach(
+					sprite,
+				);
+				this.#structureSprites.set(
+					s.id,
+					sprite,
+				);
+			}
+			sprite.update(
+				s,
+			);
+		}
 		this.#updatePlayers(
 			deltaTime,
 			now,

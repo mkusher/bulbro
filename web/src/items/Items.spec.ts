@@ -110,9 +110,11 @@ describe("item definitions", () => {
 				Object.keys(
 					item.bonuses,
 				)
-					.length,
-			).toBeGreaterThan(
-				0,
+					.length >
+					0 ||
+					!!item.structure,
+			).toBe(
+				true,
 			);
 			for (const key of Object.keys(
 				item.bonuses,
@@ -151,108 +153,33 @@ describe("item definitions", () => {
 		);
 	});
 
-	it("keeps items with inactive stat bonuses out of the shop pool", () => {
-		const shopIds =
-			shopItemDefinitions.map(
-				(
-					item,
-				) =>
-					item.id,
-			);
-		for (const id of [
-			"book",
-			"ductTape",
-			"compass",
-			"reinforcedSteel",
-			"alloy",
-			"exoskeleton",
-		]) {
-			expect(
-				shopIds,
-			).not.toContain(
-				id,
-			);
-			expect(
-				findItemById(
-					id,
-				),
-			).toBeDefined();
-		}
-		// Engineering penalties are harmless, so these stay in the shop.
-		expect(
-			shopIds,
-		).toContain(
-			"ritual",
-		);
-		expect(
-			shopIds,
-		).toContain(
-			"wolfHelmet",
-		);
+	it("offers engineering bonuses and structure items now that engineering is active", () => {
 		expect(
 			shopItemDefinitions,
-		).toHaveLength(
-			itemDefinitions.length -
-				6,
-		);
-		expect(
-			new Set(
-				shopItemDefinitions.map(
-					(
-						item,
-					) =>
-						item.tier,
-				),
-			),
 		).toEqual(
-			new Set(
-				[
-					1,
-					2,
-					3,
-					4,
-				],
-			),
+			itemDefinitions,
 		);
-	});
-
-	it("never rolls items with inactive stat bonuses", () => {
-		const random =
-			seededRng(
-				7,
+		for (const id of [
+			"pencil",
+			"toolbox",
+			"cog",
+			"book",
+			"turret",
+			"laserTurret",
+			"garden",
+		])
+			expect(
+				shopItemDefinitions.some(
+					(
+						i,
+					) =>
+						i.id ===
+						id,
+				),
+			).toBe(
+				true,
 			);
-		for (
-			let roll = 0;
-			roll <
-			200;
-			roll++
-		) {
-			for (const offer of generateShopItems(
-				wellRoundedBulbro,
-				{
-					wave: 20,
-					luck: 100,
-					random,
-				},
-			)) {
-				if (
-					isItemShopItem(
-						offer,
-					)
-				)
-					expect(
-						offer
-							.item
-							.bonuses
-							.engineering ??
-							0,
-					).toBeLessThanOrEqual(
-						0,
-					);
-			}
-		}
 	});
-
 	it("finds an item by id", () => {
 		expect(
 			findItemById(

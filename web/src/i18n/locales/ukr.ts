@@ -1,6 +1,54 @@
 import type en from "./en";
 
 export default {
+	"upgrade.skull":
+		"Череп",
+	"weapon.name.pruner":
+		"Секатор",
+	"weapon.name.screwdriver":
+		"Викрутка",
+	"weapon.name.wrench":
+		"Гайковий ключ",
+	"weapon.effect.pruner":
+		"Створює грядку на початку хвилі. Плід кожні {interval} с.",
+	"weapon.effect.screwdriver":
+		"Створює міну на початку хвилі та кожні {interval} с: 10 + 100% інженерії шкоди по області.",
+	"weapon.effect.wrench":
+		"На початку хвилі створює: {turret}.",
+	"item.name.landmines":
+		"Наземні міни",
+	"item.name.turret":
+		"Турель",
+	"item.name.medicalTurret":
+		"Медична турель",
+	"item.name.laserTurret":
+		"Лазерна турель",
+	"item.name.explosiveTurret":
+		"Вибухова турель",
+	"item.name.garden":
+		"Грядка",
+	"item.name.incendiaryTurret":
+		"Запалювальна турель",
+	"item.name.pencil":
+		"Олівець",
+	"item.name.toolbox":
+		"Ящик інструментів",
+	"item.name.cog":
+		"Шестерня",
+	"item.effect.landmines":
+		"Створює {count} мін на початку хвилі та кожні 12 с: 10 + 100% інженерії шкоди по області.",
+	"item.effect.turret":
+		"Створює {count} турелей: 10 + 80% інженерії шкоди, дальність 300, інтервал 0.73 с.",
+	"item.effect.medicalTurret":
+		"Створює {count} медичних турелей: лікують 3 + 5% інженерії HP, дальність 400, інтервал 2.2 с.",
+	"item.effect.laserTurret":
+		"Створює {count} лазерних турелей: 20 + 125% інженерії шкоди, 3 пробиття, дальність 400, інтервал 0.87 с.",
+	"item.effect.explosiveTurret":
+		"Створює {count} вибухових турелей: 25 + 150% інженерії шкоди по області, дальність 500, інтервал 0.87 с.",
+	"item.effect.garden":
+		"Створює {count} грядок: плід одразу та кожні 15 с.",
+	"item.effect.incendiaryTurret":
+		"Створює {count} запалювальних турелей: горіння 8 × (5 + 33% інженерії), дальність 300, інтервал 0.28 с.",
 	"characterStats.title":
 		"Характеристики персонажа",
 	"characterStats.current":

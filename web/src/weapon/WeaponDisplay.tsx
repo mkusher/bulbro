@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { ToolEffect } from "@/engineering/ToolEffect";
 import {
 	type Direction,
 	isEqual,
@@ -141,6 +142,11 @@ export function WeaponDisplay({
 							`weapon.name.${weapon.id}`,
 						)}
 					</div>
+					<ToolEffect
+						type={
+							weapon.id
+						}
+					/>
 					{statEntries.length >
 					0 ? (
 						<div className="space-y-1">

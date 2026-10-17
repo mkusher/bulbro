@@ -3,6 +3,15 @@ import { audioEngine } from "@/audio/AudioEngine";
 
 const assetDefinitions =
 	{
+		engineeringTools:
+			{
+				path: new URL(
+					"./assets/engineering-tools.svg",
+					import.meta
+						.url,
+				)
+					.href,
+			},
 		weapons:
 			{
 				path: new URL(

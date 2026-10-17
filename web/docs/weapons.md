@@ -3,8 +3,10 @@
 See [Characters](characters.md), [Items](items.md), [Enemies](enemies.md), and
 the [balance review](../../docs/balance.md).
 
-The game registers 14 player weapons and 3 enemy weapons in
+The game registers 17 player weapons and 3 enemy weapons in
 [weapons-definitions/index.ts](../src/weapons-definitions/index.ts).
+
+Pruner, Screwdriver and Wrench also spawn structures; see [Engineering](engineering.md) for their tier effects.
 
 ## Brotato analogues
 
@@ -48,7 +50,7 @@ melee projectile speed is unused.
 shop previews, equipment, combining and selling. A weapon's explicit tier
 stats override its base stats. Custom weapons use damage multipliers
 1/1.6/2.4/3.6, cooldown multipliers 1/0.93/0.85/0.75, and +3 crit chance
-per tier above I. These generic rules do not apply to the nine analogues.
+per tier above I. These generic rules do not apply to the Brotato analogues, including the three engineering tools.
 
 Rows list only supported tiers: Sword II/III/IV, all others I/II/III/IV.
 Prices shown at wave 1 are comparison values; tier II/III/IV shop offers

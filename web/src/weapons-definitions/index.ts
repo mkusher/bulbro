@@ -3,6 +3,11 @@ import { aphidGun } from "./aphid-gun";
 import { bazooka } from "./bazooka";
 import { brick } from "./brick";
 import { doubleBarrelShotgun } from "./double-barrel-shotgun";
+import {
+	pruner,
+	screwdriver,
+	wrench,
+} from "./engineering-tools";
 import { fist } from "./fist";
 import { flareGun } from "./flare-gun";
 import { grenade } from "./grenade";
@@ -33,12 +38,18 @@ export {
 	orcFist,
 	orcSlowGun,
 	pistol,
+	pruner,
+	screwdriver,
 	smg,
 	sword,
+	wrench,
 };
 
 export const weapons =
 	[
+		pruner,
+		screwdriver,
+		wrench,
 		ak47,
 		brick,
 		doubleBarrelShotgun,

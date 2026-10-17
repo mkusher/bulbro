@@ -12,6 +12,9 @@ import {
 } from "./weapons-definitions";
 
 export type WeaponType =
+	| "pruner"
+	| "screwdriver"
+	| "wrench"
 	| "hand"
 	| "fist"
 	| "pistol"
