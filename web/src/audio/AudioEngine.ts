@@ -25,6 +25,7 @@ class AudioEngine {
 		null;
 	#buffers: AudioBufferMap =
 		new Map();
+	#isUnlocked = false;
 
 	// Gain nodes for volume control
 	#effectsGain: GainNode | null =
@@ -69,6 +70,22 @@ class AudioEngine {
 	}
 
 	async #doInit(): Promise<void> {
+		// Use media playback so iOS Silent mode does not mute game audio.
+		const {
+			audioSession,
+		} =
+			navigator as Navigator & {
+				audioSession?: {
+					type: string;
+				};
+			};
+		if (
+			audioSession
+		) {
+			audioSession.type =
+				"playback";
+		}
+
 		// Create audio context
 		this.#context =
 			new AudioContext();
@@ -83,7 +100,7 @@ class AudioEngine {
 			document.addEventListener(
 				event,
 				this
-					.#resumeFromInteraction,
+					.#unlockFromInteraction,
 				true,
 			);
 		}
@@ -160,6 +177,49 @@ class AudioEngine {
 			},
 		);
 	}
+
+	#unlockFromInteraction =
+		(): void => {
+			const context =
+				this
+					.#context;
+			if (
+				!context ||
+				context.state ===
+					"closed"
+			)
+				return;
+			this.#resumeFromInteraction();
+			if (
+				this
+					.#isUnlocked &&
+				context.state ===
+					"running"
+			)
+				return;
+
+			// Start inside the gesture, without awaiting resume or asset decoding.
+			// A newly created buffer contains silence and needs no network request.
+			const source =
+				context.createBufferSource();
+			source.buffer =
+				context.createBuffer(
+					1,
+					1,
+					context.sampleRate,
+				);
+			source.connect(
+				context.destination,
+			);
+			source.onended =
+				() => {
+					this.#isUnlocked = true;
+					source.disconnect();
+				};
+			source.start(
+				0,
+			);
+		};
 
 	#resumeWhenVisible =
 		(): void => {
