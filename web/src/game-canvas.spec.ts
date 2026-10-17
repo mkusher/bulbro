@@ -3,8 +3,8 @@ import {
 	it,
 } from "bun:test";
 import {
-	autoScale,
 	automaticFitMode,
+	autoScale,
 	canvasSize,
 	mobileVisibleShortSide,
 } from "./game-canvas";
