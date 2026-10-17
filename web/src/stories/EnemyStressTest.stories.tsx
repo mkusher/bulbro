@@ -198,7 +198,7 @@ function buildInitialState(
 
 export default {
 	title:
-		"Enemies/StressTest",
+		"Game Scenes/Enemies Stress Test",
 	component:
 		StorybookGameScene,
 };

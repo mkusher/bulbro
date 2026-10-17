@@ -218,6 +218,43 @@ export class BaseWaveProcess
 			.promise;
 	}
 
+	/**
+	 * Stops the game ticks. A won wave first lets the materials left on the
+	 * field fly into the bag, then the wave is stopped.
+	 */
+	async #finish(
+		type:
+			| "win"
+			| "fail",
+	) {
+		this.#ticker.remove(
+			this
+				.tick,
+		);
+		if (
+			type ===
+			"win"
+		) {
+			try {
+				await this.#scene.playBaggingAnimation(
+					waveState.value,
+					this
+						.#ticker,
+				);
+			} catch (error) {
+				this.#logger.error(
+					{
+						error,
+					},
+					"Bagging animation failed",
+				);
+			}
+		}
+		await this.stop(
+			type,
+		);
+	}
+
 	tick =
 		() => {
 			const i =
@@ -273,19 +310,18 @@ export class BaseWaveProcess
 					this.#eventQueue.addEvent(
 						waveEnded,
 					);
-				this.stop(
-					state.players.filter(
+				this.#finish(
+					state.players.some(
 						(
 							player,
 						) =>
 							player.healthPoints >
 							0,
 					)
-						.length >
-						0
 						? "win"
 						: "fail",
 				);
+				return;
 			}
 			if (
 				i %

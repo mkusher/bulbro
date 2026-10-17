@@ -61,6 +61,9 @@ export const SerializedPlayer =
 				"number",
 			materialsAvailable:
 				"number",
+			/** Materials left on the field in previous waves, paid out on later pickups */
+			"bagMaterials?":
+				"number.integer >= 0",
 			healthPoints:
 				"number",
 			/** Every stat source, item ones included; receivers recompute stats from them. */

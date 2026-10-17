@@ -2856,6 +2856,276 @@ describe("wave end harvesting", () => {
 	});
 });
 
+describe("bagged materials", () => {
+	const at =
+		(
+			ms: number,
+		) =>
+			[
+				deltaTime(
+					16,
+				),
+				nowTime(
+					ms,
+				),
+			] as const;
+
+	const startTick: Extract<
+		GameEvent,
+		{
+			type: "tick";
+		}
+	> =
+		{
+			type: "tick",
+			deltaTime:
+				deltaTime(
+					16,
+				),
+			occurredAt:
+				nowTime(
+					0,
+				),
+		};
+
+	function material(
+		id: string,
+	): Material {
+		return {
+			type: "material",
+			id,
+			position:
+				{
+					x: 10,
+					y: 10,
+				},
+			value: 1,
+		};
+	}
+
+	function endedWaveWithMaterials(
+		count: number,
+	): WaveState {
+		const state =
+			createInitialState(
+				[
+					createTestPlayer(
+						"bagger",
+					),
+				],
+				{
+					width: 800,
+					height: 600,
+				},
+				0,
+			);
+		return updateState(
+			{
+				...state,
+				objects:
+					Array.from(
+						{
+							length:
+								count,
+						},
+						(
+							_,
+							i,
+						) =>
+							material(
+								`m${i}`,
+							),
+					),
+			},
+			withEventMeta(
+				{
+					type: "waveEnded",
+				},
+				...at(
+					1000,
+				),
+			),
+		);
+	}
+
+	function collect(
+		state: WaveState,
+		materialId: string,
+	) {
+		return updateState(
+			state,
+			withEventMeta(
+				{
+					type: "materialCollected",
+					materialId,
+					playerId:
+						"bagger",
+				},
+				...at(
+					2000,
+				),
+			),
+		);
+	}
+
+	it("puts materials left on the field into the bag when the wave ends", () => {
+		const ended =
+			endedWaveWithMaterials(
+				3,
+			);
+		expect(
+			ended
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			3,
+		);
+		expect(
+			ended
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			0,
+		);
+	});
+
+	it("keeps the bag for the next wave and clears the field", () => {
+		const next =
+			nextWave(
+				endedWaveWithMaterials(
+					2,
+				),
+				startTick,
+			);
+		expect(
+			next
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			2,
+		);
+		expect(
+			next.objects,
+		).toEqual(
+			[],
+		);
+	});
+
+	it("adds one bagged material to every pickup until the bag is empty", () => {
+		const next =
+			nextWave(
+				endedWaveWithMaterials(
+					1,
+				),
+				startTick,
+			);
+		const withDrops =
+			{
+				...next,
+				objects:
+					[
+						material(
+							"a",
+						),
+						material(
+							"b",
+						),
+					],
+			};
+		const first =
+			collect(
+				withDrops,
+				"a",
+			);
+		expect(
+			first
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			2,
+		);
+		expect(
+			first
+				.players[0]!
+				.totalExperience,
+		).toBe(
+			2,
+		);
+		expect(
+			first
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			0,
+		);
+		const second =
+			collect(
+				first,
+				"b",
+			);
+		expect(
+			second
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			3,
+		);
+	});
+
+	it("does not bag materials when the wave is lost", () => {
+		const state =
+			endedWaveWithMaterials(
+				0,
+			);
+		const dead =
+			{
+				...state,
+				round:
+					{
+						...state.round,
+						isRunning: true,
+					},
+				players:
+					state.players.map(
+						(
+							p,
+						) =>
+							new BulbroState(
+								{
+									...p.toJSON(),
+									healthPoints: 0,
+								},
+							),
+					),
+				objects:
+					[
+						material(
+							"left",
+						),
+					],
+			};
+		const ended =
+			updateState(
+				dead,
+				withEventMeta(
+					{
+						type: "waveEnded",
+					},
+					...at(
+						3000,
+					),
+				),
+			);
+		expect(
+			ended
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			0,
+		);
+	});
+});
+
 describe("co-op shared pickups", () => {
 	function coopState(
 		harvesting: [

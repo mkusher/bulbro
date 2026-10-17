@@ -1,7 +1,13 @@
 import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
+import { audioEngine } from "@/audio";
 import type { GameEvent } from "@/game-events/GameEvents";
 import type { Position } from "@/geometry";
+import {
+	loadMaterialTexture,
+	materialDisplaySize,
+	materialVisualCenterOffset,
+} from "@/object/MaterialSprite";
 import type {
 	DeltaTime,
 	NowTime,
@@ -13,6 +19,7 @@ import {
 import { InWaveStats } from "../bulbro/sprites/InWaveStats";
 import { canvasSize } from "../game-canvas";
 import type { WaveState } from "../waveState";
+import { BaggingAnimation } from "./BaggingAnimation";
 import type { Camera } from "./Camera";
 import { DustCloudEffect } from "./DustCloudEffect";
 import { ExplosionEffects } from "./ExplosionEffects";
@@ -48,6 +55,12 @@ export class StageWithUi {
 		Position
 	> =
 		new Map();
+	#lastNow: NowTime =
+		nowTime(
+			0,
+		);
+	/** Materials counted in the bag that are still flying into it */
+	#pendingBagMaterials = 0;
 
 	constructor(
 		logger: Logger,
@@ -152,6 +165,8 @@ export class StageWithUi {
 		state: WaveState,
 		events: GameEvent[],
 	): void {
+		this.#lastNow =
+			now;
 		// Update scene (players, enemies, shots, objects)
 		this.#scene.update(
 			deltaTime,
@@ -173,7 +188,6 @@ export class StageWithUi {
 				.width,
 		);
 		this.#updatePlayerStats(
-			deltaTime,
 			state,
 		);
 		this.#explosionEffects.update(
@@ -189,6 +203,163 @@ export class StageWithUi {
 			deltaTime,
 			state,
 		);
+	}
+
+	/**
+	 * Animates materials left on the field flying into the bag of the first
+	 * player. Rendering has to keep running on the ticker until it resolves.
+	 */
+	async playBaggingAnimation(
+		state: WaveState,
+		ticker: PIXI.Ticker,
+	): Promise<void> {
+		const materials =
+			state.objects.filter(
+				(
+					o,
+				) =>
+					o.type ===
+					"material",
+			);
+		const indicator =
+			state
+				.players[0] &&
+			this.#inWaveStats.get(
+				state
+					.players[0]
+					.id,
+			)
+				?.materialsIndicator;
+		if (
+			materials.length ===
+				0 ||
+			!indicator
+		)
+			return;
+
+		const ui =
+			this
+				.#camera
+				.ui;
+		const field =
+			this
+				.playingFieldContainer;
+		const from =
+			materials.map(
+				(
+					m,
+				) =>
+					ui.toLocal(
+						field.toGlobal(
+							{
+								x:
+									m
+										.position
+										.x +
+									materialVisualCenterOffset.x,
+								y:
+									m
+										.position
+										.y +
+									materialVisualCenterOffset.y,
+							},
+						),
+					),
+			);
+		const animation =
+			new BaggingAnimation(
+				ui,
+				this
+					.#uiLayer,
+				await loadMaterialTexture(),
+				from,
+				() =>
+					ui.toLocal(
+						indicator.bagGlobalPosition(),
+					),
+				materialDisplaySize.height *
+					field
+						.worldTransform
+						.a,
+				indicator.iconSize,
+			);
+
+		// The materials now fly as part of the UI instead of lying on the field
+		const remainingState =
+			{
+				...state,
+				objects:
+					state.objects.filter(
+						(
+							o,
+						) =>
+							o.type !==
+							"material",
+					),
+			};
+		this.#scene.update(
+			deltaTime(
+				0,
+			),
+			this
+				.#lastNow,
+			remainingState,
+		);
+		this.#pendingBagMaterials =
+			animation.total;
+		this.#updatePlayerStats(
+			remainingState,
+		);
+
+		const {
+			promise,
+			resolve,
+		} =
+			Promise.withResolvers<void>();
+		let lastSoundAt = 0;
+		const step =
+			() => {
+				if (
+					animation.update(
+						ticker.deltaMS,
+					) >
+						0 &&
+					ticker.lastTime -
+						lastSoundAt >
+						70
+				) {
+					lastSoundAt =
+						ticker.lastTime;
+					audioEngine.playEffect(
+						"collectCoins",
+					);
+				}
+				this.#pendingBagMaterials =
+					animation.total -
+					animation.arrived;
+				indicator.setBagScale(
+					animation.bagScale,
+				);
+				this.#updatePlayerStats(
+					remainingState,
+				);
+				if (
+					animation.isDone
+				) {
+					ticker.remove(
+						step,
+					);
+					indicator.setBagScale(
+						1,
+					);
+					animation.destroy();
+					resolve();
+				}
+			};
+		ticker.add(
+			step,
+		);
+		return promise;
 	}
 
 	// Expose scene properties for backward compatibility
@@ -283,7 +454,6 @@ export class StageWithUi {
 	}
 
 	#updatePlayerStats(
-		deltaTime: DeltaTime,
 		state: WaveState,
 	) {
 		state.players.forEach(
@@ -320,6 +490,8 @@ export class StageWithUi {
 					?.update(
 						canvasSize.value,
 						player,
+						this
+							.#pendingBagMaterials,
 					);
 			},
 		);

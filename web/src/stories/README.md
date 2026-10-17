@@ -4,6 +4,12 @@ This directory contains interactive Storybook stories for testing and showcasing
 
 ## Available Stories
 
+### Game Scenes
+
+Every story rendering a live game scene lives under **Game Scenes**:
+Combat Scenarios, Bulbros, Enemies, Enemies Stress Test, Shots, Weapons,
+Camera and Bagged Materials.
+
 ### Game Scenes / Combat Scenarios
 
 Battle scene stories with full UI controls and player controls:

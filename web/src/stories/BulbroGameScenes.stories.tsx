@@ -16,7 +16,7 @@ import {
 
 export default {
 	title:
-		"Bulbros/Game Scenes",
+		"Game Scenes/Bulbros",
 	component:
 		StorybookGameScene,
 };
