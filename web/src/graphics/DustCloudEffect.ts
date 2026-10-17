@@ -12,6 +12,7 @@ const DUST_SIZE_MIN = 3;
 const DUST_SIZE_MAX = 6;
 const DUST_SPREAD = 12;
 const DUST_TRAVEL_DISTANCE = 8;
+const DUST_BACK_OFFSET = 14;
 const DUST_COLOR = 0x6b8b5e;
 const DUST_SPAWN_INTERVAL_MS = 180;
 
@@ -145,6 +146,21 @@ export class DustCloudEffect {
 						1),
 			);
 
+		const directionLength =
+			Math.hypot(
+				direction.x,
+				direction.y,
+			) ||
+			1;
+		const backX =
+			(-direction.x /
+				directionLength) *
+			DUST_BACK_OFFSET;
+		const backY =
+			(-direction.y /
+				directionLength) *
+			DUST_BACK_OFFSET;
+
 		for (
 			let i = 0;
 			i <
@@ -181,9 +197,11 @@ export class DustCloudEffect {
 				DUST_SPREAD;
 			graphic.x =
 				position.x +
+				backX +
 				spreadX;
 			graphic.y =
 				position.y +
+				backY +
 				spreadY;
 
 			const velocityX =
