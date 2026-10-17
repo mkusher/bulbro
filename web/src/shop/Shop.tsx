@@ -158,7 +158,7 @@ function ItemCardContent({
 }) {
 	return (
 		<div className="w-full min-h-[60px] flex flex-col items-center gap-0.5">
-			<p className="text-[7px] text-muted-foreground">
+			<p className="text-[10px] lg:text-[7px] text-muted-foreground">
 				{t(
 					"levelUp.tier",
 					{
@@ -169,7 +169,7 @@ function ItemCardContent({
 					},
 				)}
 			</p>
-			<p className="text-[8px] font-semibold w-full text-center leading-tight">
+			<p className="text-xs lg:text-[8px] font-semibold w-full text-center leading-tight">
 				{t(
 					item.nameKey,
 				)}
@@ -183,7 +183,7 @@ function ItemCardContent({
 				item={
 					item
 				}
-				className="text-[7px] text-center"
+				className="text-[10px] lg:text-[7px] text-center"
 			/>
 		</div>
 	);
@@ -318,7 +318,7 @@ export function Shop({
 				</div>
 			</CardHeader>
 			<CardContent className="pt-0">
-				<div className="grid grid-cols-4 gap-1 justify-items-center">
+				<div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-1 justify-items-center">
 					{items.map(
 						(
 							item,
@@ -376,7 +376,7 @@ export function Shop({
 														}
 													/>
 												</div>
-												<p className="text-[7px] font-medium w-full text-center leading-tight whitespace-nowrap px-0.5 overflow-hidden text-ellipsis">
+												<p className="text-xs lg:text-[7px] font-medium w-full text-center leading-tight whitespace-nowrap px-0.5 overflow-hidden text-ellipsis">
 													{t(
 														`weapon.name.${item.weapon.id}`,
 													)}{" "}
@@ -400,7 +400,7 @@ export function Shop({
 												blocked ||
 												!affordable
 											}
-											className="w-full h-5 text-[8px] px-1 py-0 mt-auto"
+											className="w-full h-7 lg:h-5 text-xs lg:text-[8px] px-1 py-0 mt-auto"
 											size="sm"
 										>
 											{blocked
@@ -431,7 +431,7 @@ export function Shop({
 														? "secondary"
 														: "outline"
 												}
-												className="w-full h-5 text-[8px] px-1 py-0"
+												className="w-full h-7 lg:h-5 text-xs lg:text-[8px] px-1 py-0"
 												aria-pressed={
 													!!item.locked
 												}

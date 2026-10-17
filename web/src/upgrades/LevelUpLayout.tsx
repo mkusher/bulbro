@@ -159,7 +159,7 @@ export function LevelUpLayout({
 				)}
 
 				<div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-3">
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+					<div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
 						{choices.map(
 							(
 								choice,
