@@ -1,10 +1,6 @@
 import type { StatBonus } from "@/game-formulas";
 import type { MessageKey } from "@/i18n";
-import {
-	type UpgradeTier,
-	upgradeTierChance,
-	upgradeTiers,
-} from "@/upgrades/Upgrades";
+import type { UpgradeTier } from "@/upgrades/Upgrades";
 
 /** Item tiers I–IV, as in Brotato. */
 export type ItemTier =
@@ -1288,21 +1284,55 @@ export function rollItemTier(
 	luck: number,
 	random: () => number = Math.random,
 ): ItemTier {
-	for (const tier of [
-		...upgradeTiers,
-	].reverse()) {
+	const luckFactor =
+		Math.max(
+			0,
+			1 +
+				luck /
+					100,
+		);
+	for (const [
+		tier,
+		minWave,
+		perWave,
+		cap,
+	] of [
+		[
+			4,
+			8,
+			0.0023,
+			0.08,
+		],
+		[
+			3,
+			4,
+			0.02,
+			0.25,
+		],
+		[
+			2,
+			2,
+			0.06,
+			0.6,
+		],
+	] as const) {
 		if (
-			tier ===
-			1
+			wave <
+			minWave
 		)
-			return 1;
+			continue;
+		const chance =
+			Math.min(
+				cap,
+				(wave -
+					minWave +
+					1) *
+					perWave *
+					luckFactor,
+			);
 		if (
 			random() <
-			upgradeTierChance(
-				tier,
-				wave,
-				luck,
-			)
+			chance
 		)
 			return tier;
 	}

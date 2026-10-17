@@ -201,7 +201,8 @@ export function updateStatsFromEvents(
 					event.damage;
 				break;
 			case "materialCollected":
-				materialsCollected++;
+				materialsCollected +=
+					event.value;
 				break;
 			case "shopRerolled":
 				recordReroll(

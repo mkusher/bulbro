@@ -34,11 +34,14 @@ import {
 	updateState,
 	waveState,
 } from "@/waveState";
-import { toWeaponState } from "@/weapon";
+import { getWeaponByType } from "@/weapon";
+
 import {
-	minWeaponTier,
+	combineWeapons,
+	maxWeaponTier,
 	type OwnedWeapon,
 	ownedWeaponFromState,
+	toWeaponStateAtTier,
 	weaponSellPrice,
 	weaponTierOf,
 } from "@/weapon/WeaponTiers";
@@ -478,8 +481,7 @@ export function PreRound() {
 				purchasingPlayer
 					.stats
 					.maxWeapons;
-			// With full slots, a weapon owned at tier I can still be bought:
-			// the copies combine into tier II.
+			// Full slots allow buying a matching tier below IV for automatic combining.
 			const combinable =
 				purchasingPlayer.weapons.find(
 					(
@@ -492,7 +494,11 @@ export function PreRound() {
 						weaponTierOf(
 							weapon,
 						) ===
-							minWeaponTier,
+							(item.tier ??
+								1) &&
+						(item.tier ??
+							1) <
+							maxWeaponTier,
 				);
 			if (
 				isFull &&
@@ -533,8 +539,14 @@ export function PreRound() {
 						purchasingPlayer.id,
 				);
 			const purchasedWeapon =
-				toWeaponState(
-					item.weapon,
+				toWeaponStateAtTier(
+					getWeaponByType(
+						item
+							.weapon
+							.id,
+					),
+					item.tier ??
+						1,
 				);
 			const newWeapons =
 				[
@@ -543,6 +555,19 @@ export function PreRound() {
 					purchasedWeapon,
 				];
 
+			const combinedWeapons =
+				isFull &&
+				combinable
+					? combineWeapons(
+							newWeapons,
+							combinable.id,
+							purchasedWeapon.id,
+						)
+					: newWeapons;
+			if (
+				!combinedWeapons
+			)
+				return;
 			const equippedState =
 				selectWeaponsInState(
 					purchasedState,
@@ -551,32 +576,12 @@ export function PreRound() {
 						playerId:
 							purchasingPlayer.id,
 						weapons:
-							newWeapons,
+							combinedWeapons,
 						now,
 					},
 				);
 			waveState.value =
-				isFull &&
-				combinable
-					? updateState(
-							equippedState,
-							withEventMeta(
-								{
-									type: "weaponsCombined",
-									playerId:
-										purchasingPlayer.id,
-									weaponId:
-										combinable.id,
-									consumedWeaponId:
-										purchasedWeapon.id,
-								},
-								dt(
-									0,
-								),
-								now,
-							),
-						)
-					: equippedState;
+				equippedState;
 
 			setShopItems(
 				shopItems.filter(

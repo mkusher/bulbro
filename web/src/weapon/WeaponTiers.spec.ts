@@ -75,7 +75,7 @@ describe("weapon tier stats", () => {
 	it("keeps tier I stats as defined", () => {
 		expect(
 			weaponStatsForTier(
-				pistol.statsBonus,
+				pistol,
 				1,
 			),
 		).toEqual(
@@ -83,8 +83,13 @@ describe("weapon tier stats", () => {
 		);
 	});
 
-	it("raises damage, attack speed and crit chance on every tier", () => {
-		for (const weapon of weapons) {
+	it("keeps generic growth for custom weapons", () => {
+		for (const weapon of weapons.filter(
+			(
+				w,
+			) =>
+				!w.tierStats,
+		)) {
 			let previous =
 				weapon.statsBonus;
 			for (const tier of [
@@ -94,7 +99,7 @@ describe("weapon tier stats", () => {
 			] as const) {
 				const stats =
 					weaponStatsForTier(
-						weapon.statsBonus,
+						weapon,
 						tier,
 					);
 				expect(
@@ -135,7 +140,7 @@ describe("weapon tier stats", () => {
 		}
 	});
 
-	it("gives weak weapons at least 1 damage per tier", () => {
+	it("gives custom weak weapons at least 1 damage per tier", () => {
 		expect(
 			[
 				2,
@@ -146,7 +151,16 @@ describe("weapon tier stats", () => {
 					tier,
 				) =>
 					weaponStatsForTier(
-						smg.statsBonus,
+						{
+							...smg,
+							tierStats:
+								undefined,
+							statsBonus:
+								{
+									...smg.statsBonus,
+									damage: 1,
+								},
+						},
 						tier as
 							| 2
 							| 3
@@ -183,38 +197,58 @@ describe("weapon tier stats", () => {
 });
 
 describe("weapon prices", () => {
-	it("doubles the price with every tier", () => {
-		expect(
-			weaponPrice(
-				pistol,
-				1,
-				1,
-			),
-		).toBe(
-			itemPrice(
-				pistol.basePrice,
-				1,
-				1,
-			),
-		);
-		expect(
-			weaponPrice(
-				pistol,
-				3,
-				1,
-			),
-		).toBe(
-			itemPrice(
-				pistol.basePrice *
-					4,
-				1,
-				1,
-			),
-		);
+	it("uses Brotato's per-tier base prices before wave inflation", () => {
+		const bases =
+			[
+				10,
+				22,
+				45,
+				91,
+			];
+		for (const tier of [
+			1,
+			2,
+			3,
+			4,
+		] as const) {
+			expect(
+				weaponPrice(
+					pistol,
+					tier,
+					5,
+				),
+			).toBe(
+				itemPrice(
+					bases[
+						tier -
+							1
+					]!,
+					5,
+					1,
+				),
+			);
+			expect(
+				weaponPrice(
+					pistol,
+					tier,
+					5,
+					0.8,
+				),
+			).toBe(
+				itemPrice(
+					bases[
+						tier -
+							1
+					]!,
+					5,
+					0.8,
+				),
+			);
+		}
 	});
 
 	it("pays back a quarter of the current price when selling", () => {
-		// Pistol: base 15, wave 5 → 15 + 5 + 7.5 = 27; tier II → 30 + 5 + 15 = 50
+		// Pistol: base 10/22, wave 5 → 20/38, recycling → 5/9.
 		expect(
 			weaponSellPrice(
 				{
@@ -223,7 +257,7 @@ describe("weapon prices", () => {
 				5,
 			),
 		).toBe(
-			6,
+			5,
 		);
 		expect(
 			weaponSellPrice(
@@ -234,7 +268,7 @@ describe("weapon prices", () => {
 				5,
 			),
 		).toBe(
-			12,
+			9,
 		);
 	});
 });
@@ -281,7 +315,7 @@ describe("combining weapons", () => {
 				],
 				[
 					other.id,
-					1,
+					2,
 				],
 			],
 		);
@@ -290,7 +324,7 @@ describe("combining weapons", () => {
 				.statsBonus,
 		).toEqual(
 			weaponStatsForTier(
-				pistol.statsBonus,
+				pistol,
 				2,
 			),
 		);
@@ -392,7 +426,7 @@ describe("combining weapons", () => {
 				.statsBonus,
 		).toEqual(
 			weaponStatsForTier(
-				pistol.statsBonus,
+				pistol,
 				3,
 			),
 		);
@@ -552,7 +586,7 @@ describe("BulbroState weapon events", () => {
 				.statsBonus
 				.damage,
 		).toBe(
-			2,
+			4,
 		);
 	});
 

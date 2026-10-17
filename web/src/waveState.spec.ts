@@ -1884,63 +1884,88 @@ describe("waveState", () => {
 			);
 		});
 
-		it("should handle material collection events", () => {
-			// Add material to state
+		it("shares the full collected value as materials and XP with every player", () => {
 			state.objects =
 				[
 					{
 						type: "material",
-						id: "material1",
+						id: "valuable",
 						position:
 							{
-								x: 100,
-								y: 100,
+								...player1.position,
 							},
 						value: 25,
 					},
 				];
-
-			// Create a bulbro collection event
-			const material =
-				state
-					.objects[0] as Material;
-			const collectionEvent =
-				player1.takeMaterial(
-					material,
+			const events =
+				generateMaterialMovementEvents(
+					state,
+					deltaTime(
+						16,
+					),
 				);
 			expect(
-				collectionEvent.type,
-			).toBe(
-				"bulbroCollectedMaterial",
+				events,
+			).toEqual(
+				[
+					{
+						type: "materialCollected",
+						materialId:
+							"valuable",
+						playerId:
+							player1.id,
+						value: 25,
+					},
+				],
 			);
-			expect(
-				collectionEvent.bulbroId,
-			).toBe(
-				"player1",
-			);
-			expect(
-				collectionEvent.materialId,
-			).toBe(
-				"material1",
-			);
-
-			// Apply the collection event
-			const newPlayer =
-				player1.applyEvent(
+			const next =
+				updateState(
+					state,
 					withEventMeta(
-						collectionEvent,
+						events[0]!,
 						deltaTime(
 							16,
 						),
 						nowTime(
-							Date.now(),
+							1000,
 						),
-					),
+					) as Extract<
+						GameEvent,
+						{
+							type: "materialCollected";
+						}
+					>,
 				);
-			// BulbroState should handle the collection appropriately
 			expect(
-				newPlayer,
-			).toBeDefined();
+				next.objects,
+			).toHaveLength(
+				0,
+			);
+			for (const [
+				i,
+				player,
+			] of next.players.entries()) {
+				expect(
+					player.materialsAvailable,
+				).toBe(
+					state
+						.players[
+						i
+					]!
+						.materialsAvailable +
+						25,
+				);
+				expect(
+					player.totalExperience,
+				).toBe(
+					state
+						.players[
+						i
+					]!
+						.totalExperience +
+						25,
+				);
+			}
 		});
 
 		it("should move materials towards closest player", () => {
@@ -2890,6 +2915,7 @@ describe("bagged materials", () => {
 
 	function material(
 		id: string,
+		value = 1,
 	): Material {
 		return {
 			type: "material",
@@ -2899,7 +2925,7 @@ describe("bagged materials", () => {
 					x: 10,
 					y: 10,
 				},
-			value: 1,
+			value,
 		};
 	}
 
@@ -2951,12 +2977,14 @@ describe("bagged materials", () => {
 	function collect(
 		state: WaveState,
 		materialId: string,
+		value = 1,
 	) {
 		return updateState(
 			state,
 			withEventMeta(
 				{
 					type: "materialCollected",
+					value,
 					materialId,
 					playerId:
 						"bagger",
@@ -3069,6 +3097,294 @@ describe("bagged materials", () => {
 				.materialsAvailable,
 		).toBe(
 			3,
+		);
+	});
+
+	it("bags the sum of leftover values once without awarding materials or XP", () => {
+		const running =
+			nextWave(
+				endedWaveWithMaterials(
+					0,
+				),
+				startTick,
+			);
+		running.objects =
+			[
+				material(
+					"five",
+					5,
+				),
+				material(
+					"three",
+					3,
+				),
+				{
+					type: "consumable",
+					id: "fruit",
+					position:
+						{
+							x: 10,
+							y: 10,
+						},
+					hp: 3,
+				},
+			];
+		const ended =
+			updateState(
+				running,
+				withEventMeta(
+					{
+						type: "waveEnded",
+					},
+					...at(
+						3000,
+					),
+				),
+			);
+		expect(
+			ended
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			8,
+		);
+		expect(
+			ended
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			0,
+		);
+		expect(
+			ended
+				.players[0]!
+				.totalExperience,
+		).toBe(
+			0,
+		);
+		const repeated =
+			updateState(
+				ended,
+				withEventMeta(
+					{
+						type: "waveEnded",
+					},
+					...at(
+						3001,
+					),
+				),
+			);
+		expect(
+			repeated
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			8,
+		);
+		const next =
+			nextWave(
+				ended,
+				startTick,
+			);
+		expect(
+			next
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			8,
+		);
+		expect(
+			next.objects,
+		).toEqual(
+			[],
+		);
+	});
+
+	it("matches valued pickups from the bag and caps the final bonus", () => {
+		const next =
+			nextWave(
+				endedWaveWithMaterials(
+					8,
+				),
+				startTick,
+			);
+		const first =
+			collect(
+				{
+					...next,
+					objects:
+						[
+							material(
+								"a",
+								5,
+							),
+							material(
+								"b",
+								5,
+							),
+						],
+				},
+				"a",
+				5,
+			);
+		expect(
+			first
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			10,
+		);
+		expect(
+			first
+				.players[0]!
+				.totalExperience,
+		).toBe(
+			10,
+		);
+		expect(
+			first
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			3,
+		);
+		const second =
+			collect(
+				first,
+				"b",
+				5,
+			);
+		expect(
+			second
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			18,
+		);
+		expect(
+			second
+				.players[0]!
+				.totalExperience,
+		).toBe(
+			18,
+		);
+		expect(
+			second
+				.players[0]!
+				.bagMaterials,
+		).toBe(
+			0,
+		);
+		const third =
+			collect(
+				{
+					...second,
+					objects:
+						[
+							material(
+								"c",
+								4,
+							),
+						],
+				},
+				"c",
+				4,
+			);
+		expect(
+			third
+				.players[0]!
+				.materialsAvailable,
+		).toBe(
+			22,
+		);
+		expect(
+			third
+				.players[0]!
+				.totalExperience,
+		).toBe(
+			22,
+		);
+	});
+
+	it("redeems each co-op player's bag against the shared pickup value", () => {
+		const next =
+			nextWave(
+				endedWaveWithMaterials(
+					0,
+				),
+				startTick,
+			);
+		const alive =
+			next.players[0]!.bagMaterialsLeft(
+				2,
+			);
+		const dead =
+			new BulbroState(
+				{
+					...alive.toJSON(),
+					id: "dead",
+					healthPoints: 0,
+					bagMaterials: 8,
+				},
+			);
+		const collected =
+			collect(
+				{
+					...next,
+					players:
+						[
+							alive,
+							dead,
+						],
+					objects:
+						[
+							material(
+								"shared",
+								5,
+							),
+						],
+				},
+				"shared",
+				5,
+			);
+		expect(
+			collected.players.map(
+				(
+					p,
+				) =>
+					p.materialsAvailable,
+			),
+		).toEqual(
+			[
+				7,
+				10,
+			],
+		);
+		expect(
+			collected.players.map(
+				(
+					p,
+				) =>
+					p.totalExperience,
+			),
+		).toEqual(
+			[
+				7,
+				10,
+			],
+		);
+		expect(
+			collected.players.map(
+				(
+					p,
+				) =>
+					p.bagMaterials,
+			),
+		).toEqual(
+			[
+				0,
+				3,
+			],
 		);
 	});
 
@@ -3200,6 +3516,7 @@ describe("co-op shared pickups", () => {
 				withEventMeta(
 					{
 						type: "materialCollected",
+						value: 1,
 						materialId:
 							"material1",
 						playerId:

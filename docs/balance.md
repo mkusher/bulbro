@@ -7,14 +7,14 @@ The [item reference](../web/docs/items.md) lists all 83 items, their tiers,
 prices, bonuses, stacking rules, and sprite frames. The
 [weapon reference](../web/docs/weapons.md) covers weapon values and attacks.
 
-Bulbro copies Brotato's **formulas** almost exactly. The **content numbers**
-on top of them (weapons, enemies, economy, characters) have drifted far from
-Brotato. Most balance problems come from that mix: Brotato's scaling rules
-applied to non-Brotato base values.
+Bulbro follows Brotato's core formulas. Nine weapons now use its individual
+stat and price progressions, and six enemies use the numerical stats of
+matching roles. Custom weapons, custom enemies, behavior and wave design
+still have differences. The [weapon reference](../web/docs/weapons.md) and
+[enemy reference](../web/docs/enemies.md) document the mappings and effect gaps.
 
-Bulbro values below reflect the current source, including the AK-47 and
-Bazooka rebalance. Character verdicts and balance recommendations are
-qualitative; the new weapon values have not been validated through playtesting.
+Balance recommendations remain qualitative; the updated values have not
+been validated through playtesting.
 
 Wave estimates below are calculated from the spawner configs for a solo game
 at difficulty 0. They are not measured in play.
@@ -35,129 +35,75 @@ at difficulty 0. They are not measured in play.
 | Weapon tiers | Tiers I–IV; two equal weapons of a tier combine into the next tier; selling pays back 25% | [WeaponTiers.ts](../web/src/weapon/WeaponTiers.ts) |
 | Wave length | 20s, +5s per wave, max 60s | [waveDuration.ts](../web/src/waveDuration.ts) |
 | Melee range | Melee weapons get half of the range stat | [game-formulas.ts](../web/src/game-formulas.ts) |
-| Early enemy HP | Baby (3, +2/wave), Colorado beetle (2, +1/wave), Aphid (8, +1/wave) are close to Brotato's Baby Alien, Chaser and Spitter | [enemies-definitions](../web/src/enemies-definitions) |
+| Matched enemy stats | Six role analogues use Brotato HP/damage growth, speed, knockback resistance and rewards | [Enemy reference](../web/docs/enemies.md) |
 
-## Problems
+## Current economy
 
-### 1. Material values are ignored; premium weapons create larger spending targets
+- **Pickups respect their value.** Collection events carry the material’s
+  `value`; every player receives that amount in materials and XP, including
+  dead players. Wave and run statistics count value rather than pickup objects.
+  Harvesting remains a separate end-of-wave payout.
+- **Bagged materials retain their value.** Surviving a wave bags the sum of
+  leftover material values without immediately awarding materials or XP.
+  A later pickup pays `value + min(value, bag balance)` in both materials
+  and XP, deducting that bonus from the bag. Co-op players redeem their
+  own bags against the same shared pickup value. The bag animation counter
+  also advances by value.
+- **Matching weapons use Brotato’s price tables.** Pistol, Hand, Fist and
+  Knife use 10/22/45/91; Laser Gun 15/31/61/122; SMG and Double Barrel
+  Shotgun 20/39/74/149; Brick 6/14/22/40. Sword begins at tier II
+  and uses Brotato’s 51/95/190 prices.
+  AK-47, Bazooka, Flare Gun, Grenade and Machine Gun retain their custom
+  base prices and ×1/×2/×4/×8 progression. Prices apply the existing
+  Brotato wave formula, and recycling returns 25% of the current tier price.
+- **Higher weapon tiers can be bought.** Both weapons and items use the shop
+  rarity curve, with tier II/III/IV first available after waves 2/4/8.
+  Chances grow by 6%/2%/0.23% per wave, scaled by luck and capped at
+  60%/25%/8%. The shop shows weapon tiers and purchases equip their tier stats.
+  At capacity, buying a matching type and tier below IV combines automatically.
+- **Items share the shop with weapons.** Each slot offers a weapon with a
+  35% chance, otherwise a stat item. Character weapon restrictions still apply.
+  Engineering items stay excluded until structures exist.
 
-- **Every pickup is worth 1.** `materialCollected` always calls
-  `gainMaterials(1)` in [BulbroState.ts](../web/src/bulbro/BulbroState.ts).
-  The enemy's `materialsDropped` value, carried by the material as `value`,
-  is ignored. So the Wild Boar's 5 (+3/wave), the Tree's 3, the Archer's
-  +1/wave and similar values have no effect.
-- **Weapon prices follow weapon power.** Weapon base prices range from 8
-  (Laser Gun) to 80 (Bazooka): budget weapons cost 8–18, Brick and Grenade
-  cost 25–28, and Sword, AK-47, Machine Gun and Bazooka cost 60–80. At wave 1
-  that is 9–89 materials,
-  against tier-I items at 17–34, so wave 1's roughly 77 materials buy two
-  or three budget offers. A Machine Gun costs 78 and a Bazooka 89, so
-  neither fits that income alone without starting materials or harvesting.
-  In Brotato, tier-I weapons cost around 10–20
-  and the Sword costs 51.
-- **Items share the shop with weapons.** The shop sells 77 of the 83 Brotato items
-  that only change stats ([item values and shop rules](../web/docs/items.md)): each slot
-  offers a weapon 35% of the time, otherwise an item of a tier rolled from
-  the wave and luck. Items keep Brotato's prices (tier I 15–30, tier II
-  40–65, tier III and IV up to 110), so tier-I items and mid-tier weapons
-  compete for the same early materials; tier IV (100–122 at wave 1) cannot
-  appear before wave 7 in the default pool. Items with conditional effects
-  are not in yet.
-- **Weapons can be sold and combined.** Selling pays back 25% of the
-  weapon's current price at its tier, so a wave-1 Pistol sells for 4 and a
-  Sword for 16. Two equal weapons of the same tier combine into the next
-  tier, and a tier is valued at the two weapons it is made of (base price
-  ×1/×2/×4/×8). With full slots, a weapon already owned at tier I can still
-  be bought and combines on purchase, as in Brotato. The shop only offers
-  tier I weapons, so tier IV costs eight copies: about 136 materials of
-  Pistols or 536 of Swords at wave-1 prices, and more later.
-- **Engineering items are out of the shop.** Engineering does nothing yet
-  (see [Characters](#7-characters)), so Book, Duct Tape, Compass,
-  Reinforced Steel, Alloy and Exoskeleton would charge full price for part
-  of a bonus. They are not offered until structures exist. Ritual and Wolf
-  Helmet stay: their Engineering penalty is free for now, which makes them
-  slightly better than in Brotato.
-- **Co-op shares pickups.** Every collected material grants 1 material and
-  1 XP to every player. Harvesting adds materials and XP separately at the
-  end of the wave. The estimates below exclude harvesting and trees.
+The following table estimates enemy counts:
+actual income now sums each killed enemy’s material value, including wave
+scaling, and depends on kills and collection. Trees and harvesting add income.
 
-Estimated materials (and XP) per wave, solo, difficulty 0:
+Estimated enemies per wave, solo, difficulty 0:
 
 | Wave | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13+ |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Enemies / materials | 77 | 105 | 166 | 207 | 321 | 304 | 337 | 279 | 60 | 374 | 268 | 171 | ~285 |
-| Total enemy HP | 231 | 381 | 1054 | 1947 | 3186 | 5437 | 6769 | 4725 | 3213 | 7769 | 5695 | 4275 | grows linearly |
+| Enemies | 77 | 105 | 166 | 207 | 321 | 304 | 337 | 279 | 60 | 374 | 268 | 171 | ~285 |
 
-### 2. Weapon numbers don't fit the scaling formulas
+## Matched combat values
 
-Brotato's weapons use high base damage with slow cooldowns. Bulbro mostly
-uses low base damage with fast cooldowns, but keeps the same "add flat damage
-per hit" scaling. A point of Ranged or Melee Damage is therefore worth much
-more on fast weapons.
+Nine weapons use Brotato's per-tier stats and prices: Pistol, SMG, Laser Gun,
+Hand, Fist, Knife, Sword, Shotgun and Brick. Sword starts at tier II.
+Hand grants harvesting while equipped, Shotgun fires 4/4/4/6 pellets, and
+Brick scales with both Melee Damage and Engineering.
+See the [weapon reference](../web/docs/weapons.md#tier-growth-and-prices).
 
-Damage per second (DPS), before crits and attack-speed bonuses. Bulbro values
-include per-hit damage rounding from `calculateAttackDamage`. The "+5" value
-adds 5 Melee Damage for melee weapons or 5 Ranged Damage for projectiles;
-Elemental Damage stays at zero. Explosive DPS is per target, so total damage
-rises with the number of enemies hit:
+Six enemy roles use Brotato's numerical stats and rewards: Baby → Baby Alien,
+Colorado Beetle → Chaser, Aphid → Spitter, Wild Boar → Charger, Beetle Warrior →
+Bruiser, and Tree → Tree. See the [enemy reference](../web/docs/enemies.md).
+Aphid uses Spitter's +0.75 projectile damage growth per wave; the reference
+value 0.95 is knockback resistance. Enemy base attack speed is neutral at 0.
 
-| Weapon | Bulbro DPS (base → +5) | Brotato tier I DPS (base → +5) | Bulbro price |
-|---|---|---|---|
-| Machine Gun | **21.4 → 42.9** (3 dmg / 0.14s) | — | 70 |
-| Sword | **27.8 → 33.3** (25 dmg / 0.9s, 10% crit) | 23 (30 / 1.28s) | 60 (Brotato: 51) |
-| Brick | 21.6 → 25.2 (30 dmg / 1.39s) | 22 | 25 |
-| AK-47 | 22.7 → 40.9 (5 dmg / 0.22s) | — | 65 |
-| Bazooka | 21.4 → 24.3, area damage | — | 80 |
-| Grenade | 12.0 → 14.5, area damage | — | 28 |
-| Fist | 10.3 → 16.7 | 10 | 12 |
-| Double Barrel Shotgun | 8.8 → 11.7 (single shot) | 4 pellets, pierce 2 | 18 |
-| Knife | 5.9 → 9.9 (6 dmg) | 8.9 (9 dmg) | 12 |
-| Flare Gun | 5.7 → 7.9 | — | 15 |
-| SMG | 5.0 → 20.0 (1 / 0.2s) | 17.6 → 32 (3 / 0.17s) | 15 |
-| Pistol | 4 → 14 (2 / 0.5s) | 10 → 14 (12 / 1.2s) | 15 |
-| Laser Gun | **2 → 4.5** (4 / 1.98s) | 20 → 30 (40 dmg, 400% scaling) | 8 |
-| Hand | 1.0 → 4.0 | ~1 (support weapon, +3 harvesting) | 10 |
+## Problems
 
-- **Sword** and **Machine Gun** still beat most budget weapons. Their prices
-  (60 and 70, 67 and 78 at wave 1) are set above their Brotato tier to
-  offset that: a wave-1 Machine Gun costs slightly more than the estimated
-  77 pickup income, and the Sword costs as much as two tier-I items.
-- **Premium weapons:** AK-47 now has 5 damage and a 0.22s cooldown at a
-  base price of 65 (72 at wave 1). Only Grandpa can select it at setup.
-  Bazooka now deals 60 area damage at a base price of 80 (89 at wave 1),
-  and is only available through shops after starting a run. Both retain
-  normal tier I–IV progression and the existing character shop restrictions.
-- **Budget weapons have uneven roles.** SMG has only 5 base DPS but rises
-  to 20 with +5 Ranged Damage. Hand offers 30 knockback, but does not grant
-  the +3 Harvesting of Brotato’s Hand. Flare Gun gains from both ranged and
-  elemental damage, but has no burn effect. The Laser Gun is the cheapest
-  weapon (8, 9 at wave 1), but starts at only 2 DPS. Even at tier IV it
-  reaches only 9.4 DPS, less than a tier I Fist.
-- **Tiers multiply the gap.** Each tier multiplies base damage by
-  1/1.6/2.4/3.6 and cooldown by 1/0.93/0.85/0.75, so base DPS grows about
-  1.7× per tier and 4.8× at tier IV (see the
-  [tier table](../web/docs/weapons.md#tiers-selling-and-combining)). A tier
-  IV Sword deals 132 base DPS, AK-47 about 106, Bazooka about 103 per
-  target and Machine Gun 100, against 18 for a tier IV Pistol. Damage scaling
-  does not grow with the tier, so stat
-  points (Ranged/Melee Damage) matter relatively less on high-tier weapons
-  than in Brotato, where scaling often grows too. The Machine Gun's tier IV
-  cooldown (0.11s) is already near the 100ms floor, so attack speed is
-  almost useless on it.
-- **Attack speed hits a floor.** The Machine Gun reaches the 100ms minimum
-  cooldown at only +40% attack speed, so further attack speed is wasted on it.
-- **Missing weapon effects.** There is no pierce: Brotato's Pistol pierces one
-  enemy, and its Double Barrel Shotgun fires 4 pellets that pierce 2. Bulbro's
-  shotgun is a single 12-damage shot.
-- **Scaling differences.** Brotato's Brick scales 50% melee + 50%
-  engineering; Bulbro's scales 100% melee.
-- **Flat damage items make this worse.** Items such as Mammoth (+20 melee),
-  Gnome (+10 melee) or Big Arms (+12 melee, +6 ranged) add flat damage to every
-  hit, so they help the fast weapons most. Attack speed items are wasted on a
-  Machine Gun at the cooldown floor.
-  See [item bonuses and effect limits](../web/docs/items.md#ownership-stacking-and-effects)
-  for the complete tradeoffs and the distinction between stat items and
-  conditional effects.
+### 1. Weapon effects and custom weapon balance
+
+- **Missing effects:** Pistol, Laser Gun and Shotgun still lack piercing.
+  Brick has no chance to break and drop materials.
+- **Custom weapons need playtesting:** AK-47, Bazooka, Flare Gun, Grenade and
+  Machine Gun keep their existing stats, scaling and premium pricing.
+  Machine Gun still reaches the 100ms cooldown floor at +40% attack speed.
+  Flare Gun still has no burning effect.
+- **Engineering is partially useful:** Brick now scales 50%/65%/80%/100%
+  with both Melee Damage and Engineering. Structures are absent, and the
+  current shop exclusion of positive Engineering items remains.
+- **Class bonuses are missing:** classes now match the nine weapon analogues,
+  but equipping a class set does not grant Brotato's bonuses.
 
 ### Starting and shop availability
 
@@ -172,48 +118,29 @@ character preview and loadout validation use the same
 - **Bazooka:** no character can select it at setup. It can appear in any
   post-wave shop for characters other than Medic; there is no minimum-wave gate.
 - **Medic:** Pistol, Hand and Fist remain the complete starting and shop pool.
-- **Other weapons:** existing starting choices are unchanged, including Sword
-  and Machine Gun. Premium pricing does not imply a higher numbered tier:
-  shops still offer tier I weapons, upgraded through combining.
+- **Other weapons:** existing starting choices are retained, including Sword
+  (now tier II) and Machine Gun. Premium pricing does not imply a higher numbered tier:
+  shops roll tiers I–IV by wave and luck, alongside combining.
 
-### 3. Enemy damage scaling is uneven, and there are no i-frames
+### 2. Enemy behavior and damage protection
 
-- **Most enemies never get stronger hits.** In Brotato every enemy gains
-  +0.6 to +1.2 damage per wave. In Bulbro only Baby and Aphid scale, and at
-  +1/wave (Brotato's Baby Alien is +0.6). Beetle Warrior, Wild Boar, Roach,
-  Beetle Archer, Hedgehog and Badger hit for a flat 3 forever, and the
-  Colorado beetle for 1.
-- **Babies take over the damage curve.** By wave 20 a Baby hits for 20
-  (Brotato: about 12.4), while bigger enemies still hit for 3.
-- **No invulnerability after a hit.** Brotato gives 0.2–0.4s of i-frames,
-  scaled by the share of max HP lost. In Bulbro a swarm can land every hit in
-  the same instant.
-- **Enemy `attackSpeed: 2` does almost nothing.** It is read as attack speed
-  points by `getAttackCooldown`, so it means +2% (1.0s → 0.98s). The default
-  enemy value of 1 similarly means +1%, rather than a neutral multiplier.
+- **No invulnerability after a hit:** a swarm can still land simultaneous
+  hits. Brotato provides a short interval after taking damage.
+- **Behavior differences remain:** Bulbro keeps its own charge timing, body
+  sizes, attack cooldowns and projectile speeds. Aphid has no separate contact
+  attack corresponding to Spitter's +0.6 contact damage per wave.
+- **No crates:** consumable and material rewards match for these six enemies,
+  but loot crates and their drop rates are not implemented.
 
-| Enemy | Bulbro HP (+/wave) | Bulbro damage (+/wave) | Closest Brotato enemy |
-|---|---|---|---|
-| Baby | 3 (+2) | 1 (+1) | Baby Alien: 3 (+2), 1 (+0.6) |
-| Colorado beetle | 2 (+1) | 1 (+0) | Chaser: 1 (+1), 1 (+0.6) |
-| Aphid | 8 (+1) | 1 (+1) | Spitter: 8 (+1), 1 (+0.95) |
-| Wild Boar | 10 (**+10**) | 3 (+0) | Charger: 4 (+2.5), 1 (+0.85) |
-| Beetle Warrior | 6 (+6) | 3 (+0) | — |
-| Roach | 10 (+4) | 3 (+0) | — |
-| Beetle Archer | 2 (+5) | 3 (+0) | — |
-| Hedgehog | 6 (**+1**) | 3 (+0) | — |
-| Badger | 10 (**+1**) | 3 (+0) | — |
-| Tree | 12 (+6) | — | Tree: 10 (+5) |
+### 3. Custom enemy progression needs playtesting
 
-### 4. Enemy HP is out of line
+Roach, Beetle Archer, Hedgehog and Badger have no established direct analogue.
+Their base stats and wave growth remain custom. Hedgehog and Badger still
+gain only +1 HP per wave despite appearing on waves 10–11; Beetle Archer
+still gains +5 HP and +1 material value per wave. Validate their difficulty
+and income contribution alongside the newly matched enemies.
 
-- **Too tanky:** Wild Boar (+10 HP/wave), Beetle Warrior (+6) and Beetle
-  Archer (+5) grow much faster than comparable Brotato enemies.
-- **Too fragile:** Hedgehog and Badger gain only +1 HP/wave and appear on
-  waves 10–11 with 15–20 HP. That is less than the Babies around them (about
-  21 HP at that point).
-
-### 5. Waves have no shape after wave 12, and the run never ends
+### 4. Waves have no shape after wave 12, and the run never ends
 
 - **Waves 13 and up repeat one pattern.** Only Baby spawners run, reusing the
   wave-4 config, while enemy HP keeps rising in a straight line.
@@ -222,7 +149,7 @@ character preview and loadout validation use the same
 - **No end.** There is no wave-20 boss, no win condition, and no elites or
   hordes.
 
-### 6. Difficulty only adds enemies
+### 5. Difficulty only adds enemies
 
 - **Flat extra enemies.** Difficulty only adds `+difficulty` enemies to every
   spawn group, on top of `baseAmount + playerCount` ([spawnCluster.ts](../web/src/Spawner/spawnCluster.ts)). At
@@ -230,42 +157,33 @@ character preview and loadout validation use the same
   less later.
 - **Brotato does more.** It raises enemy HP and damage (+12%, +26%, +40% at
   Danger 3/4/5) and adds elites, hordes and a second boss.
-- **Dead code.** `spawnIntervalForRound` and `shouldSpawnEnemy` in
-  [game-formulas.ts](../web/src/game-formulas.ts) are never used.
 
-### 7. Characters
+### 6. Characters
 
 | Character | Bonuses | Verdict |
 |---|---|---|
 | King | +30 HP, +30% damage, +10 armor, +50 luck, +30% pickup range | No downside; strongest |
 | Evil | +60% damage, +6 melee, +15% crit, +25% attack speed, +10% speed, −5 HP, −3 armor | Very strong |
 | Berserker | +5 melee, +20% damage, +30% attack speed, +5 HP, −5 armor | Strong melee |
-| Cyborg | +10 HP, +4 ranged, +5 engineering, +10% attack speed, +25 range, +1 armor | Solid; engineering unused |
+| Cyborg | +10 HP, +4 ranged, +5 engineering, +10% attack speed, +25 range, +1 armor | Solid; engineering only scales Brick |
 | Vampire | +50 range, +10% life steal, +3 ranged | Fine |
-| Medic | +5 HP regen, +20 HP, +3 engineering; only Pistol, Hand, Fist | Limited weapons; engineering unused |
+| Medic | +5 HP regen, +20 HP, +3 engineering; only Pistol, Hand, Fist | Limited weapons; Engineering unused in this weapon pool |
 | Well Rounded | +5 HP, +5% speed, +8 harvesting | Harvesting gives a meaningful early spending advantage |
 | Grandpa | −20% speed, +50% pickup range; exclusive AK-47 starting choice | Stronger starting option; speed trade needs playtesting |
 
-Brotato characters always trade something away. Engineering does nothing yet,
-because there are no structures. For the same reason the Skull upgrade and
-the Pencil, Toolbox and Cog items are left out, and the shop does not offer
-items with a positive Engineering bonus.
+Brotato characters always trade something away. Engineering now contributes
+to Brick damage, but structures are still absent. The Skull upgrade,
+Engineering-only items and positive Engineering shop items remain excluded
+until structures exist.
 
 ## Suggested priority
 
-1. **Economy:** use the material's real value on pickup. Weapon prices now
-   distinguish budget and premium weapons, and combining provides another
-   spending target alongside stat items. Consider offering tier II+ weapons in later
-   waves (rolled like item tiers), so high tiers do not always cost eight
-   tier I copies.
-2. **Weapons:** rebase them on Brotato's numbers (Pistol 12 dmg / 1.2s,
-   SMG 3 / 0.17s, Laser 40 with 4× scaling). Alternatively, keep the fast feel
-   but lower each weapon's scaling in proportion to its cooldown. The
-   Machine Gun’s scaling and cooldown floor remain concerns; evaluate the
-   new AK-47 and Bazooka values alongside it.
-3. **Enemies:** give every enemy damage growth per wave (Brotato uses +0.6 to
-   +1.2), drop Baby to +0.6, add 0.2–0.4s i-frames, and fix what enemy
-   `attackSpeed` means.
+1. **Economy validation:** playtest income from valued pickups against shop
+   spending, especially the custom premium weapon prices.
+2. **Weapons:** implement missing piercing and Brick's break/material effect;
+   playtest the five custom weapons against the matched stat tables.
+3. **Enemies:** add hit invulnerability, validate the four custom enemies,
+   and review behavior differences from the matched roles.
 4. **Waves:** write wave configs for 13–20, end the run at wave 20 with a
    boss, and make difficulty scale enemy HP and damage by percentage.
 5. **Characters:** give King a real downside, and playtest whether Grandpa’s

@@ -335,9 +335,12 @@ it("allows buying a weapon owned at tier I when slots are full, to combine it", 
 						onPurchase:
 							purchase,
 						weaponsFull: true,
-						combinableWeaponIds:
+						combinableWeapons:
 							[
-								"smg",
+								{
+									type: "smg",
+									tier: 1,
+								},
 							],
 					},
 				),
@@ -366,4 +369,85 @@ it("allows buying a weapon owned at tier I when slots are full, to combine it", 
 	).toHaveBeenCalledTimes(
 		1,
 	);
+});
+
+it("only allows a matching tier below IV to combine at capacity", async () => {
+	const {
+		Shop,
+	} =
+		await import(
+			"./Shop"
+		);
+	for (const [
+		offeredTier,
+		ownedTier,
+		blocked,
+	] of [
+		[
+			2,
+			2,
+			false,
+		],
+		[
+			3,
+			2,
+			true,
+		],
+		[
+			4,
+			4,
+			true,
+		],
+	] as const) {
+		act(
+			() =>
+				render(
+					h(
+						Shop,
+						{
+							items:
+								[
+									{
+										weapon:
+											smg,
+										tier: offeredTier,
+										price: 1,
+									},
+								],
+							availableMaterials: 100,
+							weaponsFull: true,
+							combinableWeapons:
+								[
+									{
+										type: "smg",
+										tier: ownedTier,
+									},
+								],
+						},
+					),
+					container,
+				),
+		);
+		expect(
+			container.querySelector(
+				"button",
+			)
+				?.disabled,
+		).toBe(
+			blocked,
+		);
+		expect(
+			container.textContent,
+		).toContain(
+			[
+				"",
+				"I",
+				"II",
+				"III",
+				"IV",
+			][
+				offeredTier
+			]!,
+		);
+	}
 });

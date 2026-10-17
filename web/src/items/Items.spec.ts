@@ -315,7 +315,7 @@ describe("rollItemTier", () => {
 					0,
 			),
 		).toBe(
-			2,
+			1,
 		);
 		expect(
 			rollItemTier(

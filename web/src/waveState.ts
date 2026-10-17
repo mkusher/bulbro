@@ -83,8 +83,6 @@ export interface WaveState {
 	objects: MapObject[];
 	/** Active shots in play */
 	shots: ShotState[];
-	/** Timestamp of last enemy spawn */
-	lastSpawnAt?: number;
 	/** Timestamp of last shot event */
 	lastShotsAt: NowTime;
 	/** Timestamp of last movement event (material, enemy, or bulbro) */
@@ -626,6 +624,8 @@ export function generateMaterialMovementEvents(
 			events.push(
 				{
 					type: "materialCollected",
+					value:
+						object.value,
 					materialId:
 						object.id,
 					playerId:
@@ -878,8 +878,6 @@ export function spawnEnemy(
 					enemy,
 				},
 			],
-		lastSpawnAt:
-			now,
 	};
 }
 
@@ -1653,21 +1651,25 @@ export function updateState(
 }
 
 /**
- * Number of materials still lying on the field. When a wave is survived they
+ * Total value of materials still lying on the field. When a wave is survived they
  * are put into the bag; the material objects stay in the state until the next
  * wave clears them, so the scene can animate them flying into the bag.
  */
-export function countMaterialsOnField(
+export function materialsValueOnField(
 	state: WaveState,
 ): number {
-	return state.objects.filter(
+	return state.objects.reduce(
 		(
-			o,
+			total,
+			object,
 		) =>
-			o.type ===
-			"material",
-	)
-		.length;
+			total +
+			(object.type ===
+			"material"
+				? object.value
+				: 0),
+		0,
+	);
 }
 
 /** Harvesting pays out and materials left on the field go to the bag. */
@@ -1675,7 +1677,7 @@ function completeWaveForPlayers(
 	state: WaveState,
 ): BulbroState[] {
 	const leftMaterials =
-		countMaterialsOnField(
+		materialsValueOnField(
 			state,
 		);
 	return state.players.map(

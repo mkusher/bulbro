@@ -7,17 +7,20 @@ export const tree: EnemyCharacter =
 		name: "Tree",
 		sprite:
 			"tree",
+		/** Brotato analogue: Tree. See docs/balance.md. */
 		stats:
 			{
 				...baseStats,
-				maxHp: 12,
+
+				maxHp: 10,
 				speed: 0,
 				range: 0,
 				materialsDropped: 3,
+				knockbackResistance: 1,
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 6,
+				maxHp: 5,
 			},
 		weapons:
 			[],

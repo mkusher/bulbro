@@ -13,7 +13,7 @@ import type {
 export const minWeaponTier: WeaponTier = 1;
 export const maxWeaponTier: WeaponTier = 4;
 
-/** Weapon damage multiplier per tier (Brotato's Pistol: 12/20/30/50 damage) */
+/** Generic damage growth for custom weapons without explicit tier stats. */
 export const weaponTierDamageMultipliers: Record<
 	WeaponTier,
 	number
@@ -25,7 +25,7 @@ export const weaponTierDamageMultipliers: Record<
 		4: 3.6,
 	};
 
-/** Weapon cooldown multiplier per tier (Brotato's Pistol: 1.2/1.12/1.03/0.87s) */
+/** Generic cooldown growth for custom weapons without explicit tier stats. */
 export const weaponTierCooldownMultipliers: Record<
 	WeaponTier,
 	number
@@ -41,8 +41,7 @@ export const weaponTierCooldownMultipliers: Record<
 export const weaponTierCritChanceBonus = 3;
 
 /**
- * Price multiplier per tier: a weapon is worth the two weapons of the lower
- * tier it is combined from.
+ * Fallback prices for custom weapons without a Brotato tier price table.
  */
 export const weaponTierPriceMultipliers: Record<
 	WeaponTier,
@@ -62,10 +61,22 @@ export function weaponTierOf(
 	weapon: Pick<
 		WeaponState,
 		"tier"
-	>,
+	> &
+		Partial<
+			Pick<
+				WeaponState,
+				"type"
+			>
+		>,
 ): WeaponTier {
 	return (
 		weapon.tier ??
+		(weapon.type
+			? getWeaponByType(
+					weapon.type,
+				)
+					.minTier
+			: undefined) ??
 		minWeaponTier
 	);
 }
@@ -83,14 +94,35 @@ export function nextWeaponTier(
 }
 
 /**
- * Weapon stats at a tier. Higher tiers deal more damage, attack faster and
- * crit more often; range, knockback, explosion and damage scaling stay.
- * Damage grows by at least 1 per tier, so weak weapons gain from tiers too.
+ * Exact per-tier stats for Brotato analogues. Custom weapons retain generic
+ * damage/cooldown/crit progression.
  */
 export function weaponStatsForTier(
-	stats: WeaponStats,
+	weapon: Weapon,
 	tier: WeaponTier,
 ): WeaponStats {
+	const stats =
+		weapon.statsBonus;
+	const minimum =
+		weapon.minTier ??
+		minWeaponTier;
+	if (
+		tier <
+		minimum
+	)
+		throw new Error(
+			`Unsupported tier ${tier} for ${weapon.id}`,
+		);
+	if (
+		weapon.tierStats
+	)
+		return {
+			...stats,
+			...weapon
+				.tierStats[
+				tier
+			],
+		};
 	if (
 		tier ===
 		minWeaponTier
@@ -144,11 +176,24 @@ export function weaponAtTier(
 	weapon: Weapon,
 	tier: WeaponTier,
 ): Weapon {
+	if (
+		tier <
+		(weapon.minTier ??
+			1)
+	)
+		throw new Error(
+			`Unsupported tier ${tier} for ${weapon.id}`,
+		);
+	if (
+		tier ===
+		minWeaponTier
+	)
+		return weapon;
 	return {
 		...weapon,
 		statsBonus:
 			weaponStatsForTier(
-				weapon.statsBonus,
+				weapon,
 				tier,
 			),
 	};
@@ -165,7 +210,7 @@ export function toWeaponStateAtTier(
 		),
 		statsBonus:
 			weaponStatsForTier(
-				weapon.statsBonus,
+				weapon,
 				tier,
 			),
 		tier,
@@ -177,6 +222,23 @@ export function weaponTierBasePrice(
 	weapon: Weapon,
 	tier: WeaponTier,
 ): number {
+	if (
+		tier <
+		(weapon.minTier ??
+			1)
+	)
+		throw new Error(
+			`Unsupported tier ${tier} for ${weapon.id}`,
+		);
+	if (
+		tier !==
+			1 &&
+		weapon.tierBasePrices
+	)
+		return weapon
+			.tierBasePrices[
+			tier
+		];
 	return (
 		weapon.basePrice *
 		weaponTierPriceMultipliers[
@@ -362,7 +424,7 @@ export function combineWeapons(
 					tier,
 					statsBonus:
 						weaponStatsForTier(
-							definition.statsBonus,
+							definition,
 							tier,
 						),
 					strike:
@@ -402,7 +464,7 @@ export function ownedWeaponFromState(
 	};
 }
 
-/** Owned tier I copies of weapon definitions, e.g. for previews */
+/** Owned copies at each definition’s minimum tier, e.g. for previews */
 export function toOwnedWeapons(
 	weapons: Weapon[],
 ): OwnedWeapon[] {
@@ -412,7 +474,9 @@ export function toOwnedWeapons(
 			index,
 		) => ({
 			id: `${weapon.id}-${index}`,
-			tier: minWeaponTier,
+			tier:
+				weapon.minTier ??
+				minWeaponTier,
 			weapon,
 		}),
 	);

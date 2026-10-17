@@ -11,6 +11,10 @@ import type {
 	WeaponShopItem,
 } from "@/shop/Shop";
 import type { Weapon } from "@/weapon";
+import {
+	weaponAtTier,
+	weaponPrice,
+} from "@/weapon/WeaponTiers";
 
 /**
  * Fisher-Yates shuffle using the given RNG.
@@ -60,6 +64,8 @@ function shuffleArray<
 export interface GenerateWeaponShopItemsOptions {
 	/** Weapons to exclude (e.g., already owned weapons) */
 	excludeWeapons?: Weapon[];
+	/** Luck raises the chance of higher weapon tiers. */
+	luck?: number;
 	/** Maximum number of items to include in shop */
 	maxItems?: number;
 	/** Current wave number (1-based, default: 1) */
@@ -74,7 +80,7 @@ export interface GenerateWeaponShopItemsOptions {
  * Generates weapon shop items for a Bulbro character.
  *
  * This function creates a list of ShopItems from the Bulbro's available weapons,
- * calculating appropriate prices using each weapon's basePrice and the itemPrice formula.
+ * rolling tiers from wave and luck, with tier prices and wave inflation.
  *
  * @param bulbro - The Bulbro character to generate shop items for
  * @param options - Optional configuration
@@ -90,6 +96,7 @@ export function generateWeaponShopItems(
 		wave = 1,
 		random = Math.random,
 		inflation = 1,
+		luck = 0,
 	} = options;
 
 	// Get IDs of weapons to exclude
@@ -114,18 +121,40 @@ export function generateWeaponShopItems(
 						weapon.id,
 					),
 			)
-			.map(
+			.flatMap(
 				(
 					weapon,
-				) => ({
-					weapon,
-					price:
-						itemPrice(
-							weapon.basePrice,
+				) => {
+					const tier =
+						rollItemTier(
 							wave,
-							inflation,
-						),
-				}),
+							luck,
+							random,
+						);
+					if (
+						tier <
+						(weapon.minTier ??
+							1)
+					)
+						return [];
+					return [
+						{
+							weapon:
+								weaponAtTier(
+									weapon,
+									tier,
+								),
+							tier,
+							price:
+								weaponPrice(
+									weapon,
+									tier,
+									wave,
+									inflation,
+								),
+						},
+					];
+				},
 			);
 
 	shuffleArray(
@@ -211,8 +240,6 @@ export interface GenerateShopItemsOptions
 	extends GenerateWeaponShopItemsOptions {
 	/** Items that can be offered (default: shopItemDefinitions) */
 	items?: ItemDefinition[];
-	/** Luck of the shopping Bulbro, raises chances of higher item tiers */
-	luck?: number;
 	/** Chance of a slot to offer a weapon (default: weaponSlotChance) */
 	weaponChance?: number;
 }

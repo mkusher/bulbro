@@ -197,6 +197,7 @@ it("hides predicted collections until host confirmation without granting rewards
 			withEventMeta(
 				{
 					type: "materialCollected",
+					value: 1,
 					materialId:
 						"pickup",
 					playerId:

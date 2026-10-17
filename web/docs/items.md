@@ -115,18 +115,18 @@ Base price is the input to the shop formula, **not the displayed wave-1 price**.
 
 ## Shop selection and prices
 
-[ShopItemsGenerator](../src/shop/ShopItemsGenerator.ts) fills four slots by default. Each slot offers a weapon with a 35% chance when both pools are available; otherwise it offers an item. By default it offers `shopItemDefinitions`: the 77 items without a positive bonus to an inactive stat (currently only Engineering), independently of the character's weapon pool. Book, Duct Tape, Compass, Reinforced Steel, Alloy and Exoskeleton are left out of the shop but stay defined, so owned copies keep working. Callers can supply a restricted item pool. An item appears at most once within a roll, but can appear again on later rolls even when already owned. If the rolled tier has no remaining items, selection falls back to any lower-tier item, then any remaining item.
+[ShopItemsGenerator](../src/shop/ShopItemsGenerator.ts) fills four slots by default. Each slot offers a weapon with a 35% chance when both pools are available; otherwise it offers an item. By default it offers `shopItemDefinitions`: the 77 items without a positive bonus to an inactive stat (currently Engineering, which only scales Brick until structures exist), independently of the character's weapon pool. Book, Duct Tape, Compass, Reinforced Steel, Alloy and Exoskeleton are left out of the shop but stay defined, so owned copies keep working. Callers can supply a restricted item pool. An item appears at most once within a roll, but can appear again on later rolls even when already owned. If the rolled tier has no remaining items, selection falls back to any lower-tier item, then any remaining item.
 
-`rollItemTier` uses [upgradeTierChance](../src/upgrades/Upgrades.ts) with the **wave** as its level argument. It tests IV, III, then II with separate random rolls; tier I is the fallback. Unlike level-up upgrades, shop items have no guaranteed tiers on milestone waves.
+`rollItemTier` uses wave gates shared by item and weapon offers. It tests IV, III, then II with separate random rolls; tier I is the fallback. Unlike level-up upgrades, shop offers have no guaranteed tiers on milestone waves.
 
 | Tier | Per-roll test probability | First possible wave (default pool) | Cap |
 | --- | --- | --- | --- |
-| IV | `min(0.08, max(0, wave − 6) × 0.0023 × L)` | 7 | 8% |
-| III | `min(0.25, max(0, wave − 2) × 0.02 × L)` | 3 | 25% |
-| II | `min(0.60, wave × 0.06 × L)` | 1 | 60% |
+| IV | `min(0.08, max(0, wave − 7) × 0.0023 × L)` | 8 | 8% |
+| III | `min(0.25, max(0, wave − 3) × 0.02 × L)` | 4 | 25% |
+| II | `min(0.60, max(0, wave − 1) × 0.06 × L)` | 2 | 60% |
 | I | Fallback when all higher-tier tests fail | 1 | — |
 
-Here `L = max(0, 1 + luck / 100)`. These are conditional test probabilities: a tier III offer must first fail the tier IV test, for example. At wave 1 and zero luck, an item slot has a 6% chance of tier II and a 94% chance of tier I; tiers III and IV cannot appear from the default pool.
+Here `L = max(0, 1 + luck / 100)`. These are conditional test probabilities: a tier III offer must first fail the tier IV test, for example. At wave 1 all offers are tier I regardless of luck. Higher tiers first become available after waves 2, 4 and 8.
 
 [`itemPrice`](../src/game-formulas.ts) computes:
 
@@ -146,7 +146,7 @@ All current items are unconditional stat changes. Their names and artwork do not
 
 - Engineering bonuses are stored but have no gameplay benefit while structures are absent. Pencil, Toolbox, and Cog are intentionally excluded because Engineering would be their only benefit. Mixed-stat items with positive Engineering (Book, Duct Tape, Compass, Reinforced Steel, Alloy, Exoskeleton) are not offered by the shop either. Ritual and Wolf Helmet remain: their Engineering penalty currently costs nothing.
 - Plastic Explosive adds +25% Explosion Size. Grenade and Bazooka use this to scale explosion radius; it does not make ordinary shots explode. A single copy changes their base radii from 110 to 137.5 and 140 to 175, respectively, before other bonuses.
-- Flat Melee, Ranged, and Elemental Damage feed the weapon's scaling coefficients, followed by overall Damage and critical hits. They are not all added at full strength to every weapon. See the [weapon balance review](../../docs/balance.md#2-weapon-numbers-dont-fit-the-scaling-formulas).
+- Flat Melee, Ranged, and Elemental Damage feed the weapon's scaling coefficients, followed by overall Damage and critical hits. They are not all added at full strength to every weapon. See the [weapon balance review](../../docs/balance.md#1-weapon-effects-and-custom-weapon-balance).
 - Dodge is capped at 60% in combat, attack cooldown has a 100 ms minimum, and maximum HP has a floor of 1. Additional item bonuses can therefore have diminishing or no benefit at a cap.
 
 ## Sprite atlas and tiles

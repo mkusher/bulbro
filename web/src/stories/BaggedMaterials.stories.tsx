@@ -141,7 +141,8 @@ function stateWithBag(
 
 /**
  * Bag under the materials counter in the HUD. Play the scene and walk over
- * the materials: every pickup takes one material out of the bag and gives +2.
+ * the materials: each pickup adds its value plus an equal value from the bag,
+ * capped by the remaining bag balance.
  */
 export const BagInHud =
 	{

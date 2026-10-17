@@ -15,6 +15,7 @@ const bumpMs = 160;
 type Flight =
 	{
 		sprite: PIXI.Sprite;
+		value: number;
 		from: Position;
 		/** Control point of the quadratic curve to the bag */
 		via: Position;
@@ -108,11 +109,13 @@ export class BaggingAnimation {
 	#toSize: number;
 	#elapsed = 0;
 	#arrived = 0;
+	#arrivedValue = 0;
+	#totalValue: number;
 	#lastArrivalAt =
 		-Infinity;
 
 	/**
-	 * @param from screen positions of the materials, in `parent` coordinates
+	 * @param from screen positions and values of the materials, in `parent` coordinates
 	 * @param target current screen position of the bag, in `parent` coordinates
 	 * @param fromSize on-screen height of a material on the field
 	 * @param toSize on-screen height of the bag icon
@@ -121,11 +124,23 @@ export class BaggingAnimation {
 		parent: PIXI.Container,
 		layer: PIXI.RenderLayer,
 		texture: PIXI.Texture,
-		from: Position[],
+		from: (Position & {
+			value: number;
+		})[],
 		target: () => Position,
 		fromSize: number,
 		toSize: number,
 	) {
+		this.#totalValue =
+			from.reduce(
+				(
+					sum,
+					material,
+				) =>
+					sum +
+					material.value,
+				0,
+			);
 		this.#target =
 			target;
 		this.#fromSize =
@@ -185,6 +200,8 @@ export class BaggingAnimation {
 							: -1;
 					return {
 						sprite,
+						value:
+							position.value,
 						from: position,
 						via: {
 							x:
@@ -213,16 +230,15 @@ export class BaggingAnimation {
 			);
 	}
 
-	/** Materials that reached the bag so far */
+	/** Material value that reached the bag so far */
 	get arrived() {
 		return this
-			.#arrived;
+			.#arrivedValue;
 	}
 
 	get total() {
 		return this
-			.#flights
-			.length;
+			.#totalValue;
 	}
 
 	get isDone() {
@@ -265,7 +281,7 @@ export class BaggingAnimation {
 
 	/**
 	 * Advances the animation.
-	 * @returns number of materials that reached the bag during this update
+	 * @returns material value that reached the bag during this update
 	 */
 	update(
 		deltaMs: number,
@@ -275,6 +291,7 @@ export class BaggingAnimation {
 		const to =
 			this.#target();
 		let arrivedNow = 0;
+		let arrivedValueNow = 0;
 		for (const flight of this
 			.#flights) {
 			if (
@@ -299,6 +316,8 @@ export class BaggingAnimation {
 				flight.arrived = true;
 				flight.sprite.destroy();
 				arrivedNow++;
+				arrivedValueNow +=
+					flight.value;
 				continue;
 			}
 			const eased =
@@ -348,12 +367,14 @@ export class BaggingAnimation {
 			arrivedNow >
 			0
 		) {
+			this.#arrivedValue +=
+				arrivedValueNow;
 			this.#arrived +=
 				arrivedNow;
 			this.#lastArrivalAt =
 				this.#elapsed;
 		}
-		return arrivedNow;
+		return arrivedValueNow;
 	}
 
 	destroy() {

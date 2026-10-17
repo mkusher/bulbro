@@ -139,6 +139,12 @@ export default {
 		"Кулак ворога",
 	"weapon.name.aphidGun":
 		"Далекобійна гармата попелиці",
+	"weapon.class.medieval":
+		"Середньовічна",
+	"stat.projectiles":
+		"Снаряди",
+	"stat.spread":
+		"Розкид (радіани)",
 	"weapon.class.blade":
 		"Клинкова",
 	"weapon.class.blunt":

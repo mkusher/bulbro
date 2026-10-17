@@ -4,12 +4,14 @@ import {
 	expect,
 	it,
 	mock,
+	spyOn,
 } from "bun:test";
 import { signal } from "@preact/signals";
 import {
 	h,
 	render,
 } from "preact";
+import { BulbroState } from "@/bulbro/BulbroState";
 import { getTotalExperienceForLevel } from "@/bulbro/Levels";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { classicMapSize } from "@/game-canvas";
@@ -18,10 +20,17 @@ import {
 	currentNetworkGame,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import { isItemShopItem } from "@/shop/Shop";
+import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import {
 	createInitialState,
 	waveState,
 } from "@/waveState";
+import { getWeaponByType } from "@/weapon";
+import {
+	toWeaponStateAtTier,
+	weaponStatsForTier,
+} from "@/weapon/WeaponTiers";
 
 // happy-dom has neither WebAudio nor WebGL
 mock.module(
@@ -466,3 +475,188 @@ it("shows only the local player's level-ups with the players panel online", asyn
 			user;
 	}
 });
+
+for (const [
+	wave,
+	tier,
+	full,
+] of [
+	[
+		8,
+		4,
+		false,
+	],
+	[
+		2,
+		2,
+		true,
+	],
+] as const) {
+	it(`buys a tier ${tier} weapon${full ? " and combines it at capacity" : ""}`, async () => {
+		const random =
+			spyOn(
+				Math,
+				"random",
+			).mockReturnValue(
+				0,
+			);
+		try {
+			const offer =
+				generateShopItems(
+					wellRoundedBulbro,
+					{
+						wave,
+						random:
+							() =>
+								0,
+					},
+				).find(
+					(
+						i,
+					) =>
+						!isItemShopItem(
+							i,
+						),
+				)!;
+			if (
+				isItemShopItem(
+					offer,
+				)
+			)
+				throw new Error(
+					"Expected a weapon",
+				);
+			const definition =
+				getWeaponByType(
+					offer
+						.weapon
+						.id,
+				);
+			const state =
+				createInitialState(
+					[
+						{
+							id: "player-1",
+							bulbro:
+								wellRoundedBulbro,
+						},
+					],
+					classicMapSize,
+					0,
+				);
+			const player =
+				new BulbroState(
+					{
+						...state.players[0]!.toJSON(),
+						materialsAvailable: 1000,
+					},
+				);
+			waveState.value =
+				{
+					...state,
+					round:
+						{
+							...state.round,
+							wave,
+							isRunning: false,
+						},
+					players:
+						[
+							player
+								.withStatSource(
+									{
+										id: "test-capacity",
+										kind: "item",
+										bonuses:
+											{
+												maxWeapons:
+													full
+														? -5
+														: 0,
+											},
+									},
+								)
+								.useWeapons(
+									[
+										toWeaponStateAtTier(
+											definition,
+											tier,
+										),
+									],
+								),
+						],
+				};
+			render(
+				h(
+					PreRound,
+					{},
+				),
+				root,
+			);
+			const buy =
+				[
+					...root.querySelectorAll(
+						"button",
+					),
+				].find(
+					(
+						b,
+					) =>
+						b.textContent ===
+						"$" +
+							offer.price,
+				);
+			expect(
+				buy,
+			).toBeDefined();
+			expect(
+				buy!
+					.disabled,
+			).toBe(
+				false,
+			);
+			buy!.click();
+			await flush();
+			const updated =
+				waveState
+					.value
+					.players[0]!;
+			expect(
+				updated.materialsAvailable,
+			).toBe(
+				1000 -
+					offer.price,
+			);
+			expect(
+				updated.weapons,
+			).toHaveLength(
+				full
+					? 1
+					: 2,
+			);
+			const purchased =
+				updated.weapons.at(
+					-1,
+				)!;
+			expect(
+				purchased.tier,
+			).toBe(
+				full
+					? 3
+					: 4,
+			);
+			expect(
+				purchased.statsBonus,
+			).toEqual(
+				weaponStatsForTier(
+					definition,
+					full
+						? 3
+						: 4,
+				),
+			);
+		} finally {
+			random.mockRestore();
+		}
+	});
+}

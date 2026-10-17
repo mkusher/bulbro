@@ -1,9 +1,6 @@
 import { orcFist } from "@/weapons-definitions/orc-fist";
 import type { EnemyCharacter } from "../enemy";
-import {
-	baseConsumableDropChance,
-	baseStats,
-} from "./base";
+import { baseStats } from "./base";
 
 export const coloradoBeetle: EnemyCharacter =
 	{
@@ -11,26 +8,28 @@ export const coloradoBeetle: EnemyCharacter =
 		name: "Colorado beetle warrior",
 		sprite:
 			"coloradoBeetle",
+		/** Brotato analogue: Chaser. See docs/balance.md. */
 		stats:
 			{
 				...baseStats,
-				maxHp: 2,
+
+				maxHp: 1,
 				speed: 380,
 				damage: 1,
 				range: 100,
-				attackSpeed: 2,
 				materialsDropped: 1,
+				knockbackResistance: 0,
 			},
 		waveIncreaseStats:
 			{
 				maxHp: 1,
+				damage: 0.6,
 			},
 		weapons:
 			[
 				orcFist,
 			],
-		consumableDropChance:
-			baseConsumableDropChance,
+		consumableDropChance: 0.02,
 		behaviors:
 			"chasing",
 	};

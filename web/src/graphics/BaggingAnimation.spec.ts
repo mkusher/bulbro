@@ -3,7 +3,9 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import * as PIXI from "pixi.js";
 import {
+	BaggingAnimation,
 	quadraticPoint,
 	takeOffTime,
 } from "./BaggingAnimation";
@@ -75,4 +77,108 @@ describe("BaggingAnimation", () => {
 			700,
 		);
 	});
+});
+
+it("counts each pickup's value as it arrives and finishes by sprite count", () => {
+	const parent =
+		new PIXI.Container();
+	const layer =
+		new PIXI.RenderLayer();
+	const animation =
+		new BaggingAnimation(
+			parent,
+			layer,
+			PIXI
+				.Texture
+				.WHITE,
+			[
+				{
+					x: 0,
+					y: 0,
+					value: 5,
+				},
+				{
+					x: 10,
+					y: 0,
+					value: 3,
+				},
+			],
+			() => ({
+				x: 100,
+				y: 100,
+			}),
+			16,
+			12,
+		);
+	try {
+		expect(
+			animation.total,
+		).toBe(
+			8,
+		);
+		expect(
+			animation.arrived,
+		).toBe(
+			0,
+		);
+		expect(
+			animation.update(
+				850,
+			),
+		).toBe(
+			5,
+		);
+		expect(
+			animation.arrived,
+		).toBe(
+			5,
+		);
+		expect(
+			animation.total -
+				animation.arrived,
+		).toBe(
+			3,
+		);
+		expect(
+			animation.isDone,
+		).toBe(
+			false,
+		);
+		expect(
+			animation.update(
+				40,
+			),
+		).toBe(
+			3,
+		);
+		expect(
+			animation.arrived,
+		).toBe(
+			8,
+		);
+		expect(
+			animation.isDone,
+		).toBe(
+			false,
+		);
+		animation.update(
+			160,
+		);
+		expect(
+			animation.isDone,
+		).toBe(
+			true,
+		);
+		expect(
+			animation.update(
+				100,
+			),
+		).toBe(
+			0,
+		);
+	} finally {
+		animation.destroy();
+		layer.destroy();
+		parent.destroy();
+	}
 });
