@@ -3,7 +3,6 @@ import {
 	useState,
 } from "preact/hooks";
 import { useLocation } from "preact-iso";
-import { SavedRunMenuItem } from "./start/SavedRunMenuItem";
 import { t } from "@/i18n";
 import { joinLobby } from "@/network/currentLobby";
 import {
@@ -26,6 +25,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/ui/shadcn/card";
+import { SavedRunMenuItem } from "./start/SavedRunMenuItem";
 
 export function TgAppStartScreen() {
 	const location =

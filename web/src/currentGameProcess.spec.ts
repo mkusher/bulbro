@@ -4,11 +4,9 @@ import {
 	it,
 	mock,
 } from "bun:test";
-import type {
-	GameProcess,
-	WaveProcess,
-} from "./GameProcess";
+import { BulbroState } from "./bulbro/BulbroState";
 import { wellRoundedBulbro } from "./characters-definitions";
+import type { PlayerControl } from "./controls";
 import {
 	currentGameProcess,
 	disableSinglePlayerSaving,
@@ -21,6 +19,10 @@ import {
 	waveResult,
 	waveSummaryDismissed,
 } from "./currentGameProcess";
+import type {
+	GameProcess,
+	WaveProcess,
+} from "./GameProcess";
 import {
 	gameStats,
 	resetGameStats,
@@ -34,8 +36,6 @@ import {
 	deltaTime,
 	nowTime,
 } from "./time";
-import type { PlayerControl } from "./controls";
-import { BulbroState } from "./bulbro/BulbroState";
 import {
 	createInitialState,
 	nextWave,

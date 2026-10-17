@@ -2,13 +2,8 @@ import {
 	effect,
 	signal,
 } from "@preact/signals";
-import { createMainControls } from "./controls";
-import {
-	clearSinglePlayerGame,
-	loadSinglePlayerGame,
-	saveSinglePlayerGame,
-} from "./singlePlayerSave";
 import type { PlayerControl } from "./controls";
+import { createMainControls } from "./controls";
 import type { GameProcess } from "./GameProcess";
 import { BaseGameProcess } from "./GameProcess/BaseGameProcess";
 import type { Difficulty } from "./game-formulas";
@@ -19,6 +14,11 @@ import {
 	startWaveTracking,
 } from "./gameStats";
 import type { Player } from "./player";
+import {
+	clearSinglePlayerGame,
+	loadSinglePlayerGame,
+	saveSinglePlayerGame,
+} from "./singlePlayerSave";
 import {
 	getRoundElapsedTime,
 	type WaveState,
