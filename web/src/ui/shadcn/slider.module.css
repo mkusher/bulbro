@@ -1,0 +1,90 @@
+.input {
+	position: absolute;
+	inset: -1px;
+	width: calc(
+		100% +
+		2px
+	);
+	height: 44px;
+	margin: 0;
+	appearance: none;
+	background: transparent;
+	cursor: grab;
+	touch-action: pan-y;
+}
+.input::-webkit-slider-runnable-track {
+	height: 44px;
+	background: transparent;
+}
+.input::-moz-range-track {
+	height: 44px;
+	background: transparent;
+}
+.input::-webkit-slider-thumb {
+	appearance: none;
+	box-sizing: border-box;
+	width: 44px;
+	height: 44px;
+	border: 2px
+		solid
+		var(
+			--primary
+		);
+	border-radius: 8px;
+	background: color-mix(
+		in
+			oklch,
+		var(
+				--primary
+			)
+			35%,
+		var(
+			--background
+		)
+	);
+	box-shadow: 0
+		2px
+		4px
+		#0003;
+}
+.input::-moz-range-thumb {
+	box-sizing: border-box;
+	width: 44px;
+	height: 44px;
+	border: 2px
+		solid
+		var(
+			--primary
+		);
+	border-radius: 8px;
+	background: color-mix(
+		in
+			oklch,
+		var(
+				--primary
+			)
+			35%,
+		var(
+			--background
+		)
+	);
+	box-shadow: 0
+		2px
+		4px
+		#0003;
+}
+.input:focus-visible {
+	outline: 2px
+		solid
+		var(
+			--ring
+		);
+	outline-offset: 2px;
+	border-radius: 8px;
+}
+.input:active {
+	cursor: grabbing;
+}
+.input:disabled {
+	cursor: default;
+}
