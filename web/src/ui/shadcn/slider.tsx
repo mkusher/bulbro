@@ -1,9 +1,7 @@
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import * as React from "preact/compat";
-
-import styles from "./slider.module.css";
-
 import { cn } from "@/ui/shadcn/utils";
+import styles from "./slider.module.css";
 
 function Slider({
 	className,
@@ -95,8 +93,8 @@ function Slider({
 }
 
 export {
-	Slider,
 	LabeledSlider,
+	Slider,
 };
 
 type LabeledSliderProps =
