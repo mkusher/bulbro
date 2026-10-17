@@ -97,6 +97,29 @@ export const fitMode =
 			automaticFitMode.value,
 	);
 
+/** Screens whose shorter side is below this many pixels are treated as mobile. */
+export const mobileScreenMaxShortSide = 600;
+/**
+ * On mobile the camera zooms out so at least this many world units fit along
+ * the shorter screen side, letting more of the playing field be visible.
+ */
+export const mobileVisibleShortSide = 800;
+
+export const isMobileScreen =
+	computed(
+		() => {
+			const canvas =
+				canvasSize.value;
+			return (
+				Math.min(
+					canvas.width,
+					canvas.height,
+				) <
+				mobileScreenMaxShortSide
+			);
+		},
+	);
+
 export const autoScale =
 	computed(
 		() => {
@@ -106,17 +129,32 @@ export const autoScale =
 			const canvas =
 				canvasSize.value;
 
-			return fitWidth
-				? Math.max(
-						canvas.width,
-						minimalCameraSize.width,
-					) /
+			const defaultScale =
+				fitWidth
+					? Math.max(
+							canvas.width,
+							minimalCameraSize.width,
+						) /
 						classicMapSize.width
-				: Math.max(
-						canvas.height,
-						minimalCameraSize.height,
-					) /
+					: Math.max(
+							canvas.height,
+							minimalCameraSize.height,
+						) /
 						classicMapSize.height;
+
+			if (
+				!isMobileScreen.value
+			)
+				return defaultScale;
+
+			return Math.min(
+				defaultScale,
+				Math.min(
+					canvas.width,
+					canvas.height,
+				) /
+					mobileVisibleShortSide,
+			);
 		},
 	);
 
