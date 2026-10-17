@@ -124,8 +124,10 @@ character preview and loadout validation use the same
 
 ### 2. Enemy behavior and damage protection
 
-- **No invulnerability after a hit:** a swarm can still land simultaneous
-  hits. Brotato provides a short interval after taking damage.
+- **Hit protection:** taking damage grants 200 ms of invulnerability with a
+  flashing sprite. Only the first damaging hit per player per tick is accepted,
+  across melee, projectiles and explosions. Dodges do not start protection.
+  Positive armor reduces damage; negative armor increases it.
 - **Behavior differences remain:** Bulbro keeps its own charge timing, body
   sizes, attack cooldowns and projectile speeds. Aphid has no separate contact
   attack corresponding to Spitter's +0.6 contact damage per wave.
@@ -182,7 +184,7 @@ until structures exist.
    spending, especially the custom premium weapon prices.
 2. **Weapons:** implement missing piercing and Brick's break/material effect;
    playtest the five custom weapons against the matched stat tables.
-3. **Enemies:** add hit invulnerability, validate the four custom enemies,
+3. **Enemies:** playtest the 200 ms hit protection, validate the four custom enemies,
    and review behavior differences from the matched roles.
 4. **Waves:** write wave configs for 13–20, end the run at wave 20 with a
    boss, and make difficulty scale enemy HP and damage by percentage.

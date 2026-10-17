@@ -79,6 +79,9 @@ import {
 } from "./Levels";
 import type { FaceType } from "./Sprite";
 
+/** Protection after taking damage, in milliseconds. */
+export const hitInvulnerabilityDuration = 200;
+
 type BulbroStateProperties =
 	{
 		readonly id: string;
@@ -105,6 +108,7 @@ type BulbroStateProperties =
 		readonly items: readonly string[];
 		readonly lastMovedAt: number;
 		readonly lastHitAt: number;
+		readonly invulnerableUntil?: number;
 		readonly healedByHpRegenerationAt: number;
 		readonly killedAt?: number;
 		readonly lastDirection: Direction;
@@ -700,7 +704,8 @@ export class BulbroState
 
 	/**
 	 * Returns a received hit or death event for the Bulbro,
-	 * or nothing when the hit was dodged. Armor reduces the damage.
+	 * or nothing when protected, dead, dodging, or taking no damage.
+	 * Positive armor reduces damage; negative armor increases it.
 	 */
 	beHit(
 		damage: number,
@@ -710,6 +715,16 @@ export class BulbroState
 		| BulbroReceivedHitEvent
 		| BulbroDiedEvent
 		| undefined {
+		if (
+			!this.isAlive() ||
+			this.isInvulnerable(
+				now,
+			) ||
+			damage <=
+				0
+		) {
+			return undefined;
+		}
 		if (
 			random() <
 			getDodgeChance(
@@ -771,6 +786,18 @@ export class BulbroState
 			damage:
 				damageTaken,
 		};
+	}
+
+	isInvulnerable(
+		now: number,
+	): boolean {
+		return (
+			now <
+			(this
+				.#props
+				.invulnerableUntil ??
+				0)
+		);
 	}
 
 	/**
@@ -1214,6 +1241,8 @@ export class BulbroState
 							event.occurredAt,
 						lastHitAt:
 							event.occurredAt,
+						invulnerableUntil:
+							undefined,
 						healedByHpRegenerationAt:
 							event.occurredAt,
 						healthPoints:
@@ -1332,6 +1361,9 @@ export class BulbroState
 							),
 						lastHitAt:
 							event.occurredAt,
+						invulnerableUntil:
+							event.occurredAt +
+							hitInvulnerabilityDuration,
 					},
 				);
 
