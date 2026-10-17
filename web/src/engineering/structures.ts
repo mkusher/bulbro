@@ -18,6 +18,8 @@ export interface Structure {
 	ownerId: string;
 	kind: StructureKind;
 	position: Position;
+	/** Host clock timestamp; absent for structures from older snapshots. */
+	spawnStartedAt?: number;
 	nextActionAt: number;
 	interval: number;
 	aim?: Position;
@@ -88,6 +90,7 @@ export const mineIntervals =
 		6000,
 		3000,
 	] as const;
+export const STRUCTURE_SPAWN_DURATION = 1000;
 export const MINE_TRIGGER_RADIUS = 20;
 // World units, matching the game's grenade blast radius.
 export const MINE_EXPLOSION_RADIUS = 100;

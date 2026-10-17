@@ -133,9 +133,8 @@ afterAll(
 it("unlocks audio synchronously from a tap while audio is still preloading", async () => {
 	const createContext =
 		mock(
-			function () {
-				return context;
-			},
+			() =>
+				context,
 		);
 	Object.defineProperty(
 		globalThis,

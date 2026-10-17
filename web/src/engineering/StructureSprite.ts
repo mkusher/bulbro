@@ -1,8 +1,37 @@
 import * as PIXI from "pixi.js";
-import type { Structure } from "./structures";
+import {
+	STRUCTURE_SPAWN_DURATION,
+	type Structure,
+} from "./structures";
 
 /** Small vector sprites share the same visual language as projectiles. */
 export class StructureSprite extends PIXI.Container {
+	private body: PIXI.Graphics;
+	private spawnCross =
+		new PIXI.Graphics()
+			.moveTo(
+				-10,
+				-10,
+			)
+			.lineTo(
+				10,
+				10,
+			)
+			.moveTo(
+				-10,
+				10,
+			)
+			.lineTo(
+				10,
+				-10,
+			)
+			.stroke(
+				{
+					width: 7,
+					color: 0x55baff,
+					cap: "round",
+				},
+			);
 	private barrel =
 		new PIXI.Graphics();
 	constructor(
@@ -224,6 +253,12 @@ export class StructureSprite extends PIXI.Container {
 						0xd34d4a,
 					);
 		}
+		this.body =
+			body;
+		this.addChild(
+			this
+				.spawnCross,
+		);
 		this.addChild(
 			body,
 			this
@@ -235,7 +270,33 @@ export class StructureSprite extends PIXI.Container {
 	}
 	update(
 		s: Structure,
+		now = Date.now(),
 	) {
+		const elapsed =
+			now -
+			(s.spawnStartedAt ??
+				-Infinity);
+		const spawning =
+			elapsed <
+			STRUCTURE_SPAWN_DURATION;
+		this.spawnCross.visible =
+			spawning;
+		this.spawnCross.alpha =
+			spawning
+				? 0.35 +
+					Math.abs(
+						Math.sin(
+							(elapsed *
+								Math.PI) /
+								400,
+						),
+					) *
+						0.65
+				: 1;
+		this.body.visible =
+			!spawning;
+		this.barrel.visible =
+			!spawning;
 		this.position.set(
 			s
 				.position

@@ -495,7 +495,11 @@ it("scales turret damage only with Engineering and keeps fixed range and randomi
 		};
 	const fired =
 		tick(
-			initial,
+			tick(
+				initial,
+				-1000,
+			)
+				.state,
 			0,
 		).state;
 	expect(
@@ -630,7 +634,7 @@ it("arms landmines on contact and explodes once on exit, applying explosion size
 				state(
 					owner,
 				),
-				0,
+				-1000,
 			)
 				.state,
 			enemies:
@@ -994,9 +998,13 @@ it("medical projectiles heal the owner on collision without resetting regenerati
 		);
 	const initial =
 		tick(
-			state(
-				hurt,
-			),
+			tick(
+				state(
+					hurt,
+				),
+				-1000,
+			)
+				.state,
 			0,
 		).state;
 	expect(
@@ -1290,3 +1298,325 @@ it("adds Tool Engineering once for equipped copies and preserves it through seri
 		0,
 	);
 });
+
+for (const item of [
+	"turret",
+	"medicalTurret",
+	"laserTurret",
+	"explosiveTurret",
+	"incendiaryTurret",
+	"landmines",
+]) {
+	it(`waits for the spawn cross before activating ${item}`, () => {
+		const owner =
+			new BulbroState(
+				{
+					...player()
+						.withItem(
+							item,
+						)
+						.toJSON(),
+					healthPoints: 1,
+				},
+			);
+		const initial =
+			{
+				...state(
+					owner,
+				),
+				enemies:
+					[
+						enemy(
+							"target",
+							500,
+						),
+					],
+			};
+		const first =
+			tick(
+				initial,
+				100,
+			).state;
+		const deployed =
+			structures(
+				first,
+			).find(
+				(
+					s,
+				) =>
+					s.kind !==
+					"landmineSource",
+			)!;
+		expect(
+			deployed.spawnStartedAt,
+		).toBe(
+			100,
+		);
+		expect(
+			first.shots,
+		).toHaveLength(
+			0,
+		);
+		expect(
+			deployed.armed,
+		).toBeUndefined();
+		const pending =
+			tick(
+				first,
+				1099,
+			).state;
+		expect(
+			pending.shots,
+		).toHaveLength(
+			0,
+		);
+		expect(
+			structures(
+				pending,
+			).find(
+				(
+					s,
+				) =>
+					s.id ===
+					deployed.id,
+			)
+				?.armed,
+		).toBeUndefined();
+		const active =
+			tick(
+				pending,
+				1100,
+			).state;
+		if (
+			item ===
+			"landmines"
+		)
+			expect(
+				structures(
+					active,
+				).find(
+					(
+						s,
+					) =>
+						s.id ===
+						deployed.id,
+				)
+					?.armed,
+			).toBe(
+				true,
+			);
+		else
+			expect(
+				active.shots,
+			).toHaveLength(
+				1,
+			);
+	});
+}
+
+it("shows a fresh spawn cross for mines produced later in the wave", () => {
+	const initial =
+		tick(
+			state(
+				player().withItem(
+					"landmines",
+				),
+			),
+			0,
+		).state;
+	const later =
+		tick(
+			initial,
+			12000,
+		).state;
+	expect(
+		structures(
+			later,
+		)
+			.filter(
+				(
+					s,
+				) =>
+					s.kind ===
+					"landmine",
+			)
+			.map(
+				(
+					s,
+				) =>
+					s.spawnStartedAt,
+			)
+			.sort(
+				(
+					a,
+					b,
+				) =>
+					a! -
+					b!,
+			),
+	).toEqual(
+		[
+			0,
+			12000,
+		],
+	);
+});
+
+for (const random of [
+	0,
+	0.125,
+	0.25,
+	0.5,
+	0.75,
+	0.999,
+]) {
+	it(`drops garden fruit nearby without overlapping the bed (random ${random})`, () => {
+		const owner =
+			player().withItem(
+				"garden",
+			);
+		const initial =
+			state(
+				owner,
+			);
+		const generator =
+			new StructureEventGenerator(
+				() =>
+					random,
+			);
+		const events =
+			generator.generate(
+				initial,
+				deltaTime(
+					0,
+				),
+				nowTime(
+					0,
+				),
+			);
+		const garden =
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+						"structureChanged" &&
+					e
+						.structure
+						.kind ===
+						"garden",
+			);
+		if (
+			!garden ||
+			garden.type !==
+				"structureChanged"
+		)
+			throw new Error(
+				"Missing garden",
+			);
+		const checkFruit =
+			(
+				events: ReturnType<
+					StructureEventGenerator["generate"]
+				>,
+			) => {
+				const fruit =
+					events.find(
+						(
+							e,
+						) =>
+							e.type ===
+							"consumableSpawned",
+					);
+				if (
+					!fruit ||
+					fruit.type !==
+						"consumableSpawned"
+				)
+					throw new Error(
+						"Missing fruit",
+					);
+				const position =
+					fruit
+						.consumable
+						.position;
+				const distance =
+					Math.hypot(
+						position.x -
+							garden
+								.structure
+								.position
+								.x,
+						position.y -
+							garden
+								.structure
+								.position
+								.y,
+					);
+				expect(
+					distance,
+				).toBeGreaterThanOrEqual(
+					54.99,
+				);
+				expect(
+					distance,
+				).toBeLessThanOrEqual(
+					75,
+				);
+				expect(
+					position.x,
+				).toBeGreaterThanOrEqual(
+					0,
+				);
+				expect(
+					position.x,
+				).toBeLessThanOrEqual(
+					1000,
+				);
+				expect(
+					position.y,
+				).toBeGreaterThanOrEqual(
+					0,
+				);
+				expect(
+					position.y,
+				).toBeLessThanOrEqual(
+					1000,
+				);
+			};
+		checkFruit(
+			events,
+		);
+		const grown =
+			events.reduce(
+				(
+					s,
+					e,
+				) =>
+					updateState(
+						s,
+						withEventMeta(
+							e,
+							deltaTime(
+								0,
+							),
+							nowTime(
+								0,
+							),
+						),
+					),
+				initial,
+			);
+		checkFruit(
+			generator.generate(
+				grown,
+				deltaTime(
+					0,
+				),
+				nowTime(
+					15000,
+				),
+			),
+		);
+	});
+}
