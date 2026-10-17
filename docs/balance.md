@@ -6,6 +6,9 @@ economy and characters. Bulbro is compared with Brotato throughout.
 The [item reference](../web/docs/items.md) lists all 83 items, their tiers,
 prices, bonuses, stacking rules, and sprite frames. The
 [weapon reference](../web/docs/weapons.md) covers weapon values and attacks.
+The [character reference](../web/docs/characters.md) links the roster review
+and records proposed additions; both references separate suggestions from
+implemented content.
 
 Bulbro follows Brotato's core formulas. Nine weapons now use its individual
 stat and price progressions, and six enemies use the numerical stats of
@@ -162,21 +165,146 @@ and income contribution alongside the newly matched enemies.
 
 ### 6. Characters
 
-| Character | Bonuses | Verdict |
-|---|---|---|
-| King | +30 HP, +30% damage, +10 armor, +50 luck, +30% pickup range | No downside; strongest |
-| Evil | +60% damage, +6 melee, +15% crit, +25% attack speed, +10% speed, −5 HP, −3 armor | Very strong |
-| Berserker | +5 melee, +20% damage, +30% attack speed, +5 HP, −5 armor | Strong melee |
-| Cyborg | +10 HP, +4 ranged, +5 engineering, +10% attack speed, +25 range, +1 armor | Solid; engineering only scales Brick |
-| Vampire | +50 range, +10% life steal, +3 ranged | Fine |
-| Medic | +5 HP regen, +20 HP, +3 engineering; only Pistol, Hand, Fist | Limited weapons; Engineering unused in this weapon pool |
-| Well Rounded | +5 HP, +5% speed, +8 harvesting | Harvesting gives a meaningful early spending advantage |
-| Grandpa | −20% speed, +50% pickup range; exclusive AK-47 starting choice | Stronger starting option; speed trade needs playtesting |
+Reviewed against the character definitions and combat formulas on 2026-10-17.
+Brotato values below come from the linked PC character wiki pages as retrieved
+on that date, including its newer Vampire. These are mechanical comparisons,
+not measured win-rate rankings; shared names do not imply matching mechanics.
 
-Brotato characters always trade something away. Engineering now contributes
-to Brick damage, but structures are still absent. The Skull upgrade,
-Engineering-only items and positive Engineering shop items remain excluded
-until structures exist.
+#### Current roster
+
+Bonuses are relative to [base stats](../web/src/game-formulas.ts): 10 HP,
+0 armor, 0 damage stats and a movement speed of 450. Every character starts
+with one selected weapon and can equip six. No character grants an extra
+weapon. Except for Medic, all share the full 14-weapon shop pool; 12 are
+selectable at setup, or 13 for Grandpa. See
+[definitions](../web/src/characters-definitions/index.ts),
+[starting restrictions](../web/src/characters-definitions/base.ts) and
+[weapon limits](../packages/network-protocol/src/weapon-limits.ts).
+
+| Character / definition | Current bonuses and restrictions | Balance assessment |
+|---|---|---|
+| [Well Rounded](../web/src/characters-definitions/well-rounded.ts) | +5 HP, +5% speed, +8 harvesting | Baseline; matches Brotato's starting stat bonuses. Preserve as the control character. |
+| [King](../web/src/characters-definitions/king.ts) | +30 HP, +30% damage, +10 armor, +50 luck, +30% pickup range | Highest-priority excess of unconditional power: huge durability, universal damage and better rarity rolls with no penalty or build requirement. |
+| [Evil](../web/src/characters-definitions/evil.ts) | +60% damage, +6 melee, +15% crit, +25% attack speed, +10% speed, −5 HP, −3 armor | Extreme early offense, especially Knife. Very fragile initially; buying HP and armor can repair the penalties while retaining every offensive bonus. Needs separate early-survival and later-scaling tests. |
+| [Berserker](../web/src/characters-definitions/berserker.ts) | +5 melee, +20% damage, +30% attack speed, +5 HP, −5 armor | Strong offense; the extra HP largely offsets the starting armor penalty. Damage and attack speed also benefit guns, so this is not mechanically restricted to melee. |
+| [Cyborg](../web/src/characters-definitions/cyborg.ts) | +10 HP, +4 ranged, +5 engineering, +10% attack speed, +25 range, +1 armor | Strong early gun specialist with over twice base effective HP and no penalty. Engineering adds damage to Brick, but provides no turret/support play. |
+| [Vampire](../web/src/characters-definitions/vampire.ts) | +50 range, +10% life steal, +3 ranged | Strong early gun damage and sustain with no penalty. The former “Fine” verdict understated its synergy with fast guns. Healing depends on successful hits, not damage dealt. |
+| [Medic](../web/src/characters-definitions/medic.ts) | +5 HP regeneration, +20 HP, +3 engineering; only Pistol, Hand and Fist at setup and in shops | Durable survival option, but restricted damage progression. Engineering has no effect in this pool. It has no character-specific ally healing or medical-weapon mechanic. |
+| [Grandpa](../web/src/characters-definitions/grandpa.ts) | −20% speed, +50% pickup range; exclusive access to AK-47 at setup | Likely weakest with a shared starting weapon: pickup reach cannot replace escape speed, damage or income. AK-47 access is a separate loadout advantage, not proof the character is balanced. |
+
+#### Comparison with Brotato
+
+Brotato often pays for specialization with restrictions, scaling penalties or
+conditional power. It does **not** require every character to have a downside:
+[Well Rounded](https://brotato.wiki.spellsandguns.com/Well_Rounded) has the same
+three positive bonuses as Bulbro. Retain that exception rather than adding
+penalties merely for parity.
+
+| Bulbro | Brotato comparison | Implication for Bulbro |
+|---|---|---|
+| Well Rounded | [Well Rounded](https://brotato.wiki.spellsandguns.com/Well_Rounded): +5 HP, +5% speed, +8 harvesting. | Stat parity only; Bulbro's broader starting choices, waves and shared co-op income still change its value. |
+| King | [King](https://brotato.wiki.spellsandguns.com/King): +50 luck; each tier IV weapon adds +25% damage and attack speed, each tier I weapon subtracts 15% of both. Different tier IV/I items add 5/subtract 2 HP respectively. Starts with a tier II weapon. | Bulbro keeps luck but replaces the tier-management tradeoff with unconditional HP, armor and damage. Its shared Sword start is not a King-specific tier upgrade. |
+| Evil | No direct counterpart. [Crazy](https://brotato.wiki.spellsandguns.com/Crazy) has +25% attack speed, +100 range with Precise weapons and an extra Knife, but −30% dodge, −10 engineering and −10 ranged damage. [Demon](https://brotato.wiki.spellsandguns.com/Demon) instead buys with HP and converts materials to HP. | Treat Evil as a custom glass cannon. Neither its appearance nor name makes it a Demon equivalent; its universal +60% damage is additional to Crazy-like attack speed. |
+| Berserker | No direct counterpart. [Brawler](https://brotato.wiki.spellsandguns.com/Brawler) grants +50% attack speed only with Unarmed weapons, an extra Fist and +15% dodge, at −50 range and −50 ranged damage. | Bulbro's smaller attack-speed bonus works on every weapon and stacks with flat melee and percentage damage. A negative armor stat alone does not establish equivalent specialization. |
+| Cyborg | [Cyborg](https://brotato.wiki.spellsandguns.com/Cyborg) starts with an extra Minigun, triples ranged-damage modifications and converts ranged damage to twice as much engineering halfway through each wave. Engineering modifications are reduced 75%; melee and elemental modifications are reduced 100%. | Bulbro is a static ranged bonus package without conversion, scaling modifiers or the extra gun. Do not copy the conversion until structures provide its intended second-half payoff. |
+| Vampire | [Vampire](https://brotato.wiki.spellsandguns.com/Vampire) gains damage, life steal and armor as health is missing, with −60% damage, −100 regeneration, −100 consumable healing and 25% lower HP modifications. [Sick](https://brotato.wiki.spellsandguns.com/Sick) has +25% life steal and +12 HP, but loses 1 HP/s and has −100 regeneration. [Ranger](https://brotato.wiki.spellsandguns.com/Ranger) shares +50 range, adds an extra Pistol and 50% stronger ranged modifications, but forbids melee and reduces HP modifications 25%. | Bulbro combines safe ranged reach, immediate flat damage and life steal; it has none of those health, healing or weapon tradeoffs. It is a custom ranged sustain character rather than a copy of Brotato Vampire. |
+| Medic | [Doctor](https://brotato.wiki.spellsandguns.com/Doctor) grants +200% attack speed with Medical weapons, −100% global attack speed, +5 regeneration with doubled regeneration modifications, +5 harvesting and halved armor modifications. | Bulbro trades weapon access for a large HP reserve and ordinary regeneration. Pistol, Hand and Fist do not reproduce Doctor's medical attack speed or innate medical-weapon life steal. |
+| Grandpa | [Old](https://brotato.wiki.spellsandguns.com/Old) has −10% player speed, −25% enemy speed, +10 harvesting, a 33% smaller map and 10% fewer enemies. | Bulbro doubles the player-speed penalty and omits the enemy slowdown, map change and harvesting compensation. AK-47 must be evaluated against freely available Sword II and Machine Gun starts. |
+
+#### Quantitative checks
+
+These are level-0, character-only calculations using
+[combat formulas](../web/src/game-formulas.ts) and the current
+[Fist](../web/src/weapons-definitions/fist.ts),
+[Knife](../web/src/weapons-definitions/knife.ts) and
+[SMG](../web/src/weapons-definitions/smg.ts) definitions at tier I. Expected DPS
+weights the rounded normal and critical hit damage by the combined weapon and
+character critical chance, then divides by `getAttackCooldown / 1000`.
+Assume continuous attacks against one target, all hits connecting, no enemy
+mitigation, items, upgrades or class bonuses. This excludes target acquisition,
+melee animation/coverage, overkill, knockback and movement; it is not observed
+combat DPS. “Unavailable” means outside Medic's weapon pool.
+
+Effective HP is `HP / armor damage multiplier`, before per-hit rounding and
+the minimum-1-damage floor; healing and dodge are excluded. Actual starting
+levels add their usual HP on top of this isolated comparison.
+
+| Character | HP | Effective HP | Fist DPS | Knife DPS | SMG DPS |
+|---|---:|---:|---:|---:|---:|
+| Well Rounded | 15 | 15.00 | 10.31 | 11.68 | 17.76 |
+| King | 40 | 66.67 | 12.90 | 15.25 | 23.65 |
+| Evil | 5 | 4.17 | 38.33 | 41.52 | 39.12 |
+| Berserker | 15 | 11.25 | 26.78 | 26.51 | 30.66 |
+| Cyborg | 20 | 21.33 | 11.34 | 12.85 | 32.55 |
+| Vampire | 10 | 10.00 | 10.31 | 11.68 | 29.53 |
+| Medic | 30 | 30.00 | 10.31 | Unavailable | Unavailable |
+| Grandpa | 10 | 10.00 | 10.31 | 11.68 | 17.76 |
+
+- **King:** 4.44× Well Rounded's effective HP before its damage, luck and
+  pickup bonuses. +10 armor reduces damage 40%; HP and armor multiply in value.
+  This is the clearest numerical outlier, not evidence of a measured win rate.
+- **Evil:** 3.56× Well Rounded's Knife DPS at only 28% of its effective HP.
+  This is a real early risk. Percentage damage, critical chance and attack speed
+  remain useful after HP/armor purchases, so test whether that risk fades too
+  cheaply. Berserker retains 75% of Well Rounded's effective HP and 2.27× its
+  Knife DPS, making its starting defense penalty less severe than it looks.
+- **Cyborg / Vampire:** SMG DPS is 1.83× / 1.66× the baseline. Vampire's
+  +3 ranged becomes +1.5 unrounded damage per SMG bullet, and its 10% life steal
+  nominally yields about 0.59 HP/s from one continuously hitting SMG before
+  healing cooldown collisions. Medic's regeneration is about 0.56 HP/s, but
+  works without landing hits. Multiple guns favor Vampire's sustain; the shared
+  100 ms life-steal cooldown prevents simply multiplying healing indefinitely.
+- **Well Rounded:** with no other harvesting changes, 8 harvesting pays 50
+  materials and XP in waves 1–5 and 125 in waves 1–10, because each positive
+  growth step rounds up. This economy advantage must be included in longer-run
+  comparisons; raw starting DPS alone undervalues it.
+- **Grandpa:** speed falls from 450 to 360; pickup radius rises from 100 to
+  150. Enemy speed is unchanged. In co-op, collected materials/XP are shared,
+  so a teammate collecting them can reduce the marginal benefit of Grandpa's
+  pickup reach without removing his personal escape-speed penalty.
+
+#### Proposed tuning and validation
+
+The following are **unimplemented playtest candidates**, not established
+balanced values. Apply one change at a time and compare against the current
+version; do not treat every row as a single required patch.
+
+| Priority | Character | First candidate to test | Reason / follow-up |
+|---|---|---|---|
+| 1 | King | Reduce +30 HP to +10 and +10 armor to +3. | Cuts character-only effective HP to 24 while retaining its damage/luck identity. If still dominant, test a tier-dependent bonus/penalty design separately, following Brotato King. |
+| 2 | Evil | Reduce +60% damage to +30%; keep its current penalties initially. | Tests the largest universal offensive bonus without simultaneously making an already fragile start more lethal. Track early deaths and later recovery separately. |
+| 2 | Grandpa | Reduce −20% speed to −10%; test +10 harvesting separately if still weak. | Restores some escape capacity. Compare both AK-47 and a shared start before deciding whether additional economy is necessary. |
+| 3 | Vampire | Reduce +3 ranged to +1, keeping range and life steal. | Tests sustain identity with less free early gun damage. Avoid copying Brotato Vampire's healing penalties without its missing-health rewards. |
+| 3 | Cyborg | Remove +10 HP while retaining +1 armor and offensive stats. | Tests the ranged specialist's offensive advantage with a smaller defensive reserve. Keep engineering clearly described as Brick-only until structures exist. |
+| 3 | Berserker | Test −5 ranged damage alongside its existing bonuses. | Discourages gun builds using its universal attack speed/damage; verify that melee survival remains reasonable. Longer term, class-specific attack speed would express the role more directly. |
+| 4 | Medic | Replace the unused +3 engineering with +5 harvesting. | Makes the displayed bonus useful and helps fund its restricted pool. Measure survival before adding medical weapons or stronger healing. |
+| Control | Well Rounded | Keep current bonuses. | Provides a stable comparison for income, survival and weapon progression. |
+
+Use the same starting weapon, difficulty, player count and wave horizon for
+each paired comparison, with repeated runs rather than a single favorable
+shop. Use Pistol or Fist when including Medic; test Knife and SMG separately
+for the other characters. Record deaths/damage taken in waves 1–5 and 6–12,
+healing actually received, kills, collected material value, harvesting income,
+spending and weapon tiers. Run a separate best-start comparison for Sword II,
+Machine Gun and Grandpa's AK-47 so loadout strength is not mistaken for a stat
+advantage. Repeat solo and in co-op; shared pickup income and XP do not imply
+shared regeneration or life steal. The current absence of a wave-20 boss/end
+condition prevents a standard Brotato Danger-5 win-rate comparison.
+
+Engineering contributes to Brick damage, but structures are still absent.
+The Skull upgrade, Engineering-only items and positive Engineering shop items
+remain excluded until structures exist.
+
+#### Suggested character additions
+
+Prioritize Sniper (precision), Demolitionist (explosives) and Farmer
+(harvesting economy). Tank, Runner, Brawler and Gambler are further candidates;
+Engineer/Summoner depend on future structures or companions. See the
+[character proposals](../web/docs/characters.md#suggested-additions) for
+strengths, tradeoffs, weapon affinities and implementation needs, and the
+[weapon proposals](../web/docs/weapons.md#suggested-additions) for their
+potential loadouts. All are unimplemented and require tuning against the
+current roster.
 
 ## Suggested priority
 
@@ -188,9 +316,11 @@ until structures exist.
    and review behavior differences from the matched roles.
 4. **Waves:** write wave configs for 13–20, end the run at wave 20 with a
    boss, and make difficulty scale enemy HP and damage by percentage.
-5. **Characters:** give King a real downside, and playtest whether Grandpa’s
-   exclusive AK-47 start offsets his speed penalty. Compare the other free
-   starting options, especially Sword and Machine Gun.
+5. **Characters:** first reduce King's unconditional durability, then test
+   Evil's offense and Grandpa's speed penalty. Use Well Rounded as a control,
+   include Vampire/Cyborg gun scaling, and separate shared-weapon trials from
+   the free Sword II, Machine Gun and Grandpa AK-47 starts. See the character
+   review above for proposed values and validation criteria.
 
 ## Sources
 
