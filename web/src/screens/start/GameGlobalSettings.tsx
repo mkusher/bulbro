@@ -30,6 +30,7 @@ import { updateLocale } from "@/userSettings";
 type Props =
 	{
 		goBack: () => void;
+		backLabel?: string;
 	};
 
 const toggleFullscreen =
@@ -56,6 +57,9 @@ export function GameGlobalSettings() {
 
 export function GameGlobalSettingsLayout({
 	goBack,
+	backLabel = t(
+		"settings.backToMenu",
+	),
 }: Props) {
 	return (
 		<SplashBanner>
@@ -181,9 +185,9 @@ export function GameGlobalSettingsLayout({
 									goBack
 								}
 							>
-								{t(
-									"settings.backToMenu",
-								)}
+								{
+									backLabel
+								}
 							</Button>
 						</CardFooter>
 					</Card>

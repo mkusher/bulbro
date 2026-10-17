@@ -923,3 +923,70 @@ it("removes a purchased offer from saved locks", async () => {
 		0,
 	);
 });
+
+it("returns from settings to the same shop without changing offers or player state", async () => {
+	startPreRound(
+		0,
+	);
+	const shopText =
+		root.textContent;
+	const state =
+		waveState.value;
+	const settings =
+		[
+			...root.querySelectorAll(
+				"button",
+			),
+		].find(
+			(
+				button,
+			) =>
+				button.textContent ===
+				"Settings",
+		);
+	expect(
+		settings,
+	).toBeDefined();
+	settings!.click();
+	await flush();
+	expect(
+		root.querySelector(
+			"h2",
+		)
+			?.textContent,
+	).toBe(
+		"Settings",
+	);
+	expect(
+		root.querySelector(
+			"#language",
+		),
+	).not.toBeNull();
+	const back =
+		[
+			...root.querySelectorAll(
+				"button",
+			),
+		].find(
+			(
+				button,
+			) =>
+				button.textContent ===
+				"Back to shop",
+		);
+	expect(
+		back,
+	).toBeDefined();
+	back!.click();
+	await flush();
+	expect(
+		root.textContent,
+	).toBe(
+		shopText,
+	);
+	expect(
+		waveState.value,
+	).toBe(
+		state,
+	);
+});

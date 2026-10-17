@@ -571,6 +571,8 @@ export default {
 		"Ustawienia",
 	"settings.backToMenu":
 		"Wróć do menu głównego",
+	"settings.backToShop":
+		"Wróć do sklepu",
 	"settings.display":
 		"Wyświetlanie",
 	"settings.sizeFor":

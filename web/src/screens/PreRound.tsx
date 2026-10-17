@@ -5,6 +5,8 @@ import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
+import { t } from "@/i18n";
+import { GameGlobalSettingsLayout } from "@/screens/start/GameGlobalSettings";
 import { bulbroName } from "@/i18n/game";
 import { findItemById } from "@/items/Items";
 import {
@@ -345,6 +347,13 @@ function LevelUp({
  * Reads and writes the waveState signal directly.
  */
 export function PreRound() {
+	const [
+		settingsOpen,
+		setSettingsOpen,
+	] =
+		useState(
+			false,
+		);
 	const [
 		shopItems,
 		setShopItems,
@@ -819,6 +828,22 @@ export function PreRound() {
 		);
 	}
 
+	if (
+		settingsOpen
+	) {
+		return (
+			<GameGlobalSettingsLayout
+				goBack={() =>
+					setSettingsOpen(
+						false,
+					)
+				}
+				backLabel={t(
+					"settings.backToShop",
+				)}
+			/>
+		);
+	}
 	const bulbro =
 		findBulbroById(
 			player.characterId,
@@ -830,6 +855,11 @@ export function PreRound() {
 
 	return (
 		<PreRoundLayout
+			onOpenSettings={() =>
+				setSettingsOpen(
+					true,
+				)
+			}
 			onToggleLock={
 				handleToggleLock
 			}

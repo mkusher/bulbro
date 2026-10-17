@@ -78,6 +78,7 @@ export interface PreRoundLayoutProps {
 	) => void;
 	/** Callback when the start wave button is clicked */
 	onStartWave?: () => void;
+	onOpenSettings?: () => void;
 	/** Callback when the re-roll button is clicked */
 	onToggleLock?: (
 		item: ShopItem,
@@ -102,6 +103,7 @@ export function PreRoundLayout({
 	onPurchase,
 	onToggleLock,
 	onStartWave,
+	onOpenSettings,
 	onReroll,
 	rerollPrice,
 	network,
@@ -119,6 +121,19 @@ export function PreRoundLayout({
 				{/* Header */}
 				<Card className="bg-white border p-4">
 					<div className="text-center">
+						{onOpenSettings && (
+							<Button
+								variant="outline"
+								className="mb-3"
+								onClick={
+									onOpenSettings
+								}
+							>
+								{t(
+									"settings.title",
+								)}
+							</Button>
+						)}
 						<h1 className="text-2xl font-bold mb-1">
 							{t(
 								"preround.prepareForWave",
