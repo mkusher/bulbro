@@ -107,4 +107,19 @@ export class CharacterSprites<
 			delta,
 		);
 	}
+
+	destroy(
+		options?: PIXI.DestroyOptions,
+	) {
+		for (const animation of new Set(
+			Object.values(
+				this
+					.#animations,
+			),
+		)) {
+			animation?.destroy(
+				options,
+			);
+		}
+	}
 }

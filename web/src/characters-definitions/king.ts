@@ -22,6 +22,8 @@ export const king: Bulbro =
 				faceType:
 					"normal",
 				wearingItems:
-					[],
+					[
+						"crown",
+					],
 			},
 	};

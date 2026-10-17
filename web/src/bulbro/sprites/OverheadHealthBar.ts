@@ -9,6 +9,7 @@ export class OverheadHealthBar {
 	#container: PIXI.Graphics;
 	#fill: PIXI.Graphics;
 	#barWidth: number;
+	#characterHeight: number;
 	#offsetY: number;
 
 	constructor(
@@ -18,6 +19,8 @@ export class OverheadHealthBar {
 		this.#barWidth =
 			characterWidth *
 			1.15;
+		this.#characterHeight =
+			characterHeight;
 		this.#offsetY =
 			-characterHeight -
 			barHeight -
@@ -45,6 +48,18 @@ export class OverheadHealthBar {
 		);
 
 		this.#container.visible = false;
+	}
+
+	/** Lifts the bar above anything worn on top of the character. */
+	setHeadroom(
+		headroom: number,
+	) {
+		this.#offsetY =
+			-this
+				.#characterHeight -
+			headroom -
+			barHeight -
+			8;
 	}
 
 	appendTo(

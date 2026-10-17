@@ -1,4 +1,4 @@
-import type * as PIXI from "pixi.js";
+import * as PIXI from "pixi.js";
 import type { DeltaTime } from "@/time";
 
 /**
@@ -26,6 +26,12 @@ export class AnimatedSprite<
 			number,
 			R
 		>();
+	#pendingFrames =
+		new Map<
+			number,
+			Promise<R>
+		>();
+	#destroyOptions?: PIXI.DestroyOptions;
 
 	/**
 	 * @param framesCount Number of frames in the animation cycle
@@ -100,16 +106,93 @@ export class AnimatedSprite<
 		)
 			return cached;
 
-		const result =
-			await this.#drawFrame(
-				this
-					.#frameIndex,
-			);
-		this.#frameCache.set(
+		const frameIndex =
 			this
-				.#frameIndex,
-			result,
+				.#frameIndex;
+		// Ticks keep asking for the frame while it is drawn, build it only once
+		const pending =
+			this.#pendingFrames.get(
+				frameIndex,
+			) ??
+			this.#drawAndCache(
+				frameIndex,
+			);
+		return pending;
+	}
+
+	#drawAndCache(
+		frameIndex: number,
+	): Promise<R> {
+		const pending =
+			(async () => {
+				const result =
+					await Promise.resolve(
+						this.#drawFrame(
+							frameIndex,
+						),
+					).finally(
+						() =>
+							this.#pendingFrames.delete(
+								frameIndex,
+							),
+					);
+				// A frame finished after destroy() would never be freed otherwise
+				if (
+					this
+						.#destroyOptions
+				) {
+					this.#destroyFrame(
+						result,
+						this
+							.#destroyOptions,
+					);
+				} else {
+					this.#frameCache.set(
+						frameIndex,
+						result,
+					);
+				}
+				return result;
+			})();
+		this.#pendingFrames.set(
+			frameIndex,
+			pending,
 		);
-		return result;
+		return pending;
+	}
+
+	/** Destroys every cached frame and any frame still being drawn. */
+	destroy(
+		options: PIXI.DestroyOptions = {
+			children: true,
+		},
+	) {
+		this.#destroyOptions =
+			options;
+		for (const frame of this.#frameCache.values()) {
+			this.#destroyFrame(
+				frame,
+				options,
+			);
+		}
+		this.#frameCache.clear();
+	}
+
+	#destroyFrame(
+		frame: R,
+		options: PIXI.DestroyOptions,
+	) {
+		if (
+			frame instanceof
+			PIXI.Container
+		) {
+			frame.destroy(
+				options,
+			);
+		} else {
+			frame.destroy(
+				false,
+			);
+		}
 	}
 }
