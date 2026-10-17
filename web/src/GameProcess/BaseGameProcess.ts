@@ -120,7 +120,13 @@ export class BaseGameProcess
 
 	async startNextWave(
 		state: WaveState,
+		playerControls?: PlayerControl[],
 	) {
+		if (
+			playerControls
+		)
+			this.#playerControls =
+				playerControls;
 		if (
 			!waveState.value
 		) {

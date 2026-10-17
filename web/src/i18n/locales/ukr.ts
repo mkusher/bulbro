@@ -456,6 +456,8 @@ export default {
 
 	"setup.single.title":
 		"Почати гру одного гравця",
+	"start.local.resume":
+		"Продовжити збережений забіг — хвиля {wave}",
 	"setup.single.start":
 		"Старт",
 	"setup.coop.title":

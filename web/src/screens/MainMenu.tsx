@@ -20,6 +20,7 @@ import {
 	TabsTrigger,
 } from "@/ui/shadcn/tabs";
 import { OnlineGameTab } from "./start/OnlineGameTab";
+import { SavedRunMenuItem } from "./start/SavedRunMenuItem";
 
 export type Props =
 	{
@@ -68,6 +69,11 @@ export const MainMenuComponent =
 										</CardDescription>
 									</CardHeader>
 									<CardContent className="grid gap-6">
+										<SavedRunMenuItem
+											toGame={toScreen(
+												"game",
+											)}
+										/>
 										<div className="grid gap-3">
 											<Button
 												onClick={toScreen(

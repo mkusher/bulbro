@@ -25,6 +25,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/ui/shadcn/card";
+import { SavedRunMenuItem } from "./start/SavedRunMenuItem";
 
 export function TgAppStartScreen() {
 	const location =
@@ -127,6 +128,11 @@ export function TgAppStartScreen() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="grid gap-6">
+								<SavedRunMenuItem
+									toGame={
+										router.toGame
+									}
+								/>
 								<div className="grid gap-3">
 									<Button
 										onClick={toScreen(
