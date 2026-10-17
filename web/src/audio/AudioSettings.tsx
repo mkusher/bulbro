@@ -15,7 +15,7 @@ import { t } from "@/i18n";
 import { Button } from "@/ui/shadcn/button";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
-import { Slider } from "@/ui/shadcn/slider";
+import { LabeledSlider } from "@/ui/shadcn/slider";
 import {
 	updateAudioEnabled,
 	updateBgmEnabled,
@@ -148,43 +148,31 @@ export function AudioSettings() {
 			</div>
 
 			{/* Effects Volume */}
-			<div className="grid gap-2">
-				<div className="flex items-center justify-between">
-					<Label>
-						{t(
-							"audio.effectsVolume",
-						)}
-					</Label>
-					<span className="text-sm text-muted-foreground">
-						{Math.round(
-							effectsVolume.value *
-								100,
-						)}
-						%
-					</span>
-				</div>
-				<Slider
-					value={[
-						effectsVolume.value *
-							100,
-					]}
-					onValueChange={
-						handleEffectsVolumeChange
-					}
-					min={
-						0
-					}
-					max={
-						100
-					}
-					step={
-						1
-					}
-					disabled={
-						!audioEnabled.value
-					}
-				/>
-			</div>
+			<LabeledSlider
+				label={t(
+					"audio.effectsVolume",
+				)}
+				displayValue={`${Math.round(effectsVolume.value * 100)}%`}
+				value={[
+					effectsVolume.value *
+						100,
+				]}
+				onValueChange={
+					handleEffectsVolumeChange
+				}
+				min={
+					0
+				}
+				max={
+					100
+				}
+				step={
+					1
+				}
+				disabled={
+					!audioEnabled.value
+				}
+			/>
 
 			{/* Test Effect Sounds */}
 			<div className="grid gap-2">
@@ -245,44 +233,32 @@ export function AudioSettings() {
 			</div>
 
 			{/* BGM Volume */}
-			<div className="grid gap-2">
-				<div className="flex items-center justify-between">
-					<Label>
-						{t(
-							"audio.bgmVolume",
-						)}
-					</Label>
-					<span className="text-sm text-muted-foreground">
-						{Math.round(
-							bgmVolume.value *
-								100,
-						)}
-						%
-					</span>
-				</div>
-				<Slider
-					value={[
-						bgmVolume.value *
-							100,
-					]}
-					onValueChange={
-						handleBgmVolumeChange
-					}
-					min={
-						0
-					}
-					max={
-						100
-					}
-					step={
-						1
-					}
-					disabled={
-						!audioEnabled.value ||
-						!bgmEnabled.value
-					}
-				/>
-			</div>
+			<LabeledSlider
+				label={t(
+					"audio.bgmVolume",
+				)}
+				displayValue={`${Math.round(bgmVolume.value * 100)}%`}
+				value={[
+					bgmVolume.value *
+						100,
+				]}
+				onValueChange={
+					handleBgmVolumeChange
+				}
+				min={
+					0
+				}
+				max={
+					100
+				}
+				step={
+					1
+				}
+				disabled={
+					!audioEnabled.value ||
+					!bgmEnabled.value
+				}
+			/>
 
 			{/* Test BGM */}
 			<div className="grid gap-2">
