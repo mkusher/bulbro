@@ -6,6 +6,7 @@ import {
 	MINE_EXPLOSION_RADIUS,
 	MINE_TRIGGER_RADIUS,
 	mineIntervals,
+	STRUCTURE_SPAWN_DURATION,
 	type Structure,
 	type StructureKind,
 	TURRET_EXPLOSION_RADIUS,
@@ -286,7 +287,39 @@ export class StructureEventGenerator
 		const fruit =
 			(
 				position: Position,
-			) =>
+			) => {
+				const angle =
+					this.random() *
+					Math.PI *
+					2;
+				const radius =
+					55 +
+					this.random() *
+						20;
+				// Reflect outward offsets back into the arena so edge gardens keep their clearance.
+				const offset =
+					(
+						value: number,
+						delta: number,
+						max: number,
+					) => {
+						const candidate =
+							value +
+							delta;
+						return Math.max(
+							0,
+							Math.min(
+								max,
+								candidate <
+									0 ||
+									candidate >
+										max
+									? value -
+											delta
+									: candidate,
+							),
+						);
+					};
 				events.push(
 					{
 						type: "consumableSpawned",
@@ -296,35 +329,32 @@ export class StructureEventGenerator
 								id: uuid(),
 								position:
 									{
-										x: Math.max(
-											0,
-											Math.min(
-												state
-													.mapSize
-													.width,
-												position.x +
-													(this.random() -
-														0.5) *
-														40,
-											),
+										x: offset(
+											position.x,
+											Math.cos(
+												angle,
+											) *
+												radius,
+											state
+												.mapSize
+												.width,
 										),
-										y: Math.max(
-											0,
-											Math.min(
-												state
-													.mapSize
-													.height,
-												position.y +
-													(this.random() -
-														0.5) *
-														40,
-											),
+										y: offset(
+											position.y,
+											Math.sin(
+												angle,
+											) *
+												radius,
+											state
+												.mapSize
+												.height,
 										),
 									},
 								hp: CONSUMABLE_HEAL_AMOUNT,
 							},
 					},
 				);
+			};
 		const mine =
 			(
 				ownerId: string,
@@ -334,6 +364,8 @@ export class StructureEventGenerator
 						type: "structure",
 						id: uuid(),
 						kind: "landmine",
+						spawnStartedAt:
+							now,
 						ownerId,
 						position:
 							randomPosition(
@@ -364,6 +396,11 @@ export class StructureEventGenerator
 						type: "structure",
 						id,
 						kind,
+						spawnStartedAt:
+							kind in
+							turretParameters
+								? now
+								: undefined,
 						ownerId:
 							owner.id,
 						position:
@@ -485,6 +522,14 @@ export class StructureEventGenerator
 				);
 			if (
 				!owner?.isAlive()
+			)
+				continue;
+			if (
+				s.spawnStartedAt !==
+					undefined &&
+				now -
+					s.spawnStartedAt <
+					STRUCTURE_SPAWN_DURATION
 			)
 				continue;
 			if (

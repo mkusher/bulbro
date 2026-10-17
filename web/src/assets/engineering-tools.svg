@@ -3,5 +3,13 @@
 <g stroke="#25332e" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
 <g transform="translate(10 12)"><path d="M38 31Q8 29 12 52Q16 76 49 67L100 82L202 111Q192 75 137 65L100 58Z" fill="#c9584b"/><path d="M39 107Q6 111 12 87Q18 67 49 77L98 61L203 29Q193 65 138 77L99 84Z" fill="#a9b5a9"/><path d="M35 41Q23 39 23 50Q25 61 40 55M35 98Q23 101 23 89Q25 80 40 87" fill="none" stroke="#653b35"/><circle cx="100" cy="71" r="10" fill="#e0cd83"/></g>
 <g transform="translate(250 12)"><path d="M91 61H194L218 69L194 80H91Z" fill="#c0c9bc"/><path d="M16 49Q4 70 16 92H87L105 81V60L87 49Z" fill="#e6b34e"/><path d="M26 59V83M46 59V83M67 59V83" fill="none" stroke="#a66d33"/></g>
-<g transform="translate(488 12)"><path d="M14 70Q10 49 33 39L52 47L37 63L48 78L69 68L67 49L83 34Q104 55 91 79L183 69L199 48L219 50L211 70L220 87L203 102L180 87L87 97Q50 125 24 100Z" fill="#9faaa2"/><path d="M97 83L168 78" stroke="#dce3d6"/><path d="M24 80L32 91" stroke="#dce3d6"/></g>
+<g transform="translate(720 0) scale(-1 1)">
+<path d="M81 65L204 52Q227 52 227 72Q227 92 204 92L79 89L58 105L28 111L11 98L43 88L45 70L30 57L7 69L15 44L41 32L68 40Z" fill="#59645f"/>
+<path d="M15 44L41 32L68 40L81 65L61 81L45 70L30 57L7 69Z" fill="#b5beb6"/>
+<path d="M58 82L79 89L58 105L28 111L11 98L43 88L45 78Z" fill="#a0aaa2"/>
+<path d="M66 62L76 75L65 85L55 72Z" fill="#35423b" stroke-width="4"/>
+<path d="M62 65L70 73M59 70L67 78M57 75L63 81" stroke="#c4cdc3" stroke-width="2"/>
+<path d="M90 76L185 70" stroke="#829087" stroke-width="5"/>
+<circle cx="207" cy="72" r="9" fill="none" stroke="#25332e" stroke-width="5"/>
+</g>
 </g></svg>

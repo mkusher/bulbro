@@ -256,6 +256,7 @@ export abstract class BaseScene<
 			}
 			sprite.update(
 				s,
+				now,
 			);
 		}
 		this.#updatePlayers(
