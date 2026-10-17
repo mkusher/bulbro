@@ -13,8 +13,8 @@ import { LocationProvider } from "preact-iso";
 import { logger } from "@/logger";
 import {
 	currentLobby,
-	readyPlayers,
 	processLobbySocketMessage,
+	readyPlayers,
 } from "@/network/currentLobby";
 import {
 	currentUser,

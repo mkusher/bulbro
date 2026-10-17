@@ -8,10 +8,10 @@ import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
-import { logger } from "@/logger";
 import { t } from "@/i18n";
 import { bulbroName } from "@/i18n/game";
 import { findItemById } from "@/items/Items";
+import { logger } from "@/logger";
 import {
 	currentLobby,
 	currentNetworkGame,

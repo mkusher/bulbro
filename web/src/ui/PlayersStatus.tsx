@@ -1,20 +1,20 @@
-import type { BulbroState } from "@/bulbro/BulbroState";
 import type { Stats } from "@/bulbro/BulbroCharacter";
+import type { BulbroState } from "@/bulbro/BulbroState";
 import {
 	BulbroStateStats,
 	formatStatName,
 	formatStatValue,
 } from "@/bulbro/BulbroStats";
+import { t } from "@/i18n";
 import { findItemById } from "@/items/Items";
 import { ItemSlots } from "@/shop/ItemSlots";
 import { WeaponSlots } from "@/shop/WeaponSlots";
-import { ownedWeaponFromState } from "@/weapon/WeaponTiers";
-import { t } from "@/i18n";
 import {
 	Card,
 	CardContent,
 	CardHeader,
 } from "@/ui/shadcn/card";
+import { ownedWeaponFromState } from "@/weapon/WeaponTiers";
 
 /**
  * Connection and readiness of a single online game participant.
