@@ -28,7 +28,7 @@ const defaultSettings: UserSettings =
 				enabled: true,
 				bgmEnabled: true,
 				effectsVolume: 0.75,
-				bgmVolume: 0.5,
+				bgmVolume: 0.25,
 			},
 	};
 
