@@ -26,6 +26,9 @@ class AudioEngine {
 	#buffers: AudioBufferMap =
 		new Map();
 	#isUnlocked = false;
+	#needsRecovery = false;
+	#recoveryPromise: Promise<void> | null =
+		null;
 
 	// Gain nodes for volume control
 	#effectsGain: GainNode | null =
@@ -106,6 +109,16 @@ class AudioEngine {
 		}
 		document.addEventListener(
 			"visibilitychange",
+			this
+				.#resumeWhenVisible,
+		);
+		window.addEventListener(
+			"pageshow",
+			this
+				.#resumeWhenVisible,
+		);
+		window.addEventListener(
+			"focus",
 			this
 				.#resumeWhenVisible,
 		);
@@ -225,6 +238,14 @@ class AudioEngine {
 		(): void => {
 			if (
 				document.visibilityState ===
+				"hidden"
+			) {
+				this.#needsRecovery = true;
+				this.#isUnlocked = false;
+				return;
+			}
+			if (
+				document.visibilityState ===
 				"visible"
 			)
 				this.#resumeFromInteraction();
@@ -244,19 +265,76 @@ class AudioEngine {
 			);
 		};
 
-	/** Resume suspended audio, including Safari’s interrupted state. */
+	/** Recover audio after screen lock, including Safari's stalled running state. */
 	async resume(): Promise<void> {
 		const context =
 			this
 				.#context;
 		if (
-			context &&
+			!context ||
+			context.state ===
+				"closed" ||
+			document.visibilityState ===
+				"hidden"
+		)
+			return;
+
+		if (
+			this
+				.#recoveryPromise
+		) {
+			// A foreground recovery may still be pending when a gesture arrives.
+			// Keep resume inside that gesture so Safari receives user activation.
+			await context.resume();
+			return this
+				.#recoveryPromise;
+		}
+
+		if (
+			this
+				.#needsRecovery ||
+			(context.state as string) ===
+				"interrupted"
+		) {
+			// resume() alone can leave Safari silent after locking the screen,
+			// even when the context reports running. Keep the graph and BGM intact.
+			this.#needsRecovery = true;
+			this.#recoveryPromise =
+				this.#recoverContext(
+					context,
+				);
+			try {
+				await this
+					.#recoveryPromise;
+			} finally {
+				this.#recoveryPromise =
+					null;
+			}
+		} else if (
 			context.state !==
-				"running" &&
-			context.state !==
-				"closed"
+			"running"
 		) {
 			await context.resume();
+		}
+	}
+
+	async #recoverContext(
+		context: AudioContext,
+	): Promise<void> {
+		await context.suspend();
+		if (
+			document.visibilityState ===
+			"hidden"
+		)
+			return;
+		await context.resume();
+		if (
+			document.visibilityState ===
+				"visible" &&
+			context.state ===
+				"running"
+		) {
+			this.#needsRecovery = false;
 		}
 	}
 
