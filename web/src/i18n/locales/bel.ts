@@ -456,6 +456,8 @@ export default {
 
 	"setup.single.title":
 		"Пачаць адзіночную гульню",
+	"start.local.resume":
+		"Працягнуць захаваны забег — хваля {wave}",
 	"setup.single.start":
 		"Пачаць",
 	"setup.coop.title":

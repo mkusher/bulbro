@@ -1,5 +1,6 @@
 import {
 	currentGameProcess,
+	disableSinglePlayerSaving,
 	isLoading,
 	markAsLoading,
 	markAsRunningWave,
@@ -27,6 +28,7 @@ export async function startNetworkGameAsHost(
 	selectedDifficulty: Difficulty,
 	onStarted?: () => void,
 ) {
+	disableSinglePlayerSaving();
 	const players =
 		orderPlayersLocalFirst(
 			readyPlayers.value,
@@ -151,6 +153,7 @@ export async function startNetworkGameAsGuest(
 	initialState: WaveState,
 	toGame: () => void,
 ) {
+	disableSinglePlayerSaving();
 	const game =
 		startGameFromLobby();
 	if (

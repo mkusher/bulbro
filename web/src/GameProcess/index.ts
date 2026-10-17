@@ -80,6 +80,7 @@ export interface GameProcess {
 	): WavePromises;
 	startNextWave(
 		state: WaveState,
+		playerControls?: PlayerControl[],
 	): Promise<WavePromises>;
 	readonly gameCanvas:
 		| HTMLCanvasElement

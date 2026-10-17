@@ -454,6 +454,8 @@ export default {
 
 	"setup.single.title":
 		"Start single player run",
+	"start.local.resume":
+		"Continue saved run — wave {wave}",
 	"setup.single.start":
 		"Start",
 	"setup.coop.title":

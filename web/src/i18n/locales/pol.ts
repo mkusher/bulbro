@@ -456,6 +456,8 @@ export default {
 
 	"setup.single.title":
 		"Rozpocznij grę jednoosobową",
+	"start.local.resume":
+		"Kontynuuj zapisany bieg — fala {wave}",
 	"setup.single.start":
 		"Start",
 	"setup.coop.title":
