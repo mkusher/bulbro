@@ -3,7 +3,10 @@ import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
-import type { EnemyState } from "./EnemyState";
+import {
+	type EnemyState,
+	RAGE_STARTING_DURATION,
+} from "./EnemyState";
 
 const CYCLE_LENGTH = 20;
 const MOVING_ANIMATION_DELAY = 100;
@@ -58,7 +61,7 @@ export type EnemyAnimationState =
 			| "rage";
 		/** Convolution hit filter intensity (changes per frame) */
 		hitFactor: number;
-		/** Whether to show rage color overlay (alternates per frame) */
+		/** Whether to show the red overlay (blinks faster during rage windup) */
 		showRageOverlay: boolean;
 	};
 
@@ -198,7 +201,12 @@ export class EnemySprites {
 			};
 		}
 
+		const startingRage =
+			enemy.isStartingRaging(
+				now,
+			);
 		if (
+			startingRage ||
 			enemy.isRaging(
 				now,
 			)
@@ -219,6 +227,25 @@ export class EnemySprites {
 					frameIndex,
 					anim,
 				);
+			// Use time since rage began so the warning restarts for every charge
+			// and speeds up independently of the sprite's swing animation.
+			const progress =
+				Math.max(
+					0,
+					Math.min(
+						1,
+						(now -
+							(enemy.ragingStartedAt ??
+								now)) /
+							RAGE_STARTING_DURATION,
+					),
+				);
+			const blinkPhase =
+				2 *
+				(2 *
+					progress +
+					progress *
+						progress);
 			return {
 				kind: "raging",
 				scaleX,
@@ -229,9 +256,12 @@ export class EnemySprites {
 					"rage",
 				hitFactor: 0,
 				showRageOverlay:
-					frameIndex %
+					!startingRage ||
+					Math.floor(
+						blinkPhase,
+					) %
 						2 ===
-					0,
+						0,
 			};
 		}
 
