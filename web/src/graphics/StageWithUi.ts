@@ -42,6 +42,7 @@ export class StageWithUi {
 	> =
 		new Map();
 	#uiLayer: PIXI.RenderLayer;
+	#baggingLayer: PIXI.RenderLayer;
 	#camera: Camera;
 	#logger: Logger;
 	#hitIndicators: HitIndicators;
@@ -81,6 +82,14 @@ export class StageWithUi {
 				camera,
 				scale,
 			);
+
+		// End-wave materials render above the field and below the stats and other UI.
+		this.#baggingLayer =
+			new PIXI.RenderLayer();
+		this.#camera.stage.addChild(
+			this
+				.#baggingLayer,
+		);
 
 		// Create UI layer and sprites
 		this.#uiLayer =
@@ -292,7 +301,7 @@ export class StageWithUi {
 			new BaggingAnimation(
 				ui,
 				this
-					.#uiLayer,
+					.#baggingLayer,
 				await loadMaterialTexture(),
 				from,
 				() =>

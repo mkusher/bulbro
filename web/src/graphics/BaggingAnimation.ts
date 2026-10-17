@@ -1,10 +1,15 @@
 import * as PIXI from "pixi.js";
-import type { Position } from "@/geometry";
+import {
+	distance,
+	rectFromCenter,
+	rectsIntersect,
+	type Position,
+} from "@/geometry";
 
 /** Pause after the wave ends before materials start flying */
 const startDelayMs = 200;
-/** Flight time of a single material */
-const flightMs = 650;
+/** Fast default speed for end-of-wave flights, in screen pixels per second. */
+const flightSpeed = 1800;
 /** Delay between two materials taking off */
 const maxStaggerMs = 40;
 /** All materials take off within this time, however many there are */
@@ -20,25 +25,9 @@ type Flight =
 		/** Control point of the quadratic curve to the bag */
 		via: Position;
 		startsAt: number;
+		duration: number;
 		arrived: boolean;
 	};
-
-const easeInOutCubic =
-	(
-		t: number,
-	) =>
-		t <
-		0.5
-			? 4 *
-				t *
-				t *
-				t
-			: 1 -
-				(-2 *
-					t +
-					2) **
-					3 /
-					2;
 
 /** Point on a quadratic Bézier curve */
 export function quadraticPoint(
@@ -198,12 +187,8 @@ export class BaggingAnimation {
 						0
 							? 1
 							: -1;
-					return {
-						sprite,
-						value:
-							position.value,
-						from: position,
-						via: {
+					const via =
+						{
 							x:
 								midX +
 								side *
@@ -218,7 +203,27 @@ export class BaggingAnimation {
 									midY,
 								) -
 								60,
-						},
+						};
+					return {
+						duration:
+							Math.max(
+								1,
+								((distance(
+									position,
+									via,
+								) +
+									distance(
+										via,
+										to,
+									)) /
+									flightSpeed) *
+									1000,
+							),
+						sprite,
+						value:
+							position.value,
+						from: position,
+						via,
 						startsAt:
 							takeOffTime(
 								i,
@@ -306,24 +311,11 @@ export class BaggingAnimation {
 						(this
 							.#elapsed -
 							flight.startsAt) /
-							flightMs,
+							flight.duration,
 					),
 				);
-			if (
-				t >=
-				1
-			) {
-				flight.arrived = true;
-				flight.sprite.destroy();
-				arrivedNow++;
-				arrivedValueNow +=
-					flight.value;
-				continue;
-			}
 			const eased =
-				easeInOutCubic(
-					t,
-				);
+				t;
 			const position =
 				quadraticPoint(
 					flight.from,
@@ -358,6 +350,46 @@ export class BaggingAnimation {
 					(1 +
 						pop),
 			);
+			if (
+				this
+					.#elapsed >=
+					flight.startsAt &&
+				(t >=
+					1 ||
+					rectsIntersect(
+						rectFromCenter(
+							position,
+							{
+								width:
+									flight
+										.sprite
+										.width,
+								height:
+									flight
+										.sprite
+										.height,
+							},
+						),
+						rectFromCenter(
+							to,
+							{
+								width:
+									this
+										.#toSize,
+								height:
+									this
+										.#toSize,
+							},
+						),
+					))
+			) {
+				flight.arrived = true;
+				flight.sprite.destroy();
+				arrivedNow++;
+				arrivedValueNow +=
+					flight.value;
+				continue;
+			}
 			flight.sprite.rotation =
 				eased *
 				Math.PI *

@@ -8,6 +8,7 @@ import {
 	nowTime,
 } from "@/time";
 import {
+	BULBRO_BODY_SIZE,
 	BULBRO_SIZE,
 	BulbroState,
 	spawnBulbro,
@@ -413,7 +414,7 @@ export function handleMaterialCollected(
 	};
 }
 
-const materialPickupSpeed = 600;
+const consumablePickupSpeed = 600;
 /** Consumables are only attracted when a player (almost) touches them */
 export const CONSUMABLE_PICKUP_RANGE = 50;
 /** Pickups closer than this to the player center are collected */
@@ -451,6 +452,7 @@ function stepPickup(
 	) => number,
 	mapSize: Size,
 	deltaTime: DeltaTime,
+	material = false,
 ):
 	| PickupStep
 	| undefined {
@@ -480,9 +482,30 @@ function stepPickup(
 	)
 		return undefined;
 
+	const touchesPlayer =
+		(
+			position: Position,
+		) =>
+			material
+				? rectsIntersect(
+						rectFromCenter(
+							position,
+							MATERIAL_SHAPE,
+						),
+						rectFromCenter(
+							player.position,
+							BULBRO_BODY_SIZE,
+						),
+					)
+				: distance(
+						position,
+						player.position,
+					) <=
+					PICKUP_COLLECTION_THRESHOLD;
 	if (
-		distToPlayer <=
-		PICKUP_COLLECTION_THRESHOLD
+		touchesPlayer(
+			pickup.position,
+		)
 	) {
 		return {
 			type: "collected",
@@ -508,7 +531,10 @@ function stepPickup(
 			player.position,
 		);
 	const maxMovementDistance =
-		(materialPickupSpeed *
+		((material
+			? player.speed *
+				2
+			: consumablePickupSpeed) *
 			deltaTime) /
 		1000;
 
@@ -542,15 +568,11 @@ function stepPickup(
 	)
 		return undefined;
 
-	// Check if pickup is very close to player center (within collection threshold)
-	const distanceAfterMove =
-		distance(
-			newPosition,
-			player.position,
-		);
+	// Collect as soon as the pickup touches the player.
 	if (
-		distanceAfterMove <=
-		PICKUP_COLLECTION_THRESHOLD
+		touchesPlayer(
+			newPosition,
+		)
 	) {
 		return {
 			type: "collected",
@@ -616,6 +638,7 @@ export function generateMaterialMovementEvents(
 				materialPickupRange,
 				state.mapSize,
 				deltaTime,
+				true,
 			);
 		if (
 			step?.type ===

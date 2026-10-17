@@ -123,7 +123,7 @@ it("counts each pickup's value as it arrives and finishes by sprite count", () =
 		);
 		expect(
 			animation.update(
-				850,
+				342,
 			),
 		).toBe(
 			5,
@@ -173,6 +173,94 @@ it("counts each pickup's value as it arrives and finishes by sprite count", () =
 			animation.update(
 				100,
 			),
+		).toBe(
+			0,
+		);
+	} finally {
+		animation.destroy();
+		layer.destroy();
+		parent.destroy();
+	}
+});
+
+it("removes a material as soon as it touches the bag before reaching its center", () => {
+	const parent =
+		new PIXI.Container();
+	const layer =
+		new PIXI.RenderLayer();
+	const animation =
+		new BaggingAnimation(
+			parent,
+			layer,
+			PIXI
+				.Texture
+				.WHITE,
+			[
+				{
+					x: 0,
+					y: 0,
+					value: 1,
+				},
+			],
+			() => ({
+				x: 100,
+				y: 100,
+			}),
+			16,
+			26,
+		);
+	try {
+		animation.update(
+			200,
+		);
+		const container =
+			parent
+				.children[0] as PIXI.Container;
+		const sprite =
+			container
+				.children[0] as PIXI.Sprite;
+		let previousPosition =
+			{
+				x: sprite.x,
+				y: sprite.y,
+			};
+		while (
+			animation.arrived ===
+			0
+		) {
+			previousPosition =
+				{
+					x: sprite.x,
+					y: sprite.y,
+				};
+			animation.update(
+				1,
+			);
+		}
+		expect(
+			previousPosition.x,
+		).toBeLessThan(
+			100,
+		);
+		expect(
+			previousPosition.y,
+		).toBeLessThan(
+			100,
+		);
+		expect(
+			Math.hypot(
+				previousPosition.x -
+					100,
+				previousPosition.y -
+					100,
+			),
+		).toBeGreaterThan(
+			10,
+		);
+		expect(
+			container
+				.children
+				.length,
 		).toBe(
 			0,
 		);
