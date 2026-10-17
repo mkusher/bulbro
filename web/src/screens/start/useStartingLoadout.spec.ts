@@ -8,8 +8,15 @@ import {
 	render,
 } from "preact";
 import { act } from "preact/test-utils";
-import { wellRoundedBulbro } from "@/characters-definitions";
-import { smg } from "@/weapons-definitions";
+import {
+	grandpa,
+	wellRoundedBulbro,
+} from "@/characters-definitions";
+import {
+	ak47,
+	bazooka,
+	smg,
+} from "@/weapons-definitions";
 import { useStartingLoadout } from "./useStartingLoadout";
 
 const container =
@@ -215,5 +222,91 @@ it("counts built-in weapons and rejects impossible starting limits", () => {
 		loadout.isValid,
 	).toBe(
 		false,
+	);
+});
+
+it("rejects shop-only selections and clears a Grandpa AK-47 when switching characters", () => {
+	let loadout!: ReturnType<
+		typeof useStartingLoadout
+	>;
+	function Setup() {
+		loadout =
+			useStartingLoadout(
+				wellRoundedBulbro,
+				ak47,
+			);
+		return null;
+	}
+	act(
+		() =>
+			render(
+				h(
+					Setup,
+					{},
+				),
+				container,
+			),
+	);
+	expect(
+		loadout.selections,
+	).toEqual(
+		[
+			null,
+		],
+	);
+	act(
+		() =>
+			loadout.selectWeapon(
+				0,
+				ak47,
+			),
+	);
+	expect(
+		loadout.isValid,
+	).toBe(
+		false,
+	);
+	act(
+		() =>
+			loadout.selectBulbro(
+				grandpa,
+			),
+	);
+	expect(
+		loadout.selections,
+	).toEqual(
+		[
+			ak47,
+		],
+	);
+	expect(
+		loadout.isValid,
+	).toBe(
+		true,
+	);
+	act(
+		() =>
+			loadout.selectWeapon(
+				0,
+				bazooka,
+			),
+	);
+	expect(
+		loadout.isValid,
+	).toBe(
+		false,
+	);
+	act(
+		() =>
+			loadout.selectBulbro(
+				wellRoundedBulbro,
+			),
+	);
+	expect(
+		loadout.selections,
+	).toEqual(
+		[
+			null,
+		],
 	);
 });

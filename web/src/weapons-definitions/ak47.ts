@@ -15,9 +15,9 @@ export const ak47: Weapon =
 		shotSpeed: 1800,
 		statsBonus:
 			{
-				damage: 2,
+				damage: 5,
 				range: 500,
-				cooldown: 0.3,
+				cooldown: 0.22,
 				knockback: 5,
 				critChance: 5,
 				scaling:
@@ -25,7 +25,7 @@ export const ak47: Weapon =
 						rangedDamage: 0.8,
 					},
 			},
-		basePrice: 20,
+		basePrice: 65,
 		attack:
 			{
 				type: "shot",

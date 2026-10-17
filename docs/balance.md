@@ -12,6 +12,10 @@ on top of them (weapons, enemies, economy, characters) have drifted far from
 Brotato. Most balance problems come from that mix: Brotato's scaling rules
 applied to non-Brotato base values.
 
+Bulbro values below reflect the current source, including the AK-47 and
+Bazooka rebalance. Character verdicts and balance recommendations are
+qualitative; the new weapon values have not been validated through playtesting.
+
 Wave estimates below are calculated from the spawner configs for a solo game
 at difficulty 0. They are not measured in play.
 
@@ -35,7 +39,7 @@ at difficulty 0. They are not measured in play.
 
 ## Problems
 
-### 1. Materials stop mattering after about wave 2
+### 1. Material values are ignored; premium weapons create larger spending targets
 
 - **Every pickup is worth 1.** `materialCollected` always calls
   `gainMaterials(1)` in [BulbroState.ts](../web/src/bulbro/BulbroState.ts).
@@ -43,11 +47,13 @@ at difficulty 0. They are not measured in play.
   is ignored. So the Wild Boar's 5 (+3/wave), the Tree's 3, the Archer's
   +1/wave and similar values have no effect.
 - **Weapon prices follow weapon power.** Weapon base prices range from 8
-  (Laser Gun) to 70 (Machine Gun), ordered by the DPS table below: weak or
-  support weapons cost 8–15, mid-tier weapons 18–28, the area weapons
-  28–35, and the two outliers 60–70. At wave 1 that is 9–78 materials,
+  (Laser Gun) to 80 (Bazooka): budget weapons cost 8–18, Brick and Grenade
+  cost 25–28, and Sword, AK-47, Machine Gun and Bazooka cost 60–80. At wave 1
+  that is 9–89 materials,
   against tier-I items at 17–34, so wave 1's roughly 77 materials buy two
-  or three offers instead of the whole shop, or a Machine Gun alone. In Brotato, tier-I weapons cost around 10–20
+  or three budget offers. A Machine Gun costs 78 and a Bazooka 89, so
+  neither fits that income alone without starting materials or harvesting.
+  In Brotato, tier-I weapons cost around 10–20
   and the Sword costs 51.
 - **Items share the shop with weapons.** The shop sells 77 of the 83 Brotato items
   that only change stats ([item values and shop rules](../web/docs/items.md)): each slot
@@ -71,9 +77,9 @@ at difficulty 0. They are not measured in play.
   of a bonus. They are not offered until structures exist. Ritual and Wolf
   Helmet stay: their Engineering penalty is free for now, which makes them
   slightly better than in Brotato.
-- **Materials still drop as 1.** Every pickup is worth 1 regardless of the
-  enemy, so later waves give fewer materials than Brotato and higher prices
-  bite harder after wave 5.
+- **Co-op shares pickups.** Every collected material grants 1 material and
+  1 XP to every player. Harvesting adds materials and XP separately at the
+  end of the wave. The estimates below exclude harvesting and trees.
 
 Estimated materials (and XP) per wave, solo, difficulty 0:
 
@@ -89,40 +95,51 @@ uses low base damage with fast cooldowns, but keeps the same "add flat damage
 per hit" scaling. A point of Ranged or Melee Damage is therefore worth much
 more on fast weapons.
 
-Damage per second (DPS), before crits. The "+5" column adds 5 points of the
-scaling stat:
+Damage per second (DPS), before crits and attack-speed bonuses. Bulbro values
+include per-hit damage rounding from `calculateAttackDamage`. The "+5" value
+adds 5 Melee Damage for melee weapons or 5 Ranged Damage for projectiles;
+Elemental Damage stays at zero. Explosive DPS is per target, so total damage
+rises with the number of enemies hit:
 
 | Weapon | Bulbro DPS (base → +5) | Brotato tier I DPS (base → +5) | Bulbro price |
 |---|---|---|---|
-| Machine Gun | **21 → 43** (3 dmg / 0.14s) | — | 70 |
-| Sword | **28** (25 dmg / 0.9s, 10% crit) | 23 (30 / 1.28s) | 60 (Brotato: 51) |
-| Brick | 22 (30 / 1.39s) | 22 | 25 |
-| AK-47 | 6.7 → 20 | — | 20 |
-| Bazooka | 14 → 17, area damage | — | 35 |
-| Grenade | 12, area damage | — | 28 |
-| Fist | 10 | 10 | 12 |
-| Double Barrel Shotgun | 8.8 → 12 (single shot) | 4 pellets, pierce 2 | 18 |
-| Knife | 5.9 (6 dmg) | 8.9 (9 dmg) | 12 |
-| Flare Gun | 5.7 | — | 15 |
-| SMG | 5 → 17.5 (1 / 0.2s) | 17.6 → 32 (3 / 0.17s) | 15 |
+| Machine Gun | **21.4 → 42.9** (3 dmg / 0.14s) | — | 70 |
+| Sword | **27.8 → 33.3** (25 dmg / 0.9s, 10% crit) | 23 (30 / 1.28s) | 60 (Brotato: 51) |
+| Brick | 21.6 → 25.2 (30 dmg / 1.39s) | 22 | 25 |
+| AK-47 | 22.7 → 40.9 (5 dmg / 0.22s) | — | 65 |
+| Bazooka | 21.4 → 24.3, area damage | — | 80 |
+| Grenade | 12.0 → 14.5, area damage | — | 28 |
+| Fist | 10.3 → 16.7 | 10 | 12 |
+| Double Barrel Shotgun | 8.8 → 11.7 (single shot) | 4 pellets, pierce 2 | 18 |
+| Knife | 5.9 → 9.9 (6 dmg) | 8.9 (9 dmg) | 12 |
+| Flare Gun | 5.7 → 7.9 | — | 15 |
+| SMG | 5.0 → 20.0 (1 / 0.2s) | 17.6 → 32 (3 / 0.17s) | 15 |
 | Pistol | 4 → 14 (2 / 0.5s) | 10 → 14 (12 / 1.2s) | 15 |
 | Laser Gun | **2 → 4.5** (4 / 1.98s) | 20 → 30 (40 dmg, 400% scaling) | 8 |
-| Hand | ~1 | ~1 (support weapon, +3 harvesting) | 10 |
+| Hand | 1.0 → 4.0 | ~1 (support weapon, +3 harvesting) | 10 |
 
-- **Sword** and **Machine Gun** clearly beat everything else. Their prices
+- **Sword** and **Machine Gun** still beat most budget weapons. Their prices
   (60 and 70, 67 and 78 at wave 1) are set above their Brotato tier to
-  offset that: on wave 1 a Machine Gun takes the whole income, and the Sword
-  costs as much as two tier-I items. Their damage is still out of line.
-- **Laser Gun, SMG, Hand and Flare Gun** are not worth buying. The Laser Gun
-  is the cheapest weapon (8, 9 at wave 1) to make it a stopgap buy, but
-  price cannot fix 2 DPS. Even at tier IV it reaches only 9.4 DPS, less
-  than a tier I Fist.
+  offset that: a wave-1 Machine Gun costs slightly more than the estimated
+  77 pickup income, and the Sword costs as much as two tier-I items.
+- **Premium weapons:** AK-47 now has 5 damage and a 0.22s cooldown at a
+  base price of 65 (72 at wave 1). Only Grandpa can select it at setup.
+  Bazooka now deals 60 area damage at a base price of 80 (89 at wave 1),
+  and is only available through shops after starting a run. Both retain
+  normal tier I–IV progression and the existing character shop restrictions.
+- **Budget weapons have uneven roles.** SMG has only 5 base DPS but rises
+  to 20 with +5 Ranged Damage. Hand offers 30 knockback, but does not grant
+  the +3 Harvesting of Brotato’s Hand. Flare Gun gains from both ranged and
+  elemental damage, but has no burn effect. The Laser Gun is the cheapest
+  weapon (8, 9 at wave 1), but starts at only 2 DPS. Even at tier IV it
+  reaches only 9.4 DPS, less than a tier I Fist.
 - **Tiers multiply the gap.** Each tier multiplies base damage by
   1/1.6/2.4/3.6 and cooldown by 1/0.93/0.85/0.75, so base DPS grows about
   1.7× per tier and 4.8× at tier IV (see the
   [tier table](../web/docs/weapons.md#tiers-selling-and-combining)). A tier
-  IV Sword deals 132 base DPS and a tier IV Machine Gun 100, against 18 for
-  a tier IV Pistol. Damage scaling does not grow with the tier, so stat
+  IV Sword deals 132 base DPS, AK-47 about 106, Bazooka about 103 per
+  target and Machine Gun 100, against 18 for a tier IV Pistol. Damage scaling
+  does not grow with the tier, so stat
   points (Ranged/Melee Damage) matter relatively less on high-tier weapons
   than in Brotato, where scaling often grows too. The Machine Gun's tier IV
   cooldown (0.11s) is already near the 100ms floor, so attack speed is
@@ -142,6 +159,23 @@ scaling stat:
   for the complete tradeoffs and the distinction between stat items and
   conditional effects.
 
+### Starting and shop availability
+
+Starting choices are filtered from each character’s shop pool using
+`excludedStartingWeapons` in [base.ts](../web/src/characters-definitions/base.ts)
+and [grandpa.ts](../web/src/characters-definitions/grandpa.ts). The selector,
+character preview and loadout validation use the same
+[filter](../web/src/bulbro/startingWeapons.ts).
+
+- **AK-47:** Grandpa can select it at setup; every other character is excluded.
+  It remains a shop option for all characters except Medic.
+- **Bazooka:** no character can select it at setup. It can appear in any
+  post-wave shop for characters other than Medic; there is no minimum-wave gate.
+- **Medic:** Pistol, Hand and Fist remain the complete starting and shop pool.
+- **Other weapons:** existing starting choices are unchanged, including Sword
+  and Machine Gun. Premium pricing does not imply a higher numbered tier:
+  shops still offer tier I weapons, upgraded through combining.
+
 ### 3. Enemy damage scaling is uneven, and there are no i-frames
 
 - **Most enemies never get stronger hits.** In Brotato every enemy gains
@@ -155,8 +189,8 @@ scaling stat:
   scaled by the share of max HP lost. In Bulbro a swarm can land every hit in
   the same instant.
 - **Enemy `attackSpeed: 2` does almost nothing.** It is read as attack speed
-  points by `getAttackCooldown`, so it means +2% (1.0s → 0.98s). It was
-  probably meant to be 2× speed.
+  points by `getAttackCooldown`, so it means +2% (1.0s → 0.98s). The default
+  enemy value of 1 similarly means +1%, rather than a neutral multiplier.
 
 | Enemy | Bulbro HP (+/wave) | Bulbro damage (+/wave) | Closest Brotato enemy |
 |---|---|---|---|
@@ -191,7 +225,7 @@ scaling stat:
 ### 6. Difficulty only adds enemies
 
 - **Flat extra enemies.** Difficulty only adds `+difficulty` enemies to every
-  spawn group ([spawnCluster.ts](../web/src/Spawner/spawnCluster.ts)). At
+  spawn group, on top of `baseAmount + playerCount` ([spawnCluster.ts](../web/src/Spawner/spawnCluster.ts)). At
   difficulty 5 that more than doubles early groups but adds proportionally
   less later.
 - **Brotato does more.** It raises enemy HP and damage (+12%, +26%, +40% at
@@ -209,32 +243,34 @@ scaling stat:
 | Cyborg | +10 HP, +4 ranged, +5 engineering, +10% attack speed, +25 range, +1 armor | Solid; engineering unused |
 | Vampire | +50 range, +10% life steal, +3 ranged | Fine |
 | Medic | +5 HP regen, +20 HP, +3 engineering; only Pistol, Hand, Fist | Limited weapons; engineering unused |
-| Well Rounded | +5 HP, +5% speed, +8 harvesting | Matches Brotato, but harvesting is weak while materials don't matter |
-| Grandpa | −20% speed, +50% pickup range | Weakest; bad trade |
+| Well Rounded | +5 HP, +5% speed, +8 harvesting | Harvesting gives a meaningful early spending advantage |
+| Grandpa | −20% speed, +50% pickup range; exclusive AK-47 starting choice | Stronger starting option; speed trade needs playtesting |
 
 Brotato characters always trade something away. Engineering does nothing yet,
 because there are no structures. For the same reason the Skull upgrade and
 the Pencil, Toolbox and Cog items are left out, and the shop does not offer
-items with an Engineering bonus.
+items with a positive Engineering bonus.
 
 ## Suggested priority
 
-1. **Economy:** use the material's real value on pickup. Weapon prices are
-   already raised to Brotato levels, and weapon combining is now a second
-   sink next to stat items. Consider offering tier II+ weapons in later
+1. **Economy:** use the material's real value on pickup. Weapon prices now
+   distinguish budget and premium weapons, and combining provides another
+   spending target alongside stat items. Consider offering tier II+ weapons in later
    waves (rolled like item tiers), so high tiers do not always cost eight
    tier I copies.
 2. **Weapons:** rebase them on Brotato's numbers (Pistol 12 dmg / 1.2s,
    SMG 3 / 0.17s, Laser 40 with 4× scaling). Alternatively, keep the fast feel
-   but lower each weapon's scaling in proportion to its cooldown. Nerf the
-   Machine Gun either way.
+   but lower each weapon's scaling in proportion to its cooldown. The
+   Machine Gun’s scaling and cooldown floor remain concerns; evaluate the
+   new AK-47 and Bazooka values alongside it.
 3. **Enemies:** give every enemy damage growth per wave (Brotato uses +0.6 to
    +1.2), drop Baby to +0.6, add 0.2–0.4s i-frames, and fix what enemy
    `attackSpeed` means.
 4. **Waves:** write wave configs for 13–20, end the run at wave 20 with a
    boss, and make difficulty scale enemy HP and damage by percentage.
-5. **Characters:** give King a real downside, and give Grandpa something
-   better than pickup range.
+5. **Characters:** give King a real downside, and playtest whether Grandpa’s
+   exclusive AK-47 start offsets his speed penalty. Compare the other free
+   starting options, especially Sword and Machine Gun.
 
 ## Sources
 
