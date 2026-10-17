@@ -3,8 +3,8 @@ import type {
 	NowTime,
 } from "@/time";
 import { BULBRO_SIZE } from "../../bulbro";
-import { EnemyState } from "../../enemy/EnemyState";
 import { ENEMY_SIZE } from "../../enemy";
+import { EnemyState } from "../../enemy/EnemyState";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
 	circleIntersectsAabb,
