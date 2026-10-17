@@ -164,6 +164,11 @@ export function PixiApp({
 					minHeight
 						? `${minHeight}px`
 						: undefined,
+				// Fixed render sizes must still shrink into smaller responsive slots
+				maxWidth:
+					"100%",
+				maxHeight:
+					"100%",
 				...style,
 			}}
 		>
@@ -173,10 +178,16 @@ export function PixiApp({
 						imageDataUrl
 					}
 					style={{
+						display:
+							"block",
 						width:
 							"100%",
 						height:
 							"100%",
+						objectFit:
+							"cover",
+						objectPosition:
+							"center",
 					}}
 					alt=""
 				/>

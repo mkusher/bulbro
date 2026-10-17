@@ -56,22 +56,16 @@ export function WeaponDisplay({
 	const onInit =
 		async (
 			app: PIXI.Application,
-			canvas: HTMLDivElement,
 		) => {
-			// Get container dimensions
-			const rect =
-				canvas.getBoundingClientRect();
+			// Center within the rendered canvas, not the (possibly shrunk) DOM container
 			const actualWidth =
-				rect.width ||
-				width;
+				app
+					.screen
+					.width;
 			const actualHeight =
-				Math.max(
-					rect.height ||
-						height,
-					showStats
-						? 100
-						: height,
-				);
+				app
+					.screen
+					.height;
 
 			// Create weapon sprite
 			const weaponSprite =
