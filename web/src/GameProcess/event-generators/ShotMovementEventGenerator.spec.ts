@@ -1625,3 +1625,482 @@ describe("ShotMovementEventGenerator explosions", () => {
 		);
 	});
 });
+
+describe("piercing laser beams", () => {
+	const generator =
+		new ShotMovementEventGenerator();
+	function laser(
+		damage = 120,
+		direction = {
+			x: 1,
+			y: 0,
+		},
+	) {
+		return new ShotState(
+			{
+				...createPlayerShot(
+					"laser",
+					100,
+					100,
+				).toJSON(),
+				weaponType:
+					"laserGun",
+				damage,
+				direction,
+			},
+		);
+	}
+	function fire(
+		shots: ShotState[],
+		enemies: EnemyState[] = [],
+	) {
+		return generator.generate(
+			makeState(
+				{
+					shots,
+					enemies,
+				},
+			),
+			dt(
+				16,
+			),
+			nowTime(
+				1000,
+			),
+		);
+	}
+	const targets =
+		() => [
+			createEnemy(
+				"far",
+				500,
+				100,
+			),
+			createEnemy(
+				"near",
+				200,
+				100,
+			),
+			createEnemy(
+				"middle",
+				350,
+				100,
+			),
+		];
+
+	it("resolves the full beam instantly, spending damage on enemies in distance order", () => {
+		const events =
+			fire(
+				[
+					laser(),
+				],
+				targets(),
+			);
+		expect(
+			events
+				.filter(
+					(
+						e,
+					) =>
+						e.type ===
+							"enemyDied" ||
+						e.type ===
+							"enemyReceivedHit",
+				)
+				.map(
+					(
+						e,
+					) => [
+						e.enemyId,
+						e.damage,
+					],
+				),
+		).toEqual(
+			[
+				[
+					"near",
+					50,
+				],
+				[
+					"middle",
+					50,
+				],
+				[
+					"far",
+					20,
+				],
+			],
+		);
+		expect(
+			events,
+		).toContainEqual(
+			{
+				type: "laserFired",
+				shotId:
+					"laser",
+				from: {
+					x: 100,
+					y: 100,
+				},
+				to: {
+					x: 440,
+					y: 100,
+				},
+			},
+		);
+		expect(
+			events,
+		).toContainEqual(
+			{
+				type: "shotExpired",
+				shotId:
+					"laser",
+				position:
+					{
+						x: 440,
+						y: 100,
+					},
+			},
+		);
+		expect(
+			events.some(
+				(
+					e,
+				) =>
+					e.type ===
+					"shotMoved",
+			),
+		).toBe(
+			false,
+		);
+	});
+
+	it("stops on the first enemy when damage cannot kill it", () => {
+		const events =
+			fire(
+				[
+					laser(
+						20,
+					),
+				],
+				targets(),
+			);
+		expect(
+			events.filter(
+				(
+					e,
+				) =>
+					e.type ===
+					"enemyReceivedHit",
+			),
+		).toMatchObject(
+			[
+				{
+					enemyId:
+						"near",
+					damage: 20,
+					newHealthPoints: 30,
+				},
+			],
+		);
+		expect(
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"laserFired",
+			),
+		).toMatchObject(
+			{
+				to: {
+					x: 140,
+					y: 100,
+				},
+			},
+		);
+	});
+
+	it("stops when damage exactly equals an enemy's health", () => {
+		const events =
+			fire(
+				[
+					laser(
+						50,
+					),
+				],
+				targets(),
+			);
+		expect(
+			events
+				.filter(
+					(
+						e,
+					) =>
+						e.type ===
+						"enemyDied",
+				)
+				.map(
+					(
+						e,
+					) =>
+						e.enemyId,
+				),
+		).toEqual(
+			[
+				"near",
+			],
+		);
+		expect(
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"laserFired",
+			),
+		).toMatchObject(
+			{
+				to: {
+					x: 140,
+					y: 100,
+				},
+			},
+		);
+	});
+
+	it("continues to range after killing targets and ignores dead or off-axis enemies", () => {
+		const events =
+			fire(
+				[
+					laser(
+						200,
+					),
+				],
+				[
+					...targets(),
+					createEnemy(
+						"outside",
+						700,
+						100,
+					),
+					createEnemy(
+						"off-axis",
+						300,
+						200,
+					),
+					createEnemy(
+						"dead",
+						100,
+						100,
+						500,
+					),
+				],
+			);
+		expect(
+			events
+				.filter(
+					(
+						e,
+					) =>
+						e.type ===
+						"enemyDied",
+				)
+				.map(
+					(
+						e,
+					) =>
+						e.enemyId,
+				),
+		).toEqual(
+			[
+				"near",
+				"middle",
+				"far",
+			],
+		);
+		expect(
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"laserFired",
+			),
+		).toMatchObject(
+			{
+				to: {
+					x: 600,
+					y: 100,
+				},
+			},
+		);
+	});
+
+	it("reaches range when no enemy is hit", () => {
+		expect(
+			fire(
+				[
+					laser(),
+				],
+			).find(
+				(
+					e,
+				) =>
+					e.type ===
+					"laserFired",
+			),
+		).toMatchObject(
+			{
+				to: {
+					x: 600,
+					y: 100,
+				},
+			},
+		);
+	});
+
+	it("clips a diagonal beam at the map edge without bending it", () => {
+		const events =
+			fire(
+				[
+					laser(
+						120,
+						{
+							x:
+								-0.6,
+							y: 0.8,
+						},
+					),
+				],
+			);
+		const beam =
+			events.find(
+				(
+					e,
+				) =>
+					e.type ===
+					"laserFired",
+			);
+		expect(
+			beam
+				?.to
+				.x,
+		).toBeCloseTo(
+			0,
+		);
+		expect(
+			beam
+				?.to
+				.y,
+		).toBeCloseTo(
+			100 +
+				(100 /
+					0.6) *
+					0.8,
+		);
+	});
+
+	it("accounts for damage and kills from earlier lasers in the same tick", () => {
+		const events =
+			fire(
+				[
+					laser(
+						20,
+					),
+					laser(
+						50,
+					),
+					laser(
+						10,
+					),
+				],
+				[
+					createEnemy(
+						"near",
+						200,
+						100,
+					),
+					createEnemy(
+						"far",
+						350,
+						100,
+					),
+				],
+			);
+		expect(
+			events
+				.filter(
+					(
+						e,
+					) =>
+						e.type ===
+							"enemyDied" ||
+						e.type ===
+							"enemyReceivedHit",
+				)
+				.map(
+					(
+						e,
+					) => [
+						e.enemyId,
+						e.damage,
+					],
+				),
+		).toEqual(
+			[
+				[
+					"near",
+					20,
+				],
+				[
+					"near",
+					30,
+				],
+				[
+					"far",
+					20,
+				],
+				[
+					"far",
+					10,
+				],
+			],
+		);
+	});
+
+	it("does not hit anything with an exhausted damage budget", () => {
+		const events =
+			fire(
+				[
+					laser(
+						0,
+					),
+				],
+				targets(),
+			);
+		expect(
+			events.map(
+				(
+					e,
+				) =>
+					e.type,
+			),
+		).toEqual(
+			[
+				"laserFired",
+				"shotExpired",
+			],
+		);
+		expect(
+			events[0],
+		).toMatchObject(
+			{
+				to: {
+					x: 100,
+					y: 100,
+				},
+			},
+		);
+	});
+});

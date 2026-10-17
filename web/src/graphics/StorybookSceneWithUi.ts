@@ -19,6 +19,7 @@ import { CoordinateGridOverlay } from "../stories/CoordinateGridOverlay";
 import type { WaveState } from "../waveState";
 import type { Camera } from "./Camera";
 import { DustCloudEffect } from "./DustCloudEffect";
+import { LaserEffects } from "./LaserEffects";
 import { ExplosionEffects } from "./ExplosionEffects";
 import { HitIndicators } from "./HitIndicators";
 import { Scene } from "./Scene";
@@ -39,6 +40,7 @@ export class StorybookSceneWithUi {
 	#logger: Logger;
 	#hitIndicators: HitIndicators;
 	#explosionEffects: ExplosionEffects;
+	#laserEffects: LaserEffects;
 	#dustEffects: Map<
 		string,
 		DustCloudEffect
@@ -99,6 +101,14 @@ export class StorybookSceneWithUi {
 				.#uiLayer,
 		);
 
+		this.#laserEffects =
+			new LaserEffects();
+		this.#laserEffects.appendTo(
+			this
+				.playingFieldContainer,
+			this
+				.#uiLayer,
+		);
 		this.#explosionEffects =
 			new ExplosionEffects();
 		this.#explosionEffects.appendTo(
@@ -194,6 +204,10 @@ export class StorybookSceneWithUi {
 		this.#updatePlayerStats(
 			deltaTime,
 			state,
+		);
+		this.#laserEffects.update(
+			deltaTime,
+			events,
 		);
 		this.#explosionEffects.update(
 			deltaTime,

@@ -45,6 +45,7 @@ export type GameEventInternal =
 	| ShotMovedEvent
 	| ShotExpiredEvent
 	| ShotExplodedEvent
+	| LaserFiredEvent
 	| StrikeSweptEvent
 	| ShopRerolledEvent
 	| ShopPurchasedEvent
@@ -257,6 +258,15 @@ export type MaterialSpawnedEvent =
 			x: number;
 			y: number;
 		};
+	};
+
+/** The resolved path of an instantaneous piercing laser shot. */
+export type LaserFiredEvent =
+	{
+		type: "laserFired";
+		shotId: string;
+		from: Position;
+		to: Position;
 	};
 
 export type ShotMovedEvent =

@@ -22,6 +22,7 @@ import type { WaveState } from "../waveState";
 import { BaggingAnimation } from "./BaggingAnimation";
 import type { Camera } from "./Camera";
 import { DustCloudEffect } from "./DustCloudEffect";
+import { LaserEffects } from "./LaserEffects";
 import { ExplosionEffects } from "./ExplosionEffects";
 import { HitIndicators } from "./HitIndicators";
 import { Scene } from "./Scene";
@@ -45,6 +46,7 @@ export class StageWithUi {
 	#logger: Logger;
 	#hitIndicators: HitIndicators;
 	#explosionEffects: ExplosionEffects;
+	#laserEffects: LaserEffects;
 	#dustEffects: Map<
 		string,
 		DustCloudEffect
@@ -108,6 +110,14 @@ export class StageWithUi {
 				.#uiLayer,
 		);
 
+		this.#laserEffects =
+			new LaserEffects();
+		this.#laserEffects.appendTo(
+			this
+				.playingFieldContainer,
+			this
+				.#uiLayer,
+		);
 		this.#explosionEffects =
 			new ExplosionEffects();
 		this.#explosionEffects.appendTo(
@@ -189,6 +199,10 @@ export class StageWithUi {
 		);
 		this.#updatePlayerStats(
 			state,
+		);
+		this.#laserEffects.update(
+			deltaTime,
+			events,
 		);
 		this.#explosionEffects.update(
 			deltaTime,
