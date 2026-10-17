@@ -1,9 +1,9 @@
 import * as PIXI from "pixi.js";
 import {
 	distance,
+	type Position,
 	rectFromCenter,
 	rectsIntersect,
-	type Position,
 } from "@/geometry";
 
 /** Pause after the wave ends before materials start flying */
