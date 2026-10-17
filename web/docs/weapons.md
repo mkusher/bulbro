@@ -1,6 +1,7 @@
 # Weapons
 
-See [Items](items.md), [Enemies](enemies.md), and the [balance review](../../docs/balance.md).
+See [Characters](characters.md), [Items](items.md), [Enemies](enemies.md), and
+the [balance review](../../docs/balance.md).
 
 The game registers 14 player weapons and 3 enemy weapons in
 [weapons-definitions/index.ts](../src/weapons-definitions/index.ts).
@@ -102,6 +103,49 @@ Medic's pool remains Pistol, Hand and Fist.
   separate from the numeric stat and price match.
 - Custom explosive weapons retain their existing splash attacks. Flare Gun
   still has no burning effect. Weapon class bonuses are not implemented.
+
+## Suggested additions
+
+These are **unimplemented design proposals**, recorded on 2026-10-17. They
+are intended to add different attack patterns, not expand the current weapon
+registry or change its stat tables. Damage, cooldowns, scaling coefficients,
+prices, tiers and starting/shop availability remain to be tuned. Names shared
+with Brotato do not imply that these proposals use its exact mechanics or data.
+
+| Weapon | Proposed attack and scaling | Intended tradeoff / role | Implementation needs |
+|---|---|---|---|
+| Spear | Long, narrow melee thrust that can hit several enemies in a line; melee damage scaling. | Slower than Knife, with reach and positioning replacing rapid single-target attacks. | Build on the existing thrust attack, with suitable reach, hit coverage and artwork; verify that each target is hit only once per thrust. |
+| Revolver | Powerful shots from a small magazine, followed by a reload pause; ranged damage scaling. | Burst damage with vulnerable downtime, distinct from Pistol's steady cadence and SMG's rapid fire. | Add magazine/reload state and define how attack speed affects firing and reloading. Include that state in synchronized gameplay rather than approximating the weapon with a long fixed cooldown. |
+| Boomerang | Projectile that hits on its outward and return paths; ranged damage scaling. | Moderate damage with broad crowd coverage; movement and return timing matter. | Add returning-projectile behavior and separate hit tracking for the outward and return passes. Prevent repeated collision ticks from multiplying hits. |
+| Flamethrower | Short-range cone that applies burning; elemental damage scaling. | Strong sustained crowd damage at close range, with limited reach and exposure while attacking. | Add cone attacks and a burning system with explicit tick, duration and stacking rules. Reuse burning for Flare Gun. |
+| Mine Layer | Drops delayed proximity explosives; engineering scaling. | Rewards planning movement and luring enemies over immediate targeted fire. | Add persistent mines, arming time, proximity triggers, ownership, active-mine limits and wave cleanup. Reuse explosion handling; test overlap and co-op synchronization. |
+| Wrench | Modest melee strike plus a temporary turret; melee damage for the strike and engineering for turret damage. | Lower direct damage in exchange for stationary support; makes engineering useful beyond Brick. | Requires structures, turret targeting, lifetime/placement limits and ownership. Do not present the turret as an implemented effect before that system exists. |
+| Crossbow | Slow, piercing bolts with strong critical hits; ranged damage scaling. | Precision and line damage rather than automatic-fire volume; supports the proposed Sniper. | Implement piercing first, including target limits, damage falloff and per-projectile hit tracking. Tune against Pistol and Laser Gun. |
+| Shield | Short melee bash with armor-based damage scaling and low base damage. | Converts defensive investment into offense, at the cost of reach and base damage. | Extend the current damage-scaling stat options to include armor. Start with damage scaling only; any blocking mechanic would be a separate proposal. |
+
+### Priorities and validation
+
+First finish existing effects: Pistol/Laser Gun/Shotgun piercing, Brick's
+break/material effect, and Flare Gun burning. Reusing those systems gives
+future Crossbow and Flamethrower implementations a consistent foundation.
+
+Prioritize **Spear, Revolver and Boomerang** as new weapons because they add
+distinct attack patterns without requiring the broader burning or structure
+systems. Spear is closest to existing attack behavior; Revolver and Boomerang
+still require new combat state and behavior, not only stat definitions.
+Then choose burning or structures as the next system to open a build family.
+Crossbow can follow piercing; Shield can follow armor-scaling support.
+
+Test sustained single-target damage and group coverage, including reload
+downtime, both boomerang passes, burn ticks and overlapping explosives where
+applicable. Check critical hits, attack-speed scaling, life-steal proc frequency,
+tiers, prices and co-op ownership; multi-hit weapons must not gain unintended
+damage or healing from repeated collision checks. Tune against existing
+weapons at comparable tiers and spending rather than matching base damage alone.
+
+The [character proposals](characters.md#suggested-additions) pair Sniper with
+precision weapons, Demolitionist with explosives, and Tank with Shield.
+Engineer/Summoner remain future concepts until their required systems exist.
 
 ## Enemy weapons
 
