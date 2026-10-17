@@ -2,7 +2,7 @@
 
 The game registers **93 items** in [Items.ts](../src/items/Items.ts): 36 tier I, 28 tier II, 16 tier III, and 13 tier IV. Each definition supplies a stable ID, localized name key, tier, base price, and additive stat bonuses or a structure effect. Names below use the [English locale](../src/i18n/locales/en.ts); the UI resolves `nameKey` in the selected language.
 
-See [Game Balance](../../docs/balance.md) for the economy, weapon scaling, and character implications, and [Weapons](weapons.md) for damage scaling and explosive attacks.
+See [Game Balance](../../docs/balance.md) for the economy, weapon scaling, and character implications, and [Weapons](weapons.md) for damage scaling and explosive attacks. See [Wearables](wearables.md) for how items change the bulbro's look.
 
 ## Item values
 
