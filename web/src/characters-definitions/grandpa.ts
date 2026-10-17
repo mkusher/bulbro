@@ -9,6 +9,10 @@ export const grandpa: Bulbro =
 		...baseBulbro,
 		id: "grandpa",
 		name: "Grandpa",
+		excludedStartingWeapons:
+			[
+				"bazooka",
+			],
 		statBonuses:
 			{
 				speed:

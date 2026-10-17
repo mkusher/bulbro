@@ -1,6 +1,7 @@
 import { hasValidStartingWeapons } from "@bulbro/network-protocol";
 import { useState } from "preact/hooks";
 import type { Bulbro } from "@/bulbro";
+import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import { calculateStats } from "@/game-formulas";
 import type { Weapon } from "@/weapon";
 
@@ -50,7 +51,9 @@ export function useStartingLoadout(
 					] ??
 					preferredWeapon;
 				return (
-					bulbro.availableWeapons.find(
+					availableStartingWeapons(
+						bulbro,
+					).find(
 						(
 							weapon,
 						) =>
@@ -106,7 +109,9 @@ export function useStartingLoadout(
 				(
 					weapon,
 				) =>
-					bulbro.availableWeapons.some(
+					availableStartingWeapons(
+						bulbro,
+					).some(
 						(
 							available,
 						) =>

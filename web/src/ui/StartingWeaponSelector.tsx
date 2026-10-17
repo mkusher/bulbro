@@ -1,4 +1,5 @@
 import type { Bulbro } from "@/bulbro";
+import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import { calculateStats } from "@/game-formulas";
 import { t } from "@/i18n";
 import type { Weapon } from "@/weapon";
@@ -69,9 +70,9 @@ export function StartingWeaponSelector({
 							</h4>
 						)}
 						<WeaponSelector
-							availableWeapons={
-								bulbro.availableWeapons
-							}
+							availableWeapons={availableStartingWeapons(
+								bulbro,
+							)}
 							selectedWeapon={
 								weapon
 							}

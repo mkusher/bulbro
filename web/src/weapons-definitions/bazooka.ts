@@ -14,7 +14,7 @@ export const bazooka: Weapon =
 		shotSpeed: 1000,
 		statsBonus:
 			{
-				damage: 40,
+				damage: 60,
 				cooldown: 2.8,
 				range: 650,
 				knockback: 18,
@@ -25,7 +25,7 @@ export const bazooka: Weapon =
 						rangedDamage: 1.5,
 					},
 			},
-		basePrice: 35,
+		basePrice: 80,
 		attack:
 			{
 				type: "explosion",

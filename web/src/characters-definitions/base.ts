@@ -18,6 +18,11 @@ export const baseBulbro: Bulbro =
 				wearingItems:
 					[],
 			},
+		excludedStartingWeapons:
+			[
+				"ak47",
+				"bazooka",
+			],
 		defaultWeapons:
 			[],
 		availableWeapons:

@@ -1,5 +1,8 @@
 import type { StatBonus } from "../game-formulas";
-import type { Weapon } from "../weapon";
+import type {
+	Weapon,
+	WeaponType,
+} from "../weapon";
 import type { FaceType } from "./sprites/FaceSprite";
 
 export interface SecondaryStats {
@@ -54,4 +57,6 @@ export interface Bulbro {
 	style: BulbroStyle;
 	defaultWeapons: Weapon[];
 	availableWeapons: Weapon[];
+	/** Weapons sold in shops but excluded from starting selections. */
+	excludedStartingWeapons?: WeaponType[];
 }

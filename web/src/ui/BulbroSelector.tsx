@@ -1,3 +1,4 @@
+import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import { t } from "@/i18n";
 import { bulbroName } from "@/i18n/game";
 import type { Bulbro } from "../bulbro";
@@ -130,8 +131,9 @@ export function BulbroSelector({
 						</div>
 
 						{/* Available Weapons */}
-						{displayedBulbro
-							.availableWeapons
+						{availableStartingWeapons(
+							displayedBulbro,
+						)
 							.length >
 							displayedBulbro
 								.defaultWeapons
@@ -143,7 +145,9 @@ export function BulbroSelector({
 									)}
 								</h4>
 								<div className="flex flex-wrap gap-1">
-									{displayedBulbro.availableWeapons
+									{availableStartingWeapons(
+										displayedBulbro,
+									)
 										.filter(
 											(
 												weapon,

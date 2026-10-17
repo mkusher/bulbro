@@ -9,7 +9,7 @@ The game registers 14 player weapons and 3 enemy weapons in [weapons-definitions
 
 Bulbros must start with exactly `startingWeapons` weapons (default **1**) and may carry at most `maxWeapons` (default **6**). Both are secondary stats configured through additive `statBonuses`: `{ startingWeapons: 1, maxWeapons: 2 }` requires two starting weapons and allows eight in total. Counts must be nonnegative integers, and the starting count cannot exceed capacity.
 
-Built-in `weapons` count toward the starting requirement. Setup offers the remaining slots, using `defaultWeapons` as initial selections when they are in `availableWeapons`; duplicate weapons can occupy different slots. Single-player, local co-op, and online readiness require the exact count. Shop purchases stop at capacity without spending materials, unless the offered weapon is already owned at tier I: then the new copy combines with it into tier II (see [Tiers, selling, and combining](#tiers-selling-and-combining)). Rerolls remain available.
+Built-in `weapons` count toward the starting requirement. Setup offers the remaining slots, using `defaultWeapons` as initial selections when they are allowed starting choices; duplicate weapons can occupy different slots. Single-player, local co-op, and online readiness require the exact count. Shop purchases stop at capacity without spending materials, unless the offered weapon is already owned at tier I: then the new copy combines with it into tier II (see [Tiers, selling, and combining](#tiers-selling-and-combining)). Rerolls remain available.
 
 These are tier I weapon values before character bonuses, damage scaling, attack speed, critical hits, or shop price adjustments. Cooldowns are in seconds. Range is the weapon’s contribution to attack reach, and knockback is added to the wielder’s knockback. Omitted damage, range, knockback, and critical-chance bonuses contribute zero. Projectile speed is unused for melee attacks and is shown as “—”.
 
@@ -23,10 +23,10 @@ These are tier I weapon values before character bonuses, damage scaling, attack 
 | Pistol | `pistol` | 2 | 0.5 | 400 | 5 | 1500 | 15 | 17 |
 | SMG | `smg` | 1 | 0.2 | 400 | 0 | 1400 | 15 | 17 |
 | Double Barrel Shotgun | `doubleBarrelShotgun` | 12 | 1.37 | 350 | 16 | 1500 | 18 | 20 |
-| AK-47 | `ak47` | 2 | 0.3 | 500 | 5 | 1800 | 20 | 23 |
+| AK-47 | `ak47` | 5 | 0.22 | 500 | 5 | 1800 | 65 | 72 |
 | Brick | `brick` | 30 | 1.39 | 150 | 5 | — | 25 | 28 |
 | Grenade | `grenade` | 24 | 2 | 300 | 12 | 600 | 28 | 31 |
-| Bazooka | `bazooka` | 40 | 2.8 | 650 | 18 | 1000 | 35 | 39 |
+| Bazooka | `bazooka` | 60 | 2.8 | 650 | 18 | 1000 | 80 | 89 |
 | Sword | `sword` | 25 | 0.9 | 80 | 8 | — | 60 | 67 |
 | Machine Gun | `machineGun` | 3 | 0.14 | 600 | 2 | 1900 | 70 | 78 |
 
@@ -78,10 +78,10 @@ Selecting a weapon in the pre-round [weapon slots](../src/shop/WeaponSlots.tsx) 
 | SMG | 1 / 2 / 3 / 4 | 0.2 / 0.19 / 0.17 / 0.15 | 1 / 4 / 7 / 10 | 5.0 / 10.5 / 17.6 / 26.7 | 17 / 34 / 67 / 133 | 4 / 8 / 16 / 33 |
 | Flare Gun | 8 / 13 / 19 / 29 | 1.4 / 1.3 / 1.19 / 1.05 | 3 / 6 / 9 / 12 | 5.7 / 10.0 / 16.0 / 27.6 | 17 / 34 / 67 / 133 | 4 / 8 / 16 / 33 |
 | Double Barrel Shotgun | 12 / 19 / 29 / 43 | 1.37 / 1.27 / 1.16 / 1.03 | 3 / 6 / 9 / 12 | 8.8 / 15.0 / 25.0 / 41.7 | 20 / 40 / 80 / 159 | 5 / 10 / 20 / 39 |
-| AK-47 | 2 / 3 / 5 / 7 | 0.3 / 0.28 / 0.26 / 0.22 | 5 / 8 / 11 / 14 | 6.7 / 10.7 / 19.2 / 31.8 | 23 / 45 / 89 / 177 | 5 / 11 / 22 / 44 |
+| AK-47 | 5 / 8 / 12 / 18 | 0.22 / 0.2 / 0.19 / 0.17 | 5 / 8 / 11 / 14 | 22.7 / 40.0 / 63.2 / 105.9 | 72 / 144 / 287 / 573 | 18 / 36 / 71 / 143 |
 | Brick | 30 / 48 / 72 / 108 | 1.39 / 1.29 / 1.18 / 1.04 | 5 / 8 / 11 / 14 | 21.6 / 37.2 / 61.0 / 103.8 | 28 / 56 / 111 / 221 | 7 / 14 / 27 / 55 |
 | Grenade | 24 / 38 / 58 / 86 | 2 / 1.86 / 1.7 / 1.5 | 3 / 6 / 9 / 12 | 12.0 / 20.4 / 34.1 / 57.3 | 31 / 62 / 124 / 247 | 7 / 15 / 31 / 61 |
-| Bazooka | 40 / 64 / 96 / 144 | 2.8 / 2.6 / 2.38 / 2.1 | 3 / 6 / 9 / 12 | 14.3 / 24.6 / 40.3 / 68.6 | 39 / 78 / 155 / 309 | 9 / 19 / 38 / 77 |
+| Bazooka | 60 / 96 / 144 / 216 | 2.8 / 2.6 / 2.38 / 2.1 | 3 / 6 / 9 / 12 | 21.4 / 36.9 / 60.5 / 102.9 | 89 / 177 / 353 / 705 | 22 / 44 / 88 / 176 |
 | Sword | 25 / 40 / 60 / 90 | 0.9 / 0.84 / 0.77 / 0.68 | 10 / 13 / 16 / 19 | 27.8 / 47.6 / 77.9 / 132.4 | 67 / 133 / 265 / 529 | 16 / 33 / 66 / 132 |
 | Machine Gun | 3 / 5 / 7 / 11 | 0.14 / 0.13 / 0.12 / 0.11 | 3 / 6 / 9 / 12 | 21.4 / 38.5 / 58.3 / 100.0 | 78 / 155 / 309 / 617 | 19 / 38 / 77 / 154 |
 
@@ -91,7 +91,7 @@ DPS is damage ÷ cooldown before stats and crits. Wave-1 value is what the tier 
 
 [WeaponTitle](../src/weapon/WeaponTitle.tsx) displays the definition’s name and classes, [WeaponStats](../src/weapon/WeaponStats.tsx) displays numeric stats and projectile speed, and [WeaponDisplay](../src/weapon/WeaponDisplay.tsx) renders the atlas sprite. The [weapon gallery](../src/stories/Weapons.stories.tsx) iterates the player registry. Runtime equipped weapons resolve back to their definitions through `fromWeaponState`, or to the definition with tier stats through `ownedWeaponFromState`.
 
-[baseBulbro](../src/characters-definitions/base.ts) makes the player registry available to characters that inherit its weapon pool. Characters may override it: the [medic](../src/characters-definitions/medic.ts) allows only pistol, hand, and fist. [ShopItemsGenerator](../src/shop/ShopItemsGenerator.ts) uses the character’s available weapons, exclusions, wave, inflation, and reroll settings; base price is not necessarily the displayed shop price.
+[baseBulbro](../src/characters-definitions/base.ts) makes the player registry available in shops to characters that inherit its weapon pool. Starting choices filter that pool through `excludedStartingWeapons`: AK-47 is only a starting choice for Grandpa, and Bazooka is shop-only for everyone. Both remain normal tier I weapons that can be combined up to tier IV; their premium role comes from their base stats and prices. Characters may override it: the [medic](../src/characters-definitions/medic.ts) allows only pistol, hand, and fist. [ShopItemsGenerator](../src/shop/ShopItemsGenerator.ts) uses the character’s available weapons, exclusions, wave, inflation, and reroll settings; base price is not necessarily the displayed shop price.
 
 ## Enemy weapons
 
