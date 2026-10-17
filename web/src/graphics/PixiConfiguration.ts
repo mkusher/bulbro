@@ -12,6 +12,15 @@ export const pixiRendererConfig: Partial<ApplicationOptions> =
 		antialias: true,
 		// Allow software rendering fallback when hardware acceleration is unavailable
 		failIfMajorPerformanceCaveat: false,
+		// Render at the device pixel ratio so high-DPI screens (e.g. iPhone at 3x)
+		// stay sharp; autoDensity keeps the canvas CSS size in logical pixels.
+		resolution:
+			typeof window !==
+			"undefined"
+				? window.devicePixelRatio ||
+					1
+				: 1,
+		autoDensity: true,
 	};
 
 /**
