@@ -51,11 +51,24 @@ export const waveResult =
 		undefined,
 	);
 
+/**
+ * Whether the player has dismissed the end-of-wave summary and moved on to the shop.
+ */
+export const waveSummaryDismissed =
+	signal<boolean>(
+		false,
+	);
+
+export function dismissWaveSummary() {
+	waveSummaryDismissed.value = true;
+}
+
 export function markAsLoading() {
 	isLoading.value = true;
 	isRound.value = false;
 	waveResult.value =
 		undefined;
+	waveSummaryDismissed.value = false;
 }
 
 export function markAsRunningWave() {
@@ -63,6 +76,7 @@ export function markAsRunningWave() {
 	isRound.value = true;
 	waveResult.value =
 		undefined;
+	waveSummaryDismissed.value = false;
 }
 
 export async function startLocalGame(

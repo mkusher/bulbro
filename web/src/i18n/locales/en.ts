@@ -497,6 +497,11 @@ export default {
 	"stats.waves":
 		"Waves",
 
+	"waveEnd.title":
+		"Wave {wave} complete!",
+	"waveEnd.next":
+		"Next",
+
 	"gameover.title":
 		"Game Over",
 	"gameover.returnToMenu":

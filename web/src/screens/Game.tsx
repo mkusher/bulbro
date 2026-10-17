@@ -8,6 +8,7 @@ import {
 	isLoading as isLoadingSignal,
 	isRound as isRoundSignal,
 	waveResult,
+	waveSummaryDismissed,
 } from "@/currentGameProcess";
 import { t } from "@/i18n";
 import {
@@ -21,6 +22,7 @@ import { MainContainer } from "@/ui/Layout";
 import { Loader } from "@/ui/Loading";
 import { SplashBanner } from "@/ui/Splash";
 import { StartScreen } from "./StartScreen";
+import { WaveEndSummary } from "./WaveEndSummary";
 
 export function InGame() {
 	const gameCanvas =
@@ -77,9 +79,15 @@ export function InGame() {
 		);
 	}
 
+	const showWaveSummary =
+		finishedResult ===
+			"win" &&
+		!waveSummaryDismissed.value;
+
 	if (
 		finishedResult ===
-		"win"
+			"win" &&
+		!showWaveSummary
 	) {
 		return (
 			<SplashBanner>
@@ -113,12 +121,17 @@ export function InGame() {
 							)}
 				</p>
 			)}
-			<TouchscreenJoystick />
+			{!showWaveSummary && (
+				<TouchscreenJoystick />
+			)}
 			<ShowRound
 				canvas={
 					gameCanvas
 				}
 			/>
+			{showWaveSummary && (
+				<WaveEndSummary />
+			)}
 		</MainContainer>
 	);
 }

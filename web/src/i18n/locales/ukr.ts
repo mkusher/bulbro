@@ -499,6 +499,11 @@ export default {
 	"stats.waves":
 		"Хвилі",
 
+	"waveEnd.title":
+		"Хвилю {wave} пройдено!",
+	"waveEnd.next":
+		"Далі",
+
 	"gameover.title":
 		"Гра закінчена",
 	"gameover.returnToMenu":
