@@ -279,6 +279,7 @@ each effect gets a small random pitch shift (`soundPitchVariation` in
 | `tree-break.mp3` | Trunk crack, splintering, creak, fall thud, leaves | Tree destroyed |
 | `explosion.mp3` | Shock crack, blast, sub boom, rumble, debris | Explosive weapons (none yet) |
 | `chest-open.mp3` | Metal latch, creaking hinge, lid knock | Reserved for chests |
+| `typewriter.mp3` | Plastic key click, type bar ring, soft thud | Wave end title typing |
 
 ---
 

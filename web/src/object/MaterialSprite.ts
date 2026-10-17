@@ -16,6 +16,56 @@ const textureSize =
 		height: 265,
 	};
 
+/** Size of the material crystal in the objects atlas */
+export const materialTextureSize =
+	textureSize;
+
+const textureScale = 0.1;
+
+/** Size of the material crystal on the playing field */
+export const materialDisplaySize =
+	{
+		width:
+			textureSize.width *
+			textureScale,
+		height:
+			textureSize.height *
+			textureScale,
+	};
+
+/** Offset from a material position to the visual center of its crystal */
+export const materialVisualCenterOffset =
+	{
+		x:
+			(materialDisplaySize.width -
+				size.width) /
+			2,
+		y:
+			(materialDisplaySize.height -
+				size.height) /
+			2,
+	};
+
+/** The material crystal from the objects atlas, also used by the UI. */
+export async function loadMaterialTexture() {
+	const source =
+		await Assets.get(
+			"objects",
+		);
+	return new PIXI.Texture(
+		{
+			source,
+			frame:
+				new PIXI.Rectangle(
+					763,
+					33,
+					textureSize.width,
+					textureSize.height,
+				),
+		},
+	);
+}
+
 export class MaterialSprite extends GameSprite {
 	#sprite: PIXI.Sprite;
 	#debugPosition: PIXI.Graphics;
@@ -81,27 +131,10 @@ export class MaterialSprite extends GameSprite {
 		parent: PIXI.Container,
 		layer: PIXI.RenderLayer,
 	) {
-		const source =
-			await Assets.get(
-				"objects",
-			);
-		const texture =
-			new PIXI.Texture(
-				{
-					source,
-					frame:
-						new PIXI.Rectangle(
-							763,
-							33,
-							textureSize.width,
-							textureSize.height,
-						),
-				},
-			);
 		this.#sprite.texture =
-			texture;
+			await loadMaterialTexture();
 		this.#sprite.scale.set(
-			0.1,
+			textureScale,
 		);
 		this.updatePosition(
 			material.position,

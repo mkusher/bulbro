@@ -85,6 +85,7 @@ export class InWaveStats {
 	update(
 		canvasSize: Size,
 		player?: BulbroState,
+		pendingBagMaterials = 0,
 	) {
 		const width =
 			this.#width(
@@ -101,7 +102,12 @@ export class InWaveStats {
 		this.#materialsIndicator.update(
 			width,
 			player,
+			pendingBagMaterials,
 		);
+	}
+	get materialsIndicator() {
+		return this
+			.#materialsIndicator;
 	}
 	#width(
 		canvasSize: Size,

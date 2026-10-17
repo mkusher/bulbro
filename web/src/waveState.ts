@@ -1597,11 +1597,8 @@ export function updateState(
 				enemies,
 				players:
 					isWaveCompleted
-						? state.players.map(
-								(
-									p,
-								) =>
-									p.harvest(),
+						? completeWaveForPlayers(
+								state,
 							)
 						: state.players,
 				round:
@@ -1634,11 +1631,8 @@ export function updateState(
 				...state,
 				players:
 					isWaveCompleted
-						? state.players.map(
-								(
-									p,
-								) =>
-									p.harvest(),
+						? completeWaveForPlayers(
+								state,
 							)
 						: state.players,
 				round:
@@ -1656,6 +1650,44 @@ export function updateState(
 		default:
 			return state;
 	}
+}
+
+/**
+ * Number of materials still lying on the field. When a wave is survived they
+ * are put into the bag; the material objects stay in the state until the next
+ * wave clears them, so the scene can animate them flying into the bag.
+ */
+export function countMaterialsOnField(
+	state: WaveState,
+): number {
+	return state.objects.filter(
+		(
+			o,
+		) =>
+			o.type ===
+			"material",
+	)
+		.length;
+}
+
+/** Harvesting pays out and materials left on the field go to the bag. */
+function completeWaveForPlayers(
+	state: WaveState,
+): BulbroState[] {
+	const leftMaterials =
+		countMaterialsOnField(
+			state,
+		);
+	return state.players.map(
+		(
+			p,
+		) =>
+			p
+				.harvest()
+				.bagMaterialsLeft(
+					leftMaterials,
+				),
+	);
 }
 
 /** Elapsed round time in milliseconds, frozen once the round ends. */

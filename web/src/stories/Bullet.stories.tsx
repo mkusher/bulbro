@@ -13,7 +13,7 @@ interface BulletStoryProps {
 
 export default {
 	title:
-		"Shots/Bullet",
+		"Game Scenes/Shots",
 	component:
 		StorybookGameScene,
 };

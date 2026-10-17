@@ -58,6 +58,12 @@ export const soundUrls =
 			import.meta
 				.url,
 		).toString(),
+		typewriter:
+			new URL(
+				"../sounds/typewriter.mp3",
+				import.meta
+					.url,
+			).toString(),
 		bgm1: new URL(
 			"../sounds/neon_genesis_protocol.mp3",
 			import.meta
@@ -94,4 +100,5 @@ export const soundPitchVariation: Partial<
 		chestOpen: 0.04,
 		ouch: 0.06,
 		collectCoins: 0.05,
+		typewriter: 0.15,
 	};

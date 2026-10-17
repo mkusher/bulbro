@@ -90,13 +90,14 @@ function createFadeAwayState(
 
 export default {
 	title:
-		"Camera/Fade Away On Low Health",
+		"Game Scenes/Camera",
 	component:
 		StorybookGameScene,
 };
 
 export const HealthSlider =
 	{
+		name: "Fade Away On Low Health",
 		render:
 			({
 				healthPercent,

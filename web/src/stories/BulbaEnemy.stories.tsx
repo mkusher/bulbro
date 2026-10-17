@@ -9,7 +9,7 @@ import { createEnemyState } from "./storyHelpers";
 
 export default {
 	title:
-		"Enemies/BulbaEnemies",
+		"Game Scenes/Enemies",
 	component:
 		StorybookGameScene,
 };

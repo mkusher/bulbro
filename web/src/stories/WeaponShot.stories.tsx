@@ -100,7 +100,7 @@ function createWeaponShotState(
 
 export default {
 	title:
-		"Weapons/Weapon Shot",
+		"Game Scenes/Weapons",
 	component:
 		StorybookGameScene,
 };

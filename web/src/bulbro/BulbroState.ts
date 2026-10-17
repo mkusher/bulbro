@@ -92,6 +92,11 @@ type BulbroStateProperties =
 		readonly level: number;
 		readonly totalExperience: number;
 		readonly materialsAvailable: number;
+		/**
+		 * Materials left on the field when a wave ended. Every later pickup
+		 * takes one out of the bag and pays it out on top of the picked one.
+		 */
+		readonly bagMaterials?: number;
 		readonly healthPoints: number;
 		readonly stats: Stats;
 		/** Where the stat points come from; `stats` is computed from them */
@@ -206,6 +211,14 @@ export class BulbroState
 		return this
 			.#props
 			.materialsAvailable;
+	}
+	get bagMaterials() {
+		return (
+			this
+				.#props
+				.bagMaterials ??
+			0
+		);
 	}
 	get healthPoints() {
 		return this
@@ -912,6 +925,54 @@ export class BulbroState
 		);
 	}
 
+	/** Puts materials left on the field at the end of a wave into the bag. */
+	bagMaterialsLeft(
+		amount: number,
+	) {
+		if (
+			amount <=
+			0
+		)
+			return this;
+		return new BulbroState(
+			{
+				...this
+					.#props,
+				bagMaterials:
+					this
+						.bagMaterials +
+					amount,
+			},
+		);
+	}
+
+	/**
+	 * Picks up a material. When the bag is not empty one more material is
+	 * taken out of it and added to the picked one.
+	 */
+	collectMaterial() {
+		if (
+			this
+				.bagMaterials <=
+			0
+		)
+			return this.gainMaterials(
+				1,
+			);
+		return new BulbroState(
+			{
+				...this
+					.#props,
+				bagMaterials:
+					this
+						.bagMaterials -
+					1,
+			},
+		).gainMaterials(
+			2,
+		);
+	}
+
 	/**
 	 * Removes materials and the same amount of experience. Experience never
 	 * drops below the current level, so a level is never lost.
@@ -1295,9 +1356,7 @@ export class BulbroState
 				// Co-op shares every pickup: whoever collects it, every Bulbro
 				// gets a material and experience. Harvesting does not change
 				// pickups; it pays out at the end of the wave (see harvest).
-				return this.gainMaterials(
-					1,
-				);
+				return this.collectMaterial();
 
 			case "consumableCollected": {
 				if (

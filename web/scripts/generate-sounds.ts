@@ -2502,6 +2502,87 @@ function chestOpen(): Buffer {
 	);
 }
 
+/**
+ * Single typewriter key strike: a sharp plastic click, the short
+ * metallic ring of the type bar and a soft thud of the key bottoming out.
+ */
+function typewriter(): Buffer {
+	const click =
+		shape(
+			filter(
+				noise(
+					0.006,
+				),
+				"highpass",
+				2200,
+			),
+			hit(
+				0.0002,
+				0.0012,
+			),
+		);
+	const bar =
+		resonate(
+			click,
+			[
+				{
+					frequency: 2900,
+					decay: 0.012,
+					level: 1,
+				},
+				{
+					frequency: 4300,
+					decay: 0.008,
+					level: 0.6,
+				},
+				{
+					frequency: 6100,
+					decay: 0.005,
+					level: 0.3,
+				},
+			],
+			0.05,
+		);
+	const thud =
+		resonate(
+			shape(
+				filter(
+					noise(
+						0.004,
+					),
+					"lowpass",
+					1800,
+				),
+				hit(
+					0.0004,
+					0.0015,
+				),
+			),
+			woodModes(
+				1.6,
+			),
+			0.06,
+		);
+	return master(
+		mix(
+			[
+				click,
+				1,
+			],
+			[
+				bar,
+				0.35,
+			],
+			[
+				thud,
+				0.9,
+				0.012,
+			],
+		),
+		-8,
+	);
+}
+
 const recipes: Record<
 	string,
 	() => Buffer
@@ -2518,6 +2599,7 @@ const recipes: Record<
 			treeBreak,
 		"chest-open":
 			chestOpen,
+		typewriter,
 	};
 
 // ---------------------------------------------------------------------------
