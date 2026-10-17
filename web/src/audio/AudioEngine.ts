@@ -43,7 +43,7 @@ class AudioEngine {
 
 	/**
 	 * Initialize the audio engine.
-	 * Must be called after user interaction due to browser autoplay policies.
+	 * Preloading can run before interaction; playback is unlocked by a user gesture.
 	 */
 	async init(): Promise<void> {
 		if (
@@ -60,7 +60,7 @@ class AudioEngine {
 		this.#initPromise =
 			this.#doInit();
 		try {
-			return this
+			return await this
 				.#initPromise;
 		} finally {
 			this.#initPromise =
@@ -72,6 +72,26 @@ class AudioEngine {
 		// Create audio context
 		this.#context =
 			new AudioContext();
+
+		// Resume directly in user gestures, before fetching/decoding can lose
+		// Safari’s user activation. Keep listening to recover after interruptions.
+		for (const event of [
+			"click",
+			"touchend",
+			"keydown",
+		]) {
+			document.addEventListener(
+				event,
+				this
+					.#resumeFromInteraction,
+				true,
+			);
+		}
+		document.addEventListener(
+			"visibilitychange",
+			this
+				.#resumeWhenVisible,
+		);
 
 		// Create gain nodes for independent volume control
 		this.#effectsGain =
@@ -141,17 +161,42 @@ class AudioEngine {
 		);
 	}
 
-	/**
-	 * Resume audio context if suspended (required after user interaction)
-	 */
+	#resumeWhenVisible =
+		(): void => {
+			if (
+				document.visibilityState ===
+				"visible"
+			)
+				this.#resumeFromInteraction();
+		};
+
+	#resumeFromInteraction =
+		(): void => {
+			void this.resume().catch(
+				(
+					error,
+				) => {
+					console.warn(
+						"Failed to resume audio context",
+						error,
+					);
+				},
+			);
+		};
+
+	/** Resume suspended audio, including Safari’s interrupted state. */
 	async resume(): Promise<void> {
-		if (
+		const context =
 			this
-				.#context
-				?.state ===
-			"suspended"
+				.#context;
+		if (
+			context &&
+			context.state !==
+				"running" &&
+			context.state !==
+				"closed"
 		) {
-			await this.#context.resume();
+			await context.resume();
 		}
 	}
 
@@ -182,15 +227,7 @@ class AudioEngine {
 			return;
 		}
 
-		// Resume context if needed (handles autoplay policy)
-		if (
-			this
-				.#context
-				.state ===
-			"suspended"
-		) {
-			this.#context.resume();
-		}
+		this.#resumeFromInteraction();
 
 		const source =
 			this.#context.createBufferSource();
@@ -252,15 +289,7 @@ class AudioEngine {
 			return;
 		}
 
-		// Resume context if needed
-		if (
-			this
-				.#context
-				.state ===
-			"suspended"
-		) {
-			this.#context.resume();
-		}
+		this.#resumeFromInteraction();
 
 		this.#bgmSource =
 			this.#context.createBufferSource();
