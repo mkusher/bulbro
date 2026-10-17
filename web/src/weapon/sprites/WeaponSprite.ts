@@ -15,6 +15,7 @@ import type { WeaponType } from "@/weapon";
 
 type TextureConfig =
 	{
+		asset?: "engineeringTools";
 		position: Position;
 		size: Size;
 		scale?:
@@ -40,6 +41,48 @@ export const weapons: Record<
 	TextureConfig
 > =
 	{
+		pruner:
+			{
+				asset:
+					"engineeringTools",
+				position:
+					{
+						x: 0,
+						y: 0,
+					},
+				size: {
+					width: 240,
+					height: 160,
+				},
+			},
+		screwdriver:
+			{
+				asset:
+					"engineeringTools",
+				position:
+					{
+						x: 240,
+						y: 0,
+					},
+				size: {
+					width: 240,
+					height: 160,
+				},
+			},
+		wrench:
+			{
+				asset:
+					"engineeringTools",
+				position:
+					{
+						x: 480,
+						y: 0,
+					},
+				size: {
+					width: 240,
+					height: 160,
+				},
+			},
 		hand: {
 			position:
 				{
@@ -310,7 +353,10 @@ export class WeaponSprite {
 	async init() {
 		const fullTexture =
 			await Assets.get(
-				"weapons",
+				this
+					.#weaponConfiguration
+					.asset ??
+					"weapons",
 				{
 					scaleMode:
 						"linear",

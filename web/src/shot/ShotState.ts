@@ -9,10 +9,23 @@ import type {
 } from "../geometry";
 import type { WeaponType } from "../weapon";
 
+export interface StructureShot {
+	kind:
+		| "turret"
+		| "medicalTurret"
+		| "laserTurret"
+		| "explosiveTurret"
+		| "incendiaryTurret";
+	ownerId: string;
+	targetId?: string;
+	hitIds: string[];
+	burnDamage?: number;
+}
 type ShotStateProperties =
 	{
 		/** Unique shot identifier */
 		readonly id: string;
+		readonly structure?: StructureShot;
 		/** ID of the entity that fired this shot */
 		readonly shooterId: string;
 		/** Whether the shooter was a player or enemy */
@@ -49,6 +62,11 @@ export class ShotState
 {
 	#props: ShotStateProperties;
 
+	get structure() {
+		return this
+			.#props
+			.structure;
+	}
 	get id() {
 		return this
 			.#props
@@ -192,6 +210,18 @@ export class ShotState
 							.#props,
 						position:
 							event.to,
+						structure:
+							this
+								.structure &&
+							event.structureHitIds
+								? {
+										...this
+											.structure,
+										hitIds:
+											event.structureHitIds,
+									}
+								: this
+										.structure,
 					},
 				);
 

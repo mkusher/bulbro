@@ -106,6 +106,27 @@ export class BulletSprite {
 			shot.isExplosive
 				? explosiveProjectile()
 				: firedRound();
+		if (
+			shot
+				.structure
+				?.kind ===
+			"medicalTurret"
+		)
+			this.#gfx.tint = 0x76ff9b;
+		if (
+			shot
+				.structure
+				?.kind ===
+			"laserTurret"
+		)
+			this.#gfx.tint = 0xc584ff;
+		if (
+			shot
+				.structure
+				?.kind ===
+			"incendiaryTurret"
+		)
+			this.#gfx.tint = 0xff783c;
 		// Set initial rotation based on shot direction
 		this.#gfx.rotation =
 			rotation(

@@ -1,6 +1,54 @@
 import type en from "./en";
 
 export default {
+	"upgrade.skull":
+		"Czaszka",
+	"weapon.name.pruner":
+		"Sekator",
+	"weapon.name.screwdriver":
+		"Śrubokręt",
+	"weapon.name.wrench":
+		"Klucz",
+	"weapon.effect.pruner":
+		"Na początku fali tworzy ogródek produkujący owoc co {interval} s.",
+	"weapon.effect.screwdriver":
+		"Tworzy minę na początku fali i co {interval} s: 10 + 100% Inżynierii obrażeń obszarowych.",
+	"weapon.effect.wrench":
+		"Na początku fali tworzy: {turret}.",
+	"item.name.landmines":
+		"Miny lądowe",
+	"item.name.turret":
+		"Wieżyczka",
+	"item.name.medicalTurret":
+		"Wieżyczka medyczna",
+	"item.name.laserTurret":
+		"Wieżyczka laserowa",
+	"item.name.explosiveTurret":
+		"Wieżyczka wybuchowa",
+	"item.name.garden":
+		"Ogródek",
+	"item.name.incendiaryTurret":
+		"Wieżyczka zapalająca",
+	"item.name.pencil":
+		"Ołówek",
+	"item.name.toolbox":
+		"Skrzynka narzędziowa",
+	"item.name.cog":
+		"Koło zębate",
+	"item.effect.landmines":
+		"Tworzy {count} min na początku fali i co 12 s: 10 + 100% Inżynierii obrażeń obszarowych.",
+	"item.effect.turret":
+		"Tworzy {count} wieżyczek: 10 + 80% Inżynierii obrażeń, zasięg 300, odstęp 0.73 s.",
+	"item.effect.medicalTurret":
+		"Tworzy {count} wieżyczek medycznych: leczą 3 + 5% Inżynierii HP, zasięg 400, odstęp 2.2 s.",
+	"item.effect.laserTurret":
+		"Tworzy {count} wieżyczek laserowych: 20 + 125% Inżynierii obrażeń, 3 przebicia, zasięg 400, odstęp 0.87 s.",
+	"item.effect.explosiveTurret":
+		"Tworzy {count} wieżyczek wybuchowych: 25 + 150% Inżynierii obrażeń obszarowych, zasięg 500, odstęp 0.87 s.",
+	"item.effect.garden":
+		"Tworzy {count} ogródków: owoc od razu i co 15 s.",
+	"item.effect.incendiaryTurret":
+		"Tworzy {count} wieżyczek zapalających: podpalenie 8 × (5 + 33% Inżynierii), zasięg 300, odstęp 0.28 s.",
 	"characterStats.title":
 		"Statystyki postaci",
 	"characterStats.current":

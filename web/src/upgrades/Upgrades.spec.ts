@@ -66,7 +66,7 @@ function selectUpgrade(
 }
 
 describe("upgrade definitions", () => {
-	it("has every primary stat except engineering, once", () => {
+	it("has every primary stat once", () => {
 		const stats =
 			upgradeDefinitions.map(
 				(
@@ -84,13 +84,13 @@ describe("upgrade definitions", () => {
 		);
 		expect(
 			stats,
-		).not.toContain(
+		).toContain(
 			"engineering",
 		);
 		expect(
 			stats,
 		).toHaveLength(
-			15,
+			16,
 		);
 	});
 

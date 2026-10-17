@@ -1,17 +1,23 @@
+import { ToolEffect } from "@/engineering/ToolEffect";
 import { t } from "@/i18n";
 import { formatStatName } from "@/i18n/game";
 import type { Weapon } from "../weapon";
-import type { WeaponState } from "./WeaponState";
+import type {
+	WeaponState,
+	WeaponTier,
+} from "./WeaponState";
 import { ownedWeaponFromState } from "./WeaponTiers";
 
 export type WeaponStatsProps =
 	{
 		weapon: Weapon;
+		tier?: WeaponTier;
 		className?: string;
 	};
 
 export function WeaponStats({
 	weapon,
+	tier = 1,
 	className,
 }: WeaponStatsProps) {
 	const stats =
@@ -61,6 +67,14 @@ export function WeaponStats({
 					"weapon.statsBonuses",
 				)}
 			</div>
+			<ToolEffect
+				type={
+					weapon.id
+				}
+				tier={
+					tier
+				}
+			/>
 			<div className="grid grid-cols-2 gap-2 text-xs">
 				{statEntries.map(
 					([
@@ -128,6 +142,9 @@ export function WeaponStateStats({
 		).weapon;
 	return (
 		<WeaponStats
+			tier={
+				weaponState.tier
+			}
 			weapon={
 				weapon
 			}

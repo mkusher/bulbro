@@ -35,7 +35,22 @@ export type EnemyEvent =
 	| EnemySpawnedEvent
 	| EnemySpawningStartedEvent
 	| EnemyRagingStartedEvent;
+
+import type { Structure } from "@/engineering/structures";
+import type { Consumable } from "@/object/ConsumableState";
 export type GameEventInternal =
+	| {
+			type: "structureChanged";
+			structure: Structure;
+	  }
+	| {
+			type: "structureRemoved";
+			structureId: string;
+	  }
+	| {
+			type: "consumableSpawned";
+			consumable: Consumable;
+	  }
 	| BulbroEvent
 	| EnemyEvent
 	| ConsumableMovedEvent
@@ -116,7 +131,8 @@ export type BulbroHealedEvent =
 		/** What healed the Bulbro; regeneration when not set */
 		source?:
 			| "regeneration"
-			| "lifeSteal";
+			| "lifeSteal"
+			| "medicalTurret";
 	};
 
 export type BulbroMovedEvent =
@@ -269,6 +285,7 @@ export type ShotMovedEvent =
 	{
 		type: "shotMoved";
 		shotId: string;
+		structureHitIds?: string[];
 	} & MoveDescription;
 
 export type ShotExpiredEvent =

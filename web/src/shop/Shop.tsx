@@ -1,5 +1,6 @@
 import type { Stats } from "@/bulbro/BulbroCharacter";
 import { formatStatName } from "@/bulbro/BulbroStats";
+import { ToolEffect } from "@/engineering/ToolEffect";
 import { percentageStats } from "@/game-formulas";
 import { t } from "@/i18n";
 import { ItemDisplay } from "@/items/ItemDisplay";
@@ -101,6 +102,16 @@ export function ItemBonuses({
 		<ul
 			className={`w-full leading-tight ${className}`}
 		>
+			{item.descriptionKey && (
+				<li className="text-green-700">
+					{t(
+						item.descriptionKey,
+						{
+							count,
+						},
+					)}
+				</li>
+			)}
 			{Object.entries(
 				item.bonuses,
 			).map(
@@ -387,6 +398,16 @@ export function Shop({
 														]
 													}
 												</p>
+												<ToolEffect
+													type={
+														item
+															.weapon
+															.id
+													}
+													tier={
+														item.tier
+													}
+												/>
 											</>
 										)}
 										<Button

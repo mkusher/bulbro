@@ -1,3 +1,4 @@
+import type { StructureKind } from "@/engineering/structures";
 import type { StatBonus } from "@/game-formulas";
 import type { MessageKey } from "@/i18n";
 import type { UpgradeTier } from "@/upgrades/Upgrades";
@@ -16,15 +17,142 @@ export type ItemDefinition =
 		/** Input to itemPrice, before wave scaling (including wave 1) and inflation. */
 		basePrice: number;
 		bonuses: StatBonus;
+		structure?: StructureKind;
+		descriptionKey?: MessageKey;
 	};
 
-/**
- * Brotato items that only change stats
- * (https://brotato.wiki.spellsandguns.com/Items). Pencil, Toolbox and Cog
- * are left out until structures exist: Engineering is their only benefit.
- */
+/** Shop items, including permanent bonuses and wave structures. */
 export const itemDefinitions: ItemDefinition[] =
 	[
+		{
+			id: "landmines",
+			nameKey:
+				"item.name.landmines",
+			tier: 1,
+			basePrice: 15,
+			bonuses:
+				{},
+			structure:
+				"landmineSource",
+			descriptionKey:
+				"item.effect.landmines",
+		},
+		{
+			id: "turret",
+			nameKey:
+				"item.name.turret",
+			tier: 1,
+			basePrice: 15,
+			bonuses:
+				{},
+			structure:
+				"turret",
+			descriptionKey:
+				"item.effect.turret",
+		},
+		{
+			id: "medicalTurret",
+			nameKey:
+				"item.name.medicalTurret",
+			tier: 2,
+			basePrice: 40,
+			bonuses:
+				{},
+			structure:
+				"medicalTurret",
+			descriptionKey:
+				"item.effect.medicalTurret",
+		},
+		{
+			id: "laserTurret",
+			nameKey:
+				"item.name.laserTurret",
+			tier: 3,
+			basePrice: 65,
+			bonuses:
+				{},
+			structure:
+				"laserTurret",
+			descriptionKey:
+				"item.effect.laserTurret",
+		},
+		{
+			id: "explosiveTurret",
+			nameKey:
+				"item.name.explosiveTurret",
+			tier: 4,
+			basePrice: 80,
+			bonuses:
+				{},
+			structure:
+				"explosiveTurret",
+			descriptionKey:
+				"item.effect.explosiveTurret",
+		},
+		{
+			id: "garden",
+			nameKey:
+				"item.name.garden",
+			tier: 2,
+			basePrice: 50,
+			bonuses:
+				{},
+			structure:
+				"garden",
+			descriptionKey:
+				"item.effect.garden",
+		},
+		{
+			id: "incendiaryTurret",
+			nameKey:
+				"item.name.incendiaryTurret",
+			tier: 2,
+			basePrice: 40,
+			bonuses:
+				{},
+			structure:
+				"incendiaryTurret",
+			descriptionKey:
+				"item.effect.incendiaryTurret",
+		},
+		{
+			id: "pencil",
+			nameKey:
+				"item.name.pencil",
+			tier: 1,
+			basePrice: 8,
+			bonuses:
+				{
+					engineering: 1,
+				},
+		},
+		{
+			id: "toolbox",
+			nameKey:
+				"item.name.toolbox",
+			tier: 3,
+			basePrice: 55,
+			bonuses:
+				{
+					engineering: 6,
+					attackSpeed:
+						-8,
+				},
+		},
+		{
+			id: "cog",
+			nameKey:
+				"item.name.cog",
+			tier: 2,
+			basePrice: 35,
+			bonuses:
+				{
+					engineering: 4,
+					knockback: 1,
+					damage:
+						-4,
+				},
+		},
 		{
 			id: "acid",
 			nameKey:
@@ -1192,11 +1320,9 @@ export const itemDefinitions: ItemDefinition[] =
 		},
 	];
 
-/** Stats that have no gameplay effect yet (Engineering needs structures). */
+/** Reserved for stats whose mechanics are not implemented yet. */
 export const inactiveStats: (keyof StatBonus)[] =
-	[
-		"engineering",
-	];
+	[];
 
 /**
  * Items the shop offers by default: every item except those whose bonuses

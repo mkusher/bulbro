@@ -229,6 +229,25 @@ export class BulbroState
 			.healthPoints;
 	}
 	get stats() {
+		const tools =
+			this.weapons.filter(
+				(
+					w,
+				) =>
+					w.type ===
+						"wrench" ||
+					w.type ===
+						"screwdriver",
+			).length;
+		const engineering =
+			Math.max(
+				0,
+				Math.min(
+					6,
+					tools,
+				) -
+					1,
+			);
 		const harvesting =
 			this.weapons.reduce(
 				(
@@ -242,11 +261,18 @@ export class BulbroState
 						0),
 				0,
 			);
-		return harvesting
+		return harvesting ||
+			engineering
 			? {
 					...this
 						.#props
 						.stats,
+					engineering:
+						this
+							.#props
+							.stats
+							.engineering +
+						engineering,
 					harvesting:
 						this
 							.#props
@@ -1445,6 +1471,19 @@ export class BulbroState
 							.stats
 							.maxHp,
 					);
+				if (
+					event.source ===
+					"medicalTurret"
+				)
+					return this.isAlive()
+						? new BulbroState(
+								{
+									...this
+										.#props,
+									healthPoints,
+								},
+							)
+						: this;
 				return new BulbroState(
 					event.source ===
 						"lifeSteal"

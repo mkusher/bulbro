@@ -27,6 +27,7 @@ import {
 	PlayerWeaponEventGenerator,
 	ShotMovementEventGenerator,
 } from "./event-generators";
+import { StructureEventGenerator } from "./event-generators/StructureEventGenerator";
 import type { TickProcess } from "./index";
 
 /**
@@ -58,6 +59,7 @@ export class FullGameTickProcess
 		);
 		this.#generators =
 			[
+				new StructureEventGenerator(),
 				new PlayerHealEventGenerator(),
 				new PlayerMovementEventGenerator(
 					controls,

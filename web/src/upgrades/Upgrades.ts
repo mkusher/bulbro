@@ -32,12 +32,22 @@ export type UpgradeDefinition =
 		>;
 	};
 
-/**
- * Brotato level-up upgrades. Engineering (Skull) is left out until
- * structures exist.
- */
+/** Brotato level-up upgrades for all primary stats. */
 export const upgradeDefinitions: UpgradeDefinition[] =
 	[
+		{
+			id: "skull",
+			nameKey:
+				"upgrade.skull",
+			stat: "engineering",
+			values:
+				{
+					1: 2,
+					2: 3,
+					3: 4,
+					4: 5,
+				},
+		},
 		{
 			id: "heart",
 			nameKey:

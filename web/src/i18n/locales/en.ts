@@ -1,4 +1,52 @@
 export default {
+	"upgrade.skull":
+		"Skull",
+	"weapon.name.pruner":
+		"Pruner",
+	"weapon.name.screwdriver":
+		"Screwdriver",
+	"weapon.name.wrench":
+		"Wrench",
+	"weapon.effect.pruner":
+		"Spawns a garden at wave start that creates a fruit every {interval} seconds.",
+	"weapon.effect.screwdriver":
+		"Spawns a landmine at wave start and every {interval} seconds: 10 + 100% Engineering area damage.",
+	"weapon.effect.wrench":
+		"Spawns a {turret} at wave start.",
+	"item.name.landmines":
+		"Landmines",
+	"item.name.turret":
+		"Turret",
+	"item.name.medicalTurret":
+		"Medical Turret",
+	"item.name.laserTurret":
+		"Laser Turret",
+	"item.name.explosiveTurret":
+		"Explosive Turret",
+	"item.name.garden":
+		"Garden",
+	"item.name.incendiaryTurret":
+		"Incendiary Turret",
+	"item.name.pencil":
+		"Pencil",
+	"item.name.toolbox":
+		"Toolbox",
+	"item.name.cog":
+		"Cog",
+	"item.effect.landmines":
+		"Spawns {count} landmine(s) at wave start and every 12 seconds, dealing 10 + 100% Engineering damage in an area.",
+	"item.effect.turret":
+		"Spawns {count} turret(s): 10 + 80% Engineering damage, 300 range, 0.73s cooldown.",
+	"item.effect.medicalTurret":
+		"Spawns {count} medical turret(s): heals 3 + 5% Engineering HP, 400 range, 2.2s cooldown.",
+	"item.effect.laserTurret":
+		"Spawns {count} laser turret(s): 20 + 125% Engineering damage, pierces 3 enemies, 400 range, 0.87s cooldown.",
+	"item.effect.explosiveTurret":
+		"Spawns {count} explosive turret(s): 25 + 150% Engineering area damage, 500 range, 0.87s cooldown.",
+	"item.effect.garden":
+		"Spawns {count} garden(s): creates fruit at wave start and every 15 seconds.",
+	"item.effect.incendiaryTurret":
+		"Spawns {count} incendiary turret(s): burns for 8 × (5 + 33% Engineering) damage, 300 range, 0.28s cooldown.",
 	"characterStats.title":
 		"Character Stats",
 	"characterStats.current":

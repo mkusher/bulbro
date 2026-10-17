@@ -1275,6 +1275,57 @@ export function updateState(
 	switch (
 		action.type
 	) {
+		case "structureChanged": {
+			return {
+				...state,
+				objects:
+					[
+						...state.objects.filter(
+							(
+								o,
+							) =>
+								o.id !==
+								action
+									.structure
+									.id,
+						),
+						action.structure,
+					],
+			};
+		}
+		case "structureRemoved": {
+			return {
+				...state,
+				objects:
+					state.objects.filter(
+						(
+							o,
+						) =>
+							o.id !==
+							action.structureId,
+					),
+			};
+		}
+		case "consumableSpawned": {
+			return state.objects.some(
+				(
+					o,
+				) =>
+					o.id ===
+					action
+						.consumable
+						.id,
+			)
+				? state
+				: {
+						...state,
+						objects:
+							[
+								...state.objects,
+								action.consumable,
+							],
+					};
+		}
 		case "bulbroMoved": {
 			return movePlayer(
 				state,
