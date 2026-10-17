@@ -1854,6 +1854,105 @@ describe("waveState", () => {
 			);
 		});
 
+		it("moves materials at twice the closest Bulbro speed", () => {
+			state.players =
+				[
+					new BulbroState(
+						{
+							...player1.toJSON(),
+							stats:
+								{
+									...player1.stats,
+									speed: 150,
+									pickupRange: 200,
+								},
+						},
+					),
+				];
+			state.objects =
+				[
+					{
+						type: "material",
+						id: "speed",
+						position:
+							{
+								x: 200,
+								y: 100,
+							},
+						value: 1,
+					},
+				];
+			const [
+				event,
+			] =
+				generateMaterialMovementEvents(
+					state,
+					deltaTime(
+						100,
+					),
+				);
+			expect(
+				event,
+			).toMatchObject(
+				{
+					type: "materialMoved",
+					to: {
+						x: 170,
+						y: 100,
+					},
+				},
+			);
+		});
+
+		it("collects materials when they touch Bulbro before reaching the center", () => {
+			state.players =
+				[
+					new BulbroState(
+						{
+							...player1.toJSON(),
+							stats:
+								{
+									...player1.stats,
+									pickupRange: 200,
+								},
+						},
+					),
+				];
+			state.objects =
+				[
+					{
+						type: "material",
+						id: "touch",
+						position:
+							{
+								x: 125,
+								y: 100,
+							},
+						value: 1,
+					},
+				];
+			const [
+				event,
+			] =
+				generateMaterialMovementEvents(
+					state,
+					deltaTime(
+						16,
+					),
+				);
+			expect(
+				event,
+			).toMatchObject(
+				{
+					type: "materialCollected",
+					materialId:
+						"touch",
+					playerId:
+						player1.id,
+				},
+			);
+		});
+
 		it("should not generate material movement events when player is out of pickup range", () => {
 			// Use default pickup range (20)
 			state.objects =
@@ -1997,8 +2096,8 @@ describe("waveState", () => {
 						id: "material1",
 						position:
 							{
-								x: 160,
-								y: 160,
+								x: 190,
+								y: 190,
 							}, // Closer to player2 at (150, 150)
 						value: 10,
 					},
