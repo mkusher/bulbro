@@ -131,17 +131,41 @@ export class FullGameTickProcess
 		// Collect all base events without EventMeta
 		const baseEvents: GameEventInternal[] =
 			[];
+		// Generators share the starting state. Only the first damaging hit per
+		// player can land before its invulnerability is applied, including deaths.
+		const hitPlayers =
+			new Set<string>();
 
 		// Run all event generators
 		for (const generator of this
 			.#generators) {
-			baseEvents.push(
-				...generator.generate(
+			const generated =
+				generator.generate(
 					state,
 					deltaTime,
 					now,
-				),
-			);
+				);
+			for (const event of generated) {
+				if (
+					event.type ===
+						"bulbroReceivedHit" ||
+					event.type ===
+						"bulbroDied"
+				) {
+					if (
+						hitPlayers.has(
+							event.bulbroId,
+						)
+					)
+						continue;
+					hitPlayers.add(
+						event.bulbroId,
+					);
+				}
+				baseEvents.push(
+					event,
+				);
+			}
 		}
 
 		// Generate tick event

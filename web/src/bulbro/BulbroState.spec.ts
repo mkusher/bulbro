@@ -195,6 +195,242 @@ describe("BulbroState", () => {
 	});
 
 	describe("beHit", () => {
+		it("protects after a hit, including at time zero, and expires at 200 ms", () => {
+			const player =
+				spawn();
+			const hurt =
+				apply(
+					player,
+					player.beHit(
+						2,
+						nowTime(
+							0,
+						),
+						never,
+					),
+					0,
+				);
+			expect(
+				hurt.healthPoints,
+			).toBe(
+				player.healthPoints -
+					2,
+			);
+			for (const at of [
+				0,
+				100,
+				199,
+			]) {
+				expect(
+					hurt.beHit(
+						100,
+						nowTime(
+							at,
+						),
+						never,
+					),
+				).toBeUndefined();
+			}
+			expect(
+				hurt.beHit(
+					2,
+					nowTime(
+						200,
+					),
+					never,
+				)
+					?.damage,
+			).toBe(
+				2,
+			);
+		});
+
+		it("keeps protection through serialization and clears it for the next wave", () => {
+			const player =
+				spawn();
+			const hurt =
+				apply(
+					player,
+					player.beHit(
+						2,
+						nowTime(
+							1000,
+						),
+						never,
+					),
+				);
+			const restored =
+				new BulbroState(
+					JSON.parse(
+						JSON.stringify(
+							hurt,
+						),
+					),
+				);
+			expect(
+				restored.beHit(
+					2,
+					nowTime(
+						1100,
+					),
+					never,
+				),
+			).toBeUndefined();
+			const nextWave =
+				apply(
+					restored,
+					{
+						type: "bulbroInitializedForWave",
+						bulbroId:
+							restored.id,
+						position:
+							zeroPoint(),
+						direction:
+							{
+								x: 1,
+								y: 0,
+							},
+					},
+					0,
+				);
+			expect(
+				nextWave.beHit(
+					2,
+					nowTime(
+						0,
+					),
+					never,
+				),
+			).toBeDefined();
+		});
+
+		it("does not grant protection for dodges or harmless hits", () => {
+			const player =
+				spawn(
+					{
+						dodge: 30,
+					},
+				);
+			expect(
+				player.beHit(
+					2,
+					nowTime(
+						0,
+					),
+					always,
+				),
+			).toBeUndefined();
+			expect(
+				player.beHit(
+					0,
+					nowTime(
+						0,
+					),
+					never,
+				),
+			).toBeUndefined();
+			expect(
+				player.beHit(
+					2,
+					nowTime(
+						0,
+					),
+					never,
+				),
+			).toBeDefined();
+		});
+
+		it("does not take hits after death", () => {
+			const player =
+				spawn();
+			const dead =
+				apply(
+					player,
+					player.beHit(
+						1000,
+						nowTime(
+							0,
+						),
+						never,
+					),
+					0,
+				);
+			expect(
+				dead.beHit(
+					2,
+					nowTime(
+						1000,
+					),
+					never,
+				),
+			).toBeUndefined();
+		});
+
+		it.each(
+			[
+				[
+					-15,
+					8,
+				],
+				[
+					0,
+					4,
+				],
+				[
+					15,
+					2,
+				],
+			],
+		)(
+			"applies armor %s to actual health loss",
+			(armor, damage) => {
+				const player =
+					spawn(
+						{
+							armor,
+							maxHp: 30,
+						},
+					);
+				const hurt =
+					apply(
+						player,
+						player.beHit(
+							4,
+							nowTime(
+								1000,
+							),
+							never,
+						),
+					);
+				expect(
+					hurt.healthPoints,
+				).toBe(
+					player.healthPoints -
+						damage,
+				);
+			},
+		);
+
+		it("negative dodge never avoids a hit", () => {
+			expect(
+				spawn(
+					{
+						dodge:
+							-30,
+					},
+				).beHit(
+					4,
+					nowTime(
+						0,
+					),
+					always,
+				)
+					?.damage,
+			).toBe(
+				4,
+			);
+		});
+
 		it("reduces the damage by armor", () => {
 			expect(
 				spawn(

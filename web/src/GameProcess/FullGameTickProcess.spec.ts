@@ -271,6 +271,253 @@ describe("FullGameTickProcess", () => {
 	);
 
 	describe("shot collision detection", () => {
+		it("accepts one simultaneous projectile hit per player and protects subsequent ticks", () => {
+			state.shots =
+				[
+					createTestShot(
+						"shot1",
+						"enemy1",
+						"enemy",
+						100,
+						100,
+					),
+					createTestShot(
+						"shot2",
+						"enemy1",
+						"enemy",
+						100,
+						100,
+					),
+					createTestShot(
+						"shot3",
+						"enemy1",
+						"enemy",
+						200,
+						200,
+					),
+				];
+			const events =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						1000,
+					),
+				);
+			const hits =
+				events.filter(
+					(
+						e,
+					) =>
+						e.type ===
+							"bulbroReceivedHit" ||
+						e.type ===
+							"bulbroDied",
+				);
+			expect(
+				hits.map(
+					(
+						e,
+					) =>
+						e.bulbroId,
+				),
+			).toEqual(
+				[
+					"player1",
+					"player2",
+				],
+			);
+			state.players =
+				state.players.map(
+					(
+						p,
+					) =>
+						hits.reduce(
+							(
+								current,
+								event,
+							) =>
+								current.applyEvent(
+									event,
+								),
+							p,
+						),
+				);
+			expect(
+				state.players.map(
+					(
+						p,
+					) =>
+						p.healthPoints,
+				),
+			).toEqual(
+				[
+					70,
+					70,
+				],
+			);
+			const protectedEvents =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						1199,
+					),
+				);
+			expect(
+				protectedEvents.filter(
+					(
+						e,
+					) =>
+						e.type ===
+							"bulbroReceivedHit" ||
+						e.type ===
+							"bulbroDied",
+				),
+			).toHaveLength(
+				0,
+			);
+			const expiredEvents =
+				tickProcess.tick(
+					state,
+					deltaTime(
+						16,
+					),
+					nowTime(
+						1200,
+					),
+				);
+			expect(
+				expiredEvents.filter(
+					(
+						e,
+					) =>
+						e.type ===
+						"bulbroReceivedHit",
+				),
+			).toHaveLength(
+				2,
+			);
+		});
+
+		it.each(
+			[
+				0,
+				30,
+			],
+		)(
+			"a melee hit protects against another melee hit and a lethal projectile with explosion radius %s",
+			(explosionRadius) => {
+				const now = 1000;
+				state.enemies =
+					[
+						"enemy1",
+						"enemy2",
+					].map(
+						(
+							id,
+						) => {
+							const enemy =
+								createTestEnemy(
+									id,
+									80,
+									100,
+								);
+							return new EnemyState(
+								{
+									...enemy.toJSON(),
+									weapons:
+										[
+											{
+												id: `${id}-fist`,
+												type: "enemyFist",
+												lastStrikedAt:
+													now,
+												statsBonus:
+													{},
+												shotSpeed: 0,
+												aimingDirection:
+													{
+														x: 1,
+														y: 0,
+													},
+												strike:
+													{
+														type: "thrust",
+														startedAt: 900,
+														sweptUntil: 900,
+														duration: 200,
+														centerAngle: 0,
+														reach: 60,
+														innerRadius: 0,
+														damage: 5,
+														knockback: 0,
+														targetId:
+															"player1",
+														hitTargetIds:
+															[],
+													},
+											},
+										],
+								},
+							);
+						},
+					);
+				const shot =
+					createTestShot(
+						"lethal",
+						"enemy1",
+						"enemy",
+						100,
+						100,
+					);
+				state.shots =
+					[
+						new ShotState(
+							{
+								...shot.toJSON(),
+								damage: 1000,
+								explosionRadius,
+							},
+						),
+					];
+				const events =
+					tickProcess.tick(
+						state,
+						deltaTime(
+							16,
+						),
+						nowTime(
+							now,
+						),
+					);
+				expect(
+					events.filter(
+						(
+							e,
+						) =>
+							e.type ===
+								"bulbroReceivedHit" ||
+							e.type ===
+								"bulbroDied",
+					),
+				).toMatchObject(
+					[
+						{
+							type: "bulbroReceivedHit",
+							bulbroId:
+								"player1",
+							damage: 5,
+						},
+					],
+				);
+			},
+		);
+
 		it("should generate enemyReceivedHit event when player shot hits enemy", () => {
 			// Create enemy in path of shot
 			const enemy =
