@@ -6,7 +6,6 @@ import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
 import { t } from "@/i18n";
-import { GameGlobalSettingsLayout } from "@/screens/start/GameGlobalSettings";
 import { bulbroName } from "@/i18n/game";
 import { findItemById } from "@/items/Items";
 import {
@@ -14,6 +13,7 @@ import {
 	currentNetworkGame,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import { GameGlobalSettingsLayout } from "@/screens/start/GameGlobalSettings";
 import {
 	restoreLockedOffers,
 	saveLockedOffer,
