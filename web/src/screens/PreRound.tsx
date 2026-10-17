@@ -1,4 +1,3 @@
-import { getWeaponByType } from "@/weapon";
 import { useState } from "preact/hooks";
 import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
@@ -35,13 +34,14 @@ import {
 	updateState,
 	waveState,
 } from "@/waveState";
+import { getWeaponByType } from "@/weapon";
 
 import {
-	toWeaponStateAtTier,
 	combineWeapons,
 	maxWeaponTier,
 	type OwnedWeapon,
 	ownedWeaponFromState,
+	toWeaponStateAtTier,
 	weaponSellPrice,
 	weaponTierOf,
 } from "@/weapon/WeaponTiers";

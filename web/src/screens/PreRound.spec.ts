@@ -1,24 +1,17 @@
-import { spyOn } from "bun:test";
-import { BulbroState } from "@/bulbro/BulbroState";
-import { generateShopItems } from "@/shop/ShopItemsGenerator";
-import { isItemShopItem } from "@/shop/Shop";
-import { getWeaponByType } from "@/weapon";
-import {
-	toWeaponStateAtTier,
-	weaponStatsForTier,
-} from "@/weapon/WeaponTiers";
 import {
 	afterEach,
 	beforeEach,
 	expect,
 	it,
 	mock,
+	spyOn,
 } from "bun:test";
 import { signal } from "@preact/signals";
 import {
 	h,
 	render,
 } from "preact";
+import { BulbroState } from "@/bulbro/BulbroState";
 import { getTotalExperienceForLevel } from "@/bulbro/Levels";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { classicMapSize } from "@/game-canvas";
@@ -27,10 +20,17 @@ import {
 	currentNetworkGame,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import { isItemShopItem } from "@/shop/Shop";
+import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import {
 	createInitialState,
 	waveState,
 } from "@/waveState";
+import { getWeaponByType } from "@/weapon";
+import {
+	toWeaponStateAtTier,
+	weaponStatsForTier,
+} from "@/weapon/WeaponTiers";
 
 // happy-dom has neither WebAudio nor WebGL
 mock.module(

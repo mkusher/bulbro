@@ -21,7 +21,7 @@ import {
 } from "@/ui/PlayersStatus";
 import { Button } from "@/ui/shadcn/button";
 import { Card } from "@/ui/shadcn/card";
-import { type OwnedWeapon } from "@/weapon/WeaponTiers";
+import type { OwnedWeapon } from "@/weapon/WeaponTiers";
 
 /**
  * Props for a single player section in the layout.

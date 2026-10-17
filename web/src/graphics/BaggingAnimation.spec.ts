@@ -1,11 +1,11 @@
-import * as PIXI from "pixi.js";
-import { BaggingAnimation } from "./BaggingAnimation";
 import {
 	describe,
 	expect,
 	it,
 } from "bun:test";
+import * as PIXI from "pixi.js";
 import {
+	BaggingAnimation,
 	quadraticPoint,
 	takeOffTime,
 } from "./BaggingAnimation";

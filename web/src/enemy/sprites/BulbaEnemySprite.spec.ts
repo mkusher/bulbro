@@ -4,8 +4,8 @@ import {
 	spyOn,
 } from "bun:test";
 import {
-	Container,
-	Sprite,
+	type Container,
+	type Sprite,
 	TextureSource,
 } from "pixi.js";
 import { Assets } from "@/Assets";

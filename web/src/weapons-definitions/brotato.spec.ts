@@ -4,8 +4,8 @@ import {
 	it,
 } from "bun:test";
 import {
-	spawnBulbro,
 	BulbroState,
+	spawnBulbro,
 } from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { calculateAttackDamage } from "@/game-formulas";
@@ -37,6 +37,7 @@ import {
 	hand,
 	sword,
 } from "./index";
+
 // Reference: https://brotato.wiki.spellsandguns.com/Weapons (2026-10-17).
 const reference: {
 	id: WeaponType;

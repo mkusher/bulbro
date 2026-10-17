@@ -17,8 +17,8 @@ import type {
 	Weapon,
 	WeaponType,
 } from "@/weapon";
-import type { WeaponTier } from "@/weapon/WeaponState";
 import { WeaponDisplay } from "@/weapon/WeaponDisplay";
+import type { WeaponTier } from "@/weapon/WeaponState";
 
 export type WeaponShopItem =
 	{

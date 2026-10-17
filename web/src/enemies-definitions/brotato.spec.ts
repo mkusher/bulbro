@@ -16,6 +16,7 @@ import {
 	tree,
 	wildBoar,
 } from "./index";
+
 // HP and damage are based on wave 1; Spitter's projectile growth is 0.75.
 // Reference: https://brotato.wiki.spellsandguns.com/Enemies (2026-10-17).
 for (const [

@@ -1,9 +1,3 @@
-import { pistol } from "@/weapons-definitions";
-import {
-	weaponPrice,
-	weaponStatsForTier,
-} from "@/weapon/WeaponTiers";
-import { generateShopItems } from "./ShopItemsGenerator";
 import {
 	describe,
 	expect,
@@ -11,7 +5,15 @@ import {
 } from "bun:test";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { seededRng } from "@/random";
-import { generateWeaponShopItems } from "./ShopItemsGenerator";
+import {
+	weaponPrice,
+	weaponStatsForTier,
+} from "@/weapon/WeaponTiers";
+import { pistol } from "@/weapons-definitions";
+import {
+	generateShopItems,
+	generateWeaponShopItems,
+} from "./ShopItemsGenerator";
 
 function weaponIds(
 	seed: number,

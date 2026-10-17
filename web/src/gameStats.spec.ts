@@ -5,16 +5,17 @@ import {
 } from "bun:test";
 import { withEventMeta } from "./game-events/GameEvents";
 import {
-	deltaTime,
-	nowTime,
-} from "./time";
-import {
 	finalizeWaveStats,
 	gameStats,
 	resetGameStats,
 	updateStatsFromEvents,
 	waveStats,
 } from "./gameStats";
+import {
+	deltaTime,
+	nowTime,
+} from "./time";
+
 afterEach(
 	resetGameStats,
 );

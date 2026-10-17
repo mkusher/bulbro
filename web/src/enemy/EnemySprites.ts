@@ -1,4 +1,4 @@
-import { FrameAnimationController } from "@/graphics/FrameAnimationController";
+import type { FrameAnimationController } from "@/graphics/FrameAnimationController";
 import type {
 	DeltaTime,
 	NowTime,
