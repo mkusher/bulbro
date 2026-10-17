@@ -10,6 +10,7 @@ import type {
 	BulbroReceivedHitEvent,
 	GameEvent,
 } from "@/game-events/GameEvents";
+import type { LockedShopOffer } from "@/shop/LockedShopOffer";
 import type {
 	DeltaTime,
 	NowTime,
@@ -114,7 +115,8 @@ type BulbroStateProperties =
 		readonly lastDirection: Direction;
 		readonly lastHorizontalDirection: number;
 		readonly rerollCount: number;
-		/** Level-up upgrade re-rolls done for the current level */
+		readonly lockedShopOffers?: readonly LockedShopOffer[];
+		/** Level-up upgrade re-rolls done in the current wave */
 		readonly upgradeRerollCount?: number;
 	};
 
@@ -300,6 +302,15 @@ export class BulbroState
 				.#props
 				.upgradeRerollCount ??
 			0
+		);
+	}
+
+	get lockedShopOffers() {
+		return (
+			this
+				.#props
+				.lockedShopOffers ??
+			[]
 		);
 	}
 
@@ -1220,6 +1231,8 @@ export class BulbroState
 					{
 						...this
 							.#props,
+						rerollCount: 0,
+						upgradeRerollCount: 0,
 						position:
 							round(
 								event.position,
@@ -1452,6 +1465,22 @@ export class BulbroState
 				);
 			}
 
+			case "shopLocksChanged":
+				if (
+					event.playerId !==
+					this
+						.id
+				)
+					return this;
+				return new BulbroState(
+					{
+						...this
+							.#props,
+						lockedShopOffers:
+							event.offers,
+					},
+				);
+
 			case "shopRerolled":
 				if (
 					event.playerId !==
@@ -1513,7 +1542,6 @@ export class BulbroState
 				return new BulbroState(
 					{
 						...upgraded.#props,
-						upgradeRerollCount: 0,
 					},
 				);
 			}

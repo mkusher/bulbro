@@ -1548,6 +1548,7 @@ export function updateState(
 					),
 			};
 		}
+		case "shopLocksChanged":
 		case "shopRerolled":
 		case "shopPurchased":
 		case "weaponSold":

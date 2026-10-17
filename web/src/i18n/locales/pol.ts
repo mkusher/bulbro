@@ -445,6 +445,10 @@ export default {
 
 	"shop.title":
 		"Sklep",
+	"shop.lockOffer":
+		"Zablokuj",
+	"shop.unlockOffer":
+		"Odblokuj",
 	"shop.reroll":
 		"Przerzuć ${price}",
 	"shop.locked":

@@ -11,7 +11,7 @@
 			"bulbro-game-web/src/*": ["../../web/src/*"]
 		},
 		"lib": [
-			"ES2020",
+			"ES2024",
 			"DOM",
 			"DOM.Iterable"
 		],

@@ -361,7 +361,7 @@ it("re-rolls the offered upgrades for materials", async () => {
 			.players[0]!
 			.upgradeRerollCount,
 	).toBe(
-		0,
+		1,
 	);
 	expect(
 		root.textContent,
@@ -660,3 +660,266 @@ for (const [
 		}
 	});
 }
+
+it("keeps upgrade reroll prices across level-ups, separate from the shop", async () => {
+	startPreRound(
+		2,
+	);
+	const reroll =
+		() =>
+			[
+				...root.querySelectorAll(
+					"button",
+				),
+			].find(
+				(
+					button,
+				) =>
+					button.textContent?.startsWith(
+						"Re-roll",
+					),
+			)!;
+	reroll().click();
+	await flush();
+	upgradeButtons()[0]!.click();
+	await flush();
+	expect(
+		reroll()
+			.textContent,
+	).toBe(
+		"Re-roll $2",
+	);
+	upgradeButtons()[0]!.click();
+	await flush();
+	expect(
+		reroll()
+			.textContent,
+	).toBe(
+		"Re-roll $1",
+	);
+});
+
+it("locks unaffordable offers through rerolls and waves at their original price", async () => {
+	startPreRound(
+		0,
+	);
+	const player =
+		waveState
+			.value
+			.players[0]!;
+	waveState.value =
+		{
+			...waveState.value,
+			players:
+				[
+					new BulbroState(
+						{
+							...player.toJSON(),
+							materialsAvailable: 100,
+						},
+					),
+				],
+		};
+	await flush();
+	const lock =
+		() =>
+			[
+				...root.querySelectorAll(
+					"button",
+				),
+			].find(
+				(
+					button,
+				) =>
+					button.textContent ===
+					"Lock",
+			)!;
+	lock().click();
+	await flush();
+	const saved =
+		waveState
+			.value
+			.players[0]!
+			.lockedShopOffers;
+	expect(
+		saved,
+	).toHaveLength(
+		1,
+	);
+	const reroll =
+		[
+			...root.querySelectorAll(
+				"button",
+			),
+		].find(
+			(
+				button,
+			) =>
+				button.textContent?.startsWith(
+					"Re-roll",
+				),
+		)!;
+	reroll.click();
+	await flush();
+	expect(
+		root.querySelectorAll(
+			'[aria-pressed="true"]',
+		),
+	).toHaveLength(
+		1,
+	);
+	expect(
+		waveState
+			.value
+			.players[0]!
+			.lockedShopOffers,
+	).toEqual(
+		saved,
+	);
+	render(
+		null,
+		root,
+	);
+	const current =
+		waveState.value;
+	waveState.value =
+		{
+			...current,
+			round:
+				{
+					...current.round,
+					wave: 5,
+				},
+			players:
+				[
+					new BulbroState(
+						JSON.parse(
+							JSON.stringify(
+								current.players[0]!.toJSON(),
+							),
+						),
+					),
+				],
+		};
+	render(
+		h(
+			PreRound,
+			{},
+		),
+		root,
+	);
+	await flush();
+	expect(
+		root.querySelectorAll(
+			'[aria-pressed="true"]',
+		),
+	).toHaveLength(
+		1,
+	);
+	const unlock =
+		[
+			...root.querySelectorAll(
+				"button",
+			),
+		].find(
+			(
+				button,
+			) =>
+				button.textContent ===
+				"Unlock",
+		)!;
+	expect(
+		unlock.parentElement!
+			.textContent,
+	).toContain(
+		"$" +
+			saved[0]!
+				.price,
+	);
+	unlock.click();
+	await flush();
+	expect(
+		waveState
+			.value
+			.players[0]!
+			.lockedShopOffers,
+	).toHaveLength(
+		0,
+	);
+});
+
+it("removes a purchased offer from saved locks", async () => {
+	startPreRound(
+		0,
+	);
+	const player =
+		waveState
+			.value
+			.players[0]!;
+	waveState.value =
+		{
+			...waveState.value,
+			players:
+				[
+					new BulbroState(
+						{
+							...player.toJSON(),
+							materialsAvailable: 1000,
+						},
+					),
+				],
+		};
+	await flush();
+	[
+		...root.querySelectorAll(
+			"button",
+		),
+	]
+		.find(
+			(
+				button,
+			) =>
+				button.textContent ===
+				"Lock",
+		)!
+		.click();
+	await flush();
+	const locked =
+		root.querySelector<HTMLButtonElement>(
+			'[aria-pressed="true"]',
+		)!;
+	const buy =
+		[
+			...locked.parentElement!.querySelectorAll(
+				"button",
+			),
+		].find(
+			(
+				button,
+			) =>
+				button !==
+				locked,
+		)!;
+	expect(
+		buy.disabled,
+	).toBe(
+		false,
+	);
+	buy.click();
+	await flush();
+	expect(
+		waveState
+			.value
+			.players[0]!
+			.lockedShopOffers,
+	).toHaveLength(
+		0,
+	);
+	expect(
+		root.querySelectorAll(
+			'[aria-pressed="true"]',
+		),
+	).toHaveLength(
+		0,
+	);
+});

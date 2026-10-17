@@ -12,6 +12,10 @@ import {
 	currentNetworkGame,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import {
+	restoreLockedOffers,
+	saveLockedOffer,
+} from "@/shop/LockedShopOffer";
 import type { PreRoundNetworkProps } from "@/shop/PreRoundLayout";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import {
@@ -69,6 +73,10 @@ function generateShopItemsFromWaveState(): ShopItem[] {
 		bulbro,
 		{
 			maxItems: 4,
+			lockedItems:
+				restoreLockedOffers(
+					player.lockedShopOffers,
+				),
 			wave: state
 				.round
 				.wave,
@@ -358,12 +366,15 @@ export function PreRound() {
 		player?.rerollCount ??
 		0;
 	const rerollPrice =
-		getRerollPrice(
-			rerollCount,
-			state
-				.round
-				.wave,
-		);
+		shopItems.length ===
+		0
+			? 0
+			: getRerollPrice(
+					rerollCount,
+					state
+						.round
+						.wave,
+				);
 
 	const handleReroll =
 		() => {
@@ -377,7 +388,10 @@ export function PreRound() {
 
 			const newRerollCount =
 				rerollCount +
-				1;
+				(shopItems.length ===
+				0
+					? 0
+					: 1);
 
 			recordReroll(
 				rerollPrice,
@@ -408,6 +422,76 @@ export function PreRound() {
 
 			setShopItems(
 				generateShopItemsFromWaveState(),
+			);
+		};
+
+	const saveLocks =
+		(
+			items: ShopItem[],
+		) => {
+			if (
+				!player
+			)
+				return;
+			waveState.value =
+				updateState(
+					waveState.value,
+					withEventMeta(
+						{
+							type: "shopLocksChanged",
+							playerId:
+								player.id,
+							offers:
+								items
+									.filter(
+										(
+											item,
+										) =>
+											item.locked,
+									)
+									.map(
+										saveLockedOffer,
+									),
+						},
+						dt(
+							0,
+						),
+						nowTime(
+							Date.now(),
+						),
+					),
+				);
+		};
+	const handleToggleLock =
+		(
+			item: ShopItem,
+		) => {
+			if (
+				network?.isLocalReady ||
+				!shopItems.includes(
+					item,
+				)
+			)
+				return;
+			const items =
+				shopItems.map(
+					(
+						offer,
+					) =>
+						offer ===
+						item
+							? {
+									...offer,
+									locked:
+										!offer.locked,
+								}
+							: offer,
+				);
+			saveLocks(
+				items,
+			);
+			setShopItems(
+				items,
 			);
 		};
 
@@ -462,6 +546,15 @@ export function PreRound() {
 							now,
 						),
 					);
+				saveLocks(
+					shopItems.filter(
+						(
+							offer,
+						) =>
+							offer !==
+							item,
+					),
+				);
 				setShopItems(
 					shopItems.filter(
 						(
@@ -583,6 +676,15 @@ export function PreRound() {
 			waveState.value =
 				equippedState;
 
+			saveLocks(
+				shopItems.filter(
+					(
+						offer,
+					) =>
+						offer !==
+						item,
+				),
+			);
 			setShopItems(
 				shopItems.filter(
 					(
@@ -728,6 +830,9 @@ export function PreRound() {
 
 	return (
 		<PreRoundLayout
+			onToggleLock={
+				handleToggleLock
+			}
 			currentWave={
 				state
 					.round

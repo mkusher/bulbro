@@ -3,6 +3,7 @@ import type {
 	Direction,
 	Position,
 } from "@/geometry";
+import type { LockedShopOffer } from "@/shop/LockedShopOffer";
 import type { ShotState } from "@/shot/ShotState";
 import type {
 	DeltaTime,
@@ -46,6 +47,7 @@ export type GameEventInternal =
 	| ShotExplodedEvent
 	| LaserFiredEvent
 	| StrikeSweptEvent
+	| ShopLocksChangedEvent
 	| ShopRerolledEvent
 	| ShopPurchasedEvent
 	| WeaponSoldEvent
@@ -371,6 +373,13 @@ export type WeaponsCombinedEvent =
 		consumedWeaponId: string;
 	};
 
+export type ShopLocksChangedEvent =
+	{
+		type: "shopLocksChanged";
+		playerId: string;
+		offers: LockedShopOffer[];
+	};
+
 export type ShopRerolledEvent =
 	{
 		type: "shopRerolled";
@@ -398,7 +407,7 @@ export type UpgradesRerolledEvent =
 		/** Level the upgrades are offered for */
 		level: number;
 		cost: number;
-		/** Rerolls done for this level, including this one */
+		/** Upgrade rerolls done in this wave, including this one */
 		rerollCount: number;
 	};
 
