@@ -4,6 +4,7 @@ import type {
 } from "@/time";
 import { BULBRO_SIZE } from "../../bulbro";
 import { ENEMY_SIZE } from "../../enemy";
+import { EnemyState } from "../../enemy/EnemyState";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
 	circleIntersectsAabb,
@@ -608,7 +609,245 @@ export class ShotMovementEventGenerator
 					},
 				);
 			};
+		// Track health spent by lasers in this tick, before events are applied.
+		const laserHealth =
+			new Map<
+				string,
+				number
+			>();
 		for (const shot of shots) {
+			if (
+				shot.weaponType ===
+					"laserGun" &&
+				shot.shooterType ===
+					"player"
+			) {
+				const from =
+					shot.startPosition;
+				const direction =
+					shot.direction;
+				// Clip along the ray so diagonal beams stay straight at map edges.
+				const edgeX =
+					direction.x >
+					0
+						? (mapSize.width -
+								from.x) /
+							direction.x
+						: direction.x <
+								0
+							? -from.x /
+								direction.x
+							: Infinity;
+				const edgeY =
+					direction.y >
+					0
+						? (mapSize.height -
+								from.y) /
+							direction.y
+						: direction.y <
+								0
+							? -from.y /
+								direction.y
+							: Infinity;
+				const length =
+					Math.max(
+						0,
+						Math.min(
+							shot.range,
+							edgeX,
+							edgeY,
+						),
+					);
+				const dx =
+					direction.x *
+					length;
+				const dy =
+					direction.y *
+					length;
+				let to =
+					{
+						x:
+							from.x +
+							dx,
+						y:
+							from.y +
+							dy,
+					};
+				let damageLeft =
+					Math.max(
+						0,
+						shot.damage,
+					);
+				const shooter =
+					shooterOf(
+						shot,
+					);
+				const hits =
+					enemiesNear(
+						Math.min(
+							from.x,
+							to.x,
+						),
+						Math.min(
+							from.y,
+							to.y,
+						),
+						Math.max(
+							from.x,
+							to.x,
+						),
+						Math.max(
+							from.y,
+							to.y,
+						),
+					)
+						.map(
+							(
+								body,
+							) => ({
+								body,
+								time: segmentAabbHitTime(
+									from.x,
+									from.y,
+									dx,
+									dy,
+									body.minX,
+									body.minY,
+									body.maxX,
+									body.maxY,
+								),
+							}),
+						)
+						.filter(
+							(
+								hit,
+							) =>
+								hit.time !==
+								Infinity,
+						)
+						.sort(
+							(
+								a,
+								b,
+							) =>
+								a.time -
+									b.time ||
+								a
+									.body
+									.order -
+									b
+										.body
+										.order,
+						);
+				if (
+					damageLeft ===
+					0
+				)
+					to =
+						from;
+				for (const {
+					body,
+					time,
+				} of hits) {
+					if (
+						damageLeft <=
+						0
+					)
+						break;
+					const health =
+						laserHealth.get(
+							body
+								.entity
+								.id,
+						) ??
+						body
+							.entity
+							.healthPoints;
+					if (
+						health <=
+						0
+					)
+						continue;
+					const damage =
+						Math.min(
+							damageLeft,
+							health,
+						);
+					// Use the health remaining after any earlier laser this tick.
+					const enemy =
+						health ===
+						body
+							.entity
+							.healthPoints
+							? body.entity
+							: new EnemyState(
+									{
+										...body.entity.toJSON(),
+										healthPoints:
+											health,
+									},
+								);
+					events.push(
+						enemy.beHit(
+							{
+								damage,
+								luck: shooter
+									?.stats
+									.luck,
+							},
+							now,
+							{
+								strength:
+									shot.knockback,
+								direction,
+							},
+						),
+					);
+					laserHealth.set(
+						enemy.id,
+						health -
+							damage,
+					);
+					damageLeft -=
+						damage;
+					stealLife(
+						shooter,
+					);
+					if (
+						damageLeft <=
+						0
+					)
+						to =
+							{
+								x:
+									from.x +
+									dx *
+										time,
+								y:
+									from.y +
+									dy *
+										time,
+							};
+				}
+				events.push(
+					{
+						type: "laserFired",
+						shotId:
+							shot.id,
+						from,
+						to,
+					},
+					{
+						type: "shotExpired",
+						shotId:
+							shot.id,
+						position:
+							to,
+					},
+				);
+				continue;
+			}
+
 			const prevPos =
 				shot.position;
 			const nextPos =

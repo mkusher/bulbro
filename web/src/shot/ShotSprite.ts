@@ -49,7 +49,9 @@ export class ShotSprite extends GameSprite {
 		if (
 			isUnarmedWeapon(
 				shot.weaponType,
-			)
+			) ||
+			shot.weaponType ===
+				"laserGun"
 		) {
 			this.#sprite =
 				null;

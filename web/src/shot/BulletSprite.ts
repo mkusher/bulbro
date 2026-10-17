@@ -3,8 +3,6 @@ import type { DeltaTime } from "@/time";
 import { rotation } from "../geometry";
 import type { ShotState } from "./ShotState";
 
-const width = 8;
-const height = 16;
 const explosiveRadius = 7;
 
 /** A dark round shell with a glowing fuse at its front (sprites point up at 0°). */
@@ -33,6 +31,68 @@ function explosiveProjectile() {
 			0xff7a1a,
 		);
 }
+/** A small hot round with a tapered amber tracer trailing behind it. */
+function firedRound() {
+	return new PIXI.Graphics()
+		.poly(
+			[
+				0,
+				-10,
+				-5,
+				8,
+				0,
+				34,
+				5,
+				8,
+			],
+		)
+		.fill(
+			{
+				color: 0xffa43b,
+				alpha: 0.12,
+			},
+		)
+		.poly(
+			[
+				-2,
+				-5,
+				-2,
+				8,
+				0,
+				26,
+				2,
+				8,
+				2,
+				-5,
+			],
+		)
+		.fill(
+			{
+				color: 0xffcc70,
+				alpha: 0.45,
+			},
+		)
+		.roundRect(
+			-2,
+			-10,
+			4,
+			17,
+			2,
+		)
+		.fill(
+			0xffe0a3,
+		)
+		.roundRect(
+			-1,
+			-10,
+			2,
+			12,
+			1,
+		)
+		.fill(
+			0xfffcf0,
+		);
+}
 /**
  * Manages a bullet sprite graphic.
  */
@@ -45,25 +105,7 @@ export class BulletSprite {
 		this.#gfx =
 			shot.isExplosive
 				? explosiveProjectile()
-				: new PIXI.Graphics()
-						.roundRect(
-							-width /
-								2,
-							-height /
-								2,
-							width,
-							height,
-							width,
-						)
-						.fill(
-							0xfff625,
-						)
-						.stroke(
-							0xffffff,
-						)
-						.lineStyle(
-							2,
-						);
+				: firedRound();
 		// Set initial rotation based on shot direction
 		this.#gfx.rotation =
 			rotation(
