@@ -1,5 +1,5 @@
-import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import type { Bulbro } from "@/bulbro";
+import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import { calculateStats } from "@/game-formulas";
 import { t } from "@/i18n";
 import type { Weapon } from "@/weapon";

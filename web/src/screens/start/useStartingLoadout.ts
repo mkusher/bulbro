@@ -1,7 +1,7 @@
-import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import { hasValidStartingWeapons } from "@bulbro/network-protocol";
 import { useState } from "preact/hooks";
 import type { Bulbro } from "@/bulbro";
+import { availableStartingWeapons } from "@/bulbro/startingWeapons";
 import { calculateStats } from "@/game-formulas";
 import type { Weapon } from "@/weapon";
 
