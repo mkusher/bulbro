@@ -5,12 +5,12 @@ import {
 	rollItemTier,
 	shopItemDefinitions,
 } from "@/items/Items";
-import { shopItemKey } from "@/shop/Shop";
 import type {
 	ItemShopItem,
 	ShopItem,
 	WeaponShopItem,
 } from "@/shop/Shop";
+import { shopItemKey } from "@/shop/Shop";
 import type { Weapon } from "@/weapon";
 import {
 	weaponAtTier,

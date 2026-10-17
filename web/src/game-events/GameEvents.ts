@@ -1,9 +1,9 @@
-import type { LockedShopOffer } from "@/shop/LockedShopOffer";
 import type { EnemyState } from "@/enemy";
 import type {
 	Direction,
 	Position,
 } from "@/geometry";
+import type { LockedShopOffer } from "@/shop/LockedShopOffer";
 import type { ShotState } from "@/shot/ShotState";
 import type {
 	DeltaTime,

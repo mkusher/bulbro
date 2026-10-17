@@ -1,4 +1,3 @@
-import type { LockedShopOffer } from "@/shop/LockedShopOffer";
 import type { EnemyState } from "@/enemy";
 import type {
 	AttackDescription,
@@ -11,6 +10,7 @@ import type {
 	BulbroReceivedHitEvent,
 	GameEvent,
 } from "@/game-events/GameEvents";
+import type { LockedShopOffer } from "@/shop/LockedShopOffer";
 import type {
 	DeltaTime,
 	NowTime,

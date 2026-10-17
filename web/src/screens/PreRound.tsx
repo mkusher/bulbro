@@ -1,7 +1,3 @@
-import {
-	restoreLockedOffers,
-	saveLockedOffer,
-} from "@/shop/LockedShopOffer";
 import { useState } from "preact/hooks";
 import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
@@ -16,6 +12,10 @@ import {
 	currentNetworkGame,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import {
+	restoreLockedOffers,
+	saveLockedOffer,
+} from "@/shop/LockedShopOffer";
 import type { PreRoundNetworkProps } from "@/shop/PreRoundLayout";
 import { PreRoundLayout } from "@/shop/PreRoundLayout";
 import {

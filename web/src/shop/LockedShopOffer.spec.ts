@@ -4,8 +4,8 @@ import {
 } from "bun:test";
 import { BulbroState } from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
-import { withEventMeta } from "@/game-events/GameEvents";
 import { classicMapSize } from "@/game-canvas";
+import { withEventMeta } from "@/game-events/GameEvents";
 import {
 	deltaTime,
 	nowTime,
