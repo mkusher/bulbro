@@ -172,6 +172,49 @@ export class LobbyConnection
 			.players;
 	}
 
+	get loadouts() {
+		return this
+			.#lobby
+			.loadouts;
+	}
+	updateLoadout(
+		player: Lobby["readyPlayers"][number],
+	) {
+		this.#connection.sendObject(
+			{
+				type: "lobby-player-updated",
+				gameId:
+					this
+						.id,
+				player,
+			},
+		);
+	}
+	upsertLoadout(
+		player: Lobby["readyPlayers"][number],
+	) {
+		return this.syncLobby(
+			{
+				...this
+					.#lobby,
+				loadouts:
+					[
+						...(
+							this
+								.loadouts ??
+							[]
+						).filter(
+							(
+								p,
+							) =>
+								p.id !==
+								player.id,
+						),
+						player,
+					],
+			},
+		);
+	}
 	get readyPlayers() {
 		return this
 			.#lobby

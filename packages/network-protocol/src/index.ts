@@ -130,10 +130,26 @@ export const PlayerPositionUpdated =
 	);
 
 /**
- * A player finished shopping. Sent by the client to the server and relayed to
- * the other players. `wave` is the wave that should start next and `player`
- * is the serialized player state after shopping.
+ * Live build preview while choosing upgrades or shopping. Does not set readiness.
+ * `wave` is the upcoming wave; only the sender’s own player may be updated.
  */
+export const ShopPlayerUpdated =
+	type(
+		{
+			type: "'shop-player-updated'",
+			gameId:
+				"string",
+			wave: "number.integer",
+			playerId:
+				"string",
+			player:
+				SerializedPlayer,
+			sentAt:
+				"number",
+		},
+	);
+
+/** A player locks in their full post-shop state for the upcoming wave. */
 export const NextWavePlayerReady =
 	type(
 		{
@@ -188,8 +204,11 @@ export const NextWaveStarted =
 
 export const WebsocketMessage =
 	HostStateUpdate.or(
-		PlayerStateUpdate,
+		ShopPlayerUpdated,
 	)
+		.or(
+			PlayerStateUpdate,
+		)
 		.or(
 			PlayerPositionUpdated,
 		)
@@ -211,6 +230,7 @@ export {
 	Connected,
 	GameStarted,
 	Lobby,
+	LobbyPlayerUpdated,
 	LobbySnapshot,
 	LobbyWebsocketMessage,
 	Player,

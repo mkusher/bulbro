@@ -168,3 +168,93 @@ test("authentication sends the connecting player a current lobby snapshot", asyn
 		);
 	}
 });
+
+test("authentication replays the peer's latest shop build without marking anyone ready", async () => {
+	const hostId =
+		crypto.randomUUID();
+	const guestId =
+		crypto.randomUUID();
+	const lobby =
+		registry.registerLobby(
+			{
+				id: hostId,
+				username:
+					"Host",
+			},
+		);
+	registry.addPlayer(
+		lobby.id,
+		{
+			id: guestId,
+			username:
+				"Guest",
+		},
+	);
+	registry.markGameStarted(
+		lobby.id,
+	);
+	const player =
+		{
+			id: hostId,
+			materialsAvailable: 23,
+		};
+	registry.updateShopPlayer(
+		lobby.id,
+		2,
+		hostId,
+		player,
+	);
+	const messages: object[] =
+		[];
+	websocketConnections.add(
+		guestId,
+		{
+			send: (
+				message: string,
+			) =>
+				messages.push(
+					JSON.parse(
+						message,
+					),
+				),
+			sendObject:
+				(
+					message: object,
+				) =>
+					messages.push(
+						message,
+					),
+		} as unknown as WebsocketConnection,
+	);
+	try {
+		await markAsConnected(
+			guestId,
+		);
+		expect(
+			messages,
+		).toContainEqual(
+			{
+				type: "shop-player-updated",
+				gameId:
+					lobby.id,
+				wave: 2,
+				playerId:
+					hostId,
+				player,
+				sentAt:
+					expect.any(
+						Number,
+					),
+			},
+		);
+		expect(
+			registry.nextWaveToStart(
+				lobby.id,
+			),
+		).toBeUndefined();
+	} finally {
+		websocketConnections.remove(
+			guestId,
+		);
+	}
+});

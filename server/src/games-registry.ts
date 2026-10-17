@@ -172,6 +172,136 @@ export class GamesRegistry {
 		return lobby;
 	}
 
+	updateLobbyPlayer(
+		id: string,
+		player: ReadyPlayer,
+	) {
+		const game =
+			this.#registry.get(
+				id,
+			);
+		if (
+			!game ||
+			this.#startedWaves.has(
+				id,
+			) ||
+			!game.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					player.id,
+			) ||
+			game.readyPlayers.some(
+				(
+					p,
+				) =>
+					p.id ===
+					player.id,
+			)
+		)
+			return;
+		const lobby =
+			{
+				...game,
+				loadouts:
+					[
+						...(
+							game.loadouts ??
+							[]
+						).filter(
+							(
+								p,
+							) =>
+								p.id !==
+								player.id,
+						),
+						player,
+					],
+			};
+		this.#registry.set(
+			id,
+			lobby,
+		);
+		return lobby;
+	}
+
+	#shopPlayers =
+		new Map<
+			string,
+			{
+				wave: number;
+				players: Map<
+					string,
+					object
+				>;
+			}
+		>();
+	updateShopPlayer(
+		id: string,
+		wave: number,
+		playerId: string,
+		player: object,
+	) {
+		const game =
+			this.#registry.get(
+				id,
+			);
+		if (
+			!game ||
+			!this.#startedWaves.has(
+				id,
+			) ||
+			wave !==
+				this.#startedWaves.get(
+					id,
+				)! +
+					1 ||
+			!game.players.some(
+				(
+					p,
+				) =>
+					p.id ===
+					playerId,
+			) ||
+			this.#nextWaveReadiness
+				.get(
+					id,
+				)
+				?.players.has(
+					playerId,
+				)
+		)
+			return false;
+		const shop =
+			this.#shopPlayers.get(
+				id,
+			) ?? {
+				wave,
+				players:
+					new Map<
+						string,
+						object
+					>(),
+			};
+		shop.players.set(
+			playerId,
+			player,
+		);
+		this.#shopPlayers.set(
+			id,
+			shop,
+		);
+		return true;
+	}
+	shopPlayers(
+		id: string,
+	) {
+		return this.#shopPlayers.get(
+			id,
+		);
+	}
+
 	markReady(
 		id: string,
 		readyPlayer: ReadyPlayer,
@@ -359,6 +489,25 @@ export class GamesRegistry {
 				players:
 					new Map(),
 			};
+		const shop =
+			this.#shopPlayers.get(
+				id,
+			) ?? {
+				wave,
+				players:
+					new Map<
+						string,
+						object
+					>(),
+			};
+		shop.players.set(
+			playerId,
+			player,
+		);
+		this.#shopPlayers.set(
+			id,
+			shop,
+		);
 		readiness.players.set(
 			playerId,
 			player,
@@ -493,6 +642,9 @@ export class GamesRegistry {
 		id: string,
 		wave: number,
 	) {
+		this.#shopPlayers.delete(
+			id,
+		);
 		this.#startedWaves.set(
 			id,
 			wave,

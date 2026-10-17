@@ -1,4 +1,7 @@
-import { WebsocketMessage } from "@bulbro/network-protocol";
+import {
+	LobbyPlayerUpdated,
+	WebsocketMessage,
+} from "@bulbro/network-protocol";
 import { type } from "arktype";
 import type { Logger } from "pino";
 import {
@@ -37,7 +40,9 @@ export type GameRelayDependencies =
 	{
 		rooms: Pick<
 			GamesRegistry,
-			"find"
+			| "find"
+			| "updateLobbyPlayer"
+			| "updateShopPlayer"
 		>;
 		connections: {
 			get(
@@ -84,6 +89,46 @@ export class WebsocketGameController {
 			]: unknown;
 		},
 	) {
+		const loadout =
+			LobbyPlayerUpdated(
+				wsMessage,
+			);
+		if (
+			!(
+				loadout instanceof
+				type.errors
+			)
+		) {
+			if (
+				loadout
+					.player
+					.id !==
+				userId
+			)
+				return;
+			const lobby =
+				this.#rooms.updateLobbyPlayer(
+					loadout.gameId,
+					loadout.player,
+				);
+			if (
+				!lobby
+			)
+				return;
+			for (const member of lobby.players)
+				if (
+					member.id !==
+					userId
+				)
+					this.#connections
+						.get(
+							member.id,
+						)
+						?.sendObject(
+							loadout,
+						);
+			return;
+		}
 		const message =
 			WebsocketMessage(
 				wsMessage,
@@ -97,6 +142,44 @@ export class WebsocketGameController {
 		switch (
 			message.type
 		) {
+			case "shop-player-updated": {
+				if (
+					message.playerId !==
+						userId ||
+					message
+						.player
+						.id !==
+						userId ||
+					!this.#rooms.updateShopPlayer(
+						message.gameId,
+						message.wave,
+						userId,
+						message.player,
+					)
+				)
+					return;
+				const game =
+					this.#rooms.find(
+						message.gameId,
+					)!;
+				for (const member of game.players)
+					if (
+						member.id !==
+						userId
+					)
+						this.#connections
+							.get(
+								member.id,
+							)
+							?.sendObject(
+								{
+									...message,
+									sentAt:
+										Date.now(),
+								},
+							);
+				return;
+			}
 			case "next-wave-player-ready": {
 				if (
 					message.playerId !==

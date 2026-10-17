@@ -347,6 +347,19 @@ export function processLobbySocketMessage(
 					);
 				return;
 			}
+			case "lobby-player-updated": {
+				const lobby =
+					currentLobby.value;
+				if (
+					lobby?.id ===
+					receivedMessage.gameId
+				)
+					currentLobby.value =
+						lobby.upsertLoadout(
+							receivedMessage.player,
+						);
+				return;
+			}
 			case "player-ready": {
 				logger.info(
 					{

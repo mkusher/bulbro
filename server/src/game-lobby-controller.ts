@@ -204,6 +204,40 @@ export async function markAsConnected(
 				player,
 			},
 		);
+		const shop =
+			registry.shopPlayers(
+				id,
+			);
+		if (
+			shop
+		)
+			for (const [
+				idOfPlayer,
+				player,
+			] of shop.players) {
+				if (
+					idOfPlayer ===
+					playerId
+				)
+					continue;
+				websocketConnections
+					.get(
+						playerId,
+					)
+					?.sendObject(
+						{
+							type: "shop-player-updated",
+							gameId:
+								id,
+							wave: shop.wave,
+							playerId:
+								idOfPlayer,
+							player,
+							sentAt:
+								Date.now(),
+						},
+					);
+			}
 		// Both players may have been ready while one of them was offline.
 		startNextWaveIfReady(
 			id,

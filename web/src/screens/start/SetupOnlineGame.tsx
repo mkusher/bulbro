@@ -1,6 +1,9 @@
 import { computed } from "@preact/signals";
 import { ShareIcon } from "lucide-react";
-import { useState } from "preact/hooks";
+import {
+	useLayoutEffect,
+	useState,
+} from "preact/hooks";
 import { useStartBgm } from "@/audio/useStartBgm";
 import { BulbroCard } from "@/bulbro/BulbroCard";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -16,7 +19,10 @@ import {
 import { currentUser } from "@/network/currentUser";
 import { lobbyConnectionError } from "@/network/LobbyConnection";
 import { startNetworkGameAsHost } from "@/network/start-game";
-import { createPlayer } from "@/player";
+import {
+	createPlayer,
+	type Player,
+} from "@/player";
 import { isTgApp } from "@/tg-app";
 import { BulbroSelector } from "@/ui/BulbroSelector";
 import { DifficultySelector } from "@/ui/DifficultySelector";
@@ -135,6 +141,39 @@ export function SetupOnlineGame() {
 		window.navigator.canShare(
 			share,
 		);
+	const lobbyId =
+		currentLobby
+			.value
+			?.id;
+	const selection =
+		JSON.stringify(
+			{
+				id: iam.id,
+				bulbro:
+					{
+						...firstBulbro,
+						weapons:
+							[
+								...firstBulbro.weapons,
+								...loadout.weapons,
+							],
+					},
+			},
+		);
+	useLayoutEffect(() => {
+		if (
+			!iam.isGuest
+		)
+			currentLobby.value?.updateLoadout(
+				JSON.parse(
+					selection,
+				),
+			);
+	}, [
+		iam.isGuest,
+		lobbyId,
+		selection,
+	]);
 	if (
 		iam.isGuest
 	) {
@@ -242,7 +281,15 @@ export function SetupOnlineGame() {
 				iam.id,
 		);
 	const anotherPlayerBulbro =
-		readyPlayers.value.find(
+		(
+			[
+				...readyPlayers.value,
+				...(currentLobby
+					.value
+					?.loadouts ??
+					[]),
+			] as Player[]
+		).find(
 			(
 				p,
 			) =>
@@ -260,6 +307,15 @@ export function SetupOnlineGame() {
 							ready,
 						) =>
 							ready.id ===
+							player.id,
+					);
+				const selectedPlayer =
+					readyPlayer ??
+					currentLobby.value?.loadouts?.find(
+						(
+							p,
+						) =>
+							p.id ===
 							player.id,
 					);
 				const isLocal =
@@ -280,9 +336,9 @@ export function SetupOnlineGame() {
 							? bulbroName(
 									firstBulbro,
 								)
-							: readyPlayer &&
+							: selectedPlayer &&
 								bulbroName(
-									readyPlayer.bulbro,
+									selectedPlayer.bulbro,
 								),
 				};
 			},
@@ -444,7 +500,15 @@ export function SetupOnlineGame() {
 											<>
 												<p>
 													{t(
-														"setup.ready",
+														readyPlayers.value.some(
+															(
+																p,
+															) =>
+																p.id ===
+																anotherPlayer.id,
+														)
+															? "setup.ready"
+															: "setup.notReady",
 													)}
 												</p>
 												<BulbroCard

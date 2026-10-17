@@ -326,3 +326,359 @@ test("relays only within the named room and skips disconnected endpoints", () =>
 		],
 	);
 });
+
+test("shares lobby choices without readying, retaining them for late joiners", () => {
+	const {
+		controller,
+		rooms,
+		lobby,
+		hostId,
+		guestId,
+		connect,
+	} =
+		createRelay();
+	const received =
+		connect(
+			guestId,
+		);
+	const player =
+		{
+			id: hostId,
+			bulbro:
+				{
+					id: "well-rounded",
+					name: "Well rounded",
+					statBonuses:
+						{},
+					style:
+						{
+							faceType:
+								"normal",
+							wearingItems:
+								[],
+						},
+					weapons:
+						[],
+				},
+		};
+	const message =
+		{
+			type: "lobby-player-updated",
+			gameId:
+				lobby.id,
+			player,
+		};
+	controller.routeMessage(
+		hostId,
+		message,
+	);
+	expect(
+		received,
+	).toEqual(
+		[
+			message,
+		],
+	);
+	expect(
+		rooms.find(
+			lobby.id,
+		)
+			?.loadouts,
+	).toEqual(
+		[
+			player,
+		],
+	);
+	expect(
+		rooms.find(
+			lobby.id,
+		)
+			?.readyPlayers,
+	).toEqual(
+		[],
+	);
+	controller.routeMessage(
+		guestId,
+		message,
+	);
+	controller.routeMessage(
+		"outsider",
+		{
+			...message,
+			player:
+				{
+					...player,
+					id: "outsider",
+				},
+		},
+	);
+	expect(
+		received,
+	).toHaveLength(
+		1,
+	);
+	rooms.markReady(
+		lobby.id,
+		player,
+	);
+	controller.routeMessage(
+		hostId,
+		{
+			...message,
+			player:
+				{
+					...player,
+					bulbro:
+						{
+							...player.bulbro,
+							id: "changed",
+						},
+				},
+		},
+	);
+	expect(
+		received,
+	).toHaveLength(
+		1,
+	);
+	rooms.markGameStarted(
+		lobby.id,
+	);
+	controller.routeMessage(
+		guestId,
+		{
+			...message,
+			player:
+				{
+					...player,
+					id: guestId,
+				},
+		},
+	);
+	expect(
+		rooms.find(
+			lobby.id,
+		)
+			?.loadouts,
+	).toEqual(
+		[
+			player,
+		],
+	);
+});
+
+test("shares validated shop snapshots without changing readiness and rejects stale or forged updates", () => {
+	const {
+		controller,
+		rooms,
+		lobby,
+		hostId,
+		guestId,
+		connect,
+	} =
+		createRelay();
+	const received =
+		connect(
+			guestId,
+		);
+	const player =
+		{
+			id: hostId,
+			characterId:
+				"well-rounded",
+			level: 2,
+			totalExperience: 10,
+			healthPoints: 10,
+			materialsAvailable: 35,
+			statSources:
+				[
+					{
+						id: "level-up-2",
+						kind: "upgrade",
+						bonuses:
+							{
+								damage: 5,
+							},
+					},
+				],
+			items:
+				[
+					"coffee",
+				],
+			weapons:
+				[],
+		};
+	const message =
+		{
+			type: "shop-player-updated",
+			gameId:
+				lobby.id,
+			wave: 2,
+			playerId:
+				hostId,
+			player,
+			sentAt: 0,
+		};
+	controller.routeMessage(
+		hostId,
+		message,
+	);
+	expect(
+		received,
+	).toHaveLength(
+		0,
+	);
+	rooms.markGameStarted(
+		lobby.id,
+	);
+	controller.routeMessage(
+		hostId,
+		message,
+	);
+	expect(
+		received,
+	).toEqual(
+		[
+			{
+				...message,
+				sentAt:
+					expect.any(
+						Number,
+					),
+			},
+		],
+	);
+	expect(
+		rooms.nextWaveToStart(
+			lobby.id,
+		),
+	).toBeUndefined();
+	expect(
+		rooms
+			.shopPlayers(
+				lobby.id,
+			)
+			?.players.get(
+				hostId,
+			),
+	).toEqual(
+		player,
+	);
+	for (const invalid of [
+		{
+			...message,
+			wave: 1,
+		},
+		{
+			...message,
+			wave: 3,
+		},
+		{
+			...message,
+			playerId:
+				guestId,
+		},
+		{
+			...message,
+			player:
+				{
+					...player,
+					id: guestId,
+				},
+		},
+		{
+			...message,
+			player:
+				{
+					...player,
+					items:
+						[
+							42,
+						],
+				},
+		},
+	])
+		controller.routeMessage(
+			hostId,
+			invalid,
+		);
+	controller.routeMessage(
+		"outsider",
+		{
+			...message,
+			playerId:
+				"outsider",
+			player:
+				{
+					...player,
+					id: "outsider",
+				},
+		},
+	);
+	expect(
+		received,
+	).toHaveLength(
+		1,
+	);
+	rooms.markReadyForNextWave(
+		lobby.id,
+		2,
+		hostId,
+		player,
+	);
+	controller.routeMessage(
+		hostId,
+		{
+			...message,
+			player:
+				{
+					...player,
+					materialsAvailable: 0,
+				},
+		},
+	);
+	expect(
+		received,
+	).toHaveLength(
+		1,
+	);
+	rooms.markNotReadyForNextWave(
+		lobby.id,
+		2,
+		hostId,
+	);
+	controller.routeMessage(
+		hostId,
+		{
+			...message,
+			player:
+				{
+					...player,
+					materialsAvailable: 0,
+				},
+		},
+	);
+	expect(
+		received,
+	).toHaveLength(
+		2,
+	);
+	rooms.markNextWaveStarted(
+		lobby.id,
+		2,
+	);
+	expect(
+		rooms.shopPlayers(
+			lobby.id,
+		),
+	).toBeUndefined();
+	controller.routeMessage(
+		hostId,
+		message,
+	);
+	expect(
+		received,
+	).toHaveLength(
+		2,
+	);
+});

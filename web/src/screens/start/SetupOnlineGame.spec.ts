@@ -13,6 +13,7 @@ import { LocationProvider } from "preact-iso";
 import { logger } from "@/logger";
 import {
 	currentLobby,
+	processLobbySocketMessage,
 	readyPlayers,
 } from "@/network/currentLobby";
 import {
@@ -73,21 +74,39 @@ const lobby =
 	};
 
 class TestWebSocket extends EventTarget {
+	static sent: object[] =
+		[];
 	constructor(
 		_url:
 			| string
 			| URL,
 	) {
 		super();
+		queueMicrotask(
+			() =>
+				this.dispatchEvent(
+					new Event(
+						"open",
+					),
+				),
+		);
 	}
 	send(
 		_message: string,
-	) {}
+	) {
+		TestWebSocket.sent.push(
+			JSON.parse(
+				_message,
+			),
+		);
+	}
 	close() {}
 }
 
 beforeEach(
 	() => {
+		TestWebSocket.sent =
+			[];
 		globalThis.WebSocket =
 			TestWebSocket as unknown as typeof WebSocket;
 		currentUser.value =
@@ -423,5 +442,115 @@ it("shows a ready failure and allows retrying", async () => {
 		[
 			"host-id",
 		],
+	);
+});
+
+it("publishes lobby choices and displays remote changes before Ready", async () => {
+	const {
+		SetupOnlineGame,
+	} =
+		await import(
+			"./SetupOnlineGame"
+		);
+	const container =
+		renderScreen(
+			SetupOnlineGame,
+		);
+	await Bun.sleep(
+		20,
+	);
+	expect(
+		TestWebSocket.sent,
+	).toContainEqual(
+		expect.objectContaining(
+			{
+				type: "lobby-player-updated",
+				gameId:
+					lobby.id,
+				player:
+					expect.objectContaining(
+						{
+							id: "host-id",
+						},
+					),
+			},
+		),
+	);
+	const {
+		wellRoundedBulbro,
+	} =
+		await import(
+			"@/characters-definitions"
+		);
+	const process =
+		processLobbySocketMessage(
+			logger,
+			() => {},
+		);
+	process(
+		{
+			type: "lobby-player-updated",
+			gameId:
+				lobby.id,
+			player:
+				{
+					id: "guest-id",
+					bulbro:
+						wellRoundedBulbro,
+				},
+		},
+	);
+	await Bun.sleep(
+		20,
+	);
+	expect(
+		readyPlayers.value,
+	).toEqual(
+		[],
+	);
+	expect(
+		container.querySelector(
+			'[data-player-id="guest-id"]',
+		)
+			?.textContent,
+	).toContain(
+		"Well Rounded",
+	);
+	expect(
+		container.querySelector(
+			'[data-player-id="guest-id"]',
+		)
+			?.textContent,
+	).toContain(
+		"Not Ready",
+	);
+	process(
+		{
+			type: "lobby-player-updated",
+			gameId:
+				"another-room",
+			player:
+				{
+					id: "guest-id",
+					bulbro:
+						{
+							...wellRoundedBulbro,
+							name: "wrong room",
+						},
+				},
+		},
+	);
+	expect(
+		currentLobby
+			.value
+			?.loadouts?.[0]
+			?.bulbro
+			.name,
+	).toBe(
+		wellRoundedBulbro.name,
+	);
+	render(
+		null,
+		container,
 	);
 });

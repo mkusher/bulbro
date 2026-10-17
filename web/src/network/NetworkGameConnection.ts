@@ -13,6 +13,7 @@ import {
 } from "@/controls";
 import {
 	isLoading,
+	isRound,
 	markAsLoading,
 	markAsRunningWave,
 	waveResult,
@@ -257,6 +258,122 @@ export class NetworkGameConnection {
 		);
 	}
 
+	#pendingShopPlayer?: Extract<
+		WebsocketMessage,
+		{
+			type:
+				| "shop-player-updated"
+				| "next-wave-player-ready";
+		}
+	>;
+	async updateShopPlayer() {
+		if (
+			this
+				.#pendingShopPlayer &&
+			!isRound.value
+		) {
+			const pending =
+				this
+					.#pendingShopPlayer;
+			this.#pendingShopPlayer =
+				undefined;
+			this.#applyShopPlayer(
+				pending,
+			);
+		}
+		const state =
+			waveState.value;
+		const player =
+			state.players.find(
+				(
+					p,
+				) =>
+					p.id ===
+					currentUser
+						.value
+						.id,
+			);
+		if (
+			!player ||
+			this.readyForNextWave.value.includes(
+				player.id,
+			)
+		)
+			return;
+		await this.#inGameCommunicationChannel.send(
+			{
+				type: "shop-player-updated",
+				gameId:
+					this
+						.id,
+				wave:
+					state
+						.round
+						.wave +
+					1,
+				playerId:
+					player.id,
+				player:
+					player.toJSON(),
+				sentAt:
+					Date.now(),
+			},
+		);
+	}
+
+	#applyShopPlayer(
+		message: Extract<
+			WebsocketMessage,
+			{
+				type:
+					| "shop-player-updated"
+					| "next-wave-player-ready";
+			}
+		>,
+	) {
+		const state =
+			waveState.value;
+		if (
+			message.wave !==
+				state
+					.round
+					.wave +
+					1 ||
+			message.playerId !==
+				this
+					.#remotePlayerId ||
+			message
+				.player
+				.id !==
+				message.playerId
+		)
+			return;
+		if (
+			isRound.value
+		) {
+			this.#pendingShopPlayer =
+				message;
+			return;
+		}
+		waveState.value =
+			{
+				...state,
+				players:
+					state.players.map(
+						(
+							p,
+						) =>
+							p.id ===
+							message.playerId
+								? restoreBulbroState(
+										message.player as typeof message.player &
+											BulbroStateProperties,
+									)
+								: p,
+					),
+			};
+	}
+
 	#removeReadyPlayer(
 		wave: number,
 		playerId: string,
@@ -331,7 +448,15 @@ export class NetworkGameConnection {
 			switch (
 				message.type
 			) {
+				case "shop-player-updated":
+					this.#applyShopPlayer(
+						message,
+					);
+					return;
 				case "next-wave-player-ready":
+					this.#applyShopPlayer(
+						message,
+					);
 					this.#addReadyPlayer(
 						message.wave,
 						message.playerId,
