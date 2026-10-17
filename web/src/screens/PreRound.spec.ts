@@ -11,6 +11,7 @@ import {
 	h,
 	render,
 } from "preact";
+import { audioEngine } from "@/audio/AudioEngine";
 import { BulbroState } from "@/bulbro/BulbroState";
 import { getTotalExperienceForLevel } from "@/bulbro/Levels";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -922,4 +923,82 @@ it("removes a purchased offer from saved locks", async () => {
 	).toHaveLength(
 		0,
 	);
+});
+
+it("returns from settings to the same shop without changing offers or player state", async () => {
+	const initAudio =
+		spyOn(
+			audioEngine,
+			"init",
+		).mockResolvedValue(
+			undefined,
+		);
+	try {
+		startPreRound(
+			0,
+		);
+		const shopText =
+			root.textContent;
+		const state =
+			waveState.value;
+		const settings =
+			[
+				...root.querySelectorAll(
+					"button",
+				),
+			].find(
+				(
+					button,
+				) =>
+					button.textContent ===
+					"Settings",
+			);
+		expect(
+			settings,
+		).toBeDefined();
+		settings!.click();
+		await flush();
+		expect(
+			root.querySelector(
+				"h2",
+			)
+				?.textContent,
+		).toBe(
+			"Settings",
+		);
+		expect(
+			root.querySelector(
+				"#language",
+			),
+		).not.toBeNull();
+		const back =
+			[
+				...root.querySelectorAll(
+					"button",
+				),
+			].find(
+				(
+					button,
+				) =>
+					button.textContent ===
+					"Back to shop",
+			);
+		expect(
+			back,
+		).toBeDefined();
+		back!.click();
+		await flush();
+		expect(
+			root.textContent,
+		).toBe(
+			shopText,
+		);
+		expect(
+			waveState.value,
+		).toBe(
+			state,
+		);
+	} finally {
+		initAudio.mockRestore();
+	}
 });

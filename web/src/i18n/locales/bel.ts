@@ -571,6 +571,8 @@ export default {
 		"Налады",
 	"settings.backToMenu":
 		"Вярнуцца ў галоўнае меню",
+	"settings.backToShop":
+		"Вярнуцца ў краму",
 	"settings.display":
 		"Дысплей",
 	"settings.sizeFor":

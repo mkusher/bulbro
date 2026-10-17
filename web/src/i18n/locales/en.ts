@@ -569,6 +569,8 @@ export default {
 		"Settings",
 	"settings.backToMenu":
 		"Back to main menu",
+	"settings.backToShop":
+		"Back to shop",
 	"settings.display":
 		"Display",
 	"settings.sizeFor":
