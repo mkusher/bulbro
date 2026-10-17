@@ -1,3 +1,14 @@
+import type { BulbroState } from "@/bulbro/BulbroState";
+import type { Stats } from "@/bulbro/BulbroCharacter";
+import {
+	BulbroStateStats,
+	formatStatName,
+	formatStatValue,
+} from "@/bulbro/BulbroStats";
+import { findItemById } from "@/items/Items";
+import { ItemSlots } from "@/shop/ItemSlots";
+import { WeaponSlots } from "@/shop/WeaponSlots";
+import { ownedWeaponFromState } from "@/weapon/WeaponTiers";
 import { t } from "@/i18n";
 import {
 	Card,
@@ -9,6 +20,7 @@ import {
  * Connection and readiness of a single online game participant.
  */
 export interface PlayerStatus {
+	build?: BulbroState;
 	id: string;
 	username: string;
 	connected: boolean;
@@ -79,7 +91,7 @@ export function PlayersStatus({
 								data-player-id={
 									player.id
 								}
-								className="flex items-center justify-between gap-2"
+								className="flex flex-wrap items-center justify-between gap-2"
 							>
 								<span className="flex items-center gap-2 min-w-0">
 									<span
@@ -154,6 +166,102 @@ export function PlayersStatus({
 										activeClassName="bg-blue-100 text-blue-800"
 									/>
 								</span>
+								{player.build && (
+									<details
+										className="w-full"
+										data-player-build={
+											player.id
+										}
+									>
+										<summary className="cursor-pointer text-sm">
+											{t(
+												"characterStats.current",
+											)}
+										</summary>
+										<div className="grid gap-3 pt-3">
+											<p>
+												{t(
+													"preround.materials",
+													{
+														count:
+															player
+																.build
+																.materialsAvailable,
+													},
+												)}
+											</p>
+											<ul>
+												{player.build.statSources
+													.filter(
+														(
+															source,
+														) =>
+															source.kind ===
+															"upgrade",
+													)
+													.map(
+														(
+															source,
+														) => (
+															<li
+																key={
+																	source.id
+																}
+															>
+																{Object.entries(
+																	source.bonuses,
+																)
+																	.map(
+																		([
+																			stat,
+																			value,
+																		]) =>
+																			formatStatName(
+																				stat,
+																			) +
+																			" +" +
+																			formatStatValue(
+																				stat as keyof Stats,
+																				value,
+																			),
+																	)
+																	.join(
+																		" · ",
+																	)}
+															</li>
+														),
+													)}
+											</ul>
+											<WeaponSlots
+												weapons={player.build.weapons.map(
+													ownedWeaponFromState,
+												)}
+												maxSlots={
+													player
+														.build
+														.stats
+														.maxWeapons
+												}
+											/>
+											<ItemSlots
+												items={player.build.items.flatMap(
+													(
+														id,
+													) =>
+														findItemById(
+															id,
+														) ??
+														[],
+												)}
+											/>
+											<BulbroStateStats
+												bulbroState={
+													player.build
+												}
+											/>
+										</div>
+									</details>
+								)}
 							</li>
 						),
 					)}

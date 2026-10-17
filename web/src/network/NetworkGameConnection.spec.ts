@@ -724,3 +724,172 @@ describe("NetworkGameConnection next wave", () => {
 		);
 	});
 });
+
+it("shares local shop changes and applies remote purchases and skills before Ready", async () => {
+	isRound.value = false;
+	const {
+		connection,
+		channel,
+	} =
+		makeConnection(
+			hostId,
+		);
+	await connection.updateShopPlayer();
+	expect(
+		channel.sent.at(
+			-1,
+		),
+	).toMatchObject(
+		{
+			type: "shop-player-updated",
+			playerId:
+				hostId,
+			wave: 2,
+		},
+	);
+	const local =
+		waveState
+			.value
+			.players[0]!;
+	const remote =
+		player(
+			guestId,
+			17,
+		).withStatSource(
+			{
+				id: "level-up-2",
+				kind: "upgrade",
+				bonuses:
+					{
+						damage: 5,
+					},
+			},
+		);
+	channel.deliver(
+		{
+			type: "shop-player-updated",
+			gameId,
+			wave: 2,
+			playerId:
+				guestId,
+			player:
+				remote.toJSON(),
+			sentAt: 1,
+		},
+	);
+	expect(
+		waveState
+			.value
+			.players[0],
+	).toBe(
+		local,
+	);
+	expect(
+		waveState
+			.value
+			.players[1]
+			?.materialsAvailable,
+	).toBe(
+		17,
+	);
+	expect(
+		waveState
+			.value
+			.players[1]
+			?.statSources,
+	).toContainEqual(
+		{
+			id: "level-up-2",
+			kind: "upgrade",
+			bonuses:
+				{
+					damage: 5,
+				},
+		},
+	);
+	expect(
+		connection
+			.readyForNextWave
+			.value,
+	).toEqual(
+		[],
+	);
+	channel.deliver(
+		{
+			type: "shop-player-updated",
+			gameId,
+			wave: 1,
+			playerId:
+				guestId,
+			player:
+				player(
+					guestId,
+					99,
+				).toJSON(),
+			sentAt: 2,
+		},
+	);
+	expect(
+		waveState
+			.value
+			.players[1]
+			?.materialsAvailable,
+	).toBe(
+		17,
+	);
+	await connection.markReadyForNextWave();
+	const count =
+		channel
+			.sent
+			.length;
+	await connection.updateShopPlayer();
+	expect(
+		channel.sent,
+	).toHaveLength(
+		count,
+	);
+});
+
+it("keeps an early shop snapshot until the local browser finishes its wave", async () => {
+	const {
+		connection,
+		channel,
+	} =
+		makeConnection(
+			hostId,
+		);
+	isRound.value = true;
+	channel.deliver(
+		{
+			type: "shop-player-updated",
+			gameId,
+			wave: 2,
+			playerId:
+				guestId,
+			player:
+				player(
+					guestId,
+					17,
+				).toJSON(),
+			sentAt: 1,
+		},
+	);
+	expect(
+		waveState
+			.value
+			.players[1]
+			?.materialsAvailable,
+	).not.toBe(
+		17,
+	);
+	isRound.value = false;
+	await connection.updateShopPlayer();
+	expect(
+		waveState
+			.value
+			.players[1]
+			?.materialsAvailable,
+	).toBe(
+		17,
+	);
+});

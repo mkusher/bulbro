@@ -81,6 +81,17 @@ export const ReadyPlayer =
 		},
 	);
 
+export const LobbyPlayerUpdated =
+	type(
+		{
+			type: "'lobby-player-updated'",
+			gameId:
+				"string",
+			player:
+				ReadyPlayer,
+		},
+	);
+
 export const Lobby =
 	type(
 		{
@@ -89,6 +100,8 @@ export const Lobby =
 				"string",
 			players:
 				Player.array(),
+			"loadouts?":
+				ReadyPlayer.array(),
 			readyPlayers:
 				ReadyPlayer.array(),
 			createdAt:
@@ -161,8 +174,11 @@ export const GameStarted =
 	);
 export const LobbyWebsocketMessage =
 	Connected.or(
-		PlayerJoined,
+		LobbyPlayerUpdated,
 	)
+		.or(
+			PlayerJoined,
+		)
 		.or(
 			LobbySnapshot,
 		)

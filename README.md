@@ -50,3 +50,15 @@ bun run start            # Start server (port 8080)
 bun run dev              # Start server with --watch
 bun run format           # Format server/src with Biome
 ```
+
+## Online lobby and shop
+
+Two-player online games share character and starting weapon choices in the lobby
+as they change, before Ready. Between waves, teammates can inspect each other’s
+chosen upgrade bonuses, weapons, items, materials, and stats in the expandable
+player panel while leveling up or shopping. Purchases, sales, combines, and
+rerolls update the shared build immediately. Ready locks the local shop; Not Ready
+unlocks it. The server starts the next wave when both players are connected and ready.
+
+See [the network protocol](docs/network-game-protocol.html) for message schemas,
+validation, and reconnect limitations.

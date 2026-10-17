@@ -15,6 +15,7 @@ export type LiveStateMessage =
 		WebsocketMessage,
 		{
 			type:
+				| "shop-player-updated"
 				| "next-wave-player-ready"
 				| "next-wave-player-not-ready"
 				| "next-wave-started";

@@ -1,10 +1,14 @@
-import { useState } from "preact/hooks";
+import {
+	useLayoutEffect,
+	useState,
+} from "preact/hooks";
 import { useStartBgm } from "@/audio";
 import { findBulbroById } from "@/characters-definitions";
 import { startWave } from "@/currentGameProcess";
 import { withEventMeta } from "@/game-events/GameEvents";
 import { rerollPrice as getRerollPrice } from "@/game-formulas";
 import { recordReroll } from "@/gameStats";
+import { logger } from "@/logger";
 import { t } from "@/i18n";
 import { bulbroName } from "@/i18n/game";
 import { findItemById } from "@/items/Items";
@@ -158,6 +162,11 @@ function useNetworkReadiness():
 									bulbro.characterId,
 								),
 							),
+						build:
+							player.id !==
+							localPlayerId
+								? bulbro
+								: undefined,
 						level:
 							bulbro?.level,
 					};
@@ -362,6 +371,45 @@ export function PreRound() {
 			generateShopItemsFromWaveState,
 		);
 
+	const game =
+		currentNetworkGame.value;
+	const localPlayer =
+		waveState.value.players.find(
+			(
+				p,
+			) =>
+				p.id ===
+				currentUser
+					.value
+					.id,
+		);
+	const currentWave =
+		waveState
+			.value
+			.round
+			.wave;
+	useLayoutEffect(() => {
+		if (
+			game
+		)
+			void game
+				.updateShopPlayer()
+				.catch(
+					(
+						error,
+					) =>
+						logger.error(
+							{
+								error,
+							},
+							"Could not share shop state",
+						),
+				);
+	}, [
+		game,
+		localPlayer,
+		currentWave,
+	]);
 	useStartBgm();
 	const network =
 		useNetworkReadiness();

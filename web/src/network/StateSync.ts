@@ -108,6 +108,8 @@ export class StateSync {
 				message.type ===
 					"next-wave-player-not-ready" ||
 				message.type ===
+					"shop-player-updated" ||
+				message.type ===
 					"next-wave-started"
 			)
 				return;

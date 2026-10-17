@@ -409,6 +409,8 @@ it("shows only the local player's level-ups with the players panel online", asyn
 						"player-1",
 					],
 				),
+			updateShopPlayer:
+				async () => {},
 			markNotReadyForNextWave:
 				() => {},
 		} as never;
