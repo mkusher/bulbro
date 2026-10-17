@@ -5,6 +5,7 @@ import {
 	rollItemTier,
 	shopItemDefinitions,
 } from "@/items/Items";
+import { shopItemKey } from "@/shop/Shop";
 import type {
 	ItemShopItem,
 	ShopItem,
@@ -240,6 +241,8 @@ export interface GenerateShopItemsOptions
 	extends GenerateWeaponShopItemsOptions {
 	/** Items that can be offered (default: shopItemDefinitions) */
 	items?: ItemDefinition[];
+	/** Offers carried over with their original prices. */
+	lockedItems?: ShopItem[];
 	/** Chance of a slot to offer a weapon (default: weaponSlotChance) */
 	weaponChance?: number;
 }
@@ -261,7 +264,14 @@ export function generateShopItems(
 		items = shopItemDefinitions,
 		luck = 0,
 		weaponChance = weaponSlotChance,
+		lockedItems = [],
 	} = options;
+	const lockedKeys =
+		new Set(
+			lockedItems.map(
+				shopItemKey,
+			),
+		);
 	const weapons =
 		generateWeaponShopItems(
 			bulbro,
@@ -274,12 +284,44 @@ export function generateShopItems(
 				inflation,
 			},
 		);
-	let remainingItems =
-		items;
-	const shopItems: ShopItem[] =
-		[];
 	for (
-		let slot = 0;
+		let i =
+			weapons.length -
+			1;
+		i >=
+		0;
+		i--
+	) {
+		if (
+			lockedKeys.has(
+				shopItemKey(
+					weapons[
+						i
+					]!,
+				),
+			)
+		)
+			weapons.splice(
+				i,
+				1,
+			);
+	}
+	let remainingItems =
+		items.filter(
+			(
+				item,
+			) =>
+				!lockedKeys.has(
+					`item:${item.id}`,
+				),
+		);
+	const shopItems: ShopItem[] =
+		[
+			...lockedItems,
+		];
+	for (
+		let slot =
+			lockedItems.length;
 		slot <
 		maxItems;
 		slot++

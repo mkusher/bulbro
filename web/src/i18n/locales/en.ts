@@ -443,6 +443,10 @@ export default {
 
 	"shop.title":
 		"Shop",
+	"shop.lockOffer":
+		"Lock",
+	"shop.unlockOffer":
+		"Unlock",
 	"shop.reroll":
 		"Re-roll ${price}",
 	"shop.locked":

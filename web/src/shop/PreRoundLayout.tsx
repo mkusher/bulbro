@@ -79,6 +79,9 @@ export interface PreRoundLayoutProps {
 	/** Callback when the start wave button is clicked */
 	onStartWave?: () => void;
 	/** Callback when the re-roll button is clicked */
+	onToggleLock?: (
+		item: ShopItem,
+	) => void;
 	onReroll?: () => void;
 	/** Current re-roll price */
 	rerollPrice?: number;
@@ -97,6 +100,7 @@ export function PreRoundLayout({
 	shopItems,
 	prevWaveStats,
 	onPurchase,
+	onToggleLock,
 	onStartWave,
 	onReroll,
 	rerollPrice,
@@ -223,6 +227,9 @@ export function PreRoundLayout({
 
 				{/* Shop */}
 				<Shop
+					onToggleLock={
+						onToggleLock
+					}
 					weaponsFull={
 						player
 							.weapons

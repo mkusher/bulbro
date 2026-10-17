@@ -800,7 +800,7 @@ describe("upgrade re-rolls", () => {
 		);
 	});
 
-	it("resets the re-roll count once the upgrade is picked", () => {
+	it("keeps the re-roll count across upgrades in the wave", () => {
 		const leveled =
 			spawn().gainMaterials(
 				getTotalExperienceForLevel(
@@ -819,7 +819,7 @@ describe("upgrade re-rolls", () => {
 		expect(
 			picked.upgradeRerollCount,
 		).toBe(
-			0,
+			1,
 		);
 		expect(
 			picked.nextLevelUpLevel,

@@ -445,6 +445,10 @@ export default {
 
 	"shop.title":
 		"Крама",
+	"shop.lockOffer":
+		"Заблакаваць",
+	"shop.unlockOffer":
+		"Разблакаваць",
 	"shop.reroll":
 		"Перакінуць ${price}",
 	"shop.locked":

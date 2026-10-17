@@ -26,12 +26,14 @@ export type WeaponShopItem =
 		/** Omitted for legacy tier I previews. */
 		tier?: WeaponTier;
 		price: number;
+		locked?: boolean;
 	};
 
 export type ItemShopItem =
 	{
 		item: ItemDefinition;
 		price: number;
+		locked?: boolean;
 	};
 
 /** A weapon or an item offered in the shop */
@@ -193,6 +195,9 @@ export interface ShopProps {
 	onPurchase?: (
 		item: ShopItem,
 	) => void;
+	onToggleLock?: (
+		item: ShopItem,
+	) => void;
 	onReroll?: () => void;
 	rerollPrice?: number;
 	/** Locks purchases and re-rolls, e.g. after the player is ready in an online game */
@@ -209,6 +214,7 @@ export function Shop({
 	items,
 	availableMaterials,
 	onPurchase,
+	onToggleLock,
 	onReroll,
 	rerollPrice,
 	disabled = false,
@@ -417,6 +423,34 @@ export function Shop({
 															},
 														)}
 										</Button>
+										{onToggleLock && (
+											<Button
+												size="sm"
+												variant={
+													item.locked
+														? "secondary"
+														: "outline"
+												}
+												className="w-full h-5 text-[8px] px-1 py-0"
+												aria-pressed={
+													!!item.locked
+												}
+												disabled={
+													disabled
+												}
+												onClick={() =>
+													onToggleLock(
+														item,
+													)
+												}
+											>
+												{t(
+													item.locked
+														? "shop.unlockOffer"
+														: "shop.lockOffer",
+												)}
+											</Button>
+										)}
 									</CardContent>
 								</Card>
 							);

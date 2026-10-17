@@ -273,3 +273,84 @@ it("uses shopping luck and respects character pools and exclusions", () => {
 		},
 	);
 });
+
+it("fills only unlocked slots and excludes locked offers from the new roll", () => {
+	const initial =
+		generateShopItems(
+			wellRoundedBulbro,
+			{
+				random:
+					seededRng(
+						10,
+					),
+			},
+		);
+	const lockedItems =
+		initial
+			.slice(
+				0,
+				2,
+			)
+			.map(
+				(
+					item,
+				) => ({
+					...item,
+					locked: true,
+				}),
+			);
+	const rolled =
+		generateShopItems(
+			wellRoundedBulbro,
+			{
+				wave: 10,
+				lockedItems,
+				random:
+					seededRng(
+						10,
+					),
+			},
+		);
+	expect(
+		rolled,
+	).toHaveLength(
+		4,
+	);
+	expect(
+		rolled.slice(
+			0,
+			2,
+		),
+	).toEqual(
+		lockedItems,
+	);
+	const keys =
+		rolled.map(
+			(
+				item,
+			) =>
+				"item" in
+				item
+					? `item:${item.item.id}`
+					: `weapon:${item.weapon.id}:${item.tier ?? 1}`,
+		);
+	expect(
+		new Set(
+			keys,
+		)
+			.size,
+	).toBe(
+		4,
+	);
+	expect(
+		generateShopItems(
+			wellRoundedBulbro,
+			{
+				lockedItems:
+					initial,
+			},
+		),
+	).toEqual(
+		initial,
+	);
+});
