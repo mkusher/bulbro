@@ -30,7 +30,21 @@ It does not reduce damage. Trees cannot be knocked back.
 ## Custom enemies and remaining differences
 
 Roach, Beetle Archer, Hedgehog and Badger have no established direct analogue.
-Their existing numbers and per-wave growth are retained.
+Their base stats are custom. Their per-wave growth follows the late Brotato
+enemies they replace in waves 13–30, so they keep up with the matched roles:
+
+| Bulbro enemy | Late-wave role | HP | HP per wave | Damage | Damage per wave | Materials |
+|---|---|---|---|---|---|---|
+| Roach | Pursuer | 10 | 4 | 3 | 1 | 3 |
+| Badger | Helmet Alien | 10 | 4 | 3 | 0.85 | 3 |
+| Hedgehog | Fin Alien | 6 | 3 | 3 | 0.85 | 3 |
+| Beetle Archer | Fly | 2 | 5 | 3 | 0.85 | 1 |
+
+Previously, none of them gained damage, Hedgehog and Badger gained 1 HP per
+wave, and Beetle Archer gained one material value per wave.
+
+After wave 30 every enemy also gets the endless HP, damage and speed
+multipliers described in the [balance review](../../docs/balance.md#waves-after-30).
 
 Only numerical stats and rewards are matched. Bulbro retains its own AI,
 charge timing, body sizes, attack cooldowns, projectile speeds, spawn schedules

@@ -23,7 +23,8 @@ export const hedghehog: EnemyCharacter =
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 1,
+				maxHp: 3,
+				damage: 0.85,
 			},
 		weapons:
 			[

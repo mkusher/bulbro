@@ -30,6 +30,7 @@ export type EnemyEvent =
 	| ShotEvent
 	| EnemyAttackedEvent
 	| EnemyDiedEvent
+	| EnemyDespawnedEvent
 	| EnemyMovedEvent
 	| EnemyReceivedHitEvent
 	| EnemySpawnedEvent
@@ -186,6 +187,16 @@ export type EnemyDiedEvent =
 		};
 		/** Set when the enemy dropped a consumable on death */
 		consumableId?: string;
+	};
+
+/**
+ * Enemy removed without loot because too many enemies are alive,
+ * like Brotato's enemy cap.
+ */
+export type EnemyDespawnedEvent =
+	{
+		type: "enemyDespawned";
+		enemyId: string;
 	};
 
 export type EnemyMovedEvent =

@@ -4,17 +4,10 @@ import type {
 } from "@/time";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
-	AphidSpawner,
-	BabySpawner,
-	BadgerSpawner,
-	BeetleArcherSpawner,
-	BeetleWarriorSpawner,
-	ColoradoBeetleSpawner,
-	HedgehogSpawner,
-	RoachSpawner,
 	TreeSpawner,
-	WildBoarSpawner,
+	WaveGroupsSpawner,
 } from "../../Spawner/enemy-spawners";
+import { applyEnemyCap } from "../../Spawner/enemyCap";
 import type { WaveState } from "../../waveState";
 import type { EventGenerator } from "./EventGenerator";
 
@@ -29,15 +22,7 @@ type SpawnerLogic =
 
 const spawners: SpawnerLogic[] =
 	[
-		new BabySpawner(),
-		new ColoradoBeetleSpawner(),
-		new BeetleWarriorSpawner(),
-		new BeetleArcherSpawner(),
-		new AphidSpawner(),
-		new RoachSpawner(),
-		new HedgehogSpawner(),
-		new WildBoarSpawner(),
-		new BadgerSpawner(),
+		new WaveGroupsSpawner(),
 		new TreeSpawner(),
 	];
 
@@ -50,15 +35,18 @@ export class EnemySpawnEventsGenerator
 		deltaTime: DeltaTime,
 		now: NowTime,
 	): GameEventInternal[] {
-		return spawners.flatMap(
-			(
-				s,
-			) =>
-				s.tick(
-					state,
-					deltaTime,
-					now,
-				),
+		return applyEnemyCap(
+			state,
+			spawners.flatMap(
+				(
+					s,
+				) =>
+					s.tick(
+						state,
+						deltaTime,
+						now,
+					),
+			),
 		);
 	}
 }
