@@ -39,6 +39,7 @@ at difficulty 0. They are not measured in play.
 | Wave length | 20s, +5s per wave, max 60s | [waveDuration.ts](../web/src/waveDuration.ts) |
 | Melee range | Melee weapons get half of the range stat | [game-formulas.ts](../web/src/game-formulas.ts) |
 | Matched enemy stats | Six role analogues use Brotato HP/damage growth, speed, knockback resistance and rewards | [Enemy reference](../web/docs/enemies.md) |
+| Enemy cap | At most 100 enemies alive; spawns over the cap remove a random enemy without loot | [enemyCap.ts](../web/src/Spawner/enemyCap.ts) |
 
 ## Current economy
 
@@ -74,9 +75,22 @@ scaling, and depends on kills and collection. Trees and harvesting add income.
 
 Estimated enemies per wave, solo, difficulty 0:
 
-| Wave | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13+ |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Enemies | 77 | 105 | 166 | 207 | 321 | 304 | 337 | 279 | 60 | 374 | 268 | 171 | ~285 |
+| Wave | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Enemies | 77 | 105 | 166 | 207 | 321 | 304 | 337 | 279 | 60 | 374 | 268 | 171 | 335 | 310 | 374 |
+
+| Wave | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Enemies | 341 | 343 | 330 | 359 | 513 | 347 | 318 | 322 | 311 | 566 | 311 | 405 | 403 | 402 | 638 |
+
+Waves 31–40 range from 391 to 792 and waves 41+ from 460 to 946; see
+[Waves after 30](#waves-after-30).
+
+For comparison, Brotato's Crash Zone spawns about 27 enemies on wave 1, where
+Bulbro spawns 77. Every Bulbro group adds `difficulty + players` enemies per
+cluster, and Baby, Colorado Beetle and Aphid clusters are mirrored to the
+opposite side. Bulbro is therefore about 2–3× denser than Brotato
+at the same matched enemy stats.
 
 ## Matched combat values
 
@@ -140,19 +154,60 @@ character preview and loadout validation use the same
 ### 3. Custom enemy progression needs playtesting
 
 Roach, Beetle Archer, Hedgehog and Badger have no established direct analogue.
-Their base stats and wave growth remain custom. Hedgehog and Badger still
-gain only +1 HP per wave despite appearing on waves 10–11; Beetle Archer
-still gains +5 HP and +1 material value per wave. Validate their difficulty
-and income contribution alongside the newly matched enemies.
+Their base stats remain custom. Their wave growth was raised so they stay
+relevant on waves 13–30 (see the [enemy reference](../web/docs/enemies.md)):
+all four now gain damage per wave, Hedgehog and Badger gain +3/+4 HP, and
+Beetle Archer no longer gains +1 material value per wave. Validate their
+difficulty and income contribution alongside the matched enemies.
 
-### 4. Waves have no shape after wave 12, and the run never ends
+### 4. Wave design and the missing end
 
-- **Waves 13 and up repeat one pattern.** Only Baby spawners run, reusing the
-  wave-4 config, while enemy HP keeps rising in a straight line.
-- **Uneven difficulty.** Wave 9 is a lull (about 60 enemies, Babies switched
-  off) between wave 8 (about 279) and wave 10 (about 374).
-- **No end.** There is no wave-20 boss, no win condition, and no elites or
-  hordes.
+Every wave is a list of spawn groups in [waves.ts](../web/src/Spawner/waves.ts),
+like Brotato's wave groups. A group has an enemy, its first spawn second,
+its repeat interval, an optional last spawn second, the cluster size,
+distance and angle, and whether it mirrors to the opposite side.
+
+- **Waves 1–12** are unchanged and introduce one enemy at a time.
+- **Waves 13–19** follow the themes of Brotato's waves 13–19 with Bulbro's
+  roster: tanky chasers (Badger for Helmet Alien), fast fodder (Hedgehog for
+  Fin Alien), hunters (Roach for Pursuer), a charger stampede and a mix of
+  every heavy enemy on wave 19.
+- **Waves 20, 25 and 30 are hordes** of 500–640 enemies. Waves 21–29 mix
+  the late roster: chaser swarm, ranged siege, bruiser wall, stampede, hunt.
+- **Uneven difficulty remains.** Wave 9 is a lull (about 60 enemies, Babies
+  switched off) between wave 8 (about 279) and wave 10 (about 374).
+- **No end.** There is no wave-20 boss, no win condition and no elites.
+  Brotato ends on wave 20 (90 s, one boss or two on Danger 5) and has
+  elite or horde waves on 11/12 (Danger 2+), 14/15 and 17/18 (Danger 4+).
+
+#### Waves after 30
+
+Waves after 30 repeat waves 21–30 with +1 enemy per cluster, +2 from wave 41.
+The increase stops at +2 so later waves stay playable.
+
+#### Enemy cap
+
+Like Brotato, at most 100 enemies can be alive or appearing at once
+([enemyCap.ts](../web/src/Spawner/enemyCap.ts)). Each spawn over the cap
+removes a random alive enemy without materials, consumables or a kill, and
+it plays the death animation. Spawns are skipped only when no alive enemy
+can be removed. Trees are neutral and are not counted. Spawn counts above
+are therefore upper bounds when players do not kill fast enough.
+
+Up to wave 30, enemies grow linearly: `base + growth × (wave − 1)`. After that,
+[buildEnemyCharacterForWave](../web/src/enemy/buildEnemyCharacterForWave.ts)
+applies Brotato's endless formula, starting at wave 30 instead of 20:
+
+- `n = wave − 30`, `F = n(n + 1) / 200 × (2 + max(0, (n − 15) × 0.2))`
+- HP × `(1 + 2.25F)`, damage × `(1 + F)`, speed × `(1 + min(1.75, F / 13.33))`
+
+| Wave | 31 | 35 | 40 | 45 | 50 |
+|---|---|---|---|---|---|
+| Endless factor | 0.02 | 0.3 | 1.1 | 2.4 | 6.3 |
+| HP multiplier | ×1.05 | ×1.68 | ×3.48 | ×6.4 | ×15.2 |
+
+Brotato also raises shop prices, shortens iframes and lowers material and
+consumable drop chances in endless mode; Bulbro does not.
 
 ### 5. Difficulty only adds enemies
 
@@ -314,8 +369,9 @@ current roster.
    playtest the five custom weapons against the matched stat tables.
 3. **Enemies:** playtest the 200 ms hit protection, validate the four custom enemies,
    and review behavior differences from the matched roles.
-4. **Waves:** write wave configs for 13–20, end the run at wave 20 with a
-   boss, and make difficulty scale enemy HP and damage by percentage.
+4. **Waves:** playtest waves 13–30 and the endless scaling, fill the wave 9
+   lull, add elites/bosses and a win condition,
+   and make difficulty scale enemy HP and damage by percentage.
 5. **Characters:** first reduce King's unconditional durability, then test
    Evil's offense and Grandpa's speed penalty. Use Well Rounded as a control,
    include Vampire/Cyborg gun scaling, and separate shared-weapon trials from
@@ -331,4 +387,7 @@ current roster.
 - [Brotato Wiki – SMG](https://brotato.wiki.spellsandguns.com/SMG)
 - [Brotato Wiki – Laser Gun](https://brotato.wiki.spellsandguns.com/Laser_Gun)
 - [Brotato Wiki – Dangers](https://brotato.wiki.spellsandguns.com/Dangers)
+- [Brotato Wiki – Waves](https://brotato.wiki.spellsandguns.com/Waves)
+- [Brotato Wiki – Endless Mode](https://brotato.wiki.spellsandguns.com/Endless_Mode)
+- [Brotato – Ultimate Guide to Enemies and Waves](https://gameplay.tips/guides/brotato-ultimate-guide-to-enemies-and-waves.html)
 - [Brotato Wiki – Iframes](https://brotato.wiki.spellsandguns.com/Iframes)

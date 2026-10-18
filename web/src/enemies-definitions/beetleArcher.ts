@@ -24,7 +24,7 @@ export const beetleArcher: EnemyCharacter =
 		waveIncreaseStats:
 			{
 				maxHp: 5,
-				materialsDropped: 1,
+				damage: 0.85,
 			},
 		weapons:
 			[

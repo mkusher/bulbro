@@ -24,6 +24,7 @@ export const roach: EnemyCharacter =
 		waveIncreaseStats:
 			{
 				maxHp: 4,
+				damage: 1,
 			},
 		weapons:
 			[

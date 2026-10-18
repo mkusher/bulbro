@@ -143,6 +143,11 @@ export class EnemyState
 			.#props
 			.lastHitAt;
 	}
+	get behaviorType() {
+		return this
+			.#props
+			.behaviorType;
+	}
 	get killedAt() {
 		return this
 			.#props
@@ -491,6 +496,7 @@ export class EnemyState
 				);
 
 			case "enemyDied":
+			case "enemyDespawned":
 				if (
 					event.enemyId !==
 					this

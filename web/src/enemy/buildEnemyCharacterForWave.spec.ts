@@ -6,7 +6,9 @@ import {
 } from "bun:test";
 import {
 	buildEnemyCharacterForWave,
+	ENDLESS_START_WAVE,
 	type EnemyCharacter,
+	getEndlessFactor,
 } from "./";
 
 describe("buildEnemyCharacterForWave", () => {
@@ -171,6 +173,213 @@ describe("buildEnemyCharacterForWave", () => {
 				maxHp: 5,
 				damage: 1,
 			},
+		);
+	});
+});
+
+describe("getEndlessFactor", () => {
+	it("is zero up to the endless start", () => {
+		expect(
+			getEndlessFactor(
+				1,
+			),
+		).toBe(
+			0,
+		);
+		expect(
+			getEndlessFactor(
+				ENDLESS_START_WAVE,
+			),
+		).toBe(
+			0,
+		);
+	});
+
+	it("follows Brotato's endless curve shifted by the endless start", () => {
+		// Brotato values for waves 21, 25, 30, 35 and 40
+		for (const [
+			endlessWave,
+			factor,
+		] of [
+			[
+				1,
+				0.02,
+			],
+			[
+				5,
+				0.3,
+			],
+			[
+				10,
+				1.1,
+			],
+			[
+				15,
+				2.4,
+			],
+			[
+				20,
+				6.3,
+			],
+		] as const) {
+			expect(
+				getEndlessFactor(
+					ENDLESS_START_WAVE +
+						endlessWave,
+				),
+			).toBeCloseTo(
+				factor,
+			);
+		}
+	});
+});
+
+describe("buildEnemyCharacterForWave in endless waves", () => {
+	const enemy: EnemyCharacter =
+		{
+			id: "endless-enemy",
+			name: "Endless Enemy",
+			sprite:
+				"potatoBeetleBaby",
+			stats:
+				{
+					maxHp: 10,
+					hpRegeneration: 0,
+					damage: 2,
+					meleeDamage: 0,
+					rangedDamage: 0,
+					elementalDamage: 0,
+					attackSpeed: 0,
+					critChance: 0,
+					range: 100,
+					armor: 0,
+					dodge: 0,
+					speed: 100,
+					materialsDropped: 1,
+					knockback: 0,
+				},
+			speedRange:
+				{
+					from: 100,
+					to: 200,
+				},
+			waveIncreaseStats:
+				{
+					maxHp: 1,
+					damage: 1,
+				},
+			weapons:
+				[],
+			consumableDropChance: 0,
+		};
+
+	it("keeps linear growth on the endless start wave", () => {
+		const result =
+			buildEnemyCharacterForWave(
+				enemy,
+				ENDLESS_START_WAVE,
+			);
+		expect(
+			result
+				.stats
+				.maxHp,
+		).toBe(
+			10 +
+				(ENDLESS_START_WAVE -
+					1),
+		);
+		expect(
+			result
+				.stats
+				.speed,
+		).toBe(
+			100,
+		);
+		expect(
+			result.speedRange,
+		).toEqual(
+			enemy.speedRange,
+		);
+	});
+
+	it("multiplies linear growth by the endless factor afterwards", () => {
+		const wave =
+			ENDLESS_START_WAVE +
+			10;
+		const factor =
+			getEndlessFactor(
+				wave,
+			);
+		const result =
+			buildEnemyCharacterForWave(
+				enemy,
+				wave,
+			);
+		expect(
+			result
+				.stats
+				.maxHp,
+		).toBeCloseTo(
+			(10 +
+				(wave -
+					1)) *
+				(1 +
+					factor *
+						2.25),
+		);
+		expect(
+			result
+				.stats
+				.damage,
+		).toBeCloseTo(
+			(2 +
+				(wave -
+					1)) *
+				(1 +
+					factor),
+		);
+		expect(
+			result
+				.stats
+				.speed,
+		).toBeCloseTo(
+			100 *
+				(1 +
+					factor /
+						13.33),
+		);
+		expect(
+			result
+				.speedRange
+				?.to,
+		).toBeCloseTo(
+			200 *
+				(1 +
+					factor /
+						13.33),
+		);
+		expect(
+			result
+				.stats
+				.materialsDropped,
+		).toBe(
+			1,
+		);
+	});
+
+	it("caps the speed bonus at +175%", () => {
+		const result =
+			buildEnemyCharacterForWave(
+				enemy,
+				ENDLESS_START_WAVE +
+					100,
+			);
+		expect(
+			result
+				.stats
+				.speed,
+		).toBeCloseTo(
+			275,
 		);
 	});
 });

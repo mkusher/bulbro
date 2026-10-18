@@ -1531,6 +1531,20 @@ export function updateState(
 					],
 			};
 		}
+		case "enemyDespawned": {
+			return {
+				...state,
+				enemies:
+					state.enemies.map(
+						(
+							enemy,
+						) =>
+							enemy.applyEvent(
+								action,
+							),
+					),
+			};
+		}
 		case "bulbroReceivedHit": {
 			return {
 				...state,

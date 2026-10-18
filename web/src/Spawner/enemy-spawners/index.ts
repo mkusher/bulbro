@@ -1,10 +1,2 @@
-export { AphidSpawner } from "./AphidSpawner";
-export { BabySpawner } from "./BabySpawner";
-export { BadgerSpawner } from "./BadgerSpawner";
-export { BeetleArcherSpawner } from "./BeetleArcherSpawner";
-export { BeetleWarriorSpawner } from "./BeetleWarriorSpawner";
-export { ColoradoBeetleSpawner } from "./ColoradoBeetleSpawner";
-export { HedgehogSpawner } from "./HedgehogSpawner";
-export { RoachSpawner } from "./RoachSpawner";
 export { TreeSpawner } from "./TreeSpawner";
-export { WildBoarSpawner } from "./WildBoarSpawner";
+export { WaveGroupsSpawner } from "./WaveGroupsSpawner";

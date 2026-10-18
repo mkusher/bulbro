@@ -23,7 +23,8 @@ export const badger: EnemyCharacter =
 			},
 		waveIncreaseStats:
 			{
-				maxHp: 1,
+				maxHp: 4,
+				damage: 0.85,
 			},
 		weapons:
 			[
