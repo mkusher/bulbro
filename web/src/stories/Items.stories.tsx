@@ -2,6 +2,7 @@ import { itemPrice } from "@/game-formulas";
 import { t } from "@/i18n";
 import { ItemDisplay } from "@/items/ItemDisplay";
 import { itemDefinitions } from "@/items/Items";
+import { requireDefined } from "@/requireDefined";
 import { ItemSlots } from "@/shop/ItemSlots";
 import {
 	ItemBonuses,
@@ -88,7 +89,9 @@ export const ItemTiles =
 								0,
 								6,
 							),
-							itemDefinitions[0]!,
+							requireDefined(
+								itemDefinitions[0],
+							),
 						]}
 					/>
 				</div>

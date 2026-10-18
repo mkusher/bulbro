@@ -1,3 +1,4 @@
+import { requireDefined } from "@/requireDefined";
 import { spawnBulbro } from "../bulbro/BulbroState";
 import { bulbros } from "../characters-definitions";
 import { wellRoundedBulbro } from "../characters-definitions/well-rounded";
@@ -125,7 +126,7 @@ export const BulbroVsBaby =
 	{
 		render:
 			(
-				args: any,
+				args: typeof defaults.args,
 			) => {
 				const bulbroPosition =
 					{
@@ -230,7 +231,7 @@ export const BulbroVsAphid =
 	{
 		render:
 			(
-				args: any,
+				args: typeof defaults.args,
 			) => {
 				const bulbroPosition =
 					{
@@ -335,7 +336,7 @@ export const BulbroVsTree =
 	{
 		render:
 			(
-				args: any,
+				args: typeof defaults.args,
 			) => {
 				const bulbroPosition =
 					{
@@ -440,7 +441,7 @@ export const BulbroVsBeetleWarrior =
 	{
 		render:
 			(
-				args: any,
+				args: typeof defaults.args,
 			) => {
 				const bulbroPosition =
 					{
@@ -541,11 +542,23 @@ export const BulbroVsBeetleWarrior =
 		...defaults,
 	};
 
+const bulbroVsMultipleEnemiesArgs =
+	{
+		debug: false,
+		enableKeyboard: true,
+		showPlayerStats: true,
+		showGameStats: true,
+		showTouchControls: false,
+		showCoordinateGrid: false,
+		bulbroType:
+			"well-rounded",
+	};
+
 export const BulbroVsMultipleEnemies =
 	{
 		render:
 			(
-				args: any,
+				args: typeof bulbroVsMultipleEnemiesArgs,
 			) => {
 				const bulbroPosition =
 					{
@@ -672,16 +685,7 @@ export const BulbroVsMultipleEnemies =
 					</div>
 				);
 			},
-		args: {
-			debug: false,
-			enableKeyboard: true,
-			showPlayerStats: true,
-			showGameStats: true,
-			showTouchControls: false,
-			showCoordinateGrid: false,
-			bulbroType:
-				"well-rounded",
-		},
+		args: bulbroVsMultipleEnemiesArgs,
 		argTypes:
 			{
 				debug:
@@ -731,11 +735,23 @@ export const BulbroVsMultipleEnemies =
 			},
 	};
 
+const fullyLoadedBulbroArgs =
+	{
+		debug: false,
+		enableKeyboard: true,
+		showPlayerStats: true,
+		showGameStats: true,
+		showTouchControls: false,
+		showCoordinateGrid: false,
+		bulbroType:
+			"well-rounded",
+	};
+
 export const FullyLoadedBulbro =
 	{
 		render:
 			(
-				args: any,
+				args: typeof fullyLoadedBulbroArgs,
 			) => {
 				const bulbroPosition =
 					{
@@ -843,16 +859,7 @@ export const FullyLoadedBulbro =
 					</div>
 				);
 			},
-		args: {
-			debug: false,
-			enableKeyboard: true,
-			showPlayerStats: true,
-			showGameStats: true,
-			showTouchControls: false,
-			showCoordinateGrid: false,
-			bulbroType:
-				"well-rounded",
-		},
+		args: fullyLoadedBulbroArgs,
 		argTypes:
 			{
 				debug:
@@ -902,11 +909,23 @@ export const FullyLoadedBulbro =
 			},
 	};
 
+const meleeStrikeVsCrowdArgs =
+	{
+		weapon:
+			"sword",
+		debug: false,
+		enableKeyboard: true,
+		showPlayerStats: false,
+		showGameStats: false,
+		showTouchControls: false,
+		showCoordinateGrid: false,
+	};
+
 export const MeleeStrikeVsCrowd =
 	{
 		render:
 			(
-				args: any,
+				args: typeof meleeStrikeVsCrowdArgs,
 			) => {
 				const bulbroPosition =
 					{
@@ -914,13 +933,15 @@ export const MeleeStrikeVsCrowd =
 						y: 300,
 					};
 				const weapon =
-					weapons.find(
-						(
-							w,
-						) =>
-							w.id ===
-							args.weapon,
-					)!;
+					requireDefined(
+						weapons.find(
+							(
+								w,
+							) =>
+								w.id ===
+								args.weapon,
+						),
+					);
 				const bulbro =
 					spawnBulbro(
 						"player-1",
@@ -1019,16 +1040,7 @@ export const MeleeStrikeVsCrowd =
 					</div>
 				);
 			},
-		args: {
-			weapon:
-				"sword",
-			debug: false,
-			enableKeyboard: true,
-			showPlayerStats: false,
-			showGameStats: false,
-			showTouchControls: false,
-			showCoordinateGrid: false,
-		},
+		args: meleeStrikeVsCrowdArgs,
 		argTypes:
 			{
 				weapon:

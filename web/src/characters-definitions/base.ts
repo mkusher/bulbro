@@ -5,7 +5,7 @@ import { weapons } from "@/weapons-definitions";
 
 export const baseBulbro: Bulbro =
 	{
-		id: "base" as any,
+		id: "base",
 		name: " Base",
 		statBonuses:
 			{},

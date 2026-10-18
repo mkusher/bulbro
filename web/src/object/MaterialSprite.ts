@@ -151,7 +151,7 @@ export class MaterialSprite extends GameSprite {
 
 	update(
 		material: Material,
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 	): void {
 		this.updatePosition(
 			material.position,

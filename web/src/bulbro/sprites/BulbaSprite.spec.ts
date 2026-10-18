@@ -105,7 +105,7 @@ describe("BulbaSprite weapon rotation stability", () => {
 			const incorrectOffsetX =
 				-character.width /
 				2;
-			const incorrectOffsetY =
+			const _incorrectOffsetY =
 				-character.height -
 				5;
 

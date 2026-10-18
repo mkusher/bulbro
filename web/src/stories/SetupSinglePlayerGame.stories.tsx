@@ -49,11 +49,25 @@ export const FullSetupScreen =
 	};
 
 // Interactive setup screen for Storybook testing
+const interactiveSetupArgs =
+	{
+		bulbroId:
+			wellRoundedBulbro.id,
+		difficulty:
+			1 as Difficulty,
+		weapons:
+			[
+				pistol,
+				fist,
+			],
+		duration: 60,
+	};
+
 export const InteractiveSetup =
 	{
 		render:
 			(
-				args: any,
+				args: typeof interactiveSetupArgs,
 			) => {
 				const [
 					character,
@@ -94,7 +108,7 @@ export const InteractiveSetup =
 					);
 				const [
 					weapons,
-					setWeapons,
+					_setWeapons,
 				] =
 					useState<
 						Weapon[]
@@ -224,17 +238,7 @@ export const InteractiveSetup =
 					</div>
 				);
 			},
-		args: {
-			bulbroId:
-				wellRoundedBulbro.id,
-			difficulty: 1,
-			weapons:
-				[
-					pistol,
-					fist,
-				],
-			duration: 60,
-		},
+		args: interactiveSetupArgs,
 		argTypes:
 			{
 				bulbroId:
@@ -322,11 +326,17 @@ export const InteractiveSetup =
 	};
 
 // Character selection showcase
+const characterSelectionArgs =
+	{
+		bulbroId:
+			wellRoundedBulbro.id,
+	};
+
 export const CharacterSelection =
 	{
 		render:
 			(
-				args: any,
+				args: typeof characterSelectionArgs,
 			) => {
 				const [
 					character,
@@ -359,8 +369,8 @@ export const CharacterSelection =
 						},
 					);
 				const [
-					weapons,
-					setWeapons,
+					_weapons,
+					_setWeapons,
 				] =
 					useState<
 						Weapon[]
@@ -446,10 +456,7 @@ export const CharacterSelection =
 					</div>
 				);
 			},
-		args: {
-			bulbroId:
-				wellRoundedBulbro.id,
-		},
+		args: characterSelectionArgs,
 		argTypes:
 			{
 				bulbroId:
@@ -470,11 +477,18 @@ export const CharacterSelection =
 	};
 
 // Game settings showcase
+const gameSettingsArgs =
+	{
+		difficulty:
+			1 as Difficulty,
+		duration: 60,
+	};
+
 export const GameSettings =
 	{
 		render:
 			(
-				args: any,
+				args: typeof gameSettingsArgs,
 			) => {
 				const [
 					difficulty,
@@ -593,10 +607,7 @@ export const GameSettings =
 					</div>
 				);
 			},
-		args: {
-			difficulty: 1,
-			duration: 60,
-		},
+		args: gameSettingsArgs,
 		argTypes:
 			{
 				difficulty:

@@ -21,6 +21,7 @@ import {
 	currentNetworkGame,
 } from "@/network/currentLobby";
 import { currentUser } from "@/network/currentUser";
+import { requireDefined } from "@/requireDefined";
 import { isItemShopItem } from "@/shop/Shop";
 import { generateShopItems } from "@/shop/ShopItemsGenerator";
 import {
@@ -197,7 +198,9 @@ it("shows level-ups one at a time before the shop", async () => {
 		4,
 	);
 
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
 		root.textContent,
@@ -210,15 +213,19 @@ it("shows level-ups one at a time before the shop", async () => {
 		4,
 	);
 	expect(
-		waveState
-			.value
-			.players[0]!
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		)
 			.pendingLevelUps,
 	).toBe(
 		1,
 	);
 
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
 		upgradeButtons(),
@@ -231,7 +238,11 @@ it("shows level-ups one at a time before the shop", async () => {
 		"Prepare",
 	);
 	expect(
-		waveState.value.players[0]!.statSources.filter(
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		).statSources.filter(
 			(
 				s,
 			) =>
@@ -254,7 +265,9 @@ it("lets every local co-op player pick their level-ups", async () => {
 		"P1:",
 	);
 
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
 		root.textContent,
@@ -262,7 +275,9 @@ it("lets every local co-op player pick their level-ups", async () => {
 		"P2:",
 	);
 
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
 		root.textContent,
@@ -323,12 +338,16 @@ it("re-rolls the offered upgrades for materials", async () => {
 		"Re-roll $1",
 	);
 
-	rerollButton()!.click();
+	requireDefined(
+		rerollButton(),
+	).click();
 	await flush();
 	const player =
-		waveState
-			.value
-			.players[0]!;
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		);
 	expect(
 		player.materialsAvailable,
 	).toBe(
@@ -354,12 +373,16 @@ it("re-rolls the offered upgrades for materials", async () => {
 		"Re-roll $2",
 	);
 
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
-		waveState
-			.value
-			.players[0]!
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		)
 			.upgradeRerollCount,
 	).toBe(
 		1,
@@ -443,7 +466,9 @@ it("shows only the local player's level-ups with the players panel online", asyn
 			"Ready",
 		);
 
-		upgradeButtons()[0]!.click();
+		requireDefined(
+			upgradeButtons()[0],
+		).click();
 		await flush();
 		const [
 			remote,
@@ -453,13 +478,17 @@ it("shows only the local player's level-ups with the players panel online", asyn
 				.value
 				.players;
 		expect(
-			local!
+			requireDefined(
+				local,
+			)
 				.pendingLevelUps,
 		).toBe(
 			0,
 		);
 		expect(
-			remote!
+			requireDefined(
+				remote,
+			)
 				.pendingLevelUps,
 		).toBe(
 			1,
@@ -505,22 +534,24 @@ for (const [
 			);
 		try {
 			const offer =
-				generateShopItems(
-					wellRoundedBulbro,
-					{
-						wave,
-						random:
-							() =>
-								0,
-					},
-				).find(
-					(
-						i,
-					) =>
-						!isItemShopItem(
+				requireDefined(
+					generateShopItems(
+						wellRoundedBulbro,
+						{
+							wave,
+							random:
+								() =>
+									0,
+						},
+					).find(
+						(
 							i,
-						),
-				)!;
+						) =>
+							!isItemShopItem(
+								i,
+							),
+					),
+				);
 			if (
 				isItemShopItem(
 					offer,
@@ -550,7 +581,10 @@ for (const [
 			const player =
 				new BulbroState(
 					{
-						...state.players[0]!.toJSON(),
+						...requireDefined(
+							state
+								.players[0],
+						).toJSON(),
 						materialsAvailable: 1000,
 					},
 				);
@@ -613,17 +647,23 @@ for (const [
 				buy,
 			).toBeDefined();
 			expect(
-				buy!
+				requireDefined(
+					buy,
+				)
 					.disabled,
 			).toBe(
 				false,
 			);
-			buy!.click();
+			requireDefined(
+				buy,
+			).click();
 			await flush();
 			const updated =
-				waveState
-					.value
-					.players[0]!;
+				requireDefined(
+					waveState
+						.value
+						.players[0],
+				);
 			expect(
 				updated.materialsAvailable,
 			).toBe(
@@ -638,9 +678,11 @@ for (const [
 					: 2,
 			);
 			const purchased =
-				updated.weapons.at(
-					-1,
-				)!;
+				requireDefined(
+					updated.weapons.at(
+						-1,
+					),
+				);
 			expect(
 				purchased.tier,
 			).toBe(
@@ -670,21 +712,25 @@ it("keeps upgrade reroll prices across level-ups, separate from the shop", async
 	);
 	const reroll =
 		() =>
-			[
-				...root.querySelectorAll(
-					"button",
-				),
-			].find(
-				(
-					button,
-				) =>
-					button.textContent?.startsWith(
-						"Re-roll",
+			requireDefined(
+				[
+					...root.querySelectorAll(
+						"button",
 					),
-			)!;
+				].find(
+					(
+						button,
+					) =>
+						button.textContent?.startsWith(
+							"Re-roll",
+						),
+				),
+			);
 	reroll().click();
 	await flush();
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
 		reroll()
@@ -692,7 +738,9 @@ it("keeps upgrade reroll prices across level-ups, separate from the shop", async
 	).toBe(
 		"Re-roll $2",
 	);
-	upgradeButtons()[0]!.click();
+	requireDefined(
+		upgradeButtons()[0],
+	).click();
 	await flush();
 	expect(
 		reroll()
@@ -707,9 +755,11 @@ it("locks unaffordable offers through rerolls and waves at their original price"
 		0,
 	);
 	const player =
-		waveState
-			.value
-			.players[0]!;
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		);
 	waveState.value =
 		{
 			...waveState.value,
@@ -726,6 +776,34 @@ it("locks unaffordable offers through rerolls and waves at their original price"
 	await flush();
 	const lock =
 		() =>
+			requireDefined(
+				[
+					...root.querySelectorAll(
+						"button",
+					),
+				].find(
+					(
+						button,
+					) =>
+						button.textContent ===
+						"Lock",
+				),
+			);
+	lock().click();
+	await flush();
+	const saved =
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		).lockedShopOffers;
+	expect(
+		saved,
+	).toHaveLength(
+		1,
+	);
+	const reroll =
+		requireDefined(
 			[
 				...root.querySelectorAll(
 					"button",
@@ -734,34 +812,11 @@ it("locks unaffordable offers through rerolls and waves at their original price"
 				(
 					button,
 				) =>
-					button.textContent ===
-					"Lock",
-			)!;
-	lock().click();
-	await flush();
-	const saved =
-		waveState
-			.value
-			.players[0]!
-			.lockedShopOffers;
-	expect(
-		saved,
-	).toHaveLength(
-		1,
-	);
-	const reroll =
-		[
-			...root.querySelectorAll(
-				"button",
+					button.textContent?.startsWith(
+						"Re-roll",
+					),
 			),
-		].find(
-			(
-				button,
-			) =>
-				button.textContent?.startsWith(
-					"Re-roll",
-				),
-		)!;
+		);
 	reroll.click();
 	await flush();
 	expect(
@@ -772,9 +827,11 @@ it("locks unaffordable offers through rerolls and waves at their original price"
 		1,
 	);
 	expect(
-		waveState
-			.value
-			.players[0]!
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		)
 			.lockedShopOffers,
 	).toEqual(
 		saved,
@@ -798,7 +855,10 @@ it("locks unaffordable offers through rerolls and waves at their original price"
 					new BulbroState(
 						JSON.parse(
 							JSON.stringify(
-								current.players[0]!.toJSON(),
+								requireDefined(
+									current
+										.players[0],
+								).toJSON(),
 							),
 						),
 					),
@@ -820,31 +880,39 @@ it("locks unaffordable offers through rerolls and waves at their original price"
 		1,
 	);
 	const unlock =
-		[
-			...root.querySelectorAll(
-				"button",
+		requireDefined(
+			[
+				...root.querySelectorAll(
+					"button",
+				),
+			].find(
+				(
+					button,
+				) =>
+					button.textContent ===
+					"Unlock",
 			),
-		].find(
-			(
-				button,
-			) =>
-				button.textContent ===
-				"Unlock",
-		)!;
+		);
 	expect(
-		unlock.parentElement!
+		requireDefined(
+			unlock.parentElement,
+		)
 			.textContent,
 	).toContain(
 		"$" +
-			saved[0]!
+			requireDefined(
+				saved[0],
+			)
 				.price,
 	);
 	unlock.click();
 	await flush();
 	expect(
-		waveState
-			.value
-			.players[0]!
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		)
 			.lockedShopOffers,
 	).toHaveLength(
 		0,
@@ -856,9 +924,11 @@ it("removes a purchased offer from saved locks", async () => {
 		0,
 	);
 	const player =
-		waveState
-			.value
-			.players[0]!;
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		);
 	waveState.value =
 		{
 			...waveState.value,
@@ -873,36 +943,42 @@ it("removes a purchased offer from saved locks", async () => {
 				],
 		};
 	await flush();
-	[
-		...root.querySelectorAll(
-			"button",
-		),
-	]
-		.find(
-			(
-				button,
-			) =>
-				button.textContent ===
-				"Lock",
-		)!
-		.click();
-	await flush();
-	const locked =
-		root.querySelector<HTMLButtonElement>(
-			'[aria-pressed="true"]',
-		)!;
-	const buy =
+	requireDefined(
 		[
-			...locked.parentElement!.querySelectorAll(
+			...root.querySelectorAll(
 				"button",
 			),
 		].find(
 			(
 				button,
 			) =>
-				button !==
-				locked,
-		)!;
+				button.textContent ===
+				"Lock",
+		),
+	).click();
+	await flush();
+	const locked =
+		requireDefined(
+			root.querySelector<HTMLButtonElement>(
+				'[aria-pressed="true"]',
+			),
+		);
+	const buy =
+		requireDefined(
+			[
+				...requireDefined(
+					locked.parentElement,
+				).querySelectorAll(
+					"button",
+				),
+			].find(
+				(
+					button,
+				) =>
+					button !==
+					locked,
+			),
+		);
 	expect(
 		buy.disabled,
 	).toBe(
@@ -911,9 +987,11 @@ it("removes a purchased offer from saved locks", async () => {
 	buy.click();
 	await flush();
 	expect(
-		waveState
-			.value
-			.players[0]!
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		)
 			.lockedShopOffers,
 	).toHaveLength(
 		0,
@@ -958,7 +1036,9 @@ it("returns from settings to the same shop without changing offers or player sta
 		expect(
 			settings,
 		).toBeDefined();
-		settings!.click();
+		requireDefined(
+			settings,
+		).click();
 		await flush();
 		expect(
 			root.querySelector(
@@ -988,7 +1068,9 @@ it("returns from settings to the same shop without changing offers or player sta
 		expect(
 			back,
 		).toBeDefined();
-		back!.click();
+		requireDefined(
+			back,
+		).click();
 		await flush();
 		expect(
 			root.textContent,

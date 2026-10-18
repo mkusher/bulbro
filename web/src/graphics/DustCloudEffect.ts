@@ -29,7 +29,6 @@ export class DustCloudEffect {
 		new PIXI.Container();
 	#particles: DustParticle[] =
 		[];
-	#lastSpawnMs = 0;
 	#timeSinceLastSpawn = 0;
 
 	appendTo(

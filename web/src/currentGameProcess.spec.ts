@@ -4,6 +4,7 @@ import {
 	it,
 	mock,
 } from "bun:test";
+import { requireDefined } from "@/requireDefined";
 import { BulbroState } from "./bulbro/BulbroState";
 import { wellRoundedBulbro } from "./characters-definitions";
 import type { PlayerControl } from "./controls";
@@ -158,7 +159,9 @@ it("saves a local wave, persists shop edits, and removes a failed run", async ()
 			2,
 		);
 	expect(
-		loadSinglePlayerGame()!
+		requireDefined(
+			loadSinglePlayerGame(),
+		)
 			.phase,
 	).toBe(
 		"wave",
@@ -169,15 +172,19 @@ it("saves a local wave, persists shop edits, and removes a failed run", async ()
 	);
 	await running;
 	expect(
-		loadSinglePlayerGame()!
+		requireDefined(
+			loadSinglePlayerGame(),
+		)
 			.phase,
 	).toBe(
 		"shop",
 	);
 	const player =
-		waveState
-			.value
-			.players[0]!;
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		);
 	waveState.value =
 		{
 			...waveState.value,
@@ -194,9 +201,19 @@ it("saves a local wave, persists shop edits, and removes a failed run", async ()
 				],
 		};
 	expect(
-		loadSinglePlayerGame()!.state.players[0]!.toJSON(),
+		requireDefined(
+			requireDefined(
+				loadSinglePlayerGame(),
+			)
+				.state
+				.players[0],
+		).toJSON(),
 	).toEqual(
-		waveState.value.players[0]!.toJSON(),
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		).toJSON(),
 	);
 	waveResult.value =
 		"fail";
@@ -310,7 +327,10 @@ it("keeps wave-start player state and totals when initialization advances gamepl
 						[
 							new BulbroState(
 								{
-									...checkpoint.players[0]!.toJSON(),
+									...requireDefined(
+										checkpoint
+											.players[0],
+									).toJSON(),
 									healthPoints: 1,
 									materialsAvailable: 999,
 									totalExperience: 999,
@@ -341,11 +361,20 @@ it("keeps wave-start player state and totals when initialization advances gamepl
 		);
 	await Promise.resolve();
 	const save =
-		loadSinglePlayerGame()!;
+		requireDefined(
+			loadSinglePlayerGame(),
+		);
 	expect(
-		save.state.players[0]!.toJSON(),
+		requireDefined(
+			save
+				.state
+				.players[0],
+		).toJSON(),
 	).toEqual(
-		checkpoint.players[0]!.toJSON(),
+		requireDefined(
+			checkpoint
+				.players[0],
+		).toJSON(),
 	);
 	expect(
 		save
@@ -361,16 +390,29 @@ it("keeps wave-start player state and totals when initialization advances gamepl
 				[
 					new BulbroState(
 						{
-							...waveState.value.players[0]!.toJSON(),
+							...requireDefined(
+								waveState
+									.value
+									.players[0],
+							).toJSON(),
 							materialsAvailable: 1000,
 						},
 					),
 				],
 		};
 	expect(
-		loadSinglePlayerGame()!.state.players[0]!.toJSON(),
+		requireDefined(
+			requireDefined(
+				loadSinglePlayerGame(),
+			)
+				.state
+				.players[0],
+		).toJSON(),
 	).toEqual(
-		checkpoint.players[0]!.toJSON(),
+		requireDefined(
+			checkpoint
+				.players[0],
+		).toJSON(),
 	);
 	completed.resolve(
 		"fail",
@@ -413,21 +455,27 @@ it("restores the shop and starts the next wave with recreated controls", async (
 		);
 	await Promise.resolve();
 	expect(
-		process
-			.startNextWave
-			.mock
-			.calls[0]![1],
+		requireDefined(
+			process
+				.startNextWave
+				.mock
+				.calls[0],
+		)[1],
 	).toHaveLength(
 		1,
 	);
 	expect(
-		loadSinglePlayerGame()!
+		requireDefined(
+			loadSinglePlayerGame(),
+		)
 			.phase,
 	).toBe(
 		"wave",
 	);
 	expect(
-		loadSinglePlayerGame()!
+		requireDefined(
+			loadSinglePlayerGame(),
+		)
 			.state
 			.round
 			.wave,

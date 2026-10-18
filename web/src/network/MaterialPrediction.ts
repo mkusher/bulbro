@@ -1,6 +1,7 @@
 import type { StatePrediction } from "@/GameProcess";
 import type { Position } from "@/geometry";
 import type { Material } from "@/object/MaterialState";
+import { requireDefined } from "@/requireDefined";
 import { deltaTime } from "@/time";
 import { generateMaterialMovementEvents } from "@/waveState";
 
@@ -168,19 +169,23 @@ export class MaterialPrediction {
 					},
 					step,
 				)) {
-					this.#materials.get(
-						event.materialId,
-					)!.target =
+					requireDefined(
+						this.#materials.get(
+							event.materialId,
+						),
+					).target =
 						event.type ===
 						"materialMoved"
 							? event.to
-							: state.players.find(
-									(
-										player,
-									) =>
-										player.id ===
-										event.playerId,
-								)!
+							: requireDefined(
+									state.players.find(
+										(
+											player,
+										) =>
+											player.id ===
+											event.playerId,
+									),
+								)
 									.position;
 				}
 				for (const event of generateMaterialMovementEvents(
@@ -191,9 +196,11 @@ export class MaterialPrediction {
 					step,
 				)) {
 					const predicted =
-						this.#materials.get(
-							event.materialId,
-						)!;
+						requireDefined(
+							this.#materials.get(
+								event.materialId,
+							),
+						);
 					predicted.collected =
 						event.type ===
 						"materialCollected";
@@ -201,13 +208,15 @@ export class MaterialPrediction {
 						event.type ===
 						"materialMoved"
 							? event.to
-							: state.players.find(
-									(
-										player,
-									) =>
-										player.id ===
-										event.playerId,
-								)!
+							: requireDefined(
+									state.players.find(
+										(
+											player,
+										) =>
+											player.id ===
+											event.playerId,
+									),
+								)
 									.position;
 				}
 			}
@@ -221,9 +230,11 @@ export class MaterialPrediction {
 							) =>
 								object.type !==
 									"material" ||
-								!this.#materials.get(
-									object.id,
-								)!
+								!requireDefined(
+									this.#materials.get(
+										object.id,
+									),
+								)
 									.collected,
 						)
 						.map(
@@ -235,9 +246,11 @@ export class MaterialPrediction {
 									? {
 											...object,
 											position:
-												this.#materials.get(
-													object.id,
-												)!
+												requireDefined(
+													this.#materials.get(
+														object.id,
+													),
+												)
 													.position,
 										}
 									: object,

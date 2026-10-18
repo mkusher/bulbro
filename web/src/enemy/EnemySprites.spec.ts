@@ -5,6 +5,7 @@ import {
 } from "bun:test";
 import { wildBoar } from "@/enemies-definitions/wildBoar";
 import { FrameAnimationController } from "@/graphics/FrameAnimationController";
+import { requireDefined } from "@/requireDefined";
 import {
 	deltaTime,
 	nowTime,
@@ -163,14 +164,18 @@ describe("rage warning", () => {
 			i++
 		) {
 			expect(
-				intervals[
-					i
-				]!,
+				requireDefined(
+					intervals[
+						i
+					],
+				),
 			).toBeLessThan(
-				intervals[
-					i -
-						1
-				]!,
+				requireDefined(
+					intervals[
+						i -
+							1
+					],
+				),
 			);
 		}
 	});

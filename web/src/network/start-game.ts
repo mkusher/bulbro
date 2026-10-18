@@ -7,6 +7,7 @@ import {
 	waveResult,
 } from "@/currentGameProcess";
 import type { Difficulty } from "@/game-formulas";
+import { requireDefined } from "@/requireDefined";
 import {
 	fromJSON,
 	type WaveState,
@@ -166,21 +167,25 @@ export async function startNetworkGameAsGuest(
 	const iam =
 		currentUser.value;
 	const localPlayer =
-		initialState.players.find(
-			(
-				p,
-			) =>
-				p.id ===
-				iam.id,
-		)!;
+		requireDefined(
+			initialState.players.find(
+				(
+					p,
+				) =>
+					p.id ===
+					iam.id,
+			),
+		);
 	const remotePlayer =
-		initialState.players.find(
-			(
-				p,
-			) =>
-				p.id !==
-				iam.id,
-		)!;
+		requireDefined(
+			initialState.players.find(
+				(
+					p,
+				) =>
+					p.id !==
+					iam.id,
+			),
+		);
 	fromJSON(
 		{
 			...initialState,

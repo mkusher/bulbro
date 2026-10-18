@@ -9,10 +9,7 @@ import {
 import type { WeaponType } from "../weapon";
 import { weapons } from "../weapons-definitions";
 import { StorybookGameScene } from "./StorybookGameScene";
-import {
-	createBulbroState,
-	createGameState,
-} from "./storyHelpers";
+import { createBulbroState } from "./storyHelpers";
 
 export default {
 	title:
@@ -62,27 +59,27 @@ const createState =
 		);
 	};
 
+const idleArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+	};
+
 export const Idle =
 	{
 		render:
 			(
-				args: any,
+				args: typeof idleArgs,
 			) => (
 				<StorybookGameScene
 					initialState={createState(
 						args.bulbroType,
 					)}
-					debug={
-						args.debug
-					}
 					{...args}
 				/>
 			),
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-		},
+		args: idleArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -107,11 +104,18 @@ export const Idle =
 			},
 	};
 
+const walkingInCircleArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+	};
+
 export const WalkingInCircle =
 	{
 		render:
 			(
-				args: any,
+				args: typeof walkingInCircleArgs,
 			) => {
 				const initialState =
 					createState(
@@ -122,9 +126,6 @@ export const WalkingInCircle =
 					<StorybookGameScene
 						initialState={
 							initialState
-						}
-						debug={
-							args.debug
 						}
 						onStateUpdate={(
 							newState,
@@ -204,11 +205,7 @@ export const WalkingInCircle =
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-		},
+		args: walkingInCircleArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -233,11 +230,18 @@ export const WalkingInCircle =
 			},
 	};
 
+const walkingAtTheSamePointArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+	};
+
 export const WalkingAtTheSamePoint =
 	{
 		render:
 			(
-				args: any,
+				args: typeof walkingAtTheSamePointArgs,
 			) => {
 				const initialState =
 					createState(
@@ -248,9 +252,6 @@ export const WalkingAtTheSamePoint =
 					<StorybookGameScene
 						initialState={
 							initialState
-						}
-						debug={
-							args.debug
 						}
 						onStateUpdate={(
 							newState,
@@ -330,11 +331,7 @@ export const WalkingAtTheSamePoint =
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-		},
+		args: walkingAtTheSamePointArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -360,11 +357,23 @@ export const WalkingAtTheSamePoint =
 	};
 
 // Weapon selection scenes
+const withWeaponSelectionArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+		selectedWeapons:
+			[
+				"pistol",
+				"knife",
+			],
+	};
+
 export const WithWeaponSelection =
 	{
 		render:
 			(
-				args: any,
+				args: typeof withWeaponSelectionArgs,
 			) => {
 				const selectedWeapons =
 					args.selectedWeapons as WeaponType[];
@@ -379,23 +388,11 @@ export const WithWeaponSelection =
 						initialState={
 							initialState
 						}
-						debug={
-							args.debug
-						}
 						{...args}
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-			selectedWeapons:
-				[
-					"pistol",
-					"knife",
-				],
-		},
+		args: withWeaponSelectionArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -434,11 +431,18 @@ export const WithWeaponSelection =
 			},
 	};
 
+const heavyWeaponsShowcaseArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+	};
+
 export const HeavyWeaponsShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof heavyWeaponsShowcaseArgs,
 			) => {
 				const heavyWeapons: WeaponType[] =
 					[
@@ -456,9 +460,6 @@ export const HeavyWeaponsShowcase =
 					<StorybookGameScene
 						initialState={
 							initialState
-						}
-						debug={
-							args.debug
 						}
 						onStateUpdate={(
 							newState,
@@ -537,11 +538,7 @@ export const HeavyWeaponsShowcase =
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-		},
+		args: heavyWeaponsShowcaseArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -566,11 +563,18 @@ export const HeavyWeaponsShowcase =
 			},
 	};
 
+const meleeWeaponsShowcaseArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+	};
+
 export const MeleeWeaponsShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof meleeWeaponsShowcaseArgs,
 			) => {
 				const meleeWeapons: WeaponType[] =
 					[
@@ -588,9 +592,6 @@ export const MeleeWeaponsShowcase =
 					<StorybookGameScene
 						initialState={
 							initialState
-						}
-						debug={
-							args.debug
 						}
 						onStateUpdate={(
 							newState,
@@ -679,11 +680,7 @@ export const MeleeWeaponsShowcase =
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-		},
+		args: meleeWeaponsShowcaseArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -708,11 +705,18 @@ export const MeleeWeaponsShowcase =
 			},
 	};
 
+const allWeaponsShowcaseArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+	};
+
 export const AllWeaponsShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof allWeaponsShowcaseArgs,
 			) => {
 				// Show all available weapons (limited to 6 since that's max for bulbro)
 				const allWeapons: WeaponType[] =
@@ -737,9 +741,6 @@ export const AllWeaponsShowcase =
 					<StorybookGameScene
 						initialState={
 							initialState
-						}
-						debug={
-							args.debug
 						}
 						onStateUpdate={(
 							newState,
@@ -826,11 +827,7 @@ export const AllWeaponsShowcase =
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-		},
+		args: allWeaponsShowcaseArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -856,11 +853,20 @@ export const AllWeaponsShowcase =
 	};
 
 // Single weapon selection
+const withSingleWeaponArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+		weapon:
+			"pistol" as WeaponType,
+	};
+
 export const WithSingleWeapon =
 	{
 		render:
 			(
-				args: any,
+				args: typeof withSingleWeaponArgs,
 			) => {
 				const selectedWeapons: WeaponType[] =
 					args.weapon
@@ -879,20 +885,11 @@ export const WithSingleWeapon =
 						initialState={
 							initialState
 						}
-						debug={
-							args.debug
-						}
 						{...args}
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-			weapon:
-				"pistol" as WeaponType,
-		},
+		args: withSingleWeaponArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -932,11 +929,22 @@ export const WithSingleWeapon =
 	};
 
 // Two weapons selection
+const withTwoWeaponsArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+		weapon1:
+			"pistol" as WeaponType,
+		weapon2:
+			"knife" as WeaponType,
+	};
+
 export const WithTwoWeapons =
 	{
 		render:
 			(
-				args: any,
+				args: typeof withTwoWeaponsArgs,
 			) => {
 				const selectedWeapons: WeaponType[] =
 					[
@@ -956,22 +964,11 @@ export const WithTwoWeapons =
 						initialState={
 							initialState
 						}
-						debug={
-							args.debug
-						}
 						{...args}
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-			weapon1:
-				"pistol" as WeaponType,
-			weapon2:
-				"knife" as WeaponType,
-		},
+		args: withTwoWeaponsArgs,
 		argTypes:
 			{
 				bulbroType:
@@ -1025,11 +1022,24 @@ export const WithTwoWeapons =
 	};
 
 // Three weapons selection
+const withThreeWeaponsArgs =
+	{
+		bulbroType:
+			"well-rounded",
+		debug: false,
+		weapon1:
+			"pistol" as WeaponType,
+		weapon2:
+			"knife" as WeaponType,
+		weapon3:
+			"sword" as WeaponType,
+	};
+
 export const WithThreeWeapons =
 	{
 		render:
 			(
-				args: any,
+				args: typeof withThreeWeaponsArgs,
 			) => {
 				const selectedWeapons: WeaponType[] =
 					[
@@ -1050,24 +1060,11 @@ export const WithThreeWeapons =
 						initialState={
 							initialState
 						}
-						debug={
-							args.debug
-						}
 						{...args}
 					/>
 				);
 			},
-		args: {
-			bulbroType:
-				"well-rounded",
-			debug: false,
-			weapon1:
-				"pistol" as WeaponType,
-			weapon2:
-				"knife" as WeaponType,
-			weapon3:
-				"sword" as WeaponType,
-		},
+		args: withThreeWeaponsArgs,
 		argTypes:
 			{
 				bulbroType:

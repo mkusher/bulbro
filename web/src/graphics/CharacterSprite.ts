@@ -17,7 +17,7 @@ export type Sprite<
 
 export type Animations<
 	R extends
-		Sprite<any>,
+		Sprite<PIXI.TextureSource>,
 > =
 	{
 		walking: AnimatedSprite<R>;
@@ -32,7 +32,7 @@ export type Animations<
  */
 export class CharacterSprites<
 	R extends
-		Sprite<any> = PIXI.Texture,
+		Sprite<PIXI.TextureSource> = PIXI.Texture,
 > {
 	#animations: Animations<R>;
 

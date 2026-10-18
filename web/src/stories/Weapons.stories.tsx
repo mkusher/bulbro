@@ -118,11 +118,19 @@ export const WeaponGallery =
 			},
 	};
 
+const weaponDisplayShowcaseArgs =
+	{
+		weaponType:
+			"pistol",
+		aimingDirectionX: 1,
+		aimingDirectionY: 1,
+	};
+
 export const WeaponDisplayShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof weaponDisplayShowcaseArgs,
 			) => {
 				const weapon =
 					weaponDefinitions.find(
@@ -233,12 +241,7 @@ export const WeaponDisplayShowcase =
 					</div>
 				);
 			},
-		args: {
-			weaponType:
-				"pistol",
-			aimingDirectionX: 1,
-			aimingDirectionY: 1,
-		},
+		args: weaponDisplayShowcaseArgs,
 		argTypes:
 			{
 				weaponType:
@@ -272,11 +275,19 @@ export const WeaponDisplayShowcase =
 			},
 	};
 
+const weaponStatsShowcaseArgs =
+	{
+		weaponType:
+			"pistol",
+		rarity:
+			"rare" as WeaponRarity,
+	};
+
 export const WeaponStatsShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof weaponStatsShowcaseArgs,
 			) => {
 				const weapon =
 					weaponDefinitions.find(
@@ -374,12 +385,7 @@ export const WeaponStatsShowcase =
 					</div>
 				);
 			},
-		args: {
-			weaponType:
-				"pistol",
-			rarity:
-				"rare",
-		},
+		args: weaponStatsShowcaseArgs,
 		argTypes:
 			{
 				weaponType:
@@ -676,11 +682,19 @@ export const WeaponsByAvailability =
 			},
 	};
 
+const weaponSelectorShowcaseArgs =
+	{
+		allowDeselect: true,
+		onlyWithSprites: true,
+		maxWeapons: 12,
+		darkMode: false,
+	};
+
 export const WeaponSelectorShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof weaponSelectorShowcaseArgs,
 			) => {
 				const [
 					selectedWeapon,
@@ -799,12 +813,7 @@ export const WeaponSelectorShowcase =
 					</div>
 				);
 			},
-		args: {
-			allowDeselect: true,
-			onlyWithSprites: true,
-			maxWeapons: 12,
-			darkMode: false,
-		},
+		args: weaponSelectorShowcaseArgs,
 		argTypes:
 			{
 				allowDeselect:

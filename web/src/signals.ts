@@ -13,7 +13,11 @@ export const throttle =
 	) => {
 		let nextValue =
 			source.value;
-		let timer: any;
+		let timer:
+			| ReturnType<
+					typeof setTimeout
+			  >
+			| undefined;
 		const throttled =
 			signal(
 				nextValue,

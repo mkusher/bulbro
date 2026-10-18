@@ -4,14 +4,7 @@ import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
-import {
-	findClosest,
-	findClosestPlayerInRange,
-	isInRange,
-	isWeaponReadyToShoot,
-	minWeaponRange,
-	shoot,
-} from "../game-formulas";
+import { findClosest } from "../game-formulas";
 import {
 	direction,
 	distance,

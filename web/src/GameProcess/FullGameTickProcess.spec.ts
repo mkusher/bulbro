@@ -5,7 +5,6 @@ import {
 	it,
 } from "bun:test";
 import { baseWeaponStats } from "@bulbro/network-protocol";
-import { signal } from "@preact/signals";
 import {
 	deltaTime,
 	nowTime,
@@ -181,7 +180,7 @@ function createTestWeapon(
 	type:
 		| "pistol"
 		| "laserGun" = "pistol",
-): any {
+) {
 	return {
 		id,
 		type,

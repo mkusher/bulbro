@@ -1,7 +1,6 @@
 import {
 	computed,
 	effect,
-	signal,
 } from "@preact/signals";
 import IntlMessageFormat from "intl-messageformat";
 import { logger } from "@/logger";
@@ -90,9 +89,7 @@ function getFormatter(
 		dictionaries[
 			loc
 		] ??
-		dictionaries[
-			"en"
-		] ??
+		dictionaries.en ??
 		undefined;
 	const source =
 		dict
@@ -100,9 +97,7 @@ function getFormatter(
 					key
 				]
 			: (
-					dictionaries[
-						"en"
-					] as Messages
+					dictionaries.en as Messages
 				)[
 					key
 				];

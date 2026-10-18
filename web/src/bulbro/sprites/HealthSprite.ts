@@ -9,13 +9,10 @@ export class HealthSprite {
 	#text: PIXI.Text;
 	#blackBorderRectangle: PIXI.Graphics;
 	#redHealthRectangle: PIXI.Graphics;
-	#playerIndex: number;
 	constructor(
 		canvasSize: Size,
 		playerIndex: number,
 	) {
-		this.#playerIndex =
-			playerIndex;
 		this.#gfx =
 			new PIXI.Container();
 		const style =

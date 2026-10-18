@@ -118,7 +118,7 @@ export class ConsumableSprite extends GameSprite {
 
 	update(
 		consumable: Consumable,
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 	): void {
 		this.updatePosition(
 			consumable.position,

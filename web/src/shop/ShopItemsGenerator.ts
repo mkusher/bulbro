@@ -5,6 +5,7 @@ import {
 	rollItemTier,
 	shopItemDefinitions,
 } from "@/items/Items";
+import { requireDefined } from "@/requireDefined";
 import type {
 	ItemShopItem,
 	ShopItem,
@@ -49,12 +50,16 @@ function shuffleArray<
 			],
 		] =
 			[
-				array[
-					j
-				]!,
-				array[
-					i
-				]!,
+				requireDefined(
+					array[
+						j
+					],
+				),
+				requireDefined(
+					array[
+						i
+					],
+				),
 			];
 	}
 }
@@ -295,9 +300,11 @@ export function generateShopItems(
 		if (
 			lockedKeys.has(
 				shopItemKey(
-					weapons[
-						i
-					]!,
+					requireDefined(
+						weapons[
+							i
+						],
+					),
 				),
 			)
 		)
@@ -337,7 +344,9 @@ export function generateShopItems(
 			offerWeapon
 		) {
 			shopItems.push(
-				weapons.shift()!,
+				requireDefined(
+					weapons.shift(),
+				),
 			);
 			continue;
 		}

@@ -11,12 +11,10 @@ import {
 } from "@preact/signals";
 import { BulbroState } from "@/bulbro/BulbroState";
 import { baseStats } from "@/characters-definitions/base";
+import type { EnemyState } from "@/enemy";
 import type { WaveProcess } from "@/GameProcess";
 import type { GameEvent } from "@/game-events/GameEvents";
-import {
-	direction,
-	zeroPoint,
-} from "@/geometry";
+import { direction } from "@/geometry";
 import type { Logger } from "@/logger";
 import { ShotState } from "@/shot/ShotState";
 import {
@@ -45,7 +43,7 @@ function createMockLogger(): Logger {
 				() =>
 					createMockLogger(),
 			),
-	} as any;
+	} as unknown as Logger;
 }
 
 function createMockWaveProcess(
@@ -56,7 +54,7 @@ function createMockWaveProcess(
 			() =>
 				currentTime,
 		),
-	} as any;
+	} as unknown as WaveProcess;
 }
 
 function createTestBulbro(
@@ -716,7 +714,7 @@ describe("StateUpdater", () => {
 					{
 						type: "spawnEnemy",
 						enemy:
-							{} as any, // Mock enemy
+							{} as EnemyState, // Mock enemy
 						deltaTime:
 							deltaTime(
 								16,

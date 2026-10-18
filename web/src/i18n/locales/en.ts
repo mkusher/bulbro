@@ -498,10 +498,13 @@ export default {
 	"shop.unlockOffer":
 		"Unlock",
 	"shop.reroll":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"Re-roll ${price}",
 	"shop.locked":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"Locked ${price}",
 	"shop.price":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"${price}",
 	"shop.weapons":
 		"Weapons",
@@ -622,6 +625,7 @@ export default {
 	"shop.weaponLimitReached":
 		"Weapon limit reached",
 	"shop.sellWeapon":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"Sell +${price}",
 	"shop.combineWeapon":
 		"Combine → Tier {tier}",

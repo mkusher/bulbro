@@ -10,6 +10,7 @@ import {
 import { act } from "preact/test-utils";
 import sharp from "sharp";
 import atlas from "@/assets/items.json";
+import { requireDefined } from "@/requireDefined";
 import { ItemDisplay } from "./ItemDisplay";
 import { itemDefinitions } from "./Items";
 
@@ -148,11 +149,13 @@ it("covers every item with a unique, in-bounds frame containing padded transpare
 					pixel,
 				);
 				const alpha =
-					data[
-						pixel *
-							info.channels +
-							3
-					]!;
+					requireDefined(
+						data[
+							pixel *
+								info.channels +
+								3
+						],
+					);
 				if (
 					alpha >
 					0
@@ -222,9 +225,11 @@ it("crops and scales the correct frame when a tile is reused for another item", 
 				),
 		);
 		const sprite =
-			container.querySelector<HTMLElement>(
-				".item-sprite",
-			)!;
+			requireDefined(
+				container.querySelector<HTMLElement>(
+					".item-sprite",
+				),
+			);
 		expect(
 			sprite.getAttribute(
 				"aria-hidden",

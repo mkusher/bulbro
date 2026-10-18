@@ -12,6 +12,7 @@ import {
 } from "pixi.js";
 import { Assets } from "@/Assets";
 import { wellRoundedBulbro } from "@/characters-definitions";
+import { requireDefined } from "@/requireDefined";
 import { BulbroThumbnail } from "@/ui/BulbroThumbnail";
 import {
 	BulbroDisplay,
@@ -134,8 +135,10 @@ it("waits for character artwork and centers previews without changing the game s
 			);
 			await init;
 			const container =
-				stage
-					.children[0]!;
+				requireDefined(
+					stage
+						.children[0],
+				);
 			const bounds =
 				container.getBounds();
 			expect(

@@ -7,8 +7,6 @@ export class VoidGameEventQueue
 	implements
 		GameEventQueue
 {
-	constructor() {}
-
 	addEvent(
 		_event: GameEvent,
 	): void {}

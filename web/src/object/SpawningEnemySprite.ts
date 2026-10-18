@@ -111,7 +111,7 @@ export class SpawningEnemySprite extends GameSprite {
 
 	update(
 		spawningEnemy: SpawningEnemy,
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 	) {
 		this.updatePosition(
 			spawningEnemy.position,

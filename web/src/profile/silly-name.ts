@@ -1,3 +1,5 @@
+import { requireDefined } from "@/requireDefined";
+
 const adjectives =
 	[
 		"Black",
@@ -901,24 +903,28 @@ function randomNoun() {
 	const generator =
 		Math.random;
 
-	return nouns[
-		Math.floor(
-			generator() *
-				nouns.length,
-		)
-	]!;
+	return requireDefined(
+		nouns[
+			Math.floor(
+				generator() *
+					nouns.length,
+			)
+		],
+	);
 }
 
 function randomAdjective() {
 	const generator =
 		Math.random;
 
-	return adjectives[
-		Math.floor(
-			generator() *
-				adjectives.length,
-		)
-	]!;
+	return requireDefined(
+		adjectives[
+			Math.floor(
+				generator() *
+					adjectives.length,
+			)
+		],
+	);
 }
 
 export function generateStupidName() {

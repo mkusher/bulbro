@@ -23,6 +23,7 @@ import {
 	type Position,
 	subtraction,
 } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import type { ShotState } from "@/shot/ShotState";
 import type { NowTime } from "@/time";
 import {
@@ -266,7 +267,9 @@ export function attack(
 			);
 		return {
 			type: "shot",
-			shot: shots[0]!,
+			shot: requireDefined(
+				shots[0],
+			),
 			additionalShots:
 				shots.slice(
 					1,

@@ -155,9 +155,11 @@ test("requires two distinct connected and ready members before starting", () => 
 	);
 	expect(
 		canStartLobby(
-			rooms.find(
-				lobby.id,
-			)!,
+			requireLobby(
+				rooms.find(
+					lobby.id,
+				),
+			),
 		),
 	).toBe(
 		false,
@@ -178,9 +180,11 @@ test("requires two distinct connected and ready members before starting", () => 
 	);
 	expect(
 		canStartLobby(
-			rooms.find(
-				lobby.id,
-			)!,
+			requireLobby(
+				rooms.find(
+					lobby.id,
+				),
+			),
 		),
 	).toBe(
 		false,
@@ -191,9 +195,11 @@ test("requires two distinct connected and ready members before starting", () => 
 	);
 	expect(
 		canStartLobby(
-			rooms.find(
-				lobby.id,
-			)!,
+			requireLobby(
+				rooms.find(
+					lobby.id,
+				),
+			),
 		),
 	).toBe(
 		true,
@@ -222,3 +228,20 @@ test("requires two distinct connected and ready members before starting", () => 
 		],
 	);
 });
+
+function requireLobby<
+	T,
+>(
+	lobby:
+		| T
+		| undefined,
+): T {
+	if (
+		lobby ===
+		undefined
+	)
+		throw new Error(
+			"Expected lobby",
+		);
+	return lobby;
+}

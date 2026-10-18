@@ -7,7 +7,7 @@ export default {
 		StartScreen,
 };
 
-const toScreen =
+const _toScreen =
 	(
 		screen: unknown,
 	) =>

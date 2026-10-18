@@ -7,7 +7,6 @@ import { createPixiInitOptions } from "../graphics/PixiConfiguration";
 import { MaterialSprite } from "../object/MaterialSprite";
 import type { Material } from "../object/MaterialState";
 import { SpawningEnemySprite } from "../object/SpawningEnemySprite";
-import type { SpawningEnemy } from "../object/SpawningEnemyState";
 
 export default {
 	title:
@@ -122,42 +121,10 @@ function ObjectRenderer({
 						new SpawningEnemySprite(
 							debug,
 						);
-					const spawningEnemy: SpawningEnemy =
-						{
-							type: "spawning-enemy",
-							id: "demo-spawner",
-							position:
-								centerObject
-									? {
-											x:
-												width /
-												2,
-											y:
-												height /
-												2,
-										}
-									: {
-											x: 50,
-											y: 50,
-										},
-							startedAt:
-								Date.now(),
-							duration: 3000,
-							enemy:
-								null as any, // TODO: Create proper enemy state
-						};
 					await objectSprite.init();
-					app.stage.addChild(
-						(
-							objectSprite as any
-						)
-							.container,
-					);
-					layer.attach(
-						(
-							objectSprite as any
-						)
-							.container,
+					objectSprite.appendTo(
+						app.stage,
+						layer,
 					);
 				}
 
@@ -239,31 +206,25 @@ function ObjectRenderer({
 	);
 }
 
+const materialStoryArgs =
+	{
+		width: 400,
+		height: 300,
+		debug: false,
+	};
+
 export const MaterialStory =
 	{
 		render:
 			(
-				args: any,
+				args: typeof materialStoryArgs,
 			) => (
 				<ObjectRenderer
 					objectType="material"
-					width={
-						args.width
-					}
-					height={
-						args.height
-					}
-					debug={
-						args.debug
-					}
 					{...args}
 				/>
 			),
-		args: {
-			width: 400,
-			height: 300,
-			debug: false,
-		},
+		args: materialStoryArgs,
 		argTypes:
 			{
 				width:
@@ -292,33 +253,27 @@ export const MaterialStory =
 							"boolean",
 					},
 			},
+	};
+
+const spawningEnemyStoryArgs =
+	{
+		width: 400,
+		height: 300,
+		debug: false,
 	};
 
 export const SpawningEnemyStory =
 	{
 		render:
 			(
-				args: any,
+				args: typeof spawningEnemyStoryArgs,
 			) => (
 				<ObjectRenderer
 					objectType="spawning_enemy"
-					width={
-						args.width
-					}
-					height={
-						args.height
-					}
-					debug={
-						args.debug
-					}
 					{...args}
 				/>
 			),
-		args: {
-			width: 400,
-			height: 300,
-			debug: false,
-		},
+		args: spawningEnemyStoryArgs,
 		argTypes:
 			{
 				width:
@@ -349,25 +304,23 @@ export const SpawningEnemyStory =
 			},
 	};
 
+const animatedMaterialArgs =
+	{
+		width: 400,
+		height: 300,
+		debug: false,
+	};
+
 export const AnimatedMaterial =
 	{
 		render:
 			(
-				args: any,
+				args: typeof animatedMaterialArgs,
 			) => (
 				<ObjectRenderer
 					objectType="material"
-					width={
-						args.width
-					}
-					height={
-						args.height
-					}
-					debug={
-						args.debug
-					}
 					tick={(
-						deltaTime,
+						_deltaTime,
 					) => {
 						// Add a gentle floating animation to the material
 						const canvas =
@@ -377,18 +330,22 @@ export const AnimatedMaterial =
 						if (
 							canvas &&
 							(
-								canvas as any
+								canvas as HTMLCanvasElement & {
+									app?: PIXI.Application;
+								}
 							)
 								.app
 						) {
 							const app =
 								(
-									canvas as any
+									canvas as HTMLCanvasElement & {
+										app?: PIXI.Application;
+									}
 								)
 									.app;
 							const container =
 								app
-									.stage
+									?.stage
 									.children[0]
 									?.children[0]; // Navigate to the material container
 							if (
@@ -416,11 +373,7 @@ export const AnimatedMaterial =
 					{...args}
 				/>
 			),
-		args: {
-			width: 400,
-			height: 300,
-			debug: false,
-		},
+		args: animatedMaterialArgs,
 		argTypes:
 			{
 				width:
@@ -451,11 +404,16 @@ export const AnimatedMaterial =
 			},
 	};
 
+const objectShowcaseArgs =
+	{
+		debug: false,
+	};
+
 export const ObjectShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof objectShowcaseArgs,
 			) => {
 				return (
 					<div
@@ -489,15 +447,15 @@ export const ObjectShowcase =
 								Crystal
 							</h3>
 							<ObjectRenderer
+								debug={
+									args.debug
+								}
 								objectType="material"
 								width={
 									200
 								}
 								height={
 									150
-								}
-								debug={
-									args.debug
 								}
 							/>
 							<div
@@ -540,15 +498,15 @@ export const ObjectShowcase =
 								Spawner
 							</h3>
 							<ObjectRenderer
+								debug={
+									args.debug
+								}
 								objectType="spawning_enemy"
 								width={
 									200
 								}
 								height={
 									150
-								}
-								debug={
-									args.debug
 								}
 							/>
 							<div
@@ -575,9 +533,7 @@ export const ObjectShowcase =
 					</div>
 				);
 			},
-		args: {
-			debug: false,
-		},
+		args: objectShowcaseArgs,
 		argTypes:
 			{
 				debug:

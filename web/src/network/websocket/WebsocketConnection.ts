@@ -1,7 +1,7 @@
 import type { Logger } from "pino";
 
 type NativeMessageHandler<
-	T = any,
+	T = string,
 > =
 	(
 		e: MessageEvent<T>,
@@ -62,10 +62,8 @@ export class WebsocketConnection {
 			[];
 	}
 
-	onMessage<
-		T = string,
-	>(
-		listener: NativeMessageHandler<T>,
+	onMessage(
+		listener: NativeMessageHandler,
 	) {
 		this.#listeners.push(
 			listener,

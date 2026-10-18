@@ -10,6 +10,7 @@ import {
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { calculateAttackDamage } from "@/game-formulas";
 import { zeroPoint } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import { generateWeaponShopItems } from "@/shop/ShopItemsGenerator";
 import { nowTime } from "@/time";
 import {
@@ -551,10 +552,12 @@ for (const row of reference)
 						tier,
 					),
 				).toBe(
-					row
-						.price[
-						i
-					]!,
+					requireDefined(
+						row
+							.price[
+							i
+						],
+					),
 				);
 				expect(
 					weaponPrice(
@@ -564,10 +567,12 @@ for (const row of reference)
 					),
 				).toBe(
 					2 *
-						row
-							.price[
-							i
-						]! +
+						requireDefined(
+							row
+								.price[
+								i
+							],
+						) +
 						10,
 				);
 				if (
@@ -580,16 +585,20 @@ for (const row of reference)
 							tier,
 						);
 					const combined =
-						combineWeapons(
-							[
-								state,
-								other,
-							],
-							state.id,
-							other.id,
-						)!;
+						requireDefined(
+							combineWeapons(
+								[
+									state,
+									other,
+								],
+								state.id,
+								other.id,
+							),
+						);
 					expect(
-						combined[0]!
+						requireDefined(
+							combined[0],
+						)
 							.statsBonus,
 					).toEqual(
 						toWeaponStateAtTier(
@@ -705,24 +714,26 @@ it("emits separately aimed shotgun pellets with per-pellet damage", () => {
 				],
 			);
 		const result =
-			attack(
-				player,
-				"player",
-				weapon,
-				{
-					id: "enemy",
-					aimAt:
-						{
-							x: 300,
-							y: 0,
-						},
-				},
-				nowTime(
-					1000,
+			requireDefined(
+				attack(
+					player,
+					"player",
+					weapon,
+					{
+						id: "enemy",
+						aimAt:
+							{
+								x: 300,
+								y: 0,
+							},
+					},
+					nowTime(
+						1000,
+					),
+					() =>
+						0.99,
 				),
-				() =>
-					0.99,
-			)!;
+			);
 		const events =
 			attackSideEvents(
 				weapon.id,
@@ -812,11 +823,13 @@ it("adds Hand harvesting once through combining, serialization and removal", () 
 	);
 	const combined =
 		player.useWeapons(
-			combineWeapons(
-				player.weapons,
-				first.id,
-				second.id,
-			)!,
+			requireDefined(
+				combineWeapons(
+					player.weapons,
+					first.id,
+					second.id,
+				),
+			),
 		);
 	expect(
 		combined

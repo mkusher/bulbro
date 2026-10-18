@@ -3,10 +3,7 @@ import {
 	lastWaveStats,
 } from "@/gameStats";
 import { t } from "@/i18n";
-import {
-	PrevWaveStats,
-	type WaveStats,
-} from "@/shop/PrevWaveStats";
+import { PrevWaveStats } from "@/shop/PrevWaveStats";
 import { TotalGameStats } from "@/shop/TotalGameStats";
 import {
 	CentralCard,

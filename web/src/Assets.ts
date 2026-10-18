@@ -69,51 +69,52 @@ type LoadOptions =
 			| "linear";
 	};
 
-export class Assets {
-	static async preloadAll(): Promise<void> {
-		const assets =
-			Object.values(
-				assetDefinitions,
+export const Assets =
+	{
+		async preloadAll(): Promise<void> {
+			const assets =
+				Object.values(
+					assetDefinitions,
+				);
+
+			await Promise.all(
+				[
+					// Preload image assets
+					...assets.map(
+						(
+							asset,
+						) =>
+							PIXI.Assets.load(
+								asset.path,
+							),
+					),
+					// Preload audio assets
+					audioEngine.init(),
+				],
 			);
+		},
 
-		await Promise.all(
-			[
-				// Preload image assets
-				...assets.map(
-					(
-						asset,
-					) =>
-						PIXI.Assets.load(
-							asset.path,
-						),
-				),
-				// Preload audio assets
-				audioEngine.init(),
-			],
-		);
-	}
+		async get(
+			name: AssetName,
+			options?: LoadOptions,
+		): Promise<PIXI.TextureSource> {
+			const asset =
+				assetDefinitions[
+					name
+				];
+			const path =
+				asset.path;
 
-	static async get(
-		name: AssetName,
-		options?: LoadOptions,
-	): Promise<PIXI.TextureSource> {
-		const asset =
-			assetDefinitions[
-				name
-			];
-		const path =
-			asset.path;
-
-		return PIXI.Assets.load(
-			options?.scaleMode
-				? {
-						src: path,
-						data: {
-							scaleMode:
-								options.scaleMode,
-						},
-					}
-				: path,
-		);
-	}
-}
+			return PIXI.Assets.load(
+				options?.scaleMode
+					? {
+							src: path,
+							data: {
+								scaleMode:
+									options.scaleMode,
+							},
+						}
+					: path,
+			);
+		},
+	};

@@ -2,6 +2,7 @@ import type { EnemyEvent } from "@/game-events/GameEvents";
 import type { Range } from "@/geometry";
 import { range } from "@/geometry";
 import { pickRandom } from "@/random";
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
@@ -19,7 +20,6 @@ import {
 	shortRange,
 } from "../spawnRanges";
 import type {
-	AmountRange,
 	WaveConfig,
 	WaveSpawner,
 } from "../WaveConfig";
@@ -215,9 +215,11 @@ const getWaveConfig =
 		) {
 			return config;
 		}
-		return waveConfigs.get(
-			4,
-		)!;
+		return requireDefined(
+			waveConfigs.get(
+				4,
+			),
+		);
 	};
 
 export class BabySpawner

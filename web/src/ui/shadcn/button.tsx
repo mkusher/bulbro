@@ -59,10 +59,12 @@ function Button({
 	asChild = false,
 	...props
 }: ButtonProps) {
-	const Comp: React.ComponentType<ButtonProps> =
+	const Comp:
+		| React.ComponentType<ButtonProps>
+		| "button" =
 		asChild
-			? Slot
-			: ("button" as any);
+			? (Slot as React.ComponentType<ButtonProps>)
+			: "button";
 
 	return (
 		<Comp

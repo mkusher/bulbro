@@ -21,6 +21,7 @@ import {
 	randomAngle,
 	randomInRange,
 } from "@/random";
+import { requireDefined } from "@/requireDefined";
 import type { WaveState } from "@/waveState";
 
 function spawnCount(
@@ -91,8 +92,10 @@ export function spawnCluster(
 export function getSpawnCenter(
 	waveState: WaveState,
 ): Position {
-	return waveState
-		.players[0]!
+	return requireDefined(
+		waveState
+			.players[0],
+	)
 		.position;
 }
 

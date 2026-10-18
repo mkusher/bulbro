@@ -1,4 +1,5 @@
 import type { Signal } from "@preact/signals";
+import { requireDefined } from "@/requireDefined";
 import type { GameEvent } from "../../game-events/GameEvents";
 import type { WaveState } from "../../waveState";
 import {
@@ -153,7 +154,9 @@ export class WaveStateProcessor
 				{
 					...newState,
 					lastMovementsAt:
-						enemyMovedEvents[0]!
+						requireDefined(
+							enemyMovedEvents[0],
+						)
 							.occurredAt,
 				};
 		} else if (
@@ -164,7 +167,9 @@ export class WaveStateProcessor
 				{
 					...newState,
 					lastMovementsAt:
-						materialMovedEvents[0]!
+						requireDefined(
+							materialMovedEvents[0],
+						)
 							.occurredAt,
 				};
 		}

@@ -1,4 +1,5 @@
 import { itemPrice } from "@/game-formulas";
+import { requireDefined } from "@/requireDefined";
 import {
 	getWeaponByType,
 	toWeaponState,
@@ -393,11 +394,13 @@ export function combineWeapons(
 	)
 		return;
 	const tier =
-		nextWeaponTier(
-			weaponTierOf(
-				weapon,
+		requireDefined(
+			nextWeaponTier(
+				weaponTierOf(
+					weapon,
+				),
 			),
-		)!;
+		);
 	const definition =
 		getWeaponByType(
 			weapon.type,

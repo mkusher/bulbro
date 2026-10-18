@@ -5,7 +5,6 @@ import type {
 	BulbroDiedEvent,
 	BulbroEvent,
 	BulbroHealedEvent,
-	BulbroInitializedForWaveEvent,
 	BulbroMovedEvent,
 	BulbroReceivedHitEvent,
 	GameEvent,
@@ -45,7 +44,6 @@ import {
 	type Position,
 	round,
 	type Size,
-	subtraction,
 	zeroPoint,
 } from "../geometry";
 import {
@@ -63,10 +61,7 @@ import {
 	levelUpgradeStatSourceId,
 	upgradeBonuses,
 } from "../upgrades/Upgrades";
-import type {
-	WaveState,
-	WeaponState,
-} from "../waveState";
+import type { WeaponState } from "../waveState";
 import { toWeaponState } from "../weapon";
 import { combineWeapons } from "../weapon/WeaponTiers";
 import type {
@@ -503,7 +498,7 @@ export class BulbroState
 	prepareForWave(
 		position: Position,
 		direction: Direction,
-		now: NowTime,
+		_now: NowTime,
 	): BulbroEvent[] {
 		return [
 			{
@@ -519,7 +514,7 @@ export class BulbroState
 	moveFromDirection(
 		position: Position,
 		direction: Direction,
-		now: NowTime,
+		_now: NowTime,
 	): BulbroMovedEvent {
 		const roundedPosition =
 			round(
@@ -545,7 +540,7 @@ export class BulbroState
 
 	attack(
 		enemies: EnemyState[],
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 		now: NowTime,
 	) {
 		const baseEvents: BulbroEvent[] =
@@ -1783,7 +1778,7 @@ export function levelStatSource(
  */
 export function spawnBulbro(
 	id: string,
-	type: FaceType,
+	_type: FaceType,
 	position: Position,
 	level: number,
 	experience: number,

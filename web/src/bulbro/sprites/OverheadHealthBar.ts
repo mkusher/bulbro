@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import type { Position } from "@/geometry";
 import type { BulbroState } from "../BulbroState";
 
 const barHeight = 8;

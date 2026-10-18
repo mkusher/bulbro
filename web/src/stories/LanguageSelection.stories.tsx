@@ -7,7 +7,7 @@ export default {
 		LanguageSelection,
 };
 
-const toScreen =
+const _toScreen =
 	(
 		screen: unknown,
 	) =>

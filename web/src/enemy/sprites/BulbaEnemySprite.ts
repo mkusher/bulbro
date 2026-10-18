@@ -19,7 +19,8 @@ import {
 	EnemySprites,
 } from "../EnemySprites";
 import type { EnemyState } from "../EnemyState";
-import * as enemiesFrames from "./EnemiesFrames";
+import type { EnemyType } from "./EnemiesFrames";
+import { enemiesFrames } from "./EnemiesFrames";
 import {
 	ENEMY_BODY_SCALE,
 	type EnemyBodyTextures,
@@ -76,7 +77,7 @@ export class BulbaEnemySprite extends GameSprite {
 	#defaultFrame: PhysicalRectangle;
 
 	constructor(
-		type: enemiesFrames.EnemyType,
+		type: EnemyType,
 		debug?: boolean,
 	) {
 		super(

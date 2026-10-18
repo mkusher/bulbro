@@ -10,6 +10,7 @@ import {
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { getAttackCooldown } from "@/game-formulas";
 import { zeroPoint } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import {
 	deltaTime,
 	nowTime,
@@ -292,8 +293,10 @@ describe("ChasingBehavior", () => {
 						weapons:
 							[
 								{
-									...createTestEnemy()
-										.weapons[0]!,
+									...requireDefined(
+										createTestEnemy()
+											.weapons[0],
+									),
 									lastStrikedAt:
 										now -
 										100,
@@ -347,8 +350,10 @@ describe("ChasingBehavior", () => {
 					},
 				);
 			const weaponTime =
-				baseEnemy
-					.weapons[0]!
+				requireDefined(
+					baseEnemy
+						.weapons[0],
+				)
 					.statsBonus
 					?.cooldown ??
 				1;
@@ -370,8 +375,10 @@ describe("ChasingBehavior", () => {
 						weapons:
 							[
 								{
-									...baseEnemy
-										.weapons[0]!,
+									...requireDefined(
+										baseEnemy
+											.weapons[0],
+									),
 									lastStrikedAt:
 										now -
 										cooldown -
@@ -423,8 +430,10 @@ describe("ChasingBehavior", () => {
 				);
 
 			const weaponTime =
-				enemy
-					.weapons[0]!
+				requireDefined(
+					enemy
+						.weapons[0],
+				)
 					.statsBonus
 					?.cooldown ??
 				1;

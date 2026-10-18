@@ -5,6 +5,7 @@ import {
 import { baseBulbro } from "@/characters-definitions/base";
 import { withEventMeta } from "@/game-events/GameEvents";
 import type { Material } from "@/object/MaterialState";
+import { requireDefined } from "@/requireDefined";
 import {
 	deltaTime,
 	nowTime,
@@ -40,9 +41,10 @@ function initialState(
 			1,
 		);
 	const position =
-		state
-			.players[0]!
-			.position;
+		requireDefined(
+			state
+				.players[0],
+		).position;
 	state.objects =
 		[
 			{
@@ -130,8 +132,10 @@ it("predicts material attraction on every guest frame without changing authorita
 			.position
 			.y,
 	).toBe(
-		state
-			.players[0]!
+		requireDefined(
+			state
+				.players[0],
+		)
 			.position
 			.y +
 			80,
@@ -228,27 +232,39 @@ it("hides predicted collections until host confirmation without granting rewards
 		i++
 	) {
 		expect(
-			view
-				.players[
-				i
-			]!
+			requireDefined(
+				view
+					.players[
+					i
+				],
+			)
 				.materialsAvailable,
 		).toBe(
-			before[
-				i
-			]![0]! +
+			requireDefined(
+				requireDefined(
+					before[
+						i
+					],
+				)[0],
+			) +
 				1,
 		);
 		expect(
-			view
-				.players[
-				i
-			]!
+			requireDefined(
+				view
+					.players[
+					i
+				],
+			)
 				.totalExperience,
 		).toBe(
-			before[
-				i
-			]![1]! +
+			requireDefined(
+				requireDefined(
+					before[
+						i
+					],
+				)[1],
+			) +
 				1,
 		);
 	}
@@ -393,8 +409,10 @@ it("smoothly calibrates wrong predictions and restores a pickup when the host di
 		2,
 	);
 	expect(
-		state
-			.players[0]!
+		requireDefined(
+			state
+				.players[0],
+		)
 			.materialsAvailable,
 	).toBe(
 		0,
@@ -465,8 +483,10 @@ it("ignores dead players, skips paused waves, and handles zero-length frames", (
 					type: "bulbroDied",
 					damage: 100,
 					position:
-						state
-							.players[0]!
+						requireDefined(
+							state
+								.players[0],
+						)
 							.position,
 					bulbroId:
 						"guest",

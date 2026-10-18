@@ -101,7 +101,7 @@ function safeStringify(
 		return JSON.stringify(
 			value,
 		);
-	} catch (e) {
+	} catch (_e) {
 		return "[Non-serializible value]";
 	}
 }

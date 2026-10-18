@@ -161,7 +161,11 @@ export class WebsocketGameController {
 				const game =
 					this.#rooms.find(
 						message.gameId,
-					)!;
+					);
+				if (
+					!game
+				)
+					return;
 				for (const member of game.players)
 					if (
 						member.id !==

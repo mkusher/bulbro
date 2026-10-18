@@ -1,3 +1,4 @@
+import type { ComponentProps } from "preact";
 import {
 	PrevWaveStats,
 	type WaveStats,
@@ -15,7 +16,9 @@ export const DefaultStats =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}
@@ -40,7 +43,9 @@ export const HighPerformance =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}
@@ -65,7 +70,9 @@ export const LowPerformance =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}
@@ -90,7 +97,9 @@ export const EarlyDeath =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}
@@ -115,7 +124,9 @@ export const PerfectRun =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}
@@ -140,7 +151,9 @@ export const NoAccuracy =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}
@@ -164,7 +177,9 @@ export const LateGame =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof PrevWaveStats
+				>,
 			) => (
 				<PrevWaveStats
 					{...args}

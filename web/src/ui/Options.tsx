@@ -68,7 +68,7 @@ export function BulbroOption({
 				value.id
 			}
 			onSelect={(
-				e,
+				_e,
 			) => {
 				onSelect?.(
 					value,

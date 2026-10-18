@@ -23,6 +23,7 @@ import {
 } from "@/game-events/GameEvents";
 import { InMemoryGameEventQueue } from "@/game-events/InMemoryGameEventQueue";
 import type { Logger } from "@/logger";
+import { requireDefined } from "@/requireDefined";
 import { ShotState } from "@/shot/ShotState";
 import {
 	deltaTime,
@@ -438,13 +439,15 @@ describe("network game client integration", () => {
 						: hostId;
 				const remote =
 					() =>
-						client.state.value.players.find(
-							(
-								p,
-							) =>
-								p.id ===
-								remoteId,
-						)!;
+						requireDefined(
+							client.state.value.players.find(
+								(
+									p,
+								) =>
+									p.id ===
+									remoteId,
+							),
+						);
 				const deliver =
 					(
 						version: number,
@@ -777,29 +780,33 @@ describe("network game client integration", () => {
 				),
 			);
 			const guestPlayer =
-				guest.state.value.players.find(
-					(
-						p,
-					) =>
-						p.id ===
-						guestId,
-				)!;
-			const predictedMove =
-				guestPlayer.move(
-					{
-						x:
-							-1,
-						y: 0,
-					},
-					guest
-						.state
-						.value
-						.mapSize,
-					[],
-					deltaTime(
-						16,
+				requireDefined(
+					guest.state.value.players.find(
+						(
+							p,
+						) =>
+							p.id ===
+							guestId,
 					),
-				)!;
+				);
+			const predictedMove =
+				requireDefined(
+					guestPlayer.move(
+						{
+							x:
+								-1,
+							y: 0,
+						},
+						guest
+							.state
+							.value
+							.mapSize,
+						[],
+						deltaTime(
+							16,
+						),
+					),
+				);
 			const predictedGuest =
 				guestPlayer.applyEvent(
 					{
@@ -815,13 +822,15 @@ describe("network game client integration", () => {
 					},
 				);
 			expect(
-				host.state.value.players.find(
-					(
-						p,
-					) =>
-						p.id ===
-						guestId,
-				)!
+				requireDefined(
+					host.state.value.players.find(
+						(
+							p,
+						) =>
+							p.id ===
+							guestId,
+					),
+				)
 					.position,
 			).toEqual(
 				predictedGuest.position,

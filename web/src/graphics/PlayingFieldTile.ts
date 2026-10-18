@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { requireDefined } from "@/requireDefined";
 import type { DeltaTime } from "@/time";
 import type { Size } from "../geometry";
 import { BackgroundPatternSprite } from "../object/BackgroundPatternSprite";
@@ -18,9 +19,11 @@ function createNoiseTexture(): PIXI.Texture {
 	canvas.height =
 		NOISE_TILE_SIZE;
 	const ctx =
-		canvas.getContext(
-			"2d",
-		)!;
+		requireDefined(
+			canvas.getContext(
+				"2d",
+			),
+		);
 	const imageData =
 		ctx.createImageData(
 			NOISE_TILE_SIZE,
@@ -151,7 +154,7 @@ export class PlayingFieldTile {
 	}
 
 	update(
-		deltaTime: DeltaTime,
-		state: WaveState,
+		_deltaTime: DeltaTime,
+		_state: WaveState,
 	): void {}
 }

@@ -3,6 +3,7 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import { requireDefined } from "@/requireDefined";
 import { BulbroState } from "./bulbro/BulbroState";
 import { wellRoundedBulbro } from "./characters-definitions";
 import {
@@ -53,7 +54,9 @@ it("restores a wave checkpoint with a functional player and the full build", () 
 		"wave",
 	);
 	const saved =
-		loadSinglePlayerGame()!;
+		requireDefined(
+			loadSinglePlayerGame(),
+		);
 	expect(
 		saved.phase,
 	).toBe(
@@ -90,12 +93,23 @@ it("restores a wave checkpoint with a functional player and the full build", () 
 		BulbroState,
 	);
 	expect(
-		saved.state.players[0]!.toJSON(),
+		requireDefined(
+			saved
+				.state
+				.players[0],
+		).toJSON(),
 	).toEqual(
-		original.players[0]!.toJSON(),
+		requireDefined(
+			original
+				.players[0],
+		).toJSON(),
 	);
 	expect(
-		saved.state.players[0]!.spendMaterials(
+		requireDefined(
+			saved
+				.state
+				.players[0],
+		).spendMaterials(
 			1,
 		),
 	).toBeInstanceOf(
@@ -111,8 +125,10 @@ it("updates shop progress and clears a finished run", () => {
 		"wave",
 	);
 	const player =
-		original
-			.players[0]!;
+		requireDefined(
+			original
+				.players[0],
+		);
 	const rich =
 		new BulbroState(
 			{
@@ -139,24 +155,30 @@ it("updates shop progress and clears a finished run", () => {
 		"shop",
 	);
 	const saved =
-		loadSinglePlayerGame()!;
+		requireDefined(
+			loadSinglePlayerGame(),
+		);
 	expect(
 		saved.phase,
 	).toBe(
 		"shop",
 	);
 	expect(
-		saved
-			.state
-			.players[0]!
+		requireDefined(
+			saved
+				.state
+				.players[0],
+		)
 			.materialsAvailable,
 	).toBe(
 		75,
 	);
 	expect(
-		saved
-			.state
-			.players[0]!
+		requireDefined(
+			saved
+				.state
+				.players[0],
+		)
 			.items,
 	).toEqual(
 		[
@@ -164,9 +186,11 @@ it("updates shop progress and clears a finished run", () => {
 		],
 	);
 	expect(
-		saved
-			.state
-			.players[0]!
+		requireDefined(
+			saved
+				.state
+				.players[0],
+		)
 			.rerollCount,
 	).toBe(
 		2,
@@ -190,15 +214,19 @@ it("keeps the single-player save when asked to save co-op", () => {
 			players:
 				[
 					...original.players,
-					original
-						.players[0]!,
+					requireDefined(
+						original
+							.players[0],
+					),
 				],
 		},
 		gameStats.value,
 		"shop",
 	);
 	expect(
-		loadSinglePlayerGame()!
+		requireDefined(
+			loadSinglePlayerGame(),
+		)
 			.phase,
 	).toBe(
 		"wave",

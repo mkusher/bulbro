@@ -3,6 +3,7 @@ import {
 	BulbroState,
 } from "@/bulbro";
 import { spawnBulbro } from "@/bulbro/BulbroState";
+import type { FaceType } from "@/bulbro/sprites/FaceSprite";
 import { baseStats } from "@/characters-definitions/base";
 import type { EnemyState } from "@/enemy/EnemyState";
 import { classicMapSize } from "@/game-canvas";
@@ -163,7 +164,7 @@ export function createShotState(
 // Mock bulbro creation for when we don't have access to character definitions
 function createMockBulbro(
 	id: string,
-	sprite: string,
+	sprite: FaceType,
 	position: {
 		x: number;
 		y: number;
@@ -174,7 +175,7 @@ function createMockBulbro(
 			statSources:
 				[],
 			id,
-			type: sprite as any,
+			type: sprite,
 			characterId:
 				"well-rounded",
 			position,

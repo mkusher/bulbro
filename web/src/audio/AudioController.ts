@@ -155,7 +155,7 @@ class AudioController {
 		const player =
 			state.players.find(
 				(
-					p: any,
+					p,
 				) =>
 					p.id ===
 					event.bulbroId,
@@ -169,7 +169,7 @@ class AudioController {
 		const weaponState =
 			player.weapons.find(
 				(
-					w: any,
+					w,
 				) =>
 					w.id ===
 					weaponId,
@@ -213,7 +213,7 @@ class AudioController {
 		const enemy =
 			state.enemies.find(
 				(
-					e: any,
+					e,
 				) =>
 					e.id ===
 					event.enemyId,
@@ -227,7 +227,7 @@ class AudioController {
 		const weaponState =
 			enemy.weapons.find(
 				(
-					w: any,
+					w,
 				) =>
 					w.id ===
 					weaponId,

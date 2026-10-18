@@ -15,6 +15,7 @@ import type {
 } from "@/GameProcess";
 import { InMemoryGameEventQueue } from "@/game-events/InMemoryGameEventQueue";
 import type { Logger } from "@/logger";
+import { requireDefined } from "@/requireDefined";
 import { nowTime } from "@/time";
 import {
 	type WaveState,
@@ -748,9 +749,11 @@ it("shares local shop changes and applies remote purchases and skills before Rea
 		},
 	);
 	const local =
-		waveState
-			.value
-			.players[0]!;
+		requireDefined(
+			waveState
+				.value
+				.players[0],
+		);
 	const remote =
 		player(
 			guestId,

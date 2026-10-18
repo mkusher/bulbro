@@ -5,6 +5,7 @@ import {
 } from "bun:test";
 import type { BulbroState } from "@/bulbro";
 import { distance } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import {
 	deltaTime,
 	nowTime,
@@ -64,10 +65,12 @@ function sequence(
 ) {
 	let i = 0;
 	return () =>
-		values[
-			i++ %
-				values.length
-		]!;
+		requireDefined(
+			values[
+				i++ %
+					values.length
+			],
+		);
 }
 
 describe("treeSpawnAmount", () => {
@@ -198,7 +201,9 @@ describe("TreeSpawner", () => {
 			1,
 		);
 		const event =
-			events[0]!;
+			requireDefined(
+				events[0],
+			);
 		if (
 			event.type !==
 			"spawnEnemy"
@@ -279,7 +284,9 @@ describe("TreeSpawner", () => {
 				),
 			);
 		const event =
-			events[0]!;
+			requireDefined(
+				events[0],
+			);
 		if (
 			event.type !==
 			"spawnEnemy"

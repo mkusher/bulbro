@@ -2,6 +2,7 @@ import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
 import type { GameEvent } from "@/game-events/GameEvents";
 import type { Position } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
@@ -275,9 +276,11 @@ export class StorybookSceneWithUi {
 					);
 				}
 				const dust =
-					this.#dustEffects.get(
-						player.id,
-					)!;
+					requireDefined(
+						this.#dustEffects.get(
+							player.id,
+						),
+					);
 				const lastPos =
 					this.#lastPlayerPositions.get(
 						player.id,
