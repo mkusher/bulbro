@@ -1,20 +1,16 @@
 import { signal } from "@preact/signals";
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
 } from "@/time";
-import {
-	deltaTime,
-	nowTime,
-} from "@/time";
+import { nowTime } from "@/time";
 import {
 	BULBRO_BODY_SIZE,
 	BULBRO_SIZE,
 	BulbroState,
 	spawnBulbro,
 } from "./bulbro";
-import { ENEMY_SIZE } from "./enemy";
-import { ChasingBehavior } from "./enemy/ChasingBehavior";
 import {
 	DEATH_DURATION,
 	EnemyState,
@@ -23,12 +19,9 @@ import {
 import type {
 	ConsumableCollectedEvent,
 	ConsumableMovedEvent,
-	EnemyMovedEvent,
 	GameEvent,
 	MaterialCollectedEvent,
 	MaterialMovedEvent,
-	ShotExpiredEvent,
-	ShotMovedEvent,
 } from "./game-events/GameEvents";
 import { withEventMeta } from "./game-events/GameEvents";
 import {
@@ -36,23 +29,16 @@ import {
 	findClosest,
 } from "./game-formulas";
 import {
-	type Direction,
 	direction,
 	distance,
-	isEqual,
 	type Position,
-	type Rectangle,
-	rectContainsPoint,
 	rectFromCenter,
-	rectIntersectsLine,
 	rectsIntersect,
 	type Size,
 	zeroPoint,
 } from "./geometry";
-import type { MovableObject } from "./movement/Movement";
 import { Movement } from "./movement/Movement";
 import type { MapObject } from "./object";
-import { movePosition } from "./physics";
 import type { Player } from "./player";
 import { ShotState } from "./shot/ShotState";
 import { hasSecondPassedAfter } from "./time";
@@ -834,7 +820,7 @@ export function handleConsumableCollected(
 	};
 }
 
-const enemiesBodiesDisappearAfter = 2000;
+const _enemiesBodiesDisappearAfter = 2000;
 
 function playerBlocksSpawn(
 	state: WaveState,
@@ -1137,7 +1123,6 @@ export function handleBulbroHealed(
 ): WaveState {
 	const {
 		bulbroId,
-		hp,
 	} =
 		action;
 	return {
@@ -1537,7 +1522,9 @@ export function updateState(
 											e,
 										) =>
 											e.toConsumable(
-												action.consumableId!,
+												requireDefined(
+													action.consumableId,
+												),
 											),
 									)
 							: []),

@@ -500,10 +500,13 @@ export default {
 	"shop.unlockOffer":
 		"Розблокувати",
 	"shop.reroll":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"Перекинути ${price}",
 	"shop.locked":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"Заблоковано ${price}",
 	"shop.price":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"${price}",
 	"shop.weapons":
 		"Зброя",
@@ -624,6 +627,7 @@ export default {
 	"shop.weaponLimitReached":
 		"Досягнуто ліміту зброї",
 	"shop.sellWeapon":
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Currency symbol followed by an i18n placeholder.
 		"Продати +${price}",
 	"shop.combineWeapon":
 		"Об'єднати → Ранг {tier}",

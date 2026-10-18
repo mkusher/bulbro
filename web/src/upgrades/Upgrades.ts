@@ -2,6 +2,7 @@ import type { MainStats } from "@/bulbro/BulbroCharacter";
 import type { StatBonus } from "@/game-formulas";
 import type { MessageKey } from "@/i18n";
 import { seededRng } from "@/random";
+import { requireDefined } from "@/requireDefined";
 
 /** Upgrade tiers I–IV, as in Brotato. */
 export type UpgradeTier =
@@ -509,7 +510,9 @@ export function generateUpgradeChoices({
 		choices.push(
 			{
 				upgrade:
-					upgrade!,
+					requireDefined(
+						upgrade,
+					),
 				tier: rollUpgradeTier(
 					level,
 					luck,

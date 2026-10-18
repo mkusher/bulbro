@@ -6,6 +6,7 @@ import { BulbroState } from "@/bulbro/BulbroState";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { classicMapSize } from "@/game-canvas";
 import { withEventMeta } from "@/game-events/GameEvents";
+import { requireDefined } from "@/requireDefined";
 import {
 	deltaTime,
 	nowTime,
@@ -66,7 +67,10 @@ it("retains serializable locks across wave initialization while resetting both r
 	const player =
 		new BulbroState(
 			{
-				...locked.players[0]!.toJSON(),
+				...requireDefined(
+					locked
+						.players[0],
+				).toJSON(),
 				rerollCount: 3,
 				upgradeRerollCount: 2,
 			},
@@ -96,7 +100,10 @@ it("retains serializable locks across wave initialization while resetting both r
 		new BulbroState(
 			JSON.parse(
 				JSON.stringify(
-					next.players[0]!.toJSON(),
+					requireDefined(
+						next
+							.players[0],
+					).toJSON(),
 				),
 			),
 		);

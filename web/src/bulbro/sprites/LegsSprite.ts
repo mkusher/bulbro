@@ -38,8 +38,6 @@ export class LegsSprite {
 		new PIXI.Sprite();
 	#rightLeg =
 		new PIXI.Sprite();
-
-	constructor() {}
 	async init() {
 		const fullTexture =
 			await Assets.get(
@@ -158,7 +156,6 @@ export class LegsSprite {
 					5;
 				this.#rightLeg.position.y = 0;
 				break;
-			case "normal":
 			default:
 				// Default idle position
 				this.#leftLeg.position.x =

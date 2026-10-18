@@ -152,7 +152,7 @@ export class BulletSprite {
 	}
 
 	update(
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 		shot: ShotState,
 	) {
 		this.#gfx.rotation =

@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { requireDefined } from "@/requireDefined";
 import type {
 	Position,
 	Size,
@@ -169,12 +170,14 @@ export class BackgroundPatternSprite {
 								position,
 							);
 						const type =
-							objectTypes[
-								Math.floor(
-									Math.random() *
-										objectTypes.length,
-								)
-							]!;
+							requireDefined(
+								objectTypes[
+									Math.floor(
+										Math.random() *
+											objectTypes.length,
+									)
+								],
+							);
 						this.#sprites.push(
 							{
 								sprite,

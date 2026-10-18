@@ -57,13 +57,13 @@ describe("Spawning and Enemy sprite anchor consistency", () => {
 			// So the visual center is at: (x, y - height/2)
 
 			// For portal with bottom-center:
-			const portalVisualCenterY =
+			const _portalVisualCenterY =
 				position.y -
 				scaledPortalSize.height /
 					2;
 
 			// For enemy with bottom-center:
-			const enemyVisualCenterY =
+			const _enemyVisualCenterY =
 				position.y -
 				enemySize.height /
 					2;

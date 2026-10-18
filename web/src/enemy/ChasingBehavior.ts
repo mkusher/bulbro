@@ -147,7 +147,7 @@ export class ChasingBehavior
 		enemy: EnemyState,
 		waveState: WaveState,
 		now: NowTime,
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 	): EnemyEvent[] {
 		const baseEvents: EnemyEvent[] =
 			[];

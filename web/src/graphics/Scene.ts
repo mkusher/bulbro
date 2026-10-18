@@ -37,7 +37,7 @@ export class Scene extends BaseScene<Camera> {
 	}
 
 	protected updateCamera(
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 		state: WaveState,
 	): void {
 		this.camera.update(

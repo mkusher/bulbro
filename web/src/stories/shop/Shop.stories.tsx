@@ -1,3 +1,4 @@
+import type { ComponentProps } from "preact";
 import {
 	Shop,
 	type ShopItem,
@@ -26,7 +27,9 @@ export const DefaultShop =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof Shop
+				>,
 			) => (
 				<Shop
 					{...args}
@@ -85,7 +88,9 @@ export const LowMaterials =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof Shop
+				>,
 			) => (
 				<Shop
 					{...args}
@@ -137,7 +142,9 @@ export const HighMaterials =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof Shop
+				>,
 			) => (
 				<Shop
 					{...args}
@@ -189,7 +196,9 @@ export const ExpensiveShop =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof Shop
+				>,
 			) => (
 				<Shop
 					{...args}
@@ -241,7 +250,9 @@ export const CheapShop =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof Shop
+				>,
 			) => (
 				<Shop
 					{...args}
@@ -293,7 +304,9 @@ export const NoMaterials =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof Shop
+				>,
 			) => (
 				<Shop
 					{...args}

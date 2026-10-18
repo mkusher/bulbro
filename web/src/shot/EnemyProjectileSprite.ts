@@ -7,7 +7,7 @@ export class EnemyProjectileSprite {
 	#gfx: PIXI.Graphics;
 
 	constructor(
-		shot: ShotState,
+		_shot: ShotState,
 	) {
 		this.#gfx =
 			new PIXI.Graphics()
@@ -48,8 +48,8 @@ export class EnemyProjectileSprite {
 	}
 
 	update(
-		deltaTime: DeltaTime,
-		shot: ShotState,
+		_deltaTime: DeltaTime,
+		_shot: ShotState,
 	) {}
 
 	/**

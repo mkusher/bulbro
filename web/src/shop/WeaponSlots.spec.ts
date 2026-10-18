@@ -9,6 +9,7 @@ import {
 	render,
 } from "preact";
 import { act } from "preact/test-utils";
+import { requireDefined } from "@/requireDefined";
 import { toOwnedWeapons } from "@/weapon/WeaponTiers";
 import {
 	pistol,
@@ -151,9 +152,11 @@ it("sells a selected weapon", async () => {
 	);
 	act(
 		() =>
-			buttonWithText(
-				"Sell +$7",
-			)!.click(),
+			requireDefined(
+				buttonWithText(
+					"Sell +$7",
+				),
+			).click(),
 	);
 	expect(
 		sell,
@@ -202,9 +205,11 @@ it("combines a weapon with an equal one of the same tier", async () => {
 	);
 	act(
 		() =>
-			buttonWithText(
-				"Combine → Tier II",
-			)!.click(),
+			requireDefined(
+				buttonWithText(
+					"Combine → Tier II",
+				),
+			).click(),
 	);
 	expect(
 		combine,

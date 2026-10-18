@@ -1,3 +1,4 @@
+import type { ComponentProps } from "preact";
 import { WeaponSlots } from "@/shop/WeaponSlots";
 import {
 	type OwnedWeapon,
@@ -23,7 +24,9 @@ export default {
 
 const render =
 	(
-		args: any,
+		args: ComponentProps<
+			typeof WeaponSlots
+		>,
 	) => (
 		<WeaponSlots
 			{...args}

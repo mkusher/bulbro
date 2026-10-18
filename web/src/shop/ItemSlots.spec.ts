@@ -10,6 +10,7 @@ import {
 } from "preact";
 import { act } from "preact/test-utils";
 import { findItemById } from "@/items/Items";
+import { requireDefined } from "@/requireDefined";
 
 mock.module(
 	"@/ui/PixiApp",
@@ -32,13 +33,17 @@ afterEach(
 );
 
 const acid =
-	findItemById(
-		"acid",
-	)!;
+	requireDefined(
+		findItemById(
+			"acid",
+		),
+	);
 const glasses =
-	findItemById(
-		"glasses",
-	)!;
+	requireDefined(
+		findItemById(
+			"glasses",
+		),
+	);
 
 it("groups copies of the same item", async () => {
 	const {
@@ -136,14 +141,18 @@ it("shows the effect of a selected item and its total for several copies", async
 
 	act(
 		() =>
-			tiles[0]!.click(),
+			requireDefined(
+				tiles[0],
+			).click(),
 	);
 	const details =
 		container.querySelector(
 			"section",
 		);
 	expect(
-		tiles[0]!.getAttribute(
+		requireDefined(
+			tiles[0],
+		).getAttribute(
 			"aria-pressed",
 		),
 	).toBe(
@@ -177,7 +186,9 @@ it("shows the effect of a selected item and its total for several copies", async
 
 	act(
 		() =>
-			tiles[1]!.click(),
+			requireDefined(
+				tiles[1],
+			).click(),
 	);
 	const glassesDetails =
 		container.querySelector(
@@ -196,7 +207,9 @@ it("shows the effect of a selected item and its total for several copies", async
 
 	act(
 		() =>
-			tiles[1]!.click(),
+			requireDefined(
+				tiles[1],
+			).click(),
 	);
 	expect(
 		container.querySelector(

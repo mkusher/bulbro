@@ -1,8 +1,6 @@
-import { useEffect } from "preact/hooks";
 import { babyEnemy } from "@/enemies-definitions/baby";
 import { spawnEnemy } from "@/enemy/EnemyState";
-import type { WaveState } from "@/waveState";
-import { waveState } from "@/waveState";
+import { requireDefined } from "@/requireDefined";
 import { allEnemies } from "../enemies-definitions";
 import { StorybookGameScene } from "./StorybookGameScene";
 import { createEnemyState } from "./storyHelpers";
@@ -16,11 +14,18 @@ export default {
 
 const enemies =
 	allEnemies;
+const idleArgs =
+	{
+		debug: false,
+		enemyType:
+			babyEnemy.id,
+	};
+
 export const Idle =
 	{
 		render:
 			(
-				args: any,
+				args: typeof idleArgs,
 			) => (
 				<StorybookGameScene
 					initialState={createEnemyState(
@@ -31,24 +36,22 @@ export const Idle =
 									x: 400,
 									y: 350,
 								},
-								enemies.find(
-									(
-										e,
-									) =>
-										e.id ===
-										args.enemyType,
-								)!,
+								requireDefined(
+									enemies.find(
+										(
+											e,
+										) =>
+											e.id ===
+											args.enemyType,
+									),
+								),
 							),
 						],
 					)}
 					{...args}
 				/>
 			),
-		args: {
-			debug: false,
-			enemyType:
-				babyEnemy.id,
-		},
+		args: idleArgs,
 		argTypes:
 			{
 				enemyType:
@@ -73,11 +76,18 @@ export const Idle =
 			},
 	};
 
+const walkingArgs =
+	{
+		debug: false,
+		enemyType:
+			babyEnemy.id,
+	};
+
 export const Walking =
 	{
 		render:
 			(
-				args: any,
+				args: typeof walkingArgs,
 			) => {
 				return (
 					<StorybookGameScene
@@ -89,13 +99,15 @@ export const Walking =
 										x: 400,
 										y: 350,
 									},
-									enemies.find(
-										(
-											e,
-										) =>
-											e.id ===
-											args.enemyType,
-									)!,
+									requireDefined(
+										enemies.find(
+											(
+												e,
+											) =>
+												e.id ===
+												args.enemyType,
+										),
+									),
 								),
 							],
 						)}
@@ -103,11 +115,7 @@ export const Walking =
 					/>
 				);
 			},
-		args: {
-			debug: false,
-			enemyType:
-				babyEnemy.id,
-		},
+		args: walkingArgs,
 		argTypes:
 			{
 				enemyType:

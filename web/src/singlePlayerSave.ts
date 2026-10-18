@@ -1,3 +1,4 @@
+import { requireDefined } from "@/requireDefined";
 import { BulbroState } from "./bulbro/BulbroState";
 import type { TotalGameStats } from "./gameStats";
 import type { WaveState } from "./waveState";
@@ -67,8 +68,7 @@ export function loadSinglePlayerGame(
 					"null",
 			);
 		if (
-			!save ||
-			save.version !==
+			save?.version !==
 				1 ||
 			![
 				"wave",
@@ -154,8 +154,10 @@ export function loadSinglePlayerGame(
 			return;
 		const player =
 			new BulbroState(
-				state
-					.players[0]!,
+				requireDefined(
+					state
+						.players[0],
+				),
 			);
 		if (
 			!player.id ||

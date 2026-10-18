@@ -446,7 +446,7 @@ export class BulbaSprite extends GameSprite {
 	}
 
 	async #buildCharacter(
-		frame: number,
+		_frame: number,
 		legState: LegState = "normal",
 	) {
 		const bodySprite =

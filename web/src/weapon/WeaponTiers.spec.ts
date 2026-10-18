@@ -14,6 +14,7 @@ import {
 } from "@/game-events/GameEvents";
 import { itemPrice } from "@/game-formulas";
 import { zeroPoint } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import {
 	deltaTime,
 	nowTime,
@@ -110,12 +111,18 @@ describe("weapon tier stats", () => {
 						0,
 				);
 				expect(
-					stats.cooldown!,
+					requireDefined(
+						stats.cooldown,
+					),
 				).toBeLessThan(
-					previous.cooldown!,
+					requireDefined(
+						previous.cooldown,
+					),
 				);
 				expect(
-					stats.critChance!,
+					requireDefined(
+						stats.critChance,
+					),
 				).toBeGreaterThan(
 					previous.critChance ??
 						0,
@@ -219,10 +226,12 @@ describe("weapon prices", () => {
 				),
 			).toBe(
 				itemPrice(
-					bases[
-						tier -
-							1
-					]!,
+					requireDefined(
+						bases[
+							tier -
+								1
+						],
+					),
 					5,
 					1,
 				),
@@ -236,10 +245,12 @@ describe("weapon prices", () => {
 				),
 			).toBe(
 				itemPrice(
-					bases[
-						tier -
-							1
-					]!,
+					requireDefined(
+						bases[
+							tier -
+								1
+						],
+					),
 					5,
 					0.8,
 				),
@@ -288,15 +299,17 @@ describe("combining weapons", () => {
 				sword,
 			);
 		const combined =
-			combineWeapons(
-				[
-					first,
-					other,
-					second,
-				],
-				first.id,
-				second.id,
-			)!;
+			requireDefined(
+				combineWeapons(
+					[
+						first,
+						other,
+						second,
+					],
+					first.id,
+					second.id,
+				),
+			);
 		expect(
 			combined.map(
 				(
@@ -320,7 +333,9 @@ describe("combining weapons", () => {
 			],
 		);
 		expect(
-			combined[0]!
+			requireDefined(
+				combined[0],
+			)
 				.statsBonus,
 		).toEqual(
 			weaponStatsForTier(
@@ -412,9 +427,13 @@ describe("combining weapons", () => {
 				expect(
 					combineWeapons(
 						weapons,
-						weapons[0]!
+						requireDefined(
+							weapons[0],
+						)
 							.id,
-						weapons[1]!
+						requireDefined(
+							weapons[1],
+						)
 							.id,
 					),
 				).toBeUndefined();
@@ -424,7 +443,9 @@ describe("combining weapons", () => {
 							ownedWeaponFromState,
 						),
 						ownedWeaponFromState(
-							weapons[0]!,
+							requireDefined(
+								weapons[0],
+							),
 						),
 					),
 				).toBeUndefined();
@@ -444,17 +465,23 @@ describe("combining weapons", () => {
 		expect(
 			findCombinableOwnedWeapon(
 				owned,
-				owned[0]!,
+				requireDefined(
+					owned[0],
+				),
 			)
 				?.id,
 		).toBe(
-			owned[2]!
+			requireDefined(
+				owned[2],
+			)
 				.id,
 		);
 		expect(
 			findCombinableOwnedWeapon(
 				owned,
-				owned[1]!,
+				requireDefined(
+					owned[1],
+				),
 			),
 		).toBeUndefined();
 	});
@@ -626,15 +653,19 @@ describe("BulbroState weapon events", () => {
 			1,
 		);
 		expect(
-			state
-				.weapons[0]!
+			requireDefined(
+				state
+					.weapons[0],
+			)
 				.tier,
 		).toBe(
 			2,
 		);
 		expect(
-			state
-				.weapons[0]!
+			requireDefined(
+				state
+					.weapons[0],
+			)
 				.statsBonus
 				.damage,
 		).toBe(

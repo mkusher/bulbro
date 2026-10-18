@@ -3,6 +3,7 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import { requireDefined } from "@/requireDefined";
 import { BULBRO_BODY_SIZE } from "../../bulbro";
 import { BulbroState } from "../../bulbro/BulbroState";
 import { baseStats } from "../../characters-definitions/base";
@@ -818,8 +819,10 @@ describe("MeleeStrikeEventGenerator", () => {
 					weapons:
 						[
 							{
-								...player
-									.weapons[0]!,
+								...requireDefined(
+									player
+										.weapons[0],
+								),
 								strike,
 							},
 						],

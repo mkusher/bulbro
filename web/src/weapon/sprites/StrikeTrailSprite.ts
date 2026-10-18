@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import type { Position } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 
 const slices = 8;
 const segmentsPerSlice = 3;
@@ -209,12 +210,20 @@ export class StrikeTrailSprite {
 			);
 		gfx
 			.moveTo(
-				innerX!,
-				innerY!,
+				requireDefined(
+					innerX,
+				),
+				requireDefined(
+					innerY,
+				),
 			)
 			.lineTo(
-				outerX!,
-				outerY!,
+				requireDefined(
+					outerX,
+				),
+				requireDefined(
+					outerY,
+				),
 			)
 			.stroke(
 				{

@@ -5,6 +5,7 @@ import {
 } from "bun:test";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { seededRng } from "@/random";
+import { requireDefined } from "@/requireDefined";
 import {
 	weaponPrice,
 	weaponStatsForTier,
@@ -154,15 +155,17 @@ it("gates weapon tiers by wave and prices their upgraded stats", () => {
 		);
 		for (const offer of offers) {
 			const definition =
-				wellRoundedBulbro.availableWeapons.find(
-					(
-						w,
-					) =>
-						w.id ===
-						offer
-							.weapon
-							.id,
-				)!;
+				requireDefined(
+					wellRoundedBulbro.availableWeapons.find(
+						(
+							w,
+						) =>
+							w.id ===
+							offer
+								.weapon
+								.id,
+					),
+				);
 			expect(
 				offer.tier,
 			).toBe(

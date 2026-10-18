@@ -4,6 +4,7 @@ import {
 	it,
 } from "bun:test";
 import { baseWeaponStats } from "@bulbro/network-protocol";
+import { signal } from "@preact/signals";
 import {
 	deltaTime,
 	nowTime,
@@ -362,13 +363,12 @@ describe("PlayerMovementEventGenerator", () => {
 							y: 0,
 						} as const,
 					signal:
-						{
-							value:
-								{
-									x: 1,
-									y: 0,
-								},
-						} as any,
+						signal(
+							{
+								x: 1,
+								y: 0,
+							},
+						),
 				}),
 			);
 		const generator =

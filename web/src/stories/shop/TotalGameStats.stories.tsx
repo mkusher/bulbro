@@ -1,3 +1,4 @@
+import type { ComponentProps } from "preact";
 import type { TotalGameStats as TotalGameStatsType } from "@/gameStats";
 import { TotalGameStats } from "@/shop/TotalGameStats";
 
@@ -13,7 +14,9 @@ export const DefaultStats =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof TotalGameStats
+				>,
 			) => (
 				<TotalGameStats
 					{...args}
@@ -37,7 +40,9 @@ export const HighPerformance =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof TotalGameStats
+				>,
 			) => (
 				<TotalGameStats
 					{...args}
@@ -61,7 +66,9 @@ export const EarlyGameOver =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof TotalGameStats
+				>,
 			) => (
 				<TotalGameStats
 					{...args}
@@ -85,7 +92,9 @@ export const PerfectRun =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof TotalGameStats
+				>,
 			) => (
 				<TotalGameStats
 					{...args}
@@ -109,7 +118,9 @@ export const EmptyStats =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof TotalGameStats
+				>,
 			) => (
 				<TotalGameStats
 					{...args}

@@ -1,9 +1,6 @@
 import { prometheus } from "@hono/prometheus";
 import type { ServerWebSocket } from "bun";
-import {
-	type Context,
-	Hono,
-} from "hono";
+import { Hono } from "hono";
 import {
 	createBunWebSocket,
 	serveStatic,
@@ -88,124 +85,123 @@ configureApi(
 	logger,
 );
 
-const wsApp =
-	app.get(
-		"/ws",
-		upgradeWebSocket(
-			(
-				c,
-			) => {
-				const l =
-					logger.child(
-						{
-							requestId:
-								c
-									.var
-									.requestId,
-							emitter:
-								"websocket",
-						},
-					);
-				l.info(
-					"Establishing new websocket connection",
+app.get(
+	"/ws",
+	upgradeWebSocket(
+		(
+			c,
+		) => {
+			const l =
+				logger.child(
+					{
+						requestId:
+							c
+								.var
+								.requestId,
+						emitter:
+							"websocket",
+					},
 				);
-				let connection: WebsocketConnection | null =
-					null;
-				const controller =
-					new WebsocketGameController(
-						l.child(
-							{
-								component:
-									"websocket-game-controller",
-							},
-						),
+			l.info(
+				"Establishing new websocket connection",
+			);
+			let connection: WebsocketConnection | null =
+				null;
+			const controller =
+				new WebsocketGameController(
+					l.child(
 						{
-							rooms:
-								registry,
-							connections:
-								websocketConnections,
+							component:
+								"websocket-game-controller",
 						},
+					),
+					{
+						rooms:
+							registry,
+						connections:
+							websocketConnections,
+					},
+				);
+			return {
+				onOpen(
+					_event,
+					ws,
+				) {
+					l.info(
+						"New connection has been established",
 					);
-				return {
-					onOpen(
-						event,
-						ws,
-					) {
-						l.info(
-							"New connection has been established",
-						);
-						connection =
-							new WebsocketConnection(
-								l,
-								ws,
-								(
+					connection =
+						new WebsocketConnection(
+							l,
+							ws,
+							(
+								userId,
+								message,
+							) =>
+								controller.routeMessage(
 									userId,
 									message,
-								) =>
-									controller.routeMessage(
-										userId,
-										message,
-									),
-							);
-					},
-					onMessage(
-						event,
+								),
+						);
+				},
+				onMessage(
+					event,
+					ws,
+				) {
+					l.info(
+						{
+							data: event.data,
+						},
+						"Message received",
+					);
+					connection?.updateConnection(
 						ws,
+					);
+					connection?.onMessage(
+						event.data as string,
+					);
+				},
+				async onClose(
+					_event,
+					ws,
+				) {
+					l.info(
+						"Closing connection",
+					);
+					if (
+						!connection
 					) {
-						l.info(
-							{
-								data: event.data,
-							},
-							"Message received",
+						l.warn(
+							"Connection is closed before established",
 						);
-						connection?.updateConnection(
-							ws,
-						);
-						connection?.onMessage(
-							event.data as string,
-						);
-					},
-					async onClose(
-						event,
-						ws,
-					) {
-						l.info(
-							"Closing connection",
-						);
-						if (
-							!connection
-						) {
-							l.warn(
-								"Connection is closed before established",
-							);
-							return;
-						}
-						const userId =
-							websocketConnections.getByConnection(
-								connection,
-							);
-
-						connection.onClose(
-							ws,
+						return;
+					}
+					const userId =
+						websocketConnections.getByConnection(
+							connection,
 						);
 
-						if (
-							userId &&
-							!websocketConnections.get(
-								userId,
-							)
-						) {
-							await markAsDisconnected(
-								userId,
-							).catch(
-								() => {},
-							);
-						}
-					},
-				};
-			},
-		),
-	);
+					connection.onClose(
+						ws,
+					);
+
+					if (
+						userId &&
+						!websocketConnections.get(
+							userId,
+						)
+					) {
+						await markAsDisconnected(
+							userId,
+						).catch(
+							() => {},
+						);
+					}
+				},
+			};
+		},
+	),
+);
 
 app.use(
 	"/tg-app",

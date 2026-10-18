@@ -10,6 +10,7 @@ import {
 } from "preact";
 import { act } from "preact/test-utils";
 import { findItemById } from "@/items/Items";
+import { requireDefined } from "@/requireDefined";
 import { smg } from "@/weapons-definitions";
 
 mock.module(
@@ -142,13 +143,15 @@ it("blocks weapon purchases at capacity while still allowing rerolls", async () 
 			),
 	);
 	const buyEnabled =
-		[
-			...container.querySelectorAll(
-				"button",
+		requireDefined(
+			[
+				...container.querySelectorAll(
+					"button",
+				),
+			].at(
+				-1,
 			),
-		].at(
-			-1,
-		)!;
+		);
 	expect(
 		buyEnabled.disabled,
 	).toBe(
@@ -266,9 +269,11 @@ it("allows buying items at weapon capacity", async () => {
 			() => {},
 		);
 	const item =
-		findItemById(
-			"helmet",
-		)!;
+		requireDefined(
+			findItemById(
+				"helmet",
+			),
+		);
 	act(
 		() =>
 			render(
@@ -292,9 +297,11 @@ it("allows buying items at weapon capacity", async () => {
 			),
 	);
 	const buy =
-		container.querySelector(
-			"button",
-		)!;
+		requireDefined(
+			container.querySelector(
+				"button",
+			),
+		);
 	expect(
 		buy.disabled,
 	).toBe(
@@ -353,13 +360,15 @@ it("allows buying a weapon owned at tier I when slots are full, to combine it", 
 			),
 	);
 	const buy =
-		[
-			...container.querySelectorAll(
-				"button",
+		requireDefined(
+			[
+				...container.querySelectorAll(
+					"button",
+				),
+			].at(
+				-1,
 			),
-		].at(
-			-1,
-		)!;
+		);
 	expect(
 		buy.disabled,
 	).toBe(
@@ -444,15 +453,17 @@ it("only allows a matching tier below IV to combine at capacity", async () => {
 		expect(
 			container.textContent,
 		).toContain(
-			[
-				"",
-				"I",
-				"II",
-				"III",
-				"IV",
-			][
-				offeredTier
-			]!,
+			requireDefined(
+				[
+					"",
+					"I",
+					"II",
+					"III",
+					"IV",
+				][
+					offeredTier
+				],
+			),
 		);
 	}
 });

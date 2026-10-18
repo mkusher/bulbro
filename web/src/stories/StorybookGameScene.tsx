@@ -2,6 +2,7 @@ import {
 	useEffect,
 	useRef,
 } from "preact/hooks";
+import { requireDefined } from "@/requireDefined";
 import { TouchscreenJoystick } from "../controls/TouchscreenJoystick";
 import type { WaveState } from "../waveState";
 import { GameSceneControls } from "./GameSceneControls";
@@ -53,7 +54,9 @@ export function StorybookGameScene({
 			async () => {
 				try {
 					await gameScene.initialize(
-						canvasRef.current!,
+						requireDefined(
+							canvasRef.current,
+						),
 						{
 							initialState,
 							backgroundType:

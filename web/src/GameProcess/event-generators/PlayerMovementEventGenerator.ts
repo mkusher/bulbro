@@ -1,3 +1,4 @@
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
@@ -51,10 +52,12 @@ export class PlayerMovementEventGenerator
 			i++
 		) {
 			const player =
-				state
-					.players[
-					i
-				]!;
+				requireDefined(
+					state
+						.players[
+						i
+					],
+				);
 			if (
 				player.isAlive()
 			) {

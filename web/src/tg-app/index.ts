@@ -4,7 +4,6 @@ import {
 } from "@preact/signals";
 import { type } from "arktype";
 import { logger } from "@/logger";
-import { joinLobby } from "@/network/currentLobby";
 import {
 	createUser,
 	currentUser,
@@ -13,7 +12,18 @@ import {
 declare global {
 	interface Window {
 		Telegram: {
-			WebApp: any;
+			WebApp: {
+				ready(): void;
+				expand(): void;
+				disableVerticalSwipes(): void;
+				requestFullscreen(): void;
+				exitFullscreen(): void;
+				isFullscreen?: boolean;
+				initDataUnsafe: {
+					user?: TgUser;
+					start_param?: string;
+				};
+			};
 		};
 	}
 }
@@ -24,9 +34,12 @@ const getWebApp =
 			.Telegram
 			?.WebApp;
 
+const telegramScriptUrl =
+	"https://telegram.org/js/telegram-web-app.js?58";
+
 export async function initWebApp() {
 	await import(
-		"https://telegram.org/js/telegram-web-app.js?58" as any
+		telegramScriptUrl
 	);
 
 	const WebApp =

@@ -243,19 +243,20 @@ export class GamesRegistry {
 		playerId: string,
 		player: object,
 	) {
+		const startedWave =
+			this.#startedWaves.get(
+				id,
+			);
 		const game =
 			this.#registry.get(
 				id,
 			);
 		if (
 			!game ||
-			!this.#startedWaves.has(
-				id,
-			) ||
+			startedWave ===
+				undefined ||
 			wave !==
-				this.#startedWaves.get(
-					id,
-				)! +
+				startedWave +
 					1 ||
 			!game.players.some(
 				(
@@ -396,8 +397,7 @@ export class GamesRegistry {
 				id,
 			);
 		if (
-			!game ||
-			!game.players.some(
+			!game?.players.some(
 				(
 					p,
 				) =>

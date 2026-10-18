@@ -2,6 +2,7 @@ import {
 	expect,
 	it,
 } from "bun:test";
+import { requireDefined } from "@/requireDefined";
 import { StructureSprite } from "./StructureSprite";
 import {
 	STRUCTURE_SPAWN_DURATION,
@@ -53,25 +54,33 @@ for (const kind of [
 				now,
 			);
 			expect(
-				cross!
+				requireDefined(
+					cross,
+				)
 					.visible,
 			).toBe(
 				true,
 			);
 			expect(
-				cross!
+				requireDefined(
+					cross,
+				)
 					.alpha,
 			).toBeGreaterThan(
 				0,
 			);
 			expect(
-				body!
+				requireDefined(
+					body,
+				)
 					.visible,
 			).toBe(
 				false,
 			);
 			expect(
-				barrel!
+				requireDefined(
+					barrel,
+				)
 					.visible,
 			).toBe(
 				false,
@@ -97,19 +106,25 @@ for (const kind of [
 				STRUCTURE_SPAWN_DURATION,
 		);
 		expect(
-			cross!
+			requireDefined(
+				cross,
+			)
 				.visible,
 		).toBe(
 			false,
 		);
 		expect(
-			body!
+			requireDefined(
+				body,
+			)
 				.visible,
 		).toBe(
 			true,
 		);
 		expect(
-			barrel!
+			requireDefined(
+				barrel,
+			)
 				.visible,
 		).toBe(
 			true,
@@ -151,15 +166,19 @@ it("renders gardens and structures from older snapshots immediately", () => {
 			0,
 		);
 		expect(
-			sprite
-				.children[0]!
+			requireDefined(
+				sprite
+					.children[0],
+			)
 				.visible,
 		).toBe(
 			false,
 		);
 		expect(
-			sprite
-				.children[1]!
+			requireDefined(
+				sprite
+					.children[1],
+			)
 				.visible,
 		).toBe(
 			true,

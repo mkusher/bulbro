@@ -193,3 +193,17 @@ export const enemyTypes =
 	] as const;
 export type EnemyType =
 	(typeof enemyTypes)[number];
+
+export const enemiesFrames =
+	{
+		potatoBeetleBaby,
+		potatoBeetleWarrior,
+		aphid,
+		coloradoBeetle,
+		hedghehog,
+		wildBoar,
+		badger,
+		roach,
+		beetleArcher,
+		tree,
+	};

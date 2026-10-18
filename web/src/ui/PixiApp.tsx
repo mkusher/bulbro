@@ -26,7 +26,7 @@ export type PixiAppProps =
 			app: PIXI.Application,
 			canvas: HTMLDivElement,
 		) => Promise<void> | void;
-		dependencies?: any[];
+		dependencies?: unknown[];
 	};
 
 export function PixiApp({

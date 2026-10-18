@@ -1,6 +1,8 @@
 import type { Logger } from "pino";
 import * as PIXI from "pixi.js";
 import { StructureSprite } from "@/engineering/StructureSprite";
+import type { Position } from "@/geometry";
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
@@ -9,12 +11,10 @@ import {
 	deltaTime,
 	nowTime,
 } from "@/time";
-import type { BulbroState } from "../bulbro";
 import {
 	type BulbroSprite,
 	createBulbroSprite,
 } from "../bulbro/Sprite";
-import type { EnemyState } from "../enemy/EnemyState";
 import {
 	createEnemySprite,
 	type EnemySprite,
@@ -310,7 +310,7 @@ export abstract class BaseScene<
 			| "player"
 			| "enemy",
 		id: string,
-		position: any,
+		position: Position,
 		totalSprites: number,
 	): void {
 		if (
@@ -318,8 +318,10 @@ export abstract class BaseScene<
 				.#debug
 		) {
 			this.#logger.debug(
+				{
+					position,
+				},
 				`Creating sprite for ${type} ${id} at position`,
-				position,
 			);
 			this.#logger.debug(
 				`${type} sprite ${id} added to scene, total sprites: ${totalSprites}`,
@@ -419,9 +421,11 @@ export abstract class BaseScene<
 				);
 			}
 			const sprite =
-				this.#playerSprites.get(
-					p.id,
-				)!;
+				requireDefined(
+					this.#playerSprites.get(
+						p.id,
+					),
+				);
 			sprite.update(
 				p,
 				deltaTime,
@@ -498,9 +502,11 @@ export abstract class BaseScene<
 				);
 			}
 			const sprite =
-				this.#enemySprites.get(
-					e.id,
-				)!;
+				requireDefined(
+					this.#enemySprites.get(
+						e.id,
+					),
+				);
 			sprite.update(
 				e,
 				deltaTime,
@@ -568,9 +574,11 @@ export abstract class BaseScene<
 				);
 			}
 			const sprite =
-				this.#shotSprites.get(
-					s.id,
-				)!;
+				requireDefined(
+					this.#shotSprites.get(
+						s.id,
+					),
+				);
 			sprite.update(
 				deltaTime,
 				s,
@@ -684,9 +692,11 @@ export abstract class BaseScene<
 				);
 			}
 			const sprite =
-				this.#spawningSprites.get(
-					spawning.id,
-				)!;
+				requireDefined(
+					this.#spawningSprites.get(
+						spawning.id,
+					),
+				);
 			sprite.update(
 				spawning,
 				deltaTime,
@@ -753,9 +763,11 @@ export abstract class BaseScene<
 				);
 			}
 			const sprite =
-				this.#materialSprites.get(
-					material.id,
-				)!;
+				requireDefined(
+					this.#materialSprites.get(
+						material.id,
+					),
+				);
 			sprite.update(
 				material,
 				deltaTime,
@@ -822,9 +834,11 @@ export abstract class BaseScene<
 				);
 			}
 			const sprite =
-				this.#consumableSprites.get(
-					consumable.id,
-				)!;
+				requireDefined(
+					this.#consumableSprites.get(
+						consumable.id,
+					),
+				);
 			sprite.update(
 				consumable,
 				deltaTime,

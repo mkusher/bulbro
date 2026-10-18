@@ -1,4 +1,5 @@
 import type { Logger } from "pino";
+import type { Position } from "@/geometry";
 import type { DeltaTime } from "@/time";
 import type { WaveState } from "../waveState";
 import { BaseScene } from "./BaseScene";
@@ -27,8 +28,8 @@ export class StorybookScene extends BaseScene<Camera> {
 	 * Storybook scenes don't update camera automatically - manual control in stories.
 	 */
 	protected updateCamera(
-		deltaTime: DeltaTime,
-		state: WaveState,
+		_deltaTime: DeltaTime,
+		_state: WaveState,
 	): void {
 		// Note: No automatic camera update - storybooks control camera manually
 	}
@@ -41,7 +42,7 @@ export class StorybookScene extends BaseScene<Camera> {
 			| "player"
 			| "enemy",
 		id: string,
-		position: any,
+		position: Position,
 		totalSprites: number,
 	): void {
 		console.log(

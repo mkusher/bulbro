@@ -27,6 +27,7 @@ import {
 } from "@/geometry";
 import { findItemById } from "@/items/Items";
 import { CONSUMABLE_HEAL_AMOUNT } from "@/object/ConsumableState";
+import { requireDefined } from "@/requireDefined";
 import { ShotState } from "@/shot/ShotState";
 import type {
 	DeltaTime,
@@ -427,9 +428,11 @@ export class StructureEventGenerator
 					"garden"
 				)
 					fruit(
-						structures.get(
-							id,
-						)!
+						requireDefined(
+							structures.get(
+								id,
+							),
+						)
 							.position,
 					);
 			};
@@ -476,10 +479,12 @@ export class StructureEventGenerator
 					spawnSource(
 						owner,
 						id,
-						wrenchTurrets[
-							tier -
-								1
-						]!,
+						requireDefined(
+							wrenchTurrets[
+								tier -
+									1
+							],
+						),
 					);
 				if (
 					weapon.type ===
@@ -489,10 +494,12 @@ export class StructureEventGenerator
 						owner,
 						id,
 						"garden",
-						gardenIntervals[
-							tier -
-								1
-						]!,
+						requireDefined(
+							gardenIntervals[
+								tier -
+									1
+							],
+						),
 					);
 				if (
 					weapon.type ===
@@ -502,10 +509,12 @@ export class StructureEventGenerator
 						owner,
 						id,
 						"landmineSource",
-						mineIntervals[
-							tier -
-								1
-						]!,
+						requireDefined(
+							mineIntervals[
+								tier -
+									1
+							],
+						),
 					);
 			}
 		}
@@ -609,7 +618,9 @@ export class StructureEventGenerator
 			) {
 				if (
 					!enemies.has(
-						s.targetId!,
+						requireDefined(
+							s.targetId,
+						),
 					)
 				) {
 					remove(
@@ -623,13 +634,19 @@ export class StructureEventGenerator
 				)
 					continue;
 				hit(
-					s.targetId!,
-					s.damage!,
+					requireDefined(
+						s.targetId,
+					),
+					requireDefined(
+						s.damage,
+					),
 					owner,
 					s.position,
 				);
 				if (
-					s.ticksLeft! <=
+					requireDefined(
+						s.ticksLeft,
+					) <=
 					1
 				)
 					remove(
@@ -640,7 +657,9 @@ export class StructureEventGenerator
 						{
 							...s,
 							ticksLeft:
-								s.ticksLeft! -
+								requireDefined(
+									s.ticksLeft,
+								) -
 								1,
 							nextActionAt:
 								s.nextActionAt +
@@ -1094,7 +1113,9 @@ export class StructureEventGenerator
 									enemy.id,
 								damage:
 									Math.max(
-										info.burnDamage!,
+										requireDefined(
+											info.burnDamage,
+										),
 										previous?.damage ??
 											0,
 									),

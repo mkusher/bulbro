@@ -1,4 +1,5 @@
 import { t } from "@/i18n";
+import { requireDefined } from "@/requireDefined";
 import type { WeaponType } from "@/weapon";
 import type { WeaponTier } from "@/weapon/WeaponState";
 import {
@@ -24,10 +25,12 @@ export function ToolEffect({
 				"weapon.effect.pruner",
 				{
 					interval:
-						gardenIntervals[
-							tier -
-								1
-						]! /
+						requireDefined(
+							gardenIntervals[
+								tier -
+									1
+							],
+						) /
 						1000,
 				},
 			);
@@ -40,10 +43,12 @@ export function ToolEffect({
 				"weapon.effect.screwdriver",
 				{
 					interval:
-						mineIntervals[
-							tier -
-								1
-						]! /
+						requireDefined(
+							mineIntervals[
+								tier -
+									1
+							],
+						) /
 						1000,
 				},
 			);
@@ -57,7 +62,7 @@ export function ToolEffect({
 				{
 					turret:
 						t(
-							`item.name.${wrenchTurrets[tier - 1]!}`,
+							`item.name.${requireDefined(wrenchTurrets[tier - 1])}`,
 						),
 				},
 			);

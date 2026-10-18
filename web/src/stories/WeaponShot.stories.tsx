@@ -1,3 +1,4 @@
+import { requireDefined } from "@/requireDefined";
 import { spawnBulbro } from "../bulbro/BulbroState";
 import { wellRoundedBulbro } from "../characters-definitions/well-rounded";
 import { babyEnemy } from "../enemies-definitions/baby";
@@ -38,7 +39,9 @@ function createWeaponShotState(
 				w.id ===
 				weapon,
 		) ??
-		weapons[0]!;
+		requireDefined(
+			weapons[0],
+		);
 
 	const bulbro =
 		spawnBulbro(

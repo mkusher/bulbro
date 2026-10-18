@@ -6,25 +6,17 @@ import {
 	it,
 	spyOn,
 } from "bun:test";
+import { requireDefined } from "@/requireDefined";
 import { BulbroState } from "./bulbro/BulbroState";
 import { baseStats } from "./characters-definitions/base";
 import { babyEnemy } from "./enemies-definitions";
-import { ChasingBehavior } from "./enemy/ChasingBehavior";
 import type { EnemyCharacter } from "./enemy/EnemyCharacter";
 import {
 	EnemyState,
 	spawnEnemy,
 } from "./enemy/EnemyState";
 import type {
-	BulbroAttackedEvent,
-	BulbroHealedEvent,
-	BulbroMovedEvent,
-	EnemyAttackedEvent,
-	EnemyMovedEvent,
 	GameEvent,
-	MaterialMovedEvent,
-	MoveShotEvent,
-	ShotEvent,
 	TickEvent,
 } from "./game-events/GameEvents";
 import { withEventMeta } from "./game-events/GameEvents";
@@ -554,12 +546,14 @@ describe("waveState", () => {
 					) =>
 						player.applyEvent(
 							withEventMeta(
-								player.beHit(
-									player.healthPoints,
-									nowTime(
-										7_500,
+								requireDefined(
+									player.beHit(
+										player.healthPoints,
+										nowTime(
+											7_500,
+										),
 									),
-								)!,
+								),
 								deltaTime(
 									16,
 								),
@@ -919,8 +913,10 @@ describe("waveState", () => {
 			expect(
 				healedPlayer?.healthPoints,
 			).toBeGreaterThan(
-				state
-					.players[0]!
+				requireDefined(
+					state
+						.players[0],
+				)
 					.healthPoints,
 			);
 		});
@@ -1051,7 +1047,9 @@ describe("waveState", () => {
 					enemyId:
 						"enemy1",
 					weaponId:
-						weaponId!,
+						requireDefined(
+							weaponId,
+						),
 					targetId:
 						"player1",
 					deltaTime:
@@ -1649,12 +1647,14 @@ describe("waveState", () => {
 		it("should heal the specified player", () => {
 			// Create player with lower health by applying damage
 			const damageEvent =
-				player1.beHit(
-					30,
-					nowTime(
-						Date.now(),
+				requireDefined(
+					player1.beHit(
+						30,
+						nowTime(
+							Date.now(),
+						),
 					),
-				)!;
+				);
 			const lowHealthPlayer =
 				player1.applyEvent(
 					withEventMeta(
@@ -1709,12 +1709,14 @@ describe("waveState", () => {
 		it("should not heal other players", () => {
 			// Create player with lower health by applying damage
 			const damageEvent =
-				player2.beHit(
-					30,
-					nowTime(
-						Date.now(),
+				requireDefined(
+					player2.beHit(
+						30,
+						nowTime(
+							Date.now(),
+						),
 					),
-				)!;
+				);
 			const lowHealthPlayer2 =
 				player2.applyEvent(
 					withEventMeta(
@@ -1869,7 +1871,9 @@ describe("waveState", () => {
 					enemyId:
 						"enemy1",
 					weaponId:
-						weaponId!,
+						requireDefined(
+							weaponId,
+						),
 					targetId:
 						"player1",
 					deltaTime:
@@ -2162,7 +2166,9 @@ describe("waveState", () => {
 				updateState(
 					state,
 					withEventMeta(
-						events[0]!,
+						requireDefined(
+							events[0],
+						),
 						deltaTime(
 							16,
 						),
@@ -2188,20 +2194,24 @@ describe("waveState", () => {
 				expect(
 					player.materialsAvailable,
 				).toBe(
-					state
-						.players[
-						i
-					]!
+					requireDefined(
+						state
+							.players[
+							i
+						],
+					)
 						.materialsAvailable +
 						25,
 				);
 				expect(
 					player.totalExperience,
 				).toBe(
-					state
-						.players[
-						i
-					]!
+					requireDefined(
+						state
+							.players[
+							i
+						],
+					)
 						.totalExperience +
 						25,
 				);
@@ -2553,7 +2563,9 @@ describe("waveState", () => {
 				1,
 			);
 			const event =
-				events[0]!;
+				requireDefined(
+					events[0],
+				);
 			expect(
 				event.type,
 			).toBe(
@@ -2630,15 +2642,19 @@ describe("waveState", () => {
 				[],
 			);
 			expect(
-				newState
-					.players[0]!
+				requireDefined(
+					newState
+						.players[0],
+				)
 					.healthPoints,
 			).toBe(
 				83,
 			);
 			expect(
-				newState
-					.players[1]!
+				requireDefined(
+					newState
+						.players[1],
+				)
 					.healthPoints,
 			).toBe(
 				80,
@@ -2668,8 +2684,10 @@ describe("waveState", () => {
 					),
 				);
 			expect(
-				newState
-					.players[0]!
+				requireDefined(
+					newState
+						.players[0],
+				)
 					.healthPoints,
 			).toBe(
 				100,
@@ -2699,15 +2717,19 @@ describe("waveState", () => {
 					),
 				);
 			expect(
-				twice
-					.players[0]!
+				requireDefined(
+					twice
+						.players[0],
+				)
 					.healthPoints,
 			).toBe(
 				83,
 			);
 			expect(
-				twice
-					.players[1]!
+				requireDefined(
+					twice
+						.players[1],
+				)
 					.healthPoints,
 			).toBe(
 				80,
@@ -2790,7 +2812,9 @@ describe("waveState", () => {
 				const deadPlayer1 =
 					player1.applyEvent(
 						withEventMeta(
-							deathEvent1!,
+							requireDefined(
+								deathEvent1,
+							),
 							deltaTime(
 								16,
 							),
@@ -2802,7 +2826,9 @@ describe("waveState", () => {
 				const deadPlayer2 =
 					player2.applyEvent(
 						withEventMeta(
-							deathEvent2!,
+							requireDefined(
+								deathEvent2,
+							),
 							deltaTime(
 								16,
 							),
@@ -3011,15 +3037,19 @@ describe("wave end harvesting", () => {
 			false,
 		);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			10,
 		);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.totalExperience,
 		).toBe(
 			10,
@@ -3032,8 +3062,10 @@ describe("wave end harvesting", () => {
 				),
 			);
 		expect(
-			afterMoreTicks
-				.players[0]!
+			requireDefined(
+				afterMoreTicks
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			10,
@@ -3056,8 +3088,10 @@ describe("wave end harvesting", () => {
 			true,
 		);
 		expect(
-			running
-				.players[0]!
+			requireDefined(
+				running
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			0,
@@ -3098,8 +3132,10 @@ describe("wave end harvesting", () => {
 			false,
 		);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			10,
@@ -3112,8 +3148,10 @@ describe("wave end harvesting", () => {
 				),
 			);
 		expect(
-			afterMoreEvents
-				.players[0]!
+			requireDefined(
+				afterMoreEvents
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			10,
@@ -3242,15 +3280,19 @@ describe("bagged materials", () => {
 				3,
 			);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			3,
 		);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			0,
@@ -3266,8 +3308,10 @@ describe("bagged materials", () => {
 				startTick,
 			);
 		expect(
-			next
-				.players[0]!
+			requireDefined(
+				next
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			2,
@@ -3306,22 +3350,28 @@ describe("bagged materials", () => {
 				"a",
 			);
 		expect(
-			first
-				.players[0]!
+			requireDefined(
+				first
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			2,
 		);
 		expect(
-			first
-				.players[0]!
+			requireDefined(
+				first
+					.players[0],
+			)
 				.totalExperience,
 		).toBe(
 			2,
 		);
 		expect(
-			first
-				.players[0]!
+			requireDefined(
+				first
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			0,
@@ -3332,8 +3382,10 @@ describe("bagged materials", () => {
 				"b",
 			);
 		expect(
-			second
-				.players[0]!
+			requireDefined(
+				second
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			3,
@@ -3382,22 +3434,28 @@ describe("bagged materials", () => {
 				),
 			);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			8,
 		);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			0,
 		);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.totalExperience,
 		).toBe(
 			0,
@@ -3415,8 +3473,10 @@ describe("bagged materials", () => {
 				),
 			);
 		expect(
-			repeated
-				.players[0]!
+			requireDefined(
+				repeated
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			8,
@@ -3427,8 +3487,10 @@ describe("bagged materials", () => {
 				startTick,
 			);
 		expect(
-			next
-				.players[0]!
+			requireDefined(
+				next
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			8,
@@ -3468,22 +3530,28 @@ describe("bagged materials", () => {
 				5,
 			);
 		expect(
-			first
-				.players[0]!
+			requireDefined(
+				first
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			10,
 		);
 		expect(
-			first
-				.players[0]!
+			requireDefined(
+				first
+					.players[0],
+			)
 				.totalExperience,
 		).toBe(
 			10,
 		);
 		expect(
-			first
-				.players[0]!
+			requireDefined(
+				first
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			3,
@@ -3495,22 +3563,28 @@ describe("bagged materials", () => {
 				5,
 			);
 		expect(
-			second
-				.players[0]!
+			requireDefined(
+				second
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			18,
 		);
 		expect(
-			second
-				.players[0]!
+			requireDefined(
+				second
+					.players[0],
+			)
 				.totalExperience,
 		).toBe(
 			18,
 		);
 		expect(
-			second
-				.players[0]!
+			requireDefined(
+				second
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			0,
@@ -3531,15 +3605,19 @@ describe("bagged materials", () => {
 				4,
 			);
 		expect(
-			third
-				.players[0]!
+			requireDefined(
+				third
+					.players[0],
+			)
 				.materialsAvailable,
 		).toBe(
 			22,
 		);
 		expect(
-			third
-				.players[0]!
+			requireDefined(
+				third
+					.players[0],
+			)
 				.totalExperience,
 		).toBe(
 			22,
@@ -3555,7 +3633,10 @@ describe("bagged materials", () => {
 				startTick,
 			);
 		const alive =
-			next.players[0]!.bagMaterialsLeft(
+			requireDefined(
+				next
+					.players[0],
+			).bagMaterialsLeft(
 				2,
 			);
 		const dead =
@@ -3673,8 +3754,10 @@ describe("bagged materials", () => {
 				),
 			);
 		expect(
-			ended
-				.players[0]!
+			requireDefined(
+				ended
+					.players[0],
+			)
 				.bagMaterials,
 		).toBe(
 			0,

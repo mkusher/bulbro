@@ -76,11 +76,17 @@ export const BulbroGallery =
 			),
 	};
 
+const bulbroDisplayShowcaseArgs =
+	{
+		bulbroId:
+			wellRoundedBulbro.id,
+	};
+
 export const BulbroDisplayShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof bulbroDisplayShowcaseArgs,
 			) => {
 				const bulbro =
 					bulbros.find(
@@ -173,10 +179,7 @@ export const BulbroDisplayShowcase =
 					</div>
 				);
 			},
-		args: {
-			bulbroId:
-				wellRoundedBulbro.id,
-		},
+		args: bulbroDisplayShowcaseArgs,
 		argTypes:
 			{
 				bulbroId:
@@ -196,11 +199,19 @@ export const BulbroDisplayShowcase =
 			},
 	};
 
+const bulbroCardShowcaseArgs =
+	{
+		bulbroId:
+			wellRoundedBulbro.id,
+		displayWidth: 280,
+		displayHeight: 200,
+	};
+
 export const BulbroCardShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof bulbroCardShowcaseArgs,
 			) => {
 				const bulbro =
 					bulbros.find(
@@ -302,12 +313,7 @@ export const BulbroCardShowcase =
 					</div>
 				);
 			},
-		args: {
-			bulbroId:
-				wellRoundedBulbro.id,
-			displayWidth: 280,
-			displayHeight: 200,
-		},
+		args: bulbroCardShowcaseArgs,
 		argTypes:
 			{
 				bulbroId:
@@ -347,11 +353,19 @@ export const BulbroCardShowcase =
 			},
 	};
 
+const bulbroStatsShowcaseArgs =
+	{
+		bulbroId:
+			wellRoundedBulbro.id,
+		rarity:
+			"rare" as BulbroRarity,
+	};
+
 export const BulbroStatsShowcase =
 	{
 		render:
 			(
-				args: any,
+				args: typeof bulbroStatsShowcaseArgs,
 			) => {
 				const bulbro =
 					bulbros.find(
@@ -440,12 +454,7 @@ export const BulbroStatsShowcase =
 					</div>
 				);
 			},
-		args: {
-			bulbroId:
-				wellRoundedBulbro.id,
-			rarity:
-				"rare",
-		},
+		args: bulbroStatsShowcaseArgs,
 		argTypes:
 			{
 				bulbroId:

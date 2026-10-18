@@ -1,14 +1,17 @@
+import { requireDefined } from "@/requireDefined";
 export function pickRandom<
 	T,
 >(
 	list: T[],
 ) {
-	return list[
-		Math.floor(
-			list.length *
-				Math.random(),
-		)
-	]!;
+	return requireDefined(
+		list[
+			Math.floor(
+				list.length *
+					Math.random(),
+			)
+		],
+	);
 }
 
 export function randomInRange(

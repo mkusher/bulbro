@@ -17,6 +17,7 @@ import {
 	type Structure,
 } from "@/engineering/structures";
 import { withEventMeta } from "@/game-events/GameEvents";
+import { requireDefined } from "@/requireDefined";
 import { ShotState } from "@/shot/ShotState";
 import {
 	deltaTime,
@@ -834,9 +835,11 @@ it("explodes immediately under a living player, hurting only nearby enemies", ()
 		1,
 	);
 	expect(
-		exploded
-			.state
-			.players[0]!
+		requireDefined(
+			exploded
+				.state
+				.players[0],
+		)
 			.healthPoints,
 	).toBe(
 		owner.healthPoints,
@@ -897,7 +900,10 @@ it("does not trigger mines under dead players", () => {
 		[
 			new BulbroState(
 				{
-					...initial.players[0]!.toJSON(),
+					...requireDefined(
+						initial
+							.players[0],
+					).toJSON(),
 					healthPoints: 0,
 				},
 			),
@@ -1180,13 +1186,15 @@ it("medical projectiles heal the owner on collision without resetting regenerati
 		1,
 	);
 	const healed =
-		tick(
-			initial,
-			300,
-			300,
-		)
-			.state
-			.players[0]!;
+		requireDefined(
+			tick(
+				initial,
+				300,
+				300,
+			)
+				.state
+				.players[0],
+		);
 	expect(
 		healed.healthPoints,
 	).toBe(
@@ -1495,15 +1503,17 @@ for (const item of [
 				first,
 			);
 		const deployed =
-			structures(
-				first,
-			).find(
-				(
-					s,
-				) =>
-					s.kind !==
-					"landmineSource",
-			)!;
+			requireDefined(
+				structures(
+					first,
+				).find(
+					(
+						s,
+					) =>
+						s.kind !==
+						"landmineSource",
+				),
+			);
 		expect(
 			deployed.spawnStartedAt,
 		).toBe(
@@ -1611,8 +1621,12 @@ it("shows a fresh spawn cross for mines produced later in the wave", () => {
 					a,
 					b,
 				) =>
-					a! -
-					b!,
+					requireDefined(
+						a,
+					) -
+					requireDefined(
+						b,
+					),
 			),
 	).toEqual(
 		[
@@ -1667,9 +1681,8 @@ for (const random of [
 						"garden",
 			);
 		if (
-			!garden ||
-			garden.type !==
-				"structureChanged"
+			garden?.type !==
+			"structureChanged"
 		)
 			throw new Error(
 				"Missing garden",
@@ -1689,9 +1702,8 @@ for (const random of [
 							"consumableSpawned",
 					);
 				if (
-					!fruit ||
-					fruit.type !==
-						"consumableSpawned"
+					fruit?.type !==
+					"consumableSpawned"
 				)
 					throw new Error(
 						"Missing fruit",

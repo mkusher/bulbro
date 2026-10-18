@@ -14,8 +14,6 @@ export class BodySprite {
 		} as const;
 	#gfx =
 		new PIXI.Sprite();
-
-	constructor() {}
 	get size() {
 		return this
 			.#bodySize;

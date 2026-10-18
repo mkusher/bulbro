@@ -225,14 +225,16 @@ export function StorybookScene<
 			0,
 		);
 		// Animation loop with ticker
-		let tickCount = 0;
-		const ticker: PIXI.TickerCallback<{}> = (
+		let _tickCount = 0;
+		const ticker: PIXI.TickerCallback<
+			object
+		> = (
 			ticker,
 		) => {
 			const delta =
 				ticker.deltaMS /
 				1000;
-			tickCount +=
+			_tickCount +=
 				delta;
 
 			sprite.update(
@@ -244,8 +246,7 @@ export function StorybookScene<
 			);
 		};
 		if (
-			app &&
-			app.ticker
+			app?.ticker
 		) {
 			app.ticker.add(
 				ticker,

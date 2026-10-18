@@ -1,16 +1,7 @@
 import { useState } from "preact/hooks";
-import {
-	bulbros,
-	wellRoundedBulbro,
-} from "@/characters-definitions";
+import { wellRoundedBulbro } from "@/characters-definitions";
 import type { Bulbro } from "../bulbro";
-import {
-	BulbroCard as BulbroCardComponent,
-	BulbroDisplay as BulbroDisplayComponent,
-} from "../bulbro/BulbroDisplay";
-import { BulbroStats } from "../bulbro/BulbroStats";
-import type { BulbroRarity } from "../bulbro/BulbroTitle";
-import { BulbroTitle } from "../bulbro/BulbroTitle";
+import { BulbroDisplay as BulbroDisplayComponent } from "../bulbro/BulbroDisplay";
 import { BulbroSelector } from "../ui/BulbroSelector";
 
 export default {

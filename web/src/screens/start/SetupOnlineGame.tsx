@@ -135,10 +135,7 @@ export function SetupOnlineGame() {
 	useStartBgm();
 
 	const canShare =
-		window
-			.navigator
-			.canShare &&
-		window.navigator.canShare(
+		window.navigator.canShare?.(
 			share,
 		);
 	const lobbyId =

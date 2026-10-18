@@ -6,10 +6,7 @@ import type {
 } from "@/time";
 import {
 	findClosest,
-	findClosestPlayerInRange,
-	isInRange,
 	isWeaponReadyToShoot,
-	minWeaponRange,
 } from "../game-formulas";
 import {
 	direction,
@@ -150,7 +147,7 @@ export class KeepkingDistanceBehaviors
 		currentEnemy: EnemyState,
 		waveState: WaveState,
 		now: NowTime,
-		deltaTime: DeltaTime,
+		_deltaTime: DeltaTime,
 	): EnemyEvent[] {
 		if (
 			currentEnemy.isStartingRaging(

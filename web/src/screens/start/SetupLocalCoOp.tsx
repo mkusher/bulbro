@@ -1,12 +1,5 @@
-import {
-	useEffect,
-	useState,
-} from "preact/hooks";
+import { useState } from "preact/hooks";
 import { v4 } from "uuid";
-import {
-	audioEngine,
-	bgmEnabled,
-} from "@/audio";
 import { useStartBgm } from "@/audio/useStartBgm";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import {

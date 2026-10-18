@@ -1,4 +1,3 @@
-import { zeroPoint } from "./geometry";
 import { uuid } from "./uuid";
 import type {
 	WeaponState,

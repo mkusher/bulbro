@@ -1,5 +1,6 @@
 import { spawnEnemy } from "@/enemy/EnemyState";
 import { classicMapSize } from "@/game-canvas";
+import { requireDefined } from "@/requireDefined";
 import { findBulbroById } from "../characters-definitions";
 import {
 	aphidEnemy,
@@ -153,8 +154,10 @@ function buildInitialState(
 			bulbro,
 		);
 	const player =
-		playerState
-			.players[0]!;
+		requireDefined(
+			playerState
+				.players[0],
+		);
 
 	const enemies =
 		ENEMY_TYPES.flatMap(
@@ -203,11 +206,26 @@ export default {
 		StorybookGameScene,
 };
 
+const manyEnemiesArgs =
+	{
+		babyCount: 5,
+		aphidCount: 0,
+		beetleWarriorCount: 0,
+		coloradoBeetleCount: 0,
+		hedgehogCount: 0,
+		wildBoarCount: 0,
+		badgerCount: 0,
+		roachCount: 0,
+		beetleArcherCount: 0,
+		treeCount: 0,
+		debug: false,
+	};
+
 export const ManyEnemies =
 	{
 		render:
 			(
-				args: any,
+				args: typeof manyEnemiesArgs,
 			) => (
 				<StorybookGameScene
 					initialState={buildInitialState(
@@ -224,19 +242,7 @@ export const ManyEnemies =
 					}
 				/>
 			),
-		args: {
-			babyCount: 5,
-			aphidCount: 0,
-			beetleWarriorCount: 0,
-			coloradoBeetleCount: 0,
-			hedgehogCount: 0,
-			wildBoarCount: 0,
-			badgerCount: 0,
-			roachCount: 0,
-			beetleArcherCount: 0,
-			treeCount: 0,
-			debug: false,
-		},
+		args: manyEnemiesArgs,
 		argTypes:
 			{
 				babyCount:

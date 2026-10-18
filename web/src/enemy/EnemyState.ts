@@ -1,4 +1,5 @@
 import { dropChanceWithLuck } from "@/game-formulas";
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
@@ -163,9 +164,11 @@ export class EnemyState
 			.lastHorizontalDirection;
 	}
 	get behaviors(): EnemyBehaviors {
-		return this
-			.#props
-			.behaviors!;
+		return requireDefined(
+			this
+				.#props
+				.behaviors,
+		);
 	}
 	get consumableDropChance() {
 		return (
@@ -282,7 +285,7 @@ export class EnemyState
 			damage: number;
 			luck?: number;
 		},
-		now: NowTime,
+		_now: NowTime,
 		knockback?: KnockbackDescription,
 		random: () => number = Math.random,
 	):

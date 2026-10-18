@@ -1,3 +1,4 @@
+import type { ComponentProps } from "preact";
 import { spawnBulbro } from "@/bulbro/BulbroState";
 import { getTotalExperienceForLevel } from "@/bulbro/Levels";
 import { wellRoundedBulbro } from "@/characters-definitions";
@@ -31,7 +32,9 @@ export const SingleLevel =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -59,7 +62,9 @@ export const SeveralLevels =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -87,7 +92,9 @@ export const HighTiers =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -115,7 +122,9 @@ export const LocalCoOp =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -143,7 +152,9 @@ export const CannotAffordReroll =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -198,7 +209,9 @@ export const Online =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -229,7 +242,9 @@ export const OnlineRemotePlayerReady =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}
@@ -254,7 +269,9 @@ export const OnlineRemotePlayerDisconnected =
 	{
 		render:
 			(
-				args: any,
+				args: ComponentProps<
+					typeof LevelUpLayout
+				>,
 			) => (
 				<LevelUpLayout
 					{...args}

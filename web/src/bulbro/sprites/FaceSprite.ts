@@ -197,7 +197,7 @@ export class FaceSprite {
 
 	appendTo(
 		container: PIXI.Container,
-		bodySize: Size,
+		_bodySize: Size,
 	) {
 		container.addChild(
 			this

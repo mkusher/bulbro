@@ -8,6 +8,7 @@ import {
 	materialDisplaySize,
 	materialVisualCenterOffset,
 } from "@/object/MaterialSprite";
+import { requireDefined } from "@/requireDefined";
 import type {
 	DeltaTime,
 	NowTime,
@@ -445,9 +446,11 @@ export class StageWithUi {
 					);
 				}
 				const dust =
-					this.#dustEffects.get(
-						player.id,
-					)!;
+					requireDefined(
+						this.#dustEffects.get(
+							player.id,
+						),
+					);
 				const lastPos =
 					this.#lastPlayerPositions.get(
 						player.id,

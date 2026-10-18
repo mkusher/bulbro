@@ -78,9 +78,7 @@ export function TouchscreenJoystick() {
 	return (
 		<div
 			className={
-				styles[
-					"joystick"
-				]
+				styles.joystick
 			}
 			style={
 				joystickStyle
@@ -88,9 +86,7 @@ export function TouchscreenJoystick() {
 		>
 			<div
 				className={
-					styles[
-						"touchpad"
-					]
+					styles.touchpad
 				}
 				style={
 					touchpadStyle

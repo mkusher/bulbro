@@ -1,13 +1,6 @@
-import {
-	useEffect,
-	useState,
-} from "preact/hooks";
+import { useState } from "preact/hooks";
 import { v4 } from "uuid";
-import {
-	audioEngine,
-	bgmEnabled,
-	useStartBgm,
-} from "@/audio";
+import { useStartBgm } from "@/audio";
 import { wellRoundedBulbro } from "@/characters-definitions";
 import { createMainControls } from "@/controls";
 import { startLocalGame } from "@/currentGameProcess";
