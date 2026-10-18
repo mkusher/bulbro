@@ -44,6 +44,8 @@ export interface WaveProcess {
 
 export type WavePromises =
 	{
+		/** Immutable checkpoint captured before initialization or gameplay can advance. */
+		initialState?: WaveState;
 		waveInitPromise: Promise<WaveProcess>;
 		wavePromise: Promise<
 			| "win"

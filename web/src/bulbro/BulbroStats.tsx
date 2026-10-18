@@ -209,27 +209,6 @@ export function BulbroStateStats({
 				</button>
 			</div>
 
-			{/* Health */}
-			<div className="mb-3 p-2 bg-muted/50 rounded">
-				<div className="flex justify-between text-sm">
-					<span>
-						{t(
-							"characterStats.health",
-						)}
-						:
-					</span>
-					<span className="font-medium">
-						{
-							bulbroState.healthPoints
-						}{" "}
-						/{" "}
-						{
-							stats.maxHp
-						}
-					</span>
-				</div>
-			</div>
-
 			{/* Main Stats */}
 			<div className="mb-3">
 				<div className="text-xs font-medium mb-2 text-muted-foreground">
