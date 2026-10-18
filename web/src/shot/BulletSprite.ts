@@ -93,19 +93,57 @@ function firedRound() {
 			0xfffcf0,
 		);
 }
+/** Full turns per second of a flying boomerang. */
+const boomerangSpinRate = 3;
+/** A small orange boomerang, spinning while it flies. */
+function thrownBoomerang() {
+	return new PIXI.Graphics()
+		.poly(
+			[
+				-12,
+				8,
+				0,
+				-8,
+				12,
+				8,
+				8,
+				11,
+				0,
+				0,
+				-8,
+				11,
+			],
+		)
+		.fill(
+			0xd9883c,
+		)
+		.stroke(
+			{
+				width: 2,
+				color: 0x25332e,
+			},
+		);
+}
 /**
  * Manages a bullet sprite graphic.
  */
 export class BulletSprite {
 	#gfx: PIXI.Graphics;
+	#spins: boolean;
 
 	constructor(
 		shot: ShotState,
 	) {
+		this.#spins =
+			shot.boomerang !==
+			undefined;
 		this.#gfx =
-			shot.isExplosive
-				? explosiveProjectile()
-				: firedRound();
+			this
+				.#spins
+				? thrownBoomerang()
+				: shot.isExplosive
+					? explosiveProjectile()
+					: firedRound();
 		if (
 			shot
 				.structure
@@ -152,9 +190,21 @@ export class BulletSprite {
 	}
 
 	update(
-		_deltaTime: DeltaTime,
+		deltaTime: DeltaTime,
 		shot: ShotState,
 	) {
+		if (
+			this
+				.#spins
+		) {
+			this.#gfx.rotation +=
+				(Math.PI *
+					2 *
+					boomerangSpinRate *
+					deltaTime) /
+				1000;
+			return;
+		}
 		this.#gfx.rotation =
 			rotation(
 				shot.direction,

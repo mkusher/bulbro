@@ -15,7 +15,9 @@ import type { WeaponType } from "@/weapon";
 
 type TextureConfig =
 	{
-		asset?: "engineeringTools";
+		asset?:
+			| "engineeringTools"
+			| "extraWeapons";
 		position: Position;
 		size: Size;
 		scale?:
@@ -247,6 +249,48 @@ export const weapons: Record<
 				size: {
 					width: 360,
 					height: 180,
+				},
+			},
+		spear:
+			{
+				asset:
+					"extraWeapons",
+				position:
+					{
+						x: 0,
+						y: 30,
+					},
+				size: {
+					width: 320,
+					height: 100,
+				},
+			},
+		revolver:
+			{
+				asset:
+					"extraWeapons",
+				position:
+					{
+						x: 320,
+						y: 0,
+					},
+				size: {
+					width: 240,
+					height: 160,
+				},
+			},
+		boomerang:
+			{
+				asset:
+					"extraWeapons",
+				position:
+					{
+						x: 560,
+						y: 0,
+					},
+				size: {
+					width: 200,
+					height: 160,
 				},
 			},
 		aphidGun:

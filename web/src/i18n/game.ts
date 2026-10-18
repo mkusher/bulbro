@@ -55,6 +55,10 @@ const statNames =
 			"stat.spread",
 		cooldown:
 			"stat.cooldown",
+		magazine:
+			"stat.magazine",
+		reload:
+			"stat.reload",
 		critMultiplier:
 			"stat.critMultiplier",
 		maxWeapons:

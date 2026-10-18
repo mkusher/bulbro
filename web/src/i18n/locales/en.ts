@@ -179,6 +179,12 @@ export default {
 		"Machine Gun",
 	"weapon.name.bazooka":
 		"Bazooka",
+	"weapon.name.spear":
+		"Spear",
+	"weapon.name.revolver":
+		"Revolver",
+	"weapon.name.boomerang":
+		"Boomerang",
 	"weapon.name.orcGun":
 		"Orc Very Slow Gun",
 	"weapon.name.enemyFist":
@@ -191,6 +197,10 @@ export default {
 		"Projectiles",
 	"stat.spread":
 		"Spread (radians)",
+	"stat.magazine":
+		"Magazine",
+	"stat.reload":
+		"Reload (s)",
 	"weapon.class.blade":
 		"Blade",
 	"weapon.class.blunt":

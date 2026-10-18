@@ -14,6 +14,7 @@ import {
 	findClosestPlayerInRange,
 	getAttackCooldown,
 	isInRange,
+	isMagazineEmpty,
 	shoot,
 } from "@/game-formulas";
 import {
@@ -424,6 +425,22 @@ export function applyAttackToWeapons(
 						...ws,
 						lastStrikedAt:
 							event.occurredAt,
+						...(ws
+							.statsBonus
+							.magazine !==
+						undefined
+							? {
+									// The first attack after a reload starts a new magazine.
+									shotsFired:
+										(isMagazineEmpty(
+											ws,
+										)
+											? 0
+											: (ws.shotsFired ??
+												0)) +
+										1,
+								}
+							: {}),
 						...(event.strike
 							? {
 									strike:

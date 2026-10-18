@@ -116,6 +116,9 @@ value 0.95 is knockback resistance. Enemy base attack speed is neutral at 0.
   Machine Gun keep their existing stats, scaling and premium pricing.
   Machine Gun still reaches the 100ms cooldown floor at +40% attack speed.
   Flare Gun still has no burning effect.
+- **New pattern weapons need tuning:** Spear, Revolver and Boomerang use
+  provisional stats and prices chosen against Knife, Pistol and SMG; their
+  sustained damage, coverage and reload downtime are untested.
 - **Engineering is partially useful:** Brick now scales 50%/65%/80%/100%
   with both Melee Damage and Engineering. Structures are absent, and the
   current shop exclusion of positive Engineering items remains.
@@ -366,7 +369,8 @@ current roster.
 1. **Economy validation:** playtest income from valued pickups against shop
    spending, especially the custom premium weapon prices.
 2. **Weapons:** implement missing piercing and Brick's break/material effect;
-   playtest the five custom weapons against the matched stat tables.
+   playtest the five custom weapons against the matched stat tables, and tune
+   Spear, Revolver and Boomerang.
 3. **Enemies:** playtest the 200 ms hit protection, validate the four custom enemies,
    and review behavior differences from the matched roles.
 4. **Waves:** playtest waves 13–30 and the endless scaling, fill the wave 9

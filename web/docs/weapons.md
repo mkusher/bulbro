@@ -3,7 +3,7 @@
 See [Characters](characters.md), [Items](items.md), [Enemies](enemies.md), and
 the [balance review](../../docs/balance.md).
 
-The game registers 17 player weapons and 3 enemy weapons in
+The game registers 20 player weapons and 3 enemy weapons in
 [weapons-definitions/index.ts](../src/weapons-definitions/index.ts).
 
 Pruner, Screwdriver and Wrench also spawn structures; see [Engineering](engineering.md) for their tier effects.
@@ -19,6 +19,8 @@ no custom tier-I version. Other starting availability rules are unchanged.
 
 AK-47, Bazooka, Flare Gun, Grenade and Machine Gun have no direct analogue.
 They retain their current base stats, prices and generic tier growth.
+Spear, Revolver and Boomerang are Bulbro designs with provisional, explicit
+tier tables; see [Attack patterns](#attack-patterns).
 
 ## Base stats
 
@@ -43,6 +45,9 @@ melee projectile speed is unused.
 | Grenade | `grenade` | 1 | 24 | 1 | 2 | 300 | 12 | 3% / ×2 | 28 |
 | Machine Gun | `machineGun` | 1 | 3 | 1 | 0.14 | 600 | 2 | 3% / ×2 | 70 |
 | Bazooka | `bazooka` | 1 | 60 | 1 | 2.8 | 650 | 18 | 3% / ×2 | 80 |
+| Spear | `spear` | 1 | 12 | 1 | 1.3 | 260 | 10 | 5% / ×2 | 18 |
+| Revolver | `revolver` | 1 | 10 | 1 | 0.35 (reload 2) | 450 | 10 | 10% / ×2 | 22 |
+| Boomerang | `boomerang` | 1 | 8 | 1 | 1.5 | 350 | 5 | 3% / ×2 | 16 |
 
 ## Tier growth and prices
 
@@ -50,7 +55,8 @@ melee projectile speed is unused.
 shop previews, equipment, combining and selling. A weapon's explicit tier
 stats override its base stats. Custom weapons use damage multipliers
 1/1.6/2.4/3.6, cooldown multipliers 1/0.93/0.85/0.75, and +3 crit chance
-per tier above I. These generic rules do not apply to the Brotato analogues, including the three engineering tools.
+per tier above I. These generic rules do not apply to the Brotato analogues, including the three engineering tools,
+or to Spear, Revolver and Boomerang.
 
 Rows list only supported tiers: Sword II/III/IV, all others I/II/III/IV.
 Prices shown at wave 1 are comparison values; tier II/III/IV shop offers
@@ -72,6 +78,9 @@ first unlock after waves 2/4/8, with chances increased by luck.
 | Grenade | 24 / 38 / 58 / 86 | 1 / 1 / 1 / 1 | 2 / 1.86 / 1.7 / 1.5 | 3 / 6 / 9 / 12 | 2 / 2 / 2 / 2 | 100% rangedDamage + 50% elementalDamage / 100% rangedDamage + 50% elementalDamage / 100% rangedDamage + 50% elementalDamage / 100% rangedDamage + 50% elementalDamage | 28 / 56 / 112 / 224 | 31 / 62 / 124 / 247 | 7 / 15 / 31 / 61 |
 | Machine Gun | 3 / 5 / 7 / 11 | 1 / 1 / 1 / 1 | 0.14 / 0.13 / 0.12 / 0.11 | 3 / 6 / 9 / 12 | 2 / 2 / 2 / 2 | 60% rangedDamage / 60% rangedDamage / 60% rangedDamage / 60% rangedDamage | 70 / 140 / 280 / 560 | 78 / 155 / 309 / 617 | 19 / 38 / 77 / 154 |
 | Bazooka | 60 / 96 / 144 / 216 | 1 / 1 / 1 / 1 | 2.8 / 2.6 / 2.38 / 2.1 | 3 / 6 / 9 / 12 | 2 / 2 / 2 / 2 | 150% rangedDamage / 150% rangedDamage / 150% rangedDamage / 150% rangedDamage | 80 / 160 / 320 / 640 | 89 / 177 / 353 / 705 | 22 / 44 / 88 / 176 |
+| Spear | 12 / 19 / 28 / 42 | 1 / 1 / 1 / 1 | 1.3 / 1.22 / 1.13 / 1 | 5 / 8 / 11 / 14 | 2 / 2 / 2 / 2 | 100% meleeDamage / 100% meleeDamage / 100% meleeDamage / 100% meleeDamage | 18 / 36 / 70 / 140 | 20 / 40 / 78 / 155 | 5 / 10 / 19 / 38 |
+| Revolver | 10 / 16 / 24 / 38 | 1 / 1 / 1 / 1 | 0.35 / 0.33 / 0.31 / 0.28 | 10 / 15 / 20 / 25 | 2 / 2 / 2 / 2 | 100% rangedDamage / 100% rangedDamage / 100% rangedDamage / 100% rangedDamage | 22 / 44 / 88 / 176 | 25 / 49 / 97 / 194 | 6 / 12 / 24 / 48 |
+| Boomerang | 8 / 13 / 19 / 28 | 1 / 1 / 1 / 1 | 1.5 / 1.4 / 1.3 / 1.15 | 3 / 6 / 9 / 12 | 2 / 2 / 2 / 2 | 80% rangedDamage / 80% rangedDamage / 80% rangedDamage / 80% rangedDamage | 16 / 32 / 64 / 128 | 18 / 36 / 71 / 141 | 4 / 9 / 17 / 35 |
 
 Prices use `floor((base + wave + base × wave × 0.1) × inflation)`.
 Recycling returns 25% of the current tier price, rounded down, minimum 1.
@@ -106,9 +115,31 @@ Medic's pool remains Pistol, Hand and Fist.
 - Custom explosive weapons retain their existing splash attacks. Flare Gun
   still has no burning effect. Weapon class bonuses are not implemented.
 
+## Attack patterns
+
+Spear, Revolver and Boomerang were the first group of the proposals below.
+Their stats are provisional and still need playtesting.
+
+- **Spear** uses a 320 ms thrust. Like other thrusts, the shaft hits every
+  enemy along its line, each at most once per thrust; the long reach is what
+  sets it apart from Knife.
+- **Revolver** fires 6 shots at its short cooldown, then waits its reload
+  time (2 / 1.85 / 1.7 / 1.5 s at tiers I–IV) before the next shot. Attack
+  speed shortens shots and reloads alike. The count of shots fired is part of
+  the synchronized weapon state and resets at the start of each wave. A
+  partly used magazine is only refilled by emptying it.
+- **Boomerang** flies through enemies to the end of its range or the map
+  edge, then turns and homes in on its thrower until caught. It hits each
+  enemy at most once on the way out and once on the way back, so repeated
+  collision checks never multiply damage or life steal. It drops when the
+  thrower dies or leaves. Shots, hit tracking and the return state are
+  synchronized shot state.
+
 ## Suggested additions
 
-These are **unimplemented design proposals**, recorded on 2026-10-17. They
+These are design proposals, recorded on 2026-10-17. Spear, Revolver and
+Boomerang were implemented on 2026-10-18 (see [Attack patterns](#attack-patterns));
+the rest remain **unimplemented**. They
 are intended to add different attack patterns, not expand the current weapon
 registry or change its stat tables. Damage, cooldowns, scaling coefficients,
 prices, tiers and starting/shop availability remain to be tuned. Names shared
@@ -131,11 +162,10 @@ First finish existing effects: Pistol/Laser Gun/Shotgun piercing, Brick's
 break/material effect, and Flare Gun burning. Reusing those systems gives
 future Crossbow and Flamethrower implementations a consistent foundation.
 
-Prioritize **Spear, Revolver and Boomerang** as new weapons because they add
-distinct attack patterns without requiring the broader burning or structure
-systems. Spear is closest to existing attack behavior; Revolver and Boomerang
-still require new combat state and behavior, not only stat definitions.
-Then choose burning or structures as the next system to open a build family.
+**Spear, Revolver and Boomerang** were prioritized because they add distinct
+attack patterns without requiring the broader burning or structure systems;
+they are now implemented. Choose burning as the next system to open a build
+family.
 Crossbow can follow piercing; Shield can follow armor-scaling support.
 
 Test sustained single-target damage and group coverage, including reload
@@ -183,9 +213,18 @@ All player weapon artwork is packed in [weapons.png](../src/assets/weapons.png),
 | Grenade | `grenade` | 496 | 560 | 160 | 192 |
 | Machine Gun | `machineGun` | 672 | 584 | 336 | 168 |
 | Bazooka | `bazooka` | 16 | 784 | 360 | 180 |
+| Spear | `spear` | 0 | 30 | 320 | 100 |
+| Revolver | `revolver` | 320 | 0 | 240 | 160 |
+| Boomerang | `boomerang` | 560 | 0 | 200 | 160 |
 | Ranged Aphid Gun | `aphidGun` | 0 | 0 | 0 | 0 |
 | Enemy Fist | `enemyFist` | 0 | 0 | 0 | 0 |
 | Orc Very Slow Gun | `orcGun` | 0 | 0 | 0 | 0 |
+
+Spear, Revolver and Boomerang are drawn as vector shapes in
+[extra-weapons.svg](../src/assets/extra-weapons.svg), registered as the
+`extraWeapons` asset, like the engineering tools' sheet; their frames above
+use that sheet's coordinates. A thrown boomerang is drawn as a small spinning
+shape by [BulletSprite](../src/shot/BulletSprite.ts).
 
 SMG, knife, sword, and shotgun frames were expanded to avoid clipping their edges. The separate PNGs for the added weapons and their preload entries were removed after packing. When adding or moving artwork, update the full-resolution atlas and the frame in `WeaponSprite.ts`. Keep transparent spacing between frames to avoid texture bleeding.
 
