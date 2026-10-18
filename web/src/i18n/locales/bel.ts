@@ -181,6 +181,12 @@ export default {
 		"Кулямёт",
 	"weapon.name.bazooka":
 		"Базука",
+	"weapon.name.spear":
+		"Дзіда",
+	"weapon.name.revolver":
+		"Рэвальвер",
+	"weapon.name.boomerang":
+		"Бумеранг",
 	"weapon.name.orcGun":
 		"Вельмі павольная гармата орка",
 	"weapon.name.enemyFist":
@@ -193,6 +199,10 @@ export default {
 		"Снарады",
 	"stat.spread":
 		"Роскід (радыяны)",
+	"stat.magazine":
+		"Магазін",
+	"stat.reload":
+		"Перазарадка (с)",
 	"weapon.class.blade":
 		"Клінковая",
 	"weapon.class.blunt":

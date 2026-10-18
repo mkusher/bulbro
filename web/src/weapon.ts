@@ -28,6 +28,9 @@ export type WeaponType =
 	| "grenade"
 	| "machineGun"
 	| "bazooka"
+	| "spear"
+	| "revolver"
+	| "boomerang"
 	| "orcGun"
 	| "enemyFist"
 	| "aphidGun";
@@ -112,11 +115,23 @@ export type ExplosionAttackConfig =
 	};
 
 /**
+ * Returning ranged attack: the weapon throws a projectile flying at
+ * `shotSpeed` through enemies up to the end of its range and back to the
+ * thrower. Each enemy is hit at most once on the way out and once on the
+ * way back.
+ */
+export type BoomerangAttackConfig =
+	{
+		type: "boomerang";
+	};
+
+/**
  * Attacks that fire a projectile.
  */
 export type ProjectileAttackConfig =
 	| ShotAttackConfig
-	| ExplosionAttackConfig;
+	| ExplosionAttackConfig
+	| BoomerangAttackConfig;
 
 /**
  * How a weapon attacks: fires a projectile or strikes in melee.
@@ -233,7 +248,9 @@ export const isProjectileAttack =
 		config.type ===
 			"shot" ||
 		config.type ===
-			"explosion";
+			"explosion" ||
+		config.type ===
+			"boomerang";
 
 /** Whether the weapon strikes in melee instead of firing projectiles. */
 export const isMeleeWeapon =
@@ -258,3 +275,15 @@ export const isExplosiveWeapon =
 			.attack
 			.type ===
 		"explosion";
+
+/** Whether the weapon's projectiles fly back to the thrower, hitting enemies both ways. */
+export const isBoomerangWeapon =
+	(
+		type: WeaponType,
+	): boolean =>
+		getWeaponByType(
+			type,
+		)
+			.attack
+			.type ===
+		"boomerang";

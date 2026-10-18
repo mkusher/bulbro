@@ -181,6 +181,12 @@ export default {
 		"Karabin maszynowy",
 	"weapon.name.bazooka":
 		"Bazooka",
+	"weapon.name.spear":
+		"Włócznia",
+	"weapon.name.revolver":
+		"Rewolwer",
+	"weapon.name.boomerang":
+		"Bumerang",
 	"weapon.name.orcGun":
 		"Bardzo wolna broń orka",
 	"weapon.name.enemyFist":
@@ -193,6 +199,10 @@ export default {
 		"Pociski",
 	"stat.spread":
 		"Rozrzut (radiany)",
+	"stat.magazine":
+		"Magazynek",
+	"stat.reload":
+		"Przeładowanie (s)",
 	"weapon.class.blade":
 		"Ostrze",
 	"weapon.class.blunt":

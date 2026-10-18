@@ -12,6 +12,15 @@ const assetDefinitions =
 				)
 					.href,
 			},
+		extraWeapons:
+			{
+				path: new URL(
+					"./assets/extra-weapons.svg",
+					import.meta
+						.url,
+				)
+					.href,
+			},
 		weapons:
 			{
 				path: new URL(

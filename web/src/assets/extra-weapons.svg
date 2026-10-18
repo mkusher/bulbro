@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="160" viewBox="0 0 760 160">
+<title>Spear, revolver and boomerang weapon sprites</title>
+<g stroke="#25332e" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+<g transform="translate(0 30)">
+<path d="M14 43H226V57H14Z" fill="#b9793f"/>
+<path d="M14 43H40V57H14Z" fill="#8a5a2e"/>
+<path d="M200 39H230V61H200Z" fill="#d8c48a"/>
+<path d="M207 39V61M218 39V61" fill="none" stroke-width="4"/>
+<path d="M228 50Q258 22 308 50Q258 78 228 50Z" fill="#c9d1cb"/>
+<path d="M240 50H296" fill="none" stroke="#8e9a92" stroke-width="4"/>
+</g>
+<g transform="translate(320 0)">
+<path d="M118 42H222V66H118Z" fill="#59645f"/>
+<path d="M212 34H222V42" fill="none" stroke-width="5"/>
+<path d="M60 36H124V96H72L60 84Z" fill="#7d8a83"/>
+<path d="M82 46H134V86H82Z" fill="#a9b5ad"/>
+<path d="M94 50V82M108 50V82M122 50V82" fill="none" stroke="#6d7a72" stroke-width="4"/>
+<path d="M60 84L72 96L58 140Q55 150 42 150H22Q10 150 14 136L34 84Z" fill="#b9793f"/>
+<path d="M30 112L48 112M26 126L44 126" fill="none" stroke="#8a5a2e" stroke-width="4"/>
+<path d="M80 96Q78 118 98 118Q108 118 108 104" fill="none" stroke-width="6"/>
+<path d="M84 96L90 110" fill="none" stroke-width="5"/>
+<path d="M52 36L62 24L70 36" fill="#59645f" stroke-width="5"/>
+</g>
+<g transform="translate(560 0)">
+<path d="M18 120Q12 100 34 88L86 30Q100 14 116 30L186 96Q198 112 182 122Q168 128 154 116L104 66L52 128Q36 142 18 120Z" fill="#d9883c"/>
+<path d="M38 112L92 50M120 46L176 104" fill="none" stroke="#f2c27a" stroke-width="5"/>
+<path d="M80 52L92 64M128 56L116 68" fill="none" stroke="#9c4f22" stroke-width="5"/>
+</g>
+</g></svg>

@@ -21,6 +21,13 @@ export interface StructureShot {
 	hitIds: string[];
 	burnDamage?: number;
 }
+/** Flight of a boomerang shot, which flies out to its range and back. */
+export interface BoomerangShot {
+	/** Whether the boomerang is flying back to its thrower */
+	returning: boolean;
+	/** Enemies already hit on the current pass (out or back) */
+	hitIds: string[];
+}
 type ShotStateProperties =
 	{
 		/** Unique shot identifier */
@@ -51,6 +58,8 @@ type ShotStateProperties =
 		 * range. 0 or missing for shots that hit a single target.
 		 */
 		readonly explosionRadius?: number;
+		/** Present for boomerang shots that return to the shooter */
+		readonly boomerang?: BoomerangShot;
 	};
 
 /**
@@ -129,6 +138,11 @@ export class ShotState
 				.explosionRadius ??
 			0
 		);
+	}
+	get boomerang() {
+		return this
+			.#props
+			.boomerang;
 	}
 	/** Whether the shot explodes instead of hitting a single target. */
 	get isExplosive() {
@@ -210,6 +224,17 @@ export class ShotState
 							.#props,
 						position:
 							event.to,
+						...(this
+							.boomerang &&
+						event.boomerang
+							? {
+									// Boomerangs turn around and home in on the thrower.
+									direction:
+										event.direction,
+									boomerang:
+										event.boomerang,
+								}
+							: {}),
 						structure:
 							this
 								.structure &&

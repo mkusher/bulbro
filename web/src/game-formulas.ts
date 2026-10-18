@@ -17,6 +17,7 @@ import { ShotState } from "./shot/ShotState";
 import type { NowTime } from "./time";
 import type { WeaponState } from "./waveState";
 import {
+	isBoomerangWeapon,
 	isExplosiveWeapon,
 	isMeleeWeapon,
 } from "./weapon";
@@ -237,6 +238,60 @@ export function getAttackCooldown(
 	return Math.max(
 		100,
 		cooldownMs,
+	);
+}
+
+/** Whether a weapon with a magazine has used it up and must reload next. */
+export function isMagazineEmpty(
+	weapon: Pick<
+		WeaponState,
+		| "statsBonus"
+		| "shotsFired"
+	>,
+): boolean {
+	const magazine =
+		weapon
+			.statsBonus
+			.magazine;
+	return (
+		magazine !==
+			undefined &&
+		(weapon.shotsFired ??
+			0) >=
+			magazine
+	);
+}
+
+/**
+ * Seconds the weapon waits before its next attack, before attack speed:
+ * the reload time once its magazine is empty, the cooldown otherwise.
+ */
+export function weaponCooldownSeconds(
+	weapon: Pick<
+		WeaponState,
+		| "statsBonus"
+		| "shotsFired"
+	>,
+): number {
+	if (
+		isMagazineEmpty(
+			weapon,
+		)
+	)
+		return (
+			weapon
+				.statsBonus
+				.reload ??
+			weapon
+				.statsBonus
+				.cooldown ??
+			1
+		);
+	return (
+		weapon
+			.statsBonus
+			.cooldown ??
+		1
 	);
 }
 
@@ -748,6 +803,18 @@ export function shoot(
 					weapon,
 					shooterType,
 				),
+			...(isBoomerangWeapon(
+				weapon.type,
+			)
+				? {
+						boomerang:
+							{
+								returning: false,
+								hitIds:
+									[],
+							},
+					}
+				: {}),
 		},
 	);
 }

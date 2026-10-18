@@ -8,6 +8,7 @@ import { EnemyState } from "../../enemy/EnemyState";
 import type { GameEventInternal } from "../../game-events/GameEvents";
 import {
 	circleIntersectsAabb,
+	direction,
 	distance,
 	type Position,
 	type Rectangle,
@@ -22,6 +23,10 @@ import type { EventGenerator } from "./EventGenerator";
 const CELL_SIZE = 64;
 // Provisional crossover: small populations avoid grid construction and lookups.
 const GRID_MIN_ENEMIES = 100;
+/** How close a returning boomerang has to get to its thrower to be caught. */
+const BOOMERANG_CATCH_RADIUS =
+	BULBRO_SIZE.width /
+	2;
 
 type Collider<
 	T,
@@ -609,6 +614,297 @@ export class ShotMovementEventGenerator
 					},
 				);
 			};
+		/**
+		 * Hits every enemy the boomerang crosses flying from `from` to `to`
+		 * that it hasn't hit on the current pass yet. Returns the pass's hit ids.
+		 */
+		const boomerangHits =
+			(
+				shot: (typeof shots)[number],
+				from: Position,
+				to: Position,
+				hitIds: string[],
+				knockbackDirection: Position,
+			): string[] => {
+				const dx =
+					to.x -
+					from.x;
+				const dy =
+					to.y -
+					from.y;
+				const shooter =
+					shooterOf(
+						shot,
+					);
+				const passHitIds =
+					[
+						...hitIds,
+					];
+				for (const body of enemiesNear(
+					Math.min(
+						from.x,
+						to.x,
+					),
+					Math.min(
+						from.y,
+						to.y,
+					),
+					Math.max(
+						from.x,
+						to.x,
+					),
+					Math.max(
+						from.y,
+						to.y,
+					),
+				)) {
+					if (
+						passHitIds.includes(
+							body
+								.entity
+								.id,
+						) ||
+						segmentAabbHitTime(
+							from.x,
+							from.y,
+							dx,
+							dy,
+							body.minX,
+							body.minY,
+							body.maxX,
+							body.maxY,
+						) ===
+							Infinity
+					)
+						continue;
+					passHitIds.push(
+						body
+							.entity
+							.id,
+					);
+					events.push(
+						body.entity.beHit(
+							{
+								damage:
+									shot.damage,
+								luck: shooter
+									?.stats
+									.luck,
+							},
+							now,
+							{
+								strength:
+									shot.knockback,
+								direction:
+									knockbackDirection,
+							},
+						),
+					);
+				}
+				if (
+					passHitIds.length >
+					hitIds.length
+				)
+					stealLife(
+						shooter,
+					);
+				return passHitIds;
+			};
+		/**
+		 * Boomerangs fly through enemies to the end of their range (or the map
+		 * edge), turn around and home in on their thrower until caught.
+		 */
+		const moveBoomerang =
+			(
+				shot: (typeof shots)[number],
+				boomerang: NonNullable<
+					(typeof shots)[number]["boomerang"]
+				>,
+			) => {
+				const prevPos =
+					shot.position;
+				const thrower =
+					players.find(
+						(
+							p,
+						) =>
+							p.id ===
+								shot.shooterId &&
+							p.isAlive(),
+					);
+				if (
+					!boomerang.returning
+				) {
+					const nextPos =
+						movePosition(
+							prevPos,
+							shot.speed,
+							shot.direction,
+							deltaTime,
+						);
+					const isOutOfRange =
+						distance(
+							shot.startPosition,
+							nextPos,
+						) >
+						shot.range;
+					if (
+						!isOutOfRange &&
+						rectContainsPoint(
+							bounds,
+							nextPos,
+						)
+					) {
+						events.push(
+							{
+								...shot.move(
+									nextPos,
+								),
+								boomerang:
+									{
+										returning: false,
+										hitIds:
+											boomerangHits(
+												shot,
+												prevPos,
+												nextPos,
+												boomerang.hitIds,
+												shot.direction,
+											),
+									},
+							},
+						);
+						return;
+					}
+					const turnAt =
+						clampToRect(
+							bounds,
+							isOutOfRange
+								? {
+										x:
+											shot
+												.startPosition
+												.x +
+											shot
+												.direction
+												.x *
+												shot.range,
+										y:
+											shot
+												.startPosition
+												.y +
+											shot
+												.direction
+												.y *
+												shot.range,
+									}
+								: nextPos,
+						);
+					boomerangHits(
+						shot,
+						prevPos,
+						turnAt,
+						boomerang.hitIds,
+						shot.direction,
+					);
+					// The way back is a new pass: every enemy can be hit again.
+					events.push(
+						{
+							type: "shotMoved",
+							shotId:
+								shot.id,
+							from: prevPos,
+							to: turnAt,
+							direction:
+								thrower
+									? direction(
+											turnAt,
+											thrower.position,
+										)
+									: {
+											x:
+												-shot
+													.direction
+													.x,
+											y:
+												-shot
+													.direction
+													.y,
+										},
+							boomerang:
+								{
+									returning: true,
+									hitIds:
+										[],
+								},
+						},
+					);
+					return;
+				}
+				if (
+					!thrower
+				) {
+					events.push(
+						shot.expire(),
+					);
+					return;
+				}
+				const back =
+					direction(
+						prevPos,
+						thrower.position,
+					);
+				const isCaught =
+					distance(
+						prevPos,
+						thrower.position,
+					) <=
+					(shot.speed *
+						deltaTime) /
+						1000 +
+						BOOMERANG_CATCH_RADIUS;
+				const nextPos =
+					isCaught
+						? thrower.position
+						: movePosition(
+								prevPos,
+								shot.speed,
+								back,
+								deltaTime,
+							);
+				const hitIds =
+					boomerangHits(
+						shot,
+						prevPos,
+						nextPos,
+						boomerang.hitIds,
+						back,
+					);
+				events.push(
+					isCaught
+						? {
+								type: "shotExpired",
+								shotId:
+									shot.id,
+								position:
+									nextPos,
+							}
+						: {
+								type: "shotMoved",
+								shotId:
+									shot.id,
+								from: prevPos,
+								to: nextPos,
+								direction:
+									back,
+								boomerang:
+									{
+										returning: true,
+										hitIds,
+									},
+							},
+				);
+			};
 		// Track health spent by lasers in this tick, before events are applied.
 		const laserHealth =
 			new Map<
@@ -848,6 +1144,16 @@ export class ShotMovementEventGenerator
 						position:
 							to,
 					},
+				);
+				continue;
+			}
+
+			if (
+				shot.boomerang
+			) {
+				moveBoomerang(
+					shot,
+					shot.boomerang,
 				);
 				continue;
 			}

@@ -35,6 +35,7 @@ import {
 	lifeStealCooldown,
 	lifeStealHeal,
 	type StatSource,
+	weaponCooldownSeconds,
 } from "../game-formulas";
 import {
 	addition,
@@ -554,10 +555,9 @@ export class BulbroState
 				weapon,
 			) => {
 				const weaponCooldown =
-					weapon
-						.statsBonus
-						.cooldown ??
-					1;
+					weaponCooldownSeconds(
+						weapon,
+					);
 				if (
 					isWeaponReadyToShoot(
 						weapon.lastStrikedAt,
@@ -1293,6 +1293,8 @@ export class BulbroState
 									...ws,
 									lastStrikedAt:
 										event.occurredAt,
+									shotsFired:
+										undefined,
 									strike:
 										undefined,
 								}),

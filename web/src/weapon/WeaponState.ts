@@ -25,6 +25,16 @@ export type WeaponStats =
 		damage?: number;
 		/** Seconds between attacks before the wielder's attack speed is applied */
 		cooldown?: number;
+		/**
+		 * Attacks before the weapon has to reload. Unlimited when missing.
+		 * After the last one the weapon waits `reload` instead of `cooldown`.
+		 */
+		magazine?: number;
+		/**
+		 * Seconds to reload an empty magazine before the wielder's attack
+		 * speed is applied. Used only with `magazine`.
+		 */
+		reload?: number;
 		/** Attack reach added to the wielder's range */
 		range?: number;
 		/** Knockback strength added to the wielder's knockback */
@@ -73,6 +83,8 @@ export interface WeaponState {
 	tier?: WeaponTier;
 	/** Aiming direction for the weapon */
 	aimingDirection: Direction;
+	/** Attacks made since the last reload, for weapons with a magazine */
+	shotsFired?: number;
 	/** Last melee strike of this weapon, if it strikes instead of shooting */
 	strike?: MeleeStrike;
 }

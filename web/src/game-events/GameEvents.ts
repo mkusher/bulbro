@@ -4,7 +4,10 @@ import type {
 	Position,
 } from "@/geometry";
 import type { LockedShopOffer } from "@/shop/LockedShopOffer";
-import type { ShotState } from "@/shot/ShotState";
+import type {
+	BoomerangShot,
+	ShotState,
+} from "@/shot/ShotState";
 import type {
 	DeltaTime,
 	NowTime,
@@ -297,6 +300,8 @@ export type ShotMovedEvent =
 		type: "shotMoved";
 		shotId: string;
 		structureHitIds?: string[];
+		/** New flight state of a boomerang shot */
+		boomerang?: BoomerangShot;
 	} & MoveDescription;
 
 export type ShotExpiredEvent =

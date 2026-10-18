@@ -1,6 +1,7 @@
 import { ak47 } from "./ak47";
 import { aphidGun } from "./aphid-gun";
 import { bazooka } from "./bazooka";
+import { boomerang } from "./boomerang";
 import { brick } from "./brick";
 import { doubleBarrelShotgun } from "./double-barrel-shotgun";
 import {
@@ -18,7 +19,9 @@ import { machineGun } from "./machine-gun";
 import { orcFist } from "./orc-fist";
 import { orcSlowGun } from "./orc-gun";
 import { pistol } from "./pistol";
+import { revolver } from "./revolver";
 import { smg } from "./smg";
+import { spear } from "./spear";
 import { sword } from "./sword";
 
 export {
@@ -26,6 +29,7 @@ export {
 	// Enemy weapons
 	aphidGun,
 	bazooka,
+	boomerang,
 	brick,
 	doubleBarrelShotgun,
 	fist,
@@ -39,8 +43,10 @@ export {
 	orcSlowGun,
 	pistol,
 	pruner,
+	revolver,
 	screwdriver,
 	smg,
+	spear,
 	sword,
 	wrench,
 };
@@ -64,6 +70,9 @@ export const weapons =
 		grenade,
 		machineGun,
 		bazooka,
+		spear,
+		revolver,
+		boomerang,
 	] as const;
 
 export const enemyWeapons =
