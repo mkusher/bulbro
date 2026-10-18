@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { OutlineFilter } from "pixi-filters/outline";
+import { findBulbroById } from "@/characters-definitions";
 import type {
 	Direction,
 	Position,
@@ -10,6 +11,12 @@ import { DebugSprite } from "@/graphics/DebugSprite";
 import { GameSprite } from "@/graphics/GameSprite";
 import { ShadowSprite } from "@/graphics/ShadowSprite";
 import { SwingingAnimation } from "@/graphics/SwingingAnimation";
+import {
+	appearanceHeadroom,
+	appearanceKey,
+	type ResolvedAppearance,
+	resolveAppearance,
+} from "@/items/ItemAppearance";
 import type {
 	DeltaTime,
 	NowTime,
@@ -30,6 +37,7 @@ import {
 	LegsSprite,
 } from "./LegsSprite.ts";
 import { OverheadHealthBar } from "./OverheadHealthBar.ts";
+import { WearableSprite } from "./WearableSprite.ts";
 
 export {
 	type FaceType,
@@ -49,11 +57,19 @@ const bodySize =
 		height: 130,
 	};
 
+type RenderedAppearance =
+	{
+		characterSprites: CharacterSprites<PIXI.Container>;
+		wearables: Promise<
+			WearableSprite[]
+		>;
+	};
+
 /**
  * Manages a player sprite graphic.
  */
 export class BulbaSprite extends GameSprite {
-	#sprite!: PIXI.Container;
+	#sprite?: PIXI.Container;
 	#debugSprite?: DebugSprite;
 	#characterScaling = 0.3;
 	#weaponsSprite: WeaponsSprite;
@@ -65,6 +81,28 @@ export class BulbaSprite extends GameSprite {
 	#shadow: ShadowSprite;
 	#faceType: FaceType;
 	#overheadHealthBar: OverheadHealthBar;
+	#appearanceKey =
+		"";
+	#appearanceItems?: readonly string[];
+	#frameRendering?: Promise<void>;
+	/** Previous appearances, kept on screen until a frame of the new one is ready. */
+	#retiredAppearances: RenderedAppearance[] =
+		[];
+	#wearables: Promise<
+		WearableSprite[]
+	> =
+		Promise.resolve(
+			[],
+		);
+	// One filter instance is shared by every cached frame
+	#outlineFilter =
+		new OutlineFilter(
+			{
+				thickness: 3,
+				color: 0x000000,
+				alpha: 1,
+			},
+		);
 
 	constructor(
 		faceType: FaceType,
@@ -128,58 +166,9 @@ export class BulbaSprite extends GameSprite {
 	async init(
 		bulbro: BulbroState,
 	) {
-		this.#idle =
-			this.#createSwingingAnimation(
-				80,
-				0.1,
-			);
-		this.#movement =
-			this.#createWalkingAnimation(
-				40,
-				0.2,
-			);
-		this.#whenHit =
-			this.#createSwingingAnimation(
-				50,
-				0.25,
-			);
-
-		this.#whenDangerouslyHit =
-			this.#createSwingingAnimation(
-				60,
-				0.3,
-			);
-
-		this.#characterSprites =
-			new CharacterSprites(
-				{
-					walking:
-						this
-							.#movement,
-					hurt: this
-						.#whenHit,
-					hurtALot:
-						this
-							.#whenDangerouslyHit,
-					idle: this
-						.#idle,
-				},
-			);
-
 		this.#shadow.appendTo(
 			this
 				.container,
-		);
-
-		this.#sprite =
-			await this.#idle.getSprite(
-				deltaTime(
-					0,
-				),
-			);
-		this.addChild(
-			this
-				.#sprite,
 		);
 		if (
 			this
@@ -199,6 +188,183 @@ export class BulbaSprite extends GameSprite {
 				0,
 			),
 		);
+		// Resolve once update has attached the first frame
+		await this
+			.#frameRendering;
+	}
+
+	/**
+	 * Owned items are baked into cached animation frames,
+	 * so the animations are rebuilt whenever the visible items change.
+	 */
+	#updateAppearance(
+		bulbro: BulbroState,
+	) {
+		// State copies share the items array until an item is bought
+		if (
+			bulbro.items ===
+			this
+				.#appearanceItems
+		) {
+			return;
+		}
+		this.#appearanceItems =
+			bulbro.items;
+		const appearance =
+			resolveAppearance(
+				bulbro.items,
+				findBulbroById(
+					bulbro.characterId,
+				)
+					.style
+					.wearingItems,
+			);
+		const key =
+			appearanceKey(
+				appearance,
+			);
+		if (
+			this
+				.#characterSprites &&
+			key ===
+				this
+					.#appearanceKey
+		) {
+			return;
+		}
+		this.#appearanceKey =
+			key;
+		this.#overheadHealthBar.setHeadroom(
+			appearanceHeadroom(
+				appearance,
+			) *
+				this
+					.#characterScaling,
+		);
+		if (
+			this
+				.#characterSprites
+		) {
+			this.#retiredAppearances.push(
+				{
+					characterSprites:
+						this
+							.#characterSprites,
+					wearables:
+						this
+							.#wearables,
+				},
+			);
+		}
+		this.#wearables =
+			this.#createWearables(
+				appearance,
+			);
+		this.#createAnimations(
+			this
+				.#wearables,
+		);
+	}
+
+	async #createWearables(
+		appearance: ResolvedAppearance,
+	) {
+		const wearables =
+			Object.values(
+				appearance,
+			).map(
+				(
+					wearable,
+				) =>
+					new WearableSprite(
+						wearable,
+					),
+			);
+		await Promise.all(
+			wearables.map(
+				(
+					wearable,
+				) =>
+					wearable.init(),
+			),
+		);
+		return wearables;
+	}
+
+	/** Frees the cached frames of appearances replaced by the current one. */
+	#destroyRetiredAppearances() {
+		for (const {
+			characterSprites,
+			wearables,
+		} of this
+			.#retiredAppearances) {
+			characterSprites.destroy(
+				{
+					children: true,
+					texture: true,
+					textureSource: false,
+				},
+			);
+			wearables.then(
+				(
+					sprites,
+				) => {
+					for (const sprite of sprites) {
+						sprite.destroy();
+					}
+				},
+			);
+		}
+		this.#retiredAppearances =
+			[];
+	}
+
+	#createAnimations(
+		wearables: Promise<
+			WearableSprite[]
+		>,
+	) {
+		this.#idle =
+			this.#createSwingingAnimation(
+				80,
+				0.1,
+				wearables,
+			);
+		this.#movement =
+			this.#createWalkingAnimation(
+				40,
+				0.2,
+				wearables,
+			);
+		this.#whenHit =
+			this.#createSwingingAnimation(
+				50,
+				0.25,
+				wearables,
+			);
+
+		this.#whenDangerouslyHit =
+			this.#createSwingingAnimation(
+				60,
+				0.3,
+				wearables,
+			);
+
+		this.#characterSprites =
+			new CharacterSprites(
+				{
+					walking:
+						this
+							.#movement,
+					hurt: this
+						.#whenHit,
+					hurtALot:
+						this
+							.#whenDangerouslyHit,
+					idle: this
+						.#idle,
+				},
+			);
 	}
 
 	/**
@@ -238,6 +404,9 @@ export class BulbaSprite extends GameSprite {
 				0
 				? 0.5
 				: 1;
+		this.#updateAppearance(
+			player,
+		);
 		this.#updateSpritePosition(
 			player.position,
 			player.lastDirection,
@@ -274,26 +443,34 @@ export class BulbaSprite extends GameSprite {
 			player,
 		);
 
-		this.#characterSprites
-			?.getSprite(
-				player,
-				delta,
-				now,
-			)
-			.then(
-				(
-					sprite,
-				) => {
-					if (
-						sprite
-					) {
-						this.#renderCharacterSprite(
-							player,
-							sprite,
-						);
-					}
-				},
-			);
+		const characterSprites =
+			this
+				.#characterSprites;
+		this.#frameRendering =
+			characterSprites
+				?.getSprite(
+					player,
+					delta,
+					now,
+				)
+				.then(
+					(
+						sprite,
+					) => {
+						// Skip frames of an appearance replaced meanwhile
+						if (
+							sprite &&
+							characterSprites ===
+								this
+									.#characterSprites
+						) {
+							this.#renderCharacterSprite(
+								player,
+								sprite,
+							);
+						}
+					},
+				);
 	}
 
 	#renderCharacterSprite =
@@ -333,6 +510,8 @@ export class BulbaSprite extends GameSprite {
 			this.#weaponsSprite.appendTo(
 				weaponsContainer,
 			);
+			// Weapons left the replaced frame, so it is safe to free now
+			this.#destroyRetiredAppearances();
 			this.#updateSpritePosition(
 				player.position,
 				player.lastDirection,
@@ -368,6 +547,9 @@ export class BulbaSprite extends GameSprite {
 	#createSwingingAnimation(
 		frameSpeed: number,
 		amplitude: number,
+		wearables: Promise<
+			WearableSprite[]
+		>,
 	) {
 		const swinging =
 			new SwingingAnimation(
@@ -376,6 +558,7 @@ export class BulbaSprite extends GameSprite {
 				) =>
 					this.#buildCharacter(
 						frame,
+						wearables,
 						"normal",
 					),
 				frameSpeed,
@@ -392,6 +575,9 @@ export class BulbaSprite extends GameSprite {
 	#createWalkingAnimation(
 		frameSpeed: number,
 		amplitude: number,
+		wearables: Promise<
+			WearableSprite[]
+		>,
 	) {
 		const cycleLength = 20;
 		const swinging =
@@ -401,6 +587,7 @@ export class BulbaSprite extends GameSprite {
 				) =>
 					this.#buildCharacter(
 						frame,
+						wearables,
 						this.#getLegStateForFrame(
 							frame,
 							cycleLength,
@@ -447,6 +634,9 @@ export class BulbaSprite extends GameSprite {
 
 	async #buildCharacter(
 		frame: number,
+		wearables: Promise<
+			WearableSprite[]
+		>,
 		legState: LegState = "normal",
 	) {
 		const bodySprite =
@@ -459,13 +649,17 @@ export class BulbaSprite extends GameSprite {
 				this
 					.#faceType,
 			);
-		await Promise.all(
-			[
-				bodySprite.init(),
-				legsSprite.init(),
-				faceSprite.init(),
-			],
-		);
+		const [
+			wearableSprites,
+		] =
+			await Promise.all(
+				[
+					wearables,
+					bodySprite.init(),
+					legsSprite.init(),
+					faceSprite.init(),
+				],
+			);
 		const bodySize =
 			bodySprite.size;
 		const character =
@@ -494,13 +688,16 @@ export class BulbaSprite extends GameSprite {
 			scaling,
 			bodySize,
 		);
+		for (const wearable of wearableSprites) {
+			wearable.appendTo(
+				scaling,
+				bodySize,
+			);
+		}
 		scaling.filters =
 			[
-				new OutlineFilter(
-					3,
-					0x000000,
-					1.0,
-				),
+				this
+					.#outlineFilter,
 			];
 
 		// Use fixed body dimensions for offset calculation, not dynamic container bounds.

@@ -1,4 +1,5 @@
 import { t } from "@/i18n";
+import { characterWearableAppearances } from "@/items/ItemAppearance";
 import {
 	Card,
 	CardContent,
@@ -129,6 +130,16 @@ export function BulbroCard({
 	displayHeight = 80,
 	responsive = true,
 }: BulbroCardProps) {
+	// Accessories drawn on the character are cosmetic, not items worth listing
+	const listedItems =
+		bulbro.style.wearingItems.filter(
+			(
+				item,
+			) =>
+				!characterWearableAppearances[
+					item
+				],
+		);
 	// Calculate responsive dimensions
 	const getResponsiveDimensions =
 		() => {
@@ -214,10 +225,7 @@ export function BulbroCard({
 								bulbro.statBonuses
 							}
 						/>
-						{bulbro
-							.style
-							.wearingItems
-							.length >
+						{listedItems.length >
 							0 && (
 							<div className="truncate">
 								<strong className="text-[9px]">
@@ -225,7 +233,7 @@ export function BulbroCard({
 										"bulbro.items",
 									)}
 								</strong>{" "}
-								{bulbro.style.wearingItems.join(
+								{listedItems.join(
 									", ",
 								)}
 							</div>

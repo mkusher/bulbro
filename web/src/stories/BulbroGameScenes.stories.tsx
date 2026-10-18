@@ -2,6 +2,7 @@ import {
 	bulbros,
 	findBulbroById,
 } from "../characters-definitions";
+import { itemAppearances } from "../items/ItemAppearance";
 import {
 	deltaTime,
 	nowTime,
@@ -104,6 +105,75 @@ export const Idle =
 						control:
 							"boolean",
 					},
+			},
+	};
+
+export const WithWearable =
+	{
+		render:
+			(
+				args: any,
+			) => {
+				const state =
+					createState(
+						args.bulbroType,
+					);
+				return (
+					<StorybookGameScene
+						key={`${args.bulbroType}-${args.item}`}
+						initialState={{
+							...state,
+							players:
+								state.players.map(
+									(
+										player,
+									) =>
+										args.item ===
+										"none"
+											? player
+											: player.withItem(
+													args.item,
+												),
+								),
+						}}
+						{...args}
+					/>
+				);
+			},
+		args: {
+			bulbroType:
+				"well-rounded",
+			item: "beanie",
+		},
+		argTypes:
+			{
+				bulbroType:
+					{
+						options:
+							bulbros.map(
+								(
+									bulbro,
+								) =>
+									bulbro.id,
+							),
+						control:
+							{
+								type: "radio",
+							},
+					},
+				item: {
+					options:
+						[
+							"none",
+							...Object.keys(
+								itemAppearances,
+							),
+						],
+					control:
+						{
+							type: "radio",
+						},
+				},
 			},
 	};
 

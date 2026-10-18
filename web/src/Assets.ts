@@ -48,6 +48,24 @@ const assetDefinitions =
 				)
 					.href,
 			},
+		items:
+			{
+				path: new URL(
+					"./assets/items.png",
+					import.meta
+						.url,
+				)
+					.href,
+			},
+		wearables:
+			{
+				path: new URL(
+					"./assets/wearables.png",
+					import.meta
+						.url,
+				)
+					.href,
+			},
 		lightmap:
 			{
 				path: new URL(
