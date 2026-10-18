@@ -271,6 +271,113 @@ it("resumes an interrupted wave with fresh tracking and restored totals", async 
 		loadSinglePlayerGame(),
 	).toBeUndefined();
 });
+it("keeps wave-start player state and totals when initialization advances gameplay", async () => {
+	saveSinglePlayerGame(
+		initial(),
+		{
+			...gameStats.value,
+			wavesCompleted: 8,
+		},
+		"shop",
+	);
+	const {
+		process,
+		completed,
+	} =
+		fakeProcess();
+	await resumeLocalGame();
+	const checkpoint =
+		nextWave(
+			waveState.value,
+			{
+				type: "tick",
+				occurredAt:
+					nowTime(
+						0,
+					),
+				deltaTime:
+					deltaTime(
+						0,
+					),
+			},
+		);
+	process.startNextWave.mockImplementation(
+		async () => {
+			waveState.value =
+				{
+					...checkpoint,
+					players:
+						[
+							new BulbroState(
+								{
+									...checkpoint.players[0]!.toJSON(),
+									healthPoints: 1,
+									materialsAvailable: 999,
+									totalExperience: 999,
+								},
+							),
+						],
+				};
+			gameStats.value =
+				{
+					...gameStats.value,
+					damageTaken: 99,
+				};
+			return {
+				initialState:
+					checkpoint,
+				waveInitPromise:
+					Promise.resolve(
+						{} as WaveProcess,
+					),
+				wavePromise:
+					completed.promise,
+			};
+		},
+	);
+	const running =
+		startWave(
+			waveState.value,
+		);
+	await Promise.resolve();
+	const save =
+		loadSinglePlayerGame()!;
+	expect(
+		save.state.players[0]!.toJSON(),
+	).toEqual(
+		checkpoint.players[0]!.toJSON(),
+	);
+	expect(
+		save
+			.stats
+			.damageTaken,
+	).toBe(
+		0,
+	);
+	waveState.value =
+		{
+			...waveState.value,
+			players:
+				[
+					new BulbroState(
+						{
+							...waveState.value.players[0]!.toJSON(),
+							materialsAvailable: 1000,
+						},
+					),
+				],
+		};
+	expect(
+		loadSinglePlayerGame()!.state.players[0]!.toJSON(),
+	).toEqual(
+		checkpoint.players[0]!.toJSON(),
+	);
+	completed.resolve(
+		"fail",
+	);
+	await running;
+});
+
 it("restores the shop and starts the next wave with recreated controls", async () => {
 	resetGameStats();
 	saveSinglePlayerGame(

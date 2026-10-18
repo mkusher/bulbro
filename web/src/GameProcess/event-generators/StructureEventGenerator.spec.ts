@@ -110,6 +110,26 @@ function tick(
 			),
 	};
 }
+function movePlayersAway(
+	s: WaveState,
+) {
+	s.players =
+		s.players.map(
+			(
+				p,
+			) =>
+				new BulbroState(
+					{
+						...p.toJSON(),
+						position:
+							{
+								x: 100,
+								y: 100,
+							},
+					},
+				),
+		);
+}
 const structures =
 	(
 		s: WaveState,
@@ -362,6 +382,9 @@ for (const [
 				),
 				0,
 			).state;
+		movePlayersAway(
+			first,
+		);
 		expect(
 			structures(
 				first,
@@ -653,6 +676,9 @@ it("arms landmines on contact and explodes once on exit, applying explosion size
 					),
 				],
 		};
+	movePlayersAway(
+		initial,
+	);
 	const armed =
 		tick(
 			initial,
@@ -756,6 +782,130 @@ it("arms landmines on contact and explodes once on exit, applying explosion size
 		tick(
 			exploded.state,
 			3,
+		).events.some(
+			(
+				e,
+			) =>
+				e.type ===
+				"shotExploded",
+		),
+	).toBe(
+		false,
+	);
+});
+
+it("explodes immediately under a living player, hurting only nearby enemies", () => {
+	const owner =
+		player().withItem(
+			"landmines",
+		);
+	const initial =
+		tick(
+			state(
+				owner,
+			),
+			-1000,
+		).state;
+	initial.enemies =
+		[
+			enemy(
+				"near",
+				540,
+			),
+			enemy(
+				"far",
+				850,
+			),
+		];
+	const exploded =
+		tick(
+			initial,
+			1,
+		);
+	expect(
+		exploded.events.filter(
+			(
+				e,
+			) =>
+				e.type ===
+				"shotExploded",
+		),
+	).toHaveLength(
+		1,
+	);
+	expect(
+		exploded
+			.state
+			.players[0]!
+			.healthPoints,
+	).toBe(
+		owner.healthPoints,
+	);
+	expect(
+		exploded.state.enemies.map(
+			(
+				e,
+			) =>
+				e.healthPoints,
+		),
+	).toEqual(
+		[
+			190,
+			200,
+		],
+	);
+	expect(
+		structures(
+			exploded.state,
+		).some(
+			(
+				s,
+			) =>
+				s.kind ===
+				"landmine",
+		),
+	).toBe(
+		false,
+	);
+	expect(
+		tick(
+			exploded.state,
+			2,
+		).events.some(
+			(
+				e,
+			) =>
+				e.type ===
+				"shotExploded",
+		),
+	).toBe(
+		false,
+	);
+});
+
+it("does not trigger mines under dead players", () => {
+	const initial =
+		tick(
+			state(
+				player().withItem(
+					"landmines",
+				),
+			),
+			-1000,
+		).state;
+	initial.players =
+		[
+			new BulbroState(
+				{
+					...initial.players[0]!.toJSON(),
+					healthPoints: 0,
+				},
+			),
+		];
+	expect(
+		tick(
+			initial,
+			1,
 		).events.some(
 			(
 				e,
@@ -1337,6 +1487,13 @@ for (const item of [
 				initial,
 				100,
 			).state;
+		if (
+			item ===
+			"landmines"
+		)
+			movePlayersAway(
+				first,
+			);
 		const deployed =
 			structures(
 				first,
@@ -1424,6 +1581,9 @@ it("shows a fresh spawn cross for mines produced later in the wave", () => {
 			),
 			0,
 		).state;
+	movePlayersAway(
+		initial,
+	);
 	const later =
 		tick(
 			initial,

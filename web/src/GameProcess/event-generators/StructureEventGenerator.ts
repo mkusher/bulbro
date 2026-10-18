@@ -549,6 +549,18 @@ export class StructureEventGenerator
 							) <=
 							MINE_TRIGGER_RADIUS,
 					);
+				const playerTouching =
+					state.players.some(
+						(
+							player,
+						) =>
+							player.isAlive() &&
+							distance(
+								player.position,
+								s.position,
+							) <=
+								MINE_TRIGGER_RADIUS,
+					);
 				if (
 					touching &&
 					!s.armed
@@ -560,8 +572,9 @@ export class StructureEventGenerator
 						},
 					);
 				if (
-					!touching &&
-					s.armed
+					playerTouching ||
+					(!touching &&
+						s.armed)
 				) {
 					blast(
 						s.id,

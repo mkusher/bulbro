@@ -99,6 +99,7 @@ export abstract class BaseScene<
 		new Map();
 	protected playingFieldTile!: PlayingFieldTile;
 	#playingFieldLayer: PIXI.RenderLayer;
+	#characterLayer: PIXI.RenderLayer;
 	#groundLayer: PIXI.RenderLayer;
 	#logger: Logger;
 	#debug: boolean;
@@ -122,6 +123,8 @@ export abstract class BaseScene<
 			new PIXI.RenderLayer();
 		this.#playingFieldLayer =
 			new PIXI.RenderLayer();
+		this.#characterLayer =
+			new PIXI.RenderLayer();
 		this.#camera.stage.addChild(
 			this
 				.#groundLayer,
@@ -129,6 +132,10 @@ export abstract class BaseScene<
 		this.#camera.stage.addChild(
 			this
 				.#playingFieldLayer,
+		);
+		this.#camera.stage.addChild(
+			this
+				.#characterLayer,
 		);
 		this.playingFieldTile =
 			new PlayingFieldTile(
@@ -396,7 +403,7 @@ export abstract class BaseScene<
 						.playingFieldTile
 						.container,
 					this
-						.#playingFieldLayer,
+						.#characterLayer,
 				);
 				this.#playerSprites.set(
 					p.id,
@@ -475,7 +482,7 @@ export abstract class BaseScene<
 						.playingFieldTile
 						.container,
 					this
-						.#playingFieldLayer,
+						.#characterLayer,
 				);
 				this.#enemySprites.set(
 					e.id,
@@ -553,7 +560,7 @@ export abstract class BaseScene<
 						.playingFieldTile
 						.container,
 					this
-						.#playingFieldLayer,
+						.#characterLayer,
 				);
 				this.#shotSprites.set(
 					s.id,
@@ -669,7 +676,7 @@ export abstract class BaseScene<
 						.playingFieldTile
 						.container,
 					this
-						.#playingFieldLayer,
+						.#characterLayer,
 				);
 				this.#spawningSprites.set(
 					spawning.id,
@@ -738,7 +745,7 @@ export abstract class BaseScene<
 						.playingFieldTile
 						.container,
 					this
-						.#playingFieldLayer,
+						.#characterLayer,
 				);
 				this.#materialSprites.set(
 					material.id,
@@ -807,7 +814,7 @@ export abstract class BaseScene<
 						.playingFieldTile
 						.container,
 					this
-						.#playingFieldLayer,
+						.#characterLayer,
 				);
 				this.#consumableSprites.set(
 					consumable.id,

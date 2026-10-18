@@ -197,6 +197,8 @@ export class BaseGameProcess
 	}
 
 	#startWaveProcess() {
+		const initialState =
+			waveState.value;
 		this.#waveProcess =
 			this.#createWaveProcess();
 		const waveInitPromise =
@@ -207,6 +209,7 @@ export class BaseGameProcess
 					this.#waveProcess?.start(),
 			);
 		return {
+			initialState,
 			waveInitPromise,
 			wavePromise,
 		};

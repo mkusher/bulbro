@@ -225,6 +225,7 @@ export async function startLocalGame(
 		const {
 			wavePromise,
 			waveInitPromise,
+			initialState,
 		} =
 			gameProcess.start(
 				players,
@@ -235,7 +236,8 @@ export async function startLocalGame(
 			savingSinglePlayer.value
 		)
 			saveSinglePlayerGame(
-				waveState.value,
+				initialState ??
+					waveState.value,
 				gameStats.value,
 				"wave",
 			);
@@ -281,8 +283,11 @@ export async function startWave(
 		nextWaveNumber,
 	);
 	try {
+		const initialStats =
+			gameStats.value;
 		const {
 			wavePromise,
+			initialState,
 		} =
 			await gameProcess.startNextWave(
 				state,
@@ -292,8 +297,9 @@ export async function startWave(
 			savingSinglePlayer.value
 		)
 			saveSinglePlayerGame(
-				waveState.value,
-				gameStats.value,
+				initialState ??
+					waveState.value,
+				initialStats,
 				"wave",
 			);
 		markAsRunningWave();

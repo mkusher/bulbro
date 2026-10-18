@@ -836,6 +836,25 @@ export function handleConsumableCollected(
 
 const enemiesBodiesDisappearAfter = 2000;
 
+function playerBlocksSpawn(
+	state: WaveState,
+	position: Position,
+): boolean {
+	return state.players.some(
+		(
+			player,
+		) =>
+			player.isAlive() &&
+			distance(
+				player.position,
+				position,
+			) <=
+				BULBRO_BODY_SIZE.width /
+					2 +
+					14,
+	);
+}
+
 export function spawnEnemy(
 	state: WaveState,
 	action: Extract<
@@ -866,6 +885,13 @@ export function spawnEnemy(
 			continue;
 		}
 		if (
+			playerBlocksSpawn(
+				state,
+				object.position,
+			)
+		)
+			continue;
+		if (
 			now -
 				object.startedAt >=
 			object.duration *
@@ -890,16 +916,23 @@ export function spawnEnemy(
 		objects:
 			[
 				...objects,
-				{
-					type: "spawning-enemy",
-					id: enemy.id,
-					position:
-						enemy.position,
-					startedAt:
-						now,
-					duration: 1,
-					enemy,
-				},
+				...(!playerBlocksSpawn(
+					state,
+					enemy.position,
+				)
+					? [
+							{
+								type: "spawning-enemy",
+								id: enemy.id,
+								position:
+									enemy.position,
+								startedAt:
+									now,
+								duration: 1,
+								enemy,
+							} as const,
+						]
+					: []),
 			],
 	};
 }
@@ -1668,6 +1701,18 @@ export function updateState(
 			return {
 				...state,
 				enemies,
+				objects:
+					state.objects.filter(
+						(
+							object,
+						) =>
+							object.type !==
+								"spawning-enemy" ||
+							!playerBlocksSpawn(
+								state,
+								object.position,
+							),
+					),
 				players:
 					isWaveCompleted
 						? completeWaveForPlayers(

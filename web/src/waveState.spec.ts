@@ -65,6 +65,147 @@ import type {
 	WeaponType,
 } from "./weapon";
 
+for (const at of [
+	500,
+	1500,
+]) {
+	it(`cancels a spawn on player contact at ${at}ms without spawning its enemy later`, () => {
+		const player =
+			createTestBulbro(
+				"p",
+				300,
+				300,
+			);
+		const pendingEnemy =
+			createTestEnemy(
+				"blocked",
+				300,
+				300,
+			);
+		const otherEnemy =
+			createTestEnemy(
+				"other",
+				800,
+				800,
+			);
+		const initial: WaveState =
+			{
+				...createInitialState(
+					[],
+					{
+						width: 1000,
+						height: 1000,
+					},
+					0,
+				),
+				players:
+					[
+						player,
+					],
+				objects:
+					[
+						{
+							type: "spawning-enemy",
+							id: pendingEnemy.id,
+							position:
+								pendingEnemy.position,
+							startedAt: 0,
+							duration: 1,
+							enemy:
+								pendingEnemy,
+						},
+					],
+			};
+		const canceled =
+			updateState(
+				initial,
+				withEventMeta(
+					{
+						type: "tick",
+					},
+					deltaTime(
+						16,
+					),
+					nowTime(
+						at,
+					),
+				),
+			);
+		expect(
+			canceled.objects,
+		).toHaveLength(
+			0,
+		);
+		const later =
+			updateState(
+				canceled,
+				withEventMeta(
+					{
+						type: "spawnEnemy",
+						enemy:
+							otherEnemy,
+					},
+					deltaTime(
+						16,
+					),
+					nowTime(
+						2000,
+					),
+				),
+			);
+		expect(
+			later.enemies.some(
+				(
+					e,
+				) =>
+					e.id ===
+					pendingEnemy.id,
+			),
+		).toBe(
+			false,
+		);
+		const blockedAtCompletion =
+			updateState(
+				initial,
+				withEventMeta(
+					{
+						type: "spawnEnemy",
+						enemy:
+							otherEnemy,
+					},
+					deltaTime(
+						16,
+					),
+					nowTime(
+						2000,
+					),
+				),
+			);
+		expect(
+			blockedAtCompletion.enemies.some(
+				(
+					e,
+				) =>
+					e.id ===
+					pendingEnemy.id,
+			),
+		).toBe(
+			false,
+		);
+		expect(
+			blockedAtCompletion.objects.some(
+				(
+					o,
+				) =>
+					o.id ===
+					pendingEnemy.id,
+			),
+		).toBe(
+			false,
+		);
+	});
+}
+
 function createTestPlayer(
 	id: string,
 ): Player {

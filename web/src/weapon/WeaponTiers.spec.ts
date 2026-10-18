@@ -380,6 +380,58 @@ describe("combining weapons", () => {
 		);
 	});
 
+	it("rejects every mismatched tier pair when combining", () => {
+		for (const tier of [
+			1,
+			2,
+			3,
+			4,
+		] as const) {
+			for (const otherTier of [
+				1,
+				2,
+				3,
+				4,
+			] as const) {
+				if (
+					tier ===
+					otherTier
+				)
+					continue;
+				const weapons =
+					[
+						toWeaponStateAtTier(
+							pistol,
+							tier,
+						),
+						toWeaponStateAtTier(
+							pistol,
+							otherTier,
+						),
+					];
+				expect(
+					combineWeapons(
+						weapons,
+						weapons[0]!
+							.id,
+						weapons[1]!
+							.id,
+					),
+				).toBeUndefined();
+				expect(
+					findCombinableOwnedWeapon(
+						weapons.map(
+							ownedWeaponFromState,
+						),
+						ownedWeaponFromState(
+							weapons[0]!,
+						),
+					),
+				).toBeUndefined();
+			}
+		}
+	});
+
 	it("finds a combinable owned weapon", () => {
 		const owned =
 			toOwnedWeapons(
