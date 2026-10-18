@@ -89,13 +89,18 @@ it("blocks weapon purchases at capacity while still allowing rerolls", async () 
 				button,
 			) =>
 				button.textContent?.includes(
-					"Weapon limit reached",
+					"Locked $1",
 				),
 		);
 	expect(
 		buy?.disabled,
 	).toBe(
 		true,
+	);
+	expect(
+		buy?.title,
+	).toBe(
+		"Weapon limit reached",
 	);
 	act(
 		() =>

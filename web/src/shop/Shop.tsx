@@ -79,9 +79,9 @@ export const itemTierStyles: Record<
 > =
 	{
 		1: "border-border",
-		2: "border-border bg-sky-50",
-		3: "border-border bg-purple-50",
-		4: "border-border bg-red-50",
+		2: "border-border bg-sky-200",
+		3: "border-border bg-purple-200",
+		4: "border-border bg-red-200",
 	};
 
 /**
@@ -421,28 +421,26 @@ export function Shop({
 												blocked ||
 												!affordable
 											}
+											title={
+												blocked
+													? t(
+															"shop.weaponLimitReached",
+														)
+													: undefined
+											}
 											className="w-full h-7 lg:h-5 text-xs lg:text-[8px] px-1 py-0 mt-auto"
 											size="sm"
 										>
-											{blocked
-												? t(
-														"shop.weaponLimitReached",
-													)
-												: affordable
-													? t(
-															"shop.price",
-															{
-																price:
-																	item.price,
-															},
-														)
-													: t(
-															"shop.locked",
-															{
-																price:
-																	item.price,
-															},
-														)}
+											{t(
+												blocked ||
+													!affordable
+													? "shop.locked"
+													: "shop.price",
+												{
+													price:
+														item.price,
+												},
+											)}
 										</Button>
 										{onToggleLock && (
 											<Button
