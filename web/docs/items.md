@@ -2,7 +2,7 @@
 
 The game registers **93 items** in [Items.ts](../src/items/Items.ts): 36 tier I, 28 tier II, 16 tier III, and 13 tier IV. Each definition supplies a stable ID, localized name key, tier, base price, and additive stat bonuses or a structure effect. Names below use the [English locale](../src/i18n/locales/en.ts); the UI resolves `nameKey` in the selected language.
 
-See [Game Balance](../../docs/balance.md) for the economy, weapon scaling, and character implications, and [Weapons](weapons.md) for damage scaling and explosive attacks.
+See [Game Balance](../../docs/balance.md) for the economy, weapon scaling, and character implications, and [Weapons](weapons.md) for damage scaling and explosive attacks. See [Wearables](wearables.md) for how items change the bulbro's look.
 
 ## Item values
 
@@ -170,3 +170,5 @@ The original 83 individual sprites were generated with the **built-in imagegen t
 The shared art direction is a single centered inventory object on a genuinely transparent background, thick near-black outlines, colorful flat cel shading, restrained highlights, and a silhouette readable at 48 pixels. Prompts exclude labels, logos, backgrounds, borders, and cast shadows. Subjects distinguish similar items, such as the plain army Helmet, crested Warrior Helmet, and wolf-pelt Wolf Helmet.
 
 Engineering adds ten item sprites using code-native vector art from [generate-engineering-art.ts](../scripts/generate-engineering-art.ts), rasterized with Sharp and packed into the same atlas. See [Engineering](engineering.md) for all new items and mechanics.
+
+Warrior Helmet uses a forward-facing view and a broad open face area, following Wolf Helmet's framing. Its silver shell, cheek guards, and red crest retain its identity; the face opening is transparent so it can frame a character's face. The updated sprite was edited with the built-in imagegen tool using both helmets as references, then resized to 256 × 256 and repacked into the atlas.

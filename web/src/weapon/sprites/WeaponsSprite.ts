@@ -480,6 +480,11 @@ export class WeaponsSprite {
 		);
 	}
 
+	/** Takes the weapons off their current parent without destroying them. */
+	detach() {
+		this.#container.removeFromParent();
+	}
+
 	async update(
 		bulbroState: BulbroState,
 		now: NowTime,
