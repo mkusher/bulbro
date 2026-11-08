@@ -4,7 +4,7 @@ import type {
 	Direction,
 	Position,
 } from "@/geometry";
-import type { AnimatedSprite } from "@/graphics/AnimatedSprite";
+import { AnimatedSprite } from "@/graphics/AnimatedSprite";
 import { CharacterSprites } from "@/graphics/CharacterSprite";
 import { DebugSprite } from "@/graphics/DebugSprite";
 import { GameSprite } from "@/graphics/GameSprite";
@@ -141,7 +141,7 @@ export class BulbaSprite extends GameSprite {
 			);
 		this.#movement =
 			this.#createWalkingAnimation(
-				40,
+				200,
 				0.2,
 			);
 		this.#whenHit =
@@ -410,61 +410,54 @@ export class BulbaSprite extends GameSprite {
 		frameSpeed: number,
 		amplitude: number,
 	) {
-		const cycleLength = 20;
-		const swinging =
-			new SwingingAnimation(
-				(
-					frame,
-				) =>
-					this.#buildCharacter(
-						frame,
-						this.#getLegStateForFrame(
-							frame,
+		// Two six-second strides, with a body dip on every foot plant.
+		const cycleLength = 60;
+		return new AnimatedSprite<PIXI.Container>(
+			cycleLength,
+			async (
+				frame,
+			) => {
+				const stride =
+					Math.cos(
+						(frame *
+							Math.PI *
+							4) /
 							cycleLength,
-						),
-					),
-				frameSpeed,
-				amplitude,
-				{
-					x:
-						-0.8,
-					y: 1,
-				},
-			);
-		return swinging.createAnimatedSprite();
-	}
-
-	#getLegStateForFrame(
-		frame: number,
-		cycleLength: number,
-	): LegState {
-		// Divide the cycle into 4 phases for walking animation
-		const phase =
-			Math.floor(
-				(frame /
-					cycleLength) *
-					4,
-			) %
-			4;
-		switch (
-			phase
-		) {
-			case 0:
-				return "wide-l";
-			case 1:
-				return "normal-r";
-			case 2:
-				return "wide-r";
-			case 3:
-				return "normal";
-			default:
-				return "normal";
-		}
+					);
+				const character =
+					await this.#buildCharacter(
+						frame,
+						"normal",
+						stride,
+					);
+				// Both forward leg extremes coincide with maximum body compression.
+				const compression =
+					amplitude *
+					stride *
+					stride;
+				character.scale.set(
+					1 +
+						compression *
+							0.8,
+					1 -
+						compression,
+				);
+				const container =
+					new PIXI.Container();
+				container.addChild(
+					character,
+				);
+				return container;
+			},
+			frameSpeed,
+			true,
+		);
 	}
 
 	async #buildCharacter(
 		_frame: number,
 		legState: LegState = "normal",
+		stride?: number,
 	) {
 		const bodySprite =
 			new BodySprite();
@@ -506,6 +499,7 @@ export class BulbaSprite extends GameSprite {
 			scaling,
 			bodySize,
 			legState,
+			stride,
 		);
 		faceSprite.appendTo(
 			scaling,

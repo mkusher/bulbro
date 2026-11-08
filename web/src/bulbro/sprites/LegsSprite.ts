@@ -101,6 +101,7 @@ export class LegsSprite {
 		container: PIXI.Container,
 		bodySize: Size,
 		legState: LegState = "normal",
+		stride?: number,
 	) {
 		container.addChild(
 			this
@@ -117,6 +118,64 @@ export class LegsSprite {
 		const rightBaseX =
 			bodySize.width *
 			0.05;
+
+		if (
+			stride !==
+			undefined
+		) {
+			const backLayer =
+				new PIXI.Container();
+			backLayer.y =
+				this.#gfx.y;
+			container.addChildAt(
+				backLayer,
+				0,
+			);
+			const poseLeg =
+				(
+					leg: PIXI.Sprite,
+					baseX: number,
+					forward: number,
+				) => {
+					const retreat =
+						Math.max(
+							0,
+							-forward,
+						);
+					leg.position.set(
+						baseX +
+							forward *
+								15,
+						-retreat *
+							20,
+					);
+					leg.scale.set(
+						1 +
+							forward *
+								0.15,
+					);
+					if (
+						forward <
+						0
+					)
+						backLayer.addChild(
+							leg,
+						);
+				};
+			poseLeg(
+				this
+					.#leftLeg,
+				leftBaseX,
+				stride,
+			);
+			poseLeg(
+				this
+					.#rightLeg,
+				rightBaseX,
+				-stride,
+			);
+			return;
+		}
 
 		switch (
 			legState
