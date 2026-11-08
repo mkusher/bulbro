@@ -10,6 +10,7 @@ import {
 	type Position,
 } from "@/geometry";
 import type { NowTime } from "@/time";
+import { isGunWeapon } from "@/weapon";
 import {
 	type MeleeStrike,
 	STRIKE_RECOVERY_MS,
@@ -442,6 +443,113 @@ function computeThrustPose(
 	};
 }
 
+/** One full idle bounce cycle (ms). */
+const BOUNCE_PERIOD_MS = 1000;
+/** How far (px) weapons move up and down while idle. */
+export const BOUNCE_HEIGHT = 1.5;
+
+/**
+ * Vertical offset (px) of a resting weapon: a gentle up-down bob, the same
+ * for all weapons, as if the bulbro is holding them.
+ */
+export function computeBounce(
+	now: number,
+) {
+	return (
+		Math.sin(
+			((now %
+				BOUNCE_PERIOD_MS) /
+				BOUNCE_PERIOD_MS) *
+				2 *
+				Math.PI,
+		) *
+		BOUNCE_HEIGHT
+	);
+}
+
+/** How long (ms) a gun recoil lasts. */
+export const RECOIL_DURATION_MS = 220;
+/** Share of the recoil spent kicking back, the rest returns to rest. */
+const RECOIL_KICK_SHARE = 0.15;
+/** Recoil (px) of guns without knockback. */
+const RECOIL_BASE = 3;
+/** Extra recoil (px) per knockback point. */
+const RECOIL_PER_KNOCKBACK = 0.6;
+/** Strongest recoil (px), whatever the knockback. */
+const RECOIL_MAX = 14;
+/** Muzzle lift (radians) per recoil pixel. */
+const RECOIL_LIFT = 0.025;
+
+/** Pushback distance (px) of a gun at the peak of its recoil. */
+export function recoilDistance(
+	knockback: number,
+) {
+	return Math.min(
+		RECOIL_MAX,
+		RECOIL_BASE +
+			Math.max(
+				0,
+				knockback,
+			) *
+				RECOIL_PER_KNOCKBACK,
+	);
+}
+
+/**
+ * How far (px) a gun is pushed back against its aim right now: kicks back
+ * quickly after a shot, then eases back. 0 for non-guns and when not firing.
+ */
+export function computeRecoil(
+	weapon: Pick<
+		WeaponState,
+		| "type"
+		| "lastStrikedAt"
+		| "statsBonus"
+	>,
+	now: number,
+) {
+	if (
+		!isGunWeapon(
+			weapon.type,
+		)
+	)
+		return 0;
+	const elapsed =
+		now -
+		weapon.lastStrikedAt;
+	if (
+		elapsed <
+			0 ||
+		elapsed >=
+			RECOIL_DURATION_MS
+	)
+		return 0;
+	const t =
+		elapsed /
+		RECOIL_DURATION_MS;
+	const k =
+		t <
+		RECOIL_KICK_SHARE
+			? t /
+				RECOIL_KICK_SHARE
+			: 1 -
+				easeOutQuad(
+					(t -
+						RECOIL_KICK_SHARE) /
+						(1 -
+							RECOIL_KICK_SHARE),
+				);
+	return (
+		recoilDistance(
+			weapon
+				.statsBonus
+				.knockback ??
+				0,
+		) *
+		k
+	);
+}
+
 const scaling = 0.125;
 export class WeaponsSprite {
 	#container =
@@ -619,19 +727,56 @@ export class WeaponsSprite {
 				?.hide();
 		}
 
-		// Set final position and rotation
-		const finalPosition =
+		// Striking weapons follow their strike; resting ones bounce and recoil.
+		const direction =
+			pose?.direction ??
+			weapon.aimingDirection;
+		const bounce =
+			pose
+				? 0
+				: computeBounce(
+						now,
+					);
+		const recoil =
+			pose
+				? 0
+				: computeRecoil(
+						weapon,
+						now,
+					);
+		const facing =
+			direction.x ===
+				0 &&
+			direction.y ===
+				0
+				? {
+						x: 1,
+						y: 0,
+					}
+				: direction;
+		const basePosition =
 			pose?.position ??
 			position;
 		weaponSprite.updatePosition(
-			finalPosition.x,
-			finalPosition.y,
+			basePosition.x -
+				facing.x *
+					recoil,
+			basePosition.y +
+				bounce -
+				facing.y *
+					recoil,
 		);
 
-		// Rotate weapon based on aiming (or swinging) direction
+		// Rotate weapon based on aiming (or swinging) direction,
+		// lifting the muzzle on recoil (mirrored sprites lift the other way).
 		weaponSprite.aim(
-			pose?.direction ??
-				weapon.aimingDirection,
+			direction,
+			recoil *
+				RECOIL_LIFT *
+				(facing.x <
+				0
+					? 1
+					: -1),
 		);
 	}
 

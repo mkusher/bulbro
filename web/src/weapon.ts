@@ -240,6 +240,16 @@ export const isUnarmedWeapon =
 			"unarmed",
 		);
 
+export const isGunWeapon =
+	(
+		type: WeaponType,
+	): boolean =>
+		getWeaponByType(
+			type,
+		).classes.includes(
+			"gun",
+		);
+
 /** Whether the attack config fires a projectile instead of striking in melee. */
 export const isProjectileAttack =
 	(

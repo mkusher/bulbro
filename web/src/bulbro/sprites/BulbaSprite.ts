@@ -57,6 +57,12 @@ export class BulbaSprite extends GameSprite {
 	#debugSprite?: DebugSprite;
 	#characterScaling = 0.3;
 	#weaponsSprite: WeaponsSprite;
+	/**
+	 * Holds the weapons outside of the character's swinging animation, so they
+	 * only follow the bulbro's position and not its squashing.
+	 */
+	#weaponsLayer =
+		new PIXI.Container();
 	#movement?: AnimatedSprite<PIXI.Container>;
 	#idle?: AnimatedSprite<PIXI.Container>;
 	#whenHit?: AnimatedSprite<PIXI.Container>;
@@ -322,7 +328,8 @@ export class BulbaSprite extends GameSprite {
 					sprite,
 				);
 			}
-			// Re-attach weapons to the current frame's weaponsContainer
+			// Place weapons where the frame's weaponsContainer is, but outside of
+			// the swinging character so they don't squash along with it.
 			// Hierarchy: sprite (SwingingAnimation) -> character -> weaponsContainer
 			const character =
 				sprite
@@ -330,8 +337,18 @@ export class BulbaSprite extends GameSprite {
 			const weaponsContainer =
 				character
 					.children[0] as PIXI.Container;
+			this.#weaponsLayer.position.set(
+				weaponsContainer.x,
+				weaponsContainer.y,
+			);
+			// Keep weapons drawn on top of the character
+			this.addChild(
+				this
+					.#weaponsLayer,
+			);
 			this.#weaponsSprite.appendTo(
-				weaponsContainer,
+				this
+					.#weaponsLayer,
 			);
 			this.#updateSpritePosition(
 				player.position,

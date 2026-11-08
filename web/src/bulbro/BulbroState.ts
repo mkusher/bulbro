@@ -22,6 +22,7 @@ import {
 	attackSideEvents,
 } from "@/weapon/Attack";
 import {
+	calculateWeaponAttackOrigin,
 	calculateWeaponWorldOffset,
 	computeStats,
 	damageAfterArmor,
@@ -63,7 +64,10 @@ import {
 	upgradeBonuses,
 } from "../upgrades/Upgrades";
 import type { WeaponState } from "../waveState";
-import { toWeaponState } from "../weapon";
+import {
+	isMeleeWeapon,
+	toWeaponState,
+} from "../weapon";
 import { combineWeapons } from "../weapon/WeaponTiers";
 import type {
 	Bulbro,
@@ -568,6 +572,11 @@ export class BulbroState
 						now,
 					)
 				) {
+					const origin =
+						calculateWeaponAttackOrigin(
+							this,
+							weapon,
+						);
 					const target =
 						findClosestEnemyInRange(
 							this,
@@ -578,6 +587,7 @@ export class BulbroState
 								) =>
 									!e.killedAt,
 							),
+							origin,
 						);
 					if (
 						!target ||
@@ -586,6 +596,7 @@ export class BulbroState
 							target,
 							weapon,
 							"player",
+							origin,
 						)
 					) {
 						return;
@@ -638,6 +649,21 @@ export class BulbroState
 							weapon,
 							index,
 						) => {
+							const offset =
+								calculateWeaponWorldOffset(
+									index,
+									this
+										.weapons
+										.length,
+									this
+										.lastHorizontalDirection,
+								);
+							const position =
+								addition(
+									this
+										.position,
+									offset,
+								);
 							const target =
 								findClosestEnemyInRange(
 									this,
@@ -663,6 +689,12 @@ export class BulbroState
 										) =>
 											!e.killedAt,
 									),
+									isMeleeWeapon(
+										weapon.type,
+									)
+										? this
+												.position
+										: position,
 								);
 							if (
 								!target
@@ -674,21 +706,6 @@ export class BulbroState
 								};
 							}
 
-							const offset =
-								calculateWeaponWorldOffset(
-									index,
-									this
-										.weapons
-										.length,
-									this
-										.lastHorizontalDirection,
-								);
-							const position =
-								addition(
-									this
-										.position,
-									offset,
-								);
 							const aimingDirection =
 								direction(
 									position,

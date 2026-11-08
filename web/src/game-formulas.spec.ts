@@ -10,14 +10,17 @@ import {
 	calculateAttackRange,
 	calculateExplosionRadius,
 	calculateStats,
+	calculateWeaponAttackOrigin,
 	calculateWeaponVisualWorldOffset,
 	computeStats,
 	damageAfterArmor,
 	dropChanceWithLuck,
 	getDodgeChance,
 	getHpRegenerationPerSecond,
+	isInRange,
 	minExplosionRadius,
 	shoot,
+	weaponOrbitRadius,
 } from "./game-formulas";
 import {
 	addition,
@@ -100,7 +103,6 @@ function createTestWeapon(
 }
 
 const scale = 0.125;
-const weaponOrbitRadius = 32;
 const aimingInfluence = 0.3;
 const bulbroBodySize =
 	{
@@ -1228,6 +1230,132 @@ describe("dropChanceWithLuck", () => {
 			),
 		).toBe(
 			1,
+		);
+	});
+});
+
+describe("calculateWeaponAttackOrigin", () => {
+	it("measures ranged weapons from where they are drawn", () => {
+		const weapon =
+			createTestWeapon(
+				"pistol",
+			);
+		const player =
+			createTestBulbro(
+				500,
+				500,
+				{
+					x: 1,
+					y: 0,
+				},
+				[
+					weapon,
+				],
+			);
+		expect(
+			calculateWeaponAttackOrigin(
+				player,
+				weapon,
+			),
+		).toEqual(
+			addition(
+				player.position,
+				calculateWeaponVisualWorldOffset(
+					weapon,
+					0,
+					1,
+					1,
+				),
+			),
+		);
+	});
+
+	it("measures melee weapons from the body center", () => {
+		const weapon =
+			createTestWeapon(
+				"knife",
+			);
+		const player =
+			createTestBulbro(
+				500,
+				500,
+				{
+					x: 1,
+					y: 0,
+				},
+				[
+					weapon,
+				],
+			);
+		expect(
+			calculateWeaponAttackOrigin(
+				player,
+				weapon,
+			),
+		).toEqual(
+			player.position,
+		);
+	});
+
+	it("fires at enemies in range of the weapon but out of range of the center", () => {
+		const weapon =
+			createTestWeapon(
+				"pistol",
+			);
+		const player =
+			createTestBulbro(
+				500,
+				500,
+				{
+					x: 1,
+					y: 0,
+				},
+				[
+					weapon,
+				],
+			);
+		const origin =
+			calculateWeaponAttackOrigin(
+				player,
+				weapon,
+			);
+		const range =
+			calculateAttackRange(
+				player,
+				weapon,
+				"player",
+			);
+		const target =
+			{
+				position:
+					{
+						x:
+							origin.x +
+							range -
+							1,
+						y: origin.y,
+					},
+			} as BulbroState;
+		expect(
+			isInRange(
+				player,
+				target,
+				weapon,
+				"player",
+			),
+		).toBe(
+			false,
+		);
+		expect(
+			isInRange(
+				player,
+				target,
+				weapon,
+				"player",
+				origin,
+			),
+		).toBe(
+			true,
 		);
 	});
 });

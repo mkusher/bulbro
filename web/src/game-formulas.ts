@@ -419,11 +419,16 @@ export function findClosestEnemyInRange(
 	player: BulbroState,
 	weapon: WeaponState,
 	enemies: EnemyState[],
+	/** Where the weapon looks from, the player's center by default */
+	origin: Position = player.position,
 ):
 	| EnemyState
 	| undefined {
 	return findClosestInRange(
-		player,
+		{
+			position:
+				origin,
+		},
 		enemies,
 		calculateAttackRange(
 			player,
@@ -828,10 +833,12 @@ export function isInRange(
 		| BulbroState,
 	weapon: WeaponState,
 	attackerType: AttackerType,
+	/** Where the attack is measured from, the attacker's center by default */
+	origin: Position = attacker.position,
 ) {
 	return (
 		distance(
-			attacker.position,
+			origin,
 			target.position,
 		) <=
 		calculateAttackRange(
@@ -995,8 +1002,9 @@ export const weaponContainerOffset =
 			2,
 	};
 
-// Shared constants for weapon positioning
-const weaponOrbitRadius = 32;
+// Shared constants for weapon positioning.
+// Weapons orbit far enough from the body to keep the character visible.
+export const weaponOrbitRadius = 56;
 const aimingInfluence = 0.3;
 
 /**
@@ -1145,6 +1153,51 @@ export function calculateWeaponVisualWorldOffset(
 			localPos.y +
 			weaponsContainerPosition.y,
 	};
+}
+
+/**
+ * World position of the weapon a player attacks from: ranged weapons fire
+ * from where they are drawn, melee weapons strike around the body center.
+ */
+export function calculateWeaponAttackOrigin(
+	player: Pick<
+		BulbroState,
+		| "position"
+		| "weapons"
+		| "lastHorizontalDirection"
+	>,
+	weapon: WeaponState,
+) {
+	if (
+		isMeleeWeapon(
+			weapon.type,
+		)
+	)
+		return player.position;
+	const index =
+		player.weapons.findIndex(
+			(
+				w,
+			) =>
+				w.id ===
+				weapon.id,
+		);
+	if (
+		index <
+		0
+	)
+		return player.position;
+	return addition(
+		player.position,
+		calculateWeaponVisualWorldOffset(
+			weapon,
+			index,
+			player
+				.weapons
+				.length,
+			player.lastHorizontalDirection,
+		),
+	);
 }
 
 /**
