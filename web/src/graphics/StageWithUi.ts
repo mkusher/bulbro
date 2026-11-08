@@ -26,6 +26,7 @@ import { DustCloudEffect } from "./DustCloudEffect";
 import { ExplosionEffects } from "./ExplosionEffects";
 import { HitIndicators } from "./HitIndicators";
 import { LaserEffects } from "./LaserEffects";
+import { ParticleBursts } from "./ParticleBursts";
 import { Scene } from "./Scene";
 import { TimerSprite } from "./TimerSprite";
 import { WaveSprite } from "./WaveSprite";
@@ -47,6 +48,7 @@ export class StageWithUi {
 	#camera: Camera;
 	#logger: Logger;
 	#hitIndicators: HitIndicators;
+	#particleBursts: ParticleBursts;
 	#explosionEffects: ExplosionEffects;
 	#laserEffects: LaserEffects;
 	#dustEffects: Map<
@@ -137,6 +139,15 @@ export class StageWithUi {
 				.#uiLayer,
 		);
 
+		this.#particleBursts =
+			new ParticleBursts();
+		this.#particleBursts.appendTo(
+			this
+				.playingFieldContainer,
+			this
+				.#uiLayer,
+		);
+
 		this.#hitIndicators =
 			new HitIndicators();
 		this.#hitIndicators.appendTo(
@@ -217,6 +228,11 @@ export class StageWithUi {
 		this.#explosionEffects.update(
 			deltaTime,
 			events,
+		);
+		this.#particleBursts.update(
+			deltaTime,
+			events,
+			state,
 		);
 		this.#hitIndicators.update(
 			deltaTime,
