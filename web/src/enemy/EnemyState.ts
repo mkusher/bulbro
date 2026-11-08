@@ -319,6 +319,12 @@ export class EnemyState
 				);
 			return {
 				type: "enemyDied",
+				...(knockback
+					? {
+							hitDirection:
+								knockback.direction,
+						}
+					: {}),
 				...(dropsConsumable
 					? {
 							consumableId:
@@ -362,6 +368,12 @@ export class EnemyState
 		// Enemy takes damage but survives
 		return {
 			type: "enemyReceivedHit",
+			...(knockback
+				? {
+						hitDirection:
+							knockback.direction,
+					}
+				: {}),
 			enemyId:
 				this
 					.id,

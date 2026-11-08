@@ -190,6 +190,8 @@ export type EnemyDiedEvent =
 		};
 		/** Set when the enemy dropped a consumable on death */
 		consumableId?: string;
+		/** Direction the killing hit came in, used for visual effects */
+		hitDirection?: Direction;
 	};
 
 /**
@@ -215,6 +217,8 @@ export type EnemyReceivedHitEvent =
 		damage: number;
 		newHealthPoints: number;
 		knockback?: KnockbackDescription;
+		/** Direction the hit came in, used for visual effects */
+		hitDirection?: Direction;
 	};
 
 export type KnockbackDescription =
