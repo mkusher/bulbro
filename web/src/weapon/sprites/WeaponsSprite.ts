@@ -443,72 +443,42 @@ function computeThrustPose(
 	};
 }
 
-/** One full idle sway cycle (ms). */
-const SWAY_PERIOD_MS = 1400;
-/** How far (px) weapons bob while idle. */
-const SWAY_BOB = 2;
-/** How far (radians) weapons tilt while idle. */
-const SWAY_TILT = 0.12;
-
-export type Sway =
-	{
-		offset: Position;
-		rotation: number;
-	};
+/** One full idle bounce cycle (ms). */
+const BOUNCE_PERIOD_MS = 1000;
+/** How far (px) weapons move up and down while idle. */
+export const BOUNCE_HEIGHT = 1.5;
 
 /**
- * Idle swinging-bouncing of a weapon. Each weapon slot gets its own phase so
- * that the weapons don't move in lockstep.
+ * Vertical offset (px) of a resting weapon: a gentle up-down bob, the same
+ * for all weapons, as if the bulbro is holding them.
  */
-export function computeSway(
-	index: number,
+export function computeBounce(
 	now: number,
-): Sway {
-	const phase =
-		((now %
-			SWAY_PERIOD_MS) /
-			SWAY_PERIOD_MS) *
-			2 *
-			Math.PI +
-		index *
-			1.7;
-	return {
-		offset:
-			{
-				x:
-					Math.cos(
-						phase,
-					) *
-					SWAY_BOB *
-					0.5,
-				y:
-					Math.abs(
-						Math.sin(
-							phase,
-						),
-					) *
-					-SWAY_BOB,
-			},
-		rotation:
-			Math.sin(
-				phase,
-			) *
-			SWAY_TILT,
-	};
+) {
+	return (
+		Math.sin(
+			((now %
+				BOUNCE_PERIOD_MS) /
+				BOUNCE_PERIOD_MS) *
+				2 *
+				Math.PI,
+		) *
+		BOUNCE_HEIGHT
+	);
 }
 
 /** How long (ms) a gun recoil lasts. */
-export const RECOIL_DURATION_MS = 160;
+export const RECOIL_DURATION_MS = 220;
 /** Share of the recoil spent kicking back, the rest returns to rest. */
-const RECOIL_KICK_SHARE = 0.2;
+const RECOIL_KICK_SHARE = 0.15;
 /** Recoil (px) of guns without knockback. */
-const RECOIL_BASE = 1.5;
+const RECOIL_BASE = 3;
 /** Extra recoil (px) per knockback point. */
-const RECOIL_PER_KNOCKBACK = 0.35;
+const RECOIL_PER_KNOCKBACK = 0.6;
 /** Strongest recoil (px), whatever the knockback. */
-const RECOIL_MAX = 9;
+const RECOIL_MAX = 14;
 /** Muzzle lift (radians) per recoil pixel. */
-const RECOIL_LIFT = 0.035;
+const RECOIL_LIFT = 0.025;
 
 /** Pushback distance (px) of a gun at the peak of its recoil. */
 export function recoilDistance(
@@ -757,15 +727,14 @@ export class WeaponsSprite {
 				?.hide();
 		}
 
-		// Striking weapons follow their strike; resting ones sway and recoil.
+		// Striking weapons follow their strike; resting ones bounce and recoil.
 		const direction =
 			pose?.direction ??
 			weapon.aimingDirection;
-		const sway =
+		const bounce =
 			pose
-				? undefined
-				: computeSway(
-						index,
+				? 0
+				: computeBounce(
 						now,
 					);
 		const recoil =
@@ -789,18 +758,11 @@ export class WeaponsSprite {
 			pose?.position ??
 			position;
 		weaponSprite.updatePosition(
-			basePosition.x +
-				(sway
-					?.offset
-					.x ??
-					0) -
+			basePosition.x -
 				facing.x *
 					recoil,
 			basePosition.y +
-				(sway
-					?.offset
-					.y ??
-					0) -
+				bounce -
 				facing.y *
 					recoil,
 		);
@@ -809,14 +771,12 @@ export class WeaponsSprite {
 		// lifting the muzzle on recoil (mirrored sprites lift the other way).
 		weaponSprite.aim(
 			direction,
-			(sway?.rotation ??
-				0) +
-				recoil *
-					RECOIL_LIFT *
-					(facing.x <
-					0
-						? 1
-						: -1),
+			recoil *
+				RECOIL_LIFT *
+				(facing.x <
+				0
+					? 1
+					: -1),
 		);
 	}
 

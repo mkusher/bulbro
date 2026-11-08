@@ -5,8 +5,9 @@ import {
 } from "bun:test";
 import type { WeaponState } from "../WeaponState";
 import {
+	BOUNCE_HEIGHT,
+	computeBounce,
 	computeRecoil,
-	computeSway,
 	RECOIL_DURATION_MS,
 	recoilDistance,
 } from "./WeaponsSprite";
@@ -117,49 +118,37 @@ describe("computeRecoil", () => {
 	});
 });
 
-describe("computeSway", () => {
-	it("moves weapons in different slots out of step", () => {
+describe("computeBounce", () => {
+	it("bobs weapons up and down within a small height", () => {
+		const offsets =
+			Array.from(
+				{
+					length: 40,
+				},
+				(
+					_,
+					i,
+				) =>
+					computeBounce(
+						i *
+							25,
+					),
+			);
 		expect(
-			computeSway(
-				0,
-				500,
+			Math.max(
+				...offsets,
 			),
-		).not.toEqual(
-			computeSway(
-				1,
-				500,
-			),
+		).toBeCloseTo(
+			BOUNCE_HEIGHT,
+			1,
 		);
-	});
-
-	it("stays small", () => {
-		for (
-			let now = 0;
-			now <
-			2000;
-			now += 50
-		) {
-			const sway =
-				computeSway(
-					0,
-					now,
-				);
-			expect(
-				Math.abs(
-					sway
-						.offset
-						.y,
-				),
-			).toBeLessThanOrEqual(
-				2,
-			);
-			expect(
-				Math.abs(
-					sway.rotation,
-				),
-			).toBeLessThanOrEqual(
-				0.12,
-			);
-		}
+		expect(
+			Math.min(
+				...offsets,
+			),
+		).toBeCloseTo(
+			-BOUNCE_HEIGHT,
+			1,
+		);
 	});
 });
