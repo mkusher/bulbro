@@ -508,6 +508,8 @@ export class WeaponSprite {
 	 */
 	aim(
 		direction: Direction,
+		/** Extra rotation (radians) on top of the aim, e.g. sway or recoil */
+		extraRotation = 0,
 	) {
 		if (
 			isEqual(
@@ -515,7 +517,8 @@ export class WeaponSprite {
 				zeroPoint(),
 			)
 		) {
-			this.#rotationContainer.rotation = 0;
+			this.#rotationContainer.rotation =
+				extraRotation;
 		} else {
 			// rotation() returns angle for sprites pointing UP at 0°
 			// Weapon sprites point RIGHT at 0°, so subtract PI/2 (90°) to adjust
@@ -524,7 +527,8 @@ export class WeaponSprite {
 					direction,
 				) -
 				Math.PI /
-					2;
+					2 +
+				extraRotation;
 		}
 
 		// Handle horizontal flip based on aim direction
